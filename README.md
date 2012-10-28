@@ -12,7 +12,7 @@ very small scala/java test source project bundled with it.
 I have checked the source into github primarily so that
 the source is somewhere other than on my local machines.
 I expect to continue to update the sources on github
-on a pretty reason rate, flushing out the features.
+frequently, flushing out the features.
 
 
 # Installation
@@ -95,7 +95,7 @@ features such as a popmenu of commands and the type and package inspectors
 (not yet implemented).
 
 Now start Vim. You will be asked by vim-addon-manager 
-if you would like to download and install the self plugin (no dependencies).
+if you would like to download and install the plugins.
 
 ## Installing with pathogen
 
