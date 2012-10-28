@@ -106,6 +106,20 @@ I do not use pathogen. An example usage would be welcome.
 Look at the plugin/vimside.vim file for key mappings: how to
 start the Ensime server and the currently supported commands.
 
+RECOMMENDED for initial testing:
+To run against test Scala/Java project, 
+first in data/vimside copy example_options_user.vim to options_user.vim.
+
+  > cd $HOME/.vim/data/vimside
+  > /bin/cp example_options_user.vim options_user.vim
+
+Then, in options_user.vim uncomment the following two lines:
+
+   call a:option.Set("test-ensime-file-use", 1)
+   call a:option.Set("ensime-config-file-name", "ensime_config.vim")
+
+This tells Vimside to use the test project code and to use the
+ensime_config.vim as the source for Ensime Configuration.
 
 # Supported Platforms
 

@@ -5,12 +5,6 @@
 " Summary:       Vimside swank rpc utilities
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 11/5/2012
-" Version:       1.0
-" Modifications:
-"
-" Tested on vim 7.3 on Linux
-"
-" Depends upon: NONE
 "
 " ============================================================================
 " {{{1

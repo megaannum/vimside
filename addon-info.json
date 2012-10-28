@@ -1,0 +1,15 @@
+{
+  "name" : "vimside",
+  "version" : "0.2",
+  "author" : "Richard Emberson <richard . emberson at gmail com>",
+  "maintainer" : "Richard Emberson <richard . emberson at gmail com>",
+  "repository" : {"type": "git", "url":
+"git://github.com/megaannum/vimside.git", "branch" : "master"},
+  "dependencies" : {
+    "self": {},
+    "forms": {},
+    "vimproc": {},
+    "vimshell": {}
+  },
+  "description" : "Vim Scala Ide"
+}
