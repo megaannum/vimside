@@ -94,6 +94,10 @@ optional. With the 'forms' library, Vimside supports additional
 features such as a popmenu of commands and the type and package inspectors
 (not yet implemented).
 
+Also, when one downloads Vimproc, you MUST go into the vimproc
+directory and build the C-language file 'proc.c' using one of the
+supplied make files.
+
 Now start Vim. You will be asked by vim-addon-manager 
 if you would like to download and install the plugins.
 
