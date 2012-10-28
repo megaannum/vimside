@@ -1,0 +1,108 @@
+" ============================================================================
+" inspect_type_at_point.vim
+"
+" File:          vimside#swank#rpc#inspect_type_at_point.vim
+" Summary:       Vimside RPC inspect-type-at-point
+" Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
+" Last Modified: 2012
+" Version:       1.0
+" Modifications:
+"
+" Tested on vim 7.3 on Linux
+"
+" Depends upon: NONE
+"
+" ============================================================================
+" Intro: {{{1
+" 
+" Lookup detailed type of thing at given position.
+"
+" Arguments:
+"   String:A source filename.
+"   Int:A character offset in the file.
+"
+" Return:
+"   A TypeInspectInfo
+"
+" Example:
+"
+" (:swank-rpc (swank:inspect-type-at-point "SwankProtocol.scala" 32736) 42)
+"
+" (:return 
+" (:ok 
+" (:type (:name "SExpList$" :type-id 1469 :full-name
+" "org.ensime.util.SExpList$" :decl-as object :pos
+" (:file "SExp.scala" :offset 1877))......))
+" 42)
+"
+" ============================================================================
+
+let s:LOG = function("vimside#log#log")
+let s:ERROR = function("vimside#log#error")
+
+
+" public API
+function! vimside#swank#rpc#inspect_type_at_point#Run(...)
+call s:LOG("inspect_type_at_point TOP") 
+
+  if ! exists("s:Handler")
+    let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-inspect-type-at-point-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-inspect-type-at-point-caller')
+  endif
+
+  let l:args = { }
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  " call vimside#ensime#swank#dispatch(l:rr)
+
+  let msg = "Not Implemented Yet:" . 'swank-rpc-inspect-type-at_point-handler'
+  call s:Error(msg)
+  echoerr msg
+
+call s:LOG("inspect_type_at_point BOTTOM") 
+endfunction
+
+
+"======================================================================
+" Vimside Callers
+"======================================================================
+
+function! g:InspectTypeAtPointCaller(args)
+  let cmd = "swank:inspect-type-at_point"
+
+  return '('. cmd .')'
+endfunction
+
+
+"======================================================================
+" Vimside Handlers
+"======================================================================
+
+function! g:InspectTypeAtPointHandler()
+
+  function! g:InspectTypeAtPointHandler_Abort(code, details, ...)
+    call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
+  endfunction
+
+  function! g:InspectTypeAtPointHandler_Ok(sexp_rval)
+call s:LOG("InspectTypeAtPointHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
+    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
+    if ! found 
+      echoe "InspectTypeAtPoint ok: Badly formed Response"
+      call s:ERROR("InspectTypeAtPoint ok: Badly formed Response: ". string(a:sexp_rval)) 
+      return 0
+    endif
+call s:LOG("InspectTypeAtPointHandler_Ok dic=".  string(dic)) 
+
+    let l:pid = dic[':pid']
+
+
+
+    return 1
+
+  endfunction
+
+  return { 
+    \ 'abort': function("g:InspectTypeAtPointHandler_Abort"),
+    \ 'ok': function("g:InspectTypeAtPointHandler_Ok") 
+    \ }
+endfunction

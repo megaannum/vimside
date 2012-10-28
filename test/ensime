@@ -1,0 +1,69 @@
+;; Generated from Ant build.xml 2012-04-25T10:48
+(
+
+:root-dir "/home/emberson/MEGAANNUM/scala/core"
+
+:name "core"
+
+;; synonymKey for :name
+;; :project-name "core"
+
+:package "com.megaannum.core"
+
+;; synonymKey for :package
+;; :project-package "com.megaannum.core"
+
+:version "$component.version"
+
+;; :compile-deps (list strings)
+;; :compile-deps 
+
+:compile-jars ("/home/emberson/scala/scala-2.10.0-M7/lib/scala-library.jar" "/home/emberson/scala/scala-2.10.0-M7/lib/scala-compiler.jar" "/home/emberson/MEGAANNUM/scala/core/build/classes")
+
+;; :runtime-deps (list strings)
+
+;; :runtime-jars (list strings)
+
+;; :test-deps (list strings)
+
+:sources ("/home/emberson/MEGAANNUM/scala/core/src/main/java" "/home/emberson/MEGAANNUM/scala/core/src/main/scala")
+;; "/home/emberson/MEGAANNUM/scala/core/src/test/java" "/home/emberson/MEGAANNUM/scala/core/src/test/scala"
+
+;; synonymKey for :source-roots
+;; :source-roots (list strings)
+
+:target "/home/emberson/MEGAANNUM/scala/core/build/classes"
+
+:disable-index-on-startup nil
+
+:only-include-in-index ("com\\.megaannum\\.\*")
+
+:exclude-from-index ("com\\.megaannum\\.core\\.xmlconfig\\.compiler\*")
+
+:compiler-args ("-Ywarn-dead-code")
+
+;; :builder-args (list strings)
+
+;; :formatting-prefs (symbol_map)
+;; https://github.com/mdr/scalariform
+:formatting-prefs (:alignParameters t 
+                   :alignSingleLineCaseStatements nil
+                   :alignSingleLineCaseStatements_maxArrowIndent 20
+                   :compactControlReadability t 
+                   :compactStringConcatenation t 
+                   :doubleIndentClassDeclaration t
+                   :indentLocalDefs nil
+                   :indentPackageBlocks nil
+                   :indentSpaces 2
+                   :indentWithTabs nil
+                   :multilineScaladocCommentsStartOnFirstLine nil
+                   :preserveDanglingCloseParenthesis t 
+                   :placeScaladocAsterisksBeneathSecondAsterisk nil 
+                   :preserveSpaceBeforeArguments nil
+                   :rewriteArrowSymbols nil
+                   :spaceBeforeColon nil
+                   :spaceInsideBrackets nil
+                   :spaceInsideParentheses nil
+                   :spacesWithinPatternBinders t)
+
+)
