@@ -470,7 +470,7 @@ function! s:HandleBackgroundMessage(eventcode_sexp, msg_sexp)
   let msg = msg_sexp.value
 call s:LOG("HandleBackgroundMessage ". string(eventcode) ." ". msg)
 
-  let [etype, emsg] = vimside#ensime#GetProtocolConstant(eventcode)
+  let [etype, emsg] = vimside#ensime#messages#GetProtocolConstant(eventcode)
 
   let bmsg = emsg .' ('. etype .'): '. msg
   call vimside#cmdline#Display(bmsg) 
