@@ -82,7 +82,7 @@ function! vimside#options#default#Load(option)
   call a:option.Set("swank-rpc-typecheck-file-caller", 'g:TypecheckFileCaller')
   call a:option.Set("swank-rpc-typecheck-file-handler", 'g:TypecheckFileHandler')
 
-  call a:option.Set("swank-rpc-uses-of-symbol-at-point-caller", 'g:UsesOfCaller')
+  call a:option.Set("swank-rpc-uses-of-symbol-at-point-caller", 'g:UsesOfSymbolAtPointCaller')
   call a:option.Set("swank-rpc-uses-of-symbol-at-point-handler", 'g:UsesOfSymbolAtPointHandler')
 
 
