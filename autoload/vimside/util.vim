@@ -28,6 +28,7 @@ endfunction
 
 " return byte offset into file
 function! vimside#util#GetCurrentOffset()
+" call s:LOG("vimside#util#GetCurrentOffset line=". line(".") ." col=". col(".")) 
   return line2byte(line("."))+col(".")-1
 endfunction
 

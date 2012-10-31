@@ -283,6 +283,18 @@ call s:LOG("vimside#SetAutoCmds TOP")
   augroup END
 endfunction
 
+function! vimside#RemoveAutoCmds()
+  augroup VIMSIDE_CMD
+    autocmd!
+  augroup END
+endfunction
+
+function! vimside#ResetAutoCmds()
+  call vimside#RemoveAutoCmds()
+  call vimside#SetAutoCmds()
+endfunction
+
+
 " let s:max_read_from_ensime_server = 10
 
 "
@@ -295,9 +307,10 @@ endfunction
 "  call feedkeys("f\e") 
 "
 function! vimside#CursorHoldReadFromEnsimeServer()
-"call s:LOG("CursorHoldReadFromEnsimeServer TOP") 
+call s:LOG("CursorHoldReadFromEnsimeServer TOP ") 
 
   if s:ping_info_updatetime != g:vimside.ping.info.updatetime
+call s:LOG("CursorHoldReadFromEnsimeServer from(". s:ping_info_updatetime. ")to(". g:vimside.ping.info.updatetime .")") 
     let s:ping_info_updatetime = g:vimside.ping.info.updatetime
     let &updatetime = s:ping_info_updatetime
   endif
@@ -309,21 +322,25 @@ function! vimside#CursorHoldReadFromEnsimeServer()
   endwhile
 
 " call s:LOG("CursorHoldReadFromEnsimeServer feedkeys: updatetime=". &updatetime) 
-  call feedkeys("f\e", 'n') 
+  " call feedkeys("f\e", 'n') 
+  " call feedkeys(a:keys, 'n') 
+  if mode() == 'i'
+    call feedkeys("a\<BS>", 'n')
+  else
+    call feedkeys("f\e", 'n')
+  endif
+
 endfunction
 
 function! vimside#CursorMoveReadFromEnsimeServer()
 " call s:LOG("CursorMoveReadFromEnsimeServer TOP") 
   if s:max_ping_info_char_count != g:vimside.ping.info.char_count
+call s:LOG("CursorMoveReadFromEnsimeServer from(". s:max_ping_info_char_count . ")to(". g:vimside.ping.info.char_count .")") 
     let s:max_ping_info_char_count = g:vimside.ping.info.char_count
     let s:ping_info_char_count = s:max_ping_info_char_count
   endif
 
   if s:ping_info_char_count <= 0
-    " call vimside#RemoveAutoCmds()
-    " call vimside#ensime#io#read(0)
-    " call vimside#SetAutoCmds()
-    
     let timeout = 0
     let success = vimside#ensime#io#ping(timeout)
     while success
@@ -336,14 +353,10 @@ function! vimside#CursorMoveReadFromEnsimeServer()
   endif
 endfunction
 
-function! vimside#RemoveAutoCmds()
-  augroup VIMSIDE_CMD
-    autocmd!
-  augroup END
-endfunction
 
-
-
+" ============================================================================
+" Position Code
+" ============================================================================
 function!  vimside#ClearPosition()
   let g:vimside.project.positions = []
 endfunction
@@ -366,4 +379,100 @@ call s:LOG("vimside#PreviousPosition positions=". string(positions))
     execute "buffer ". bufnum
     call setpos('.', pos)
   endif
+endfunction
+
+" ============================================================================
+" Completion code
+" ============================================================================
+"
+" 1) get completions
+"   GetCompletions
+" 2) display completions
+"   DisplayCompletions
+"
+"
+
+let s:completions_phase = 0
+let g:completions_in_process = 0
+let s:completions_start = 0
+let g:completions_base = ''
+let g:completions_results = []
+
+function!  vimside#Completions(findstart, base)
+call s:LOG("vimside#Completions findstart=". a:findstart .", base=". a:base) 
+  if ! g:vimside.started
+    return
+  endif
+call s:LOG("vimside#Completions completions_phase=". s:completions_phase) 
+
+  if s:completions_phase == 0
+    " Get Completions
+    if a:findstart 
+      let g:completions_in_process = 1
+      w
+      let line = getline('.')
+      let pos = col('.') -1
+      let bc = strpart(line,0,pos)
+      let match_text = matchstr(bc, '\zs[^ \t#().[\]{}\''\";: ]*$')
+call s:LOG("vimside#Completions match_text=". match_text) 
+      let s:completions_start = len(bc)-len(match_text)
+call s:LOG("vimside#Completions completions_start=". s:completions_start) 
+      call vimside#StartAutoCmdCompletions()
+      return s:completions_start 
+    elseif ! g:completions_in_process
+      return []
+    else
+      if len(a:base) > 0
+        let g:completions_base = a:base
+        let g:completions_results = []
+        call vimside#swank#rpc#completions#Run()
+        let s:completions_phase = 1
+      else
+        let s:completions_phase = 0
+      endif
+call s:LOG("vimside#Completions return []")
+      return []
+    endif
+  elseif ! g:completions_in_process
+    if a:findstart 
+      return ''
+    else
+      return []
+    endif
+  else
+    " Display Completions
+    if a:findstart 
+call s:LOG("vimside#Completions completions_start=". s:completions_start) 
+      return s:completions_start
+    else
+      let s:completions_phase = 0
+      let g:completions_base = ''
+call s:LOG("vimside#Completions g:completions_results=". string(g:completions_results))
+      let g:completions_in_process = 0
+      call vimside#StopAutoCmdCompletions()
+      return g:completions_results
+    endif
+
+  endif
+endfunction
+
+function!  vimside#AbortCompletions()
+call s:LOG("vimside#AbortCompletions") 
+  if pumvisible() == 0
+    let s:completions_phase = 0
+    let g:completions_in_process = 0
+    call vimside#StopAutoCmdCompletions()
+  endif
+endfunction
+
+function!  vimside#StartAutoCmdCompletions()
+  augroup VIMSIDE_COMPLETIONS
+    au!
+    autocmd CursorMovedI,InsertLeave *.scala call vimside#AbortCompletions()
+  augroup end
+endfunction
+function!  vimside#StopAutoCmdCompletions()
+  augroup VIMSIDE_COMPLETIONS
+    au!
+  augroup END
 endfunction

@@ -69,7 +69,7 @@ function! g:SymbolAtPointCaller(args)
   let fn = a:args.filename
   let offset = a:args.offset
 
-  return '(' . cmd . ' "' . fn . '" ' . offset . ')'
+  return '('. cmd .' "'. fn .'" '. offset .')'
 endfunction
 
 

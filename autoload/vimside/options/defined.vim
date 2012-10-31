@@ -471,6 +471,23 @@ function! s:MakeOptions()
       \ }
   
   " Swank RPC
+  let s:options['swank-rpc-completions-caller'] = {
+        \ 'name': 'swank-rpc-completions-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+            \ 'description': [
+            \ "RPC caller for 'swank:completions'."
+          \ ]
+      \ }
+  let s:options['swank-rpc-completions-handler'] = {
+        \ 'name': 'swank-rpc-completions-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+            \ 'description': [
+            \ "RPC handler for 'swank:completions'."
+          \ ]
+      \ }
+
   let s:options['swank-rpc-connection-info-caller'] = {
         \ 'name': 'swank-rpc-connection-info-caller',
         \ 'type': g:OPTION_STRING_TYPE, 

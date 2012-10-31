@@ -46,8 +46,8 @@ function! vimside#options#default#Load(option)
   call a:option.Set("swank-location-diff-file", 'same_window')
 
   " add default swank rpc and event ping info
-  call a:option.Set('swank-rpc-expecting-read-timeout', 100)
-  call a:option.Set('swank-rpc-expecting-updatetime', 500)
+  call a:option.Set('swank-rpc-expecting-read-timeout', 200)
+  call a:option.Set('swank-rpc-expecting-updatetime', 100)
   call a:option.Set('swank-rpc-expecting-char-count', 10)
   call a:option.Set('swank-rpc-not-expecting-read-timeout', 0)
   call a:option.Set('swank-rpc-not-expecting-updatetime', 10000)
@@ -58,6 +58,8 @@ function! vimside#options#default#Load(option)
   call a:option.Set('swank-event-expecting-many-char-count', 20)
 
   " add default swank rpc callers and handlers
+  call a:option.Set("swank-rpc-completions-caller", 'g:CompletionsCaller')
+  call a:option.Set("swank-rpc-completions-handler", 'g:CompletionsHandler')
   call a:option.Set("swank-rpc-connection-info-caller", 'g:ConnectionInfoCaller')
   call a:option.Set("swank-rpc-connection-info-handler", 'g:ConnectionInfoHandler')
 

@@ -22,7 +22,7 @@
 " Example:
 "
 " (:swank-rpc (swank:completions
-" "/ensime/src/main/scala/org/ensime/protocol/SwankProtocol.scala
+" "/ensime/src/main/scala/org/ensime/protocol/SwankProtocol.scala"
 " 22626 0 t) 42)
 "
 " (:return 
@@ -49,13 +49,20 @@ call s:LOG("completions TOP")
     let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-completions-caller')
   endif
 
-  let l:args = { }
-  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+    " TODO better error message display and logging
+    echoerr fn
+    return
+  endif
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-completions-handler'
-  call s:Error(msg)
-  echoerr msg
+  let offset = vimside#util#GetCurrentOffset()
+
+  let l:args = { }
+  let l:args['filename'] = fn
+  let l:args['offset'] = offset
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("completions BOTTOM") 
 endfunction
@@ -65,10 +72,18 @@ endfunction
 " Vimside Callers
 "======================================================================
 
+" (:swank-rpc (swank:completions
+" "/ensime/src/main/scala/org/ensime/protocol/SwankProtocol.scala
+" 22626 0 t) 42)
 function! g:CompletionsCaller(args)
   let cmd = "swank:completions"
+  let fn = a:args.filename
+  let offset = a:args.offset+1
+  let max_return = 0
+  let case = 't'
+  let reload = 't'
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. fn .'" '. offset .' '. max_return .' '. case .' '. reload .')'
 endfunction
 
 
@@ -83,7 +98,7 @@ function! g:CompletionsHandler()
   endfunction
 
   function! g:CompletionsHandler_Ok(completions)
-call s:LOG("CompletionsHandler_Ok ".  vimside#sexp#ToString(a:completions)) 
+" call s:LOG("CompletionsHandler_Ok ".  vimside#sexp#ToString(a:completions)) 
     let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:completions) 
     if ! found 
       echoe "Completions ok: Badly formed Response"
@@ -92,9 +107,45 @@ call s:LOG("CompletionsHandler_Ok ".  vimside#sexp#ToString(a:completions))
     endif
 call s:LOG("CompletionsHandler_Ok dic=".  string(dic)) 
 
-    let l:pid = dic[':pid']
+    let base = g:completions_base
+    let base_len = len(base)
 
+    let l:results = []
 
+    if g:completions_in_process
+      let completions = dic[':completions']
+      for comp in completions
+        let word = comp[':name']
+        if len(word) >= base_len && strpart(word, 0, base_len) == base
+          let l:result = {}
+          let l:result['word'] = word
+          let l:result['menu'] = string(comp[':type-sig'])
+
+          if has_key(comp, 'is_callable')
+            let k = comp['is_callable']
+            if k
+              let l:result['kind'] = 'f'
+            else
+              let l:result['kind'] = 'v'
+            endif
+          endif
+
+          call add(l:results, l:result)
+        endif
+      endfor
+
+      function! s:ListSorter(e1, e2)
+        let word1 = a:e1.word
+        let word2 = a:e2.word
+        return word1 > word2 ? 1 : -1
+      endfunction
+
+      let g:completions_results = sort(l:results, function("s:ListSorter"))
+  call s:LOG("CompletionsHandler_Ok g:completions_results=".  string(g:completions_results)) 
+
+      " this triggers re-getting the completions
+      call feedkeys("\<c-x>\<c-o>", 'n')
+    endif
 
     return 1
 
