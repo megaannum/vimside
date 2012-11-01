@@ -1,0 +1,461 @@
+" ============================================================================
+" scheduler.vim
+"
+" File:          scheduler.vim
+" Summary:       Schedule Jobs for Vimside
+" Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
+" Last Modified: 2012
+"
+" ============================================================================
+" Intro: {{{1
+" This is the Vimside job scheduler. It uses autocmds to implement
+" both time-based (CursorHold, CursorHoldI) and 
+" motion-based (CursorMoved, CursorMovedI) triggers.
+" Any job can be time and/or motion based.
+" Any job can be executed only once or have repeated execution.
+" If a job has repeated execution, then it repeats for both time and
+" motion.
+" ============================================================================
+
+if 0
+function! s:LOG(msg)
+  let t = exists("*strftime")
+           \ ? strftime("%Y%m%d-%H%M%S: ")
+           \ : "" . localtime() . ": "
+
+  execute "redir >> " . "AUTO_LOG"
+  silent echo "INFO: ". t . a:msg
+  execute "redir END"
+endfunction
+
+else
+let s:LOG = function("vimside#log#log")
+let s:ERROR = function("vimside#log#error")
+endif
+
+"=============================================================================
+" General Jobs
+"  job = [name, func, sec, msec, rsec, rmsec, charcnt, rcharcnt]
+"=============================================================================
+let s:jobs = []
+
+function! vimside#scheduler#ClearJobs()
+  let s:jobs = []
+endfunction
+
+function! vimside#scheduler#AddJob(name, func, sec, msec, charcnt, repeat) 
+  let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
+  let l:tsec = a:sec + l:sec
+  let l:tmsec = a:msec + l:msec
+  let l:mcnt = a:charcnt + s:total_mcounter
+
+  let l:job = a:repeat
+      \ ? [a:name, a:func, l:tsec, l:tmsec, a:sec, a:msec, l:mcnt, a:charcnt]
+      \ : [a:name, a:func, l:tsec, l:tmsec, 0,     0,      l:mcnt, 0]
+
+  call add(s:jobs, l:job)
+endfunction
+
+function! vimside#scheduler#RemoveJob(name)
+  let l:jobs = []
+  for l:job in s:jobs
+    if l:job[0] != a:name
+      call add(l:jobs, l:job)
+    end
+  endfor
+  let s:jobs = l:jobs
+endfunction
+
+function! vimside#scheduler#StartAuto() 
+  call vimside#scheduler#StartAutoTime()
+  call vimside#scheduler#StartAutoMotion() 
+endfunction
+
+function! vimside#scheduler#StopAuto() 
+  call vimside#scheduler#StopAutoTime() 
+  call vimside#scheduler#StopAutoMotion() 
+endfunction
+
+function! vimside#scheduler#ResetAuto() 
+  call vimside#scheduler#StopAuto() 
+  call vimside#scheduler#StartAuto() 
+endfunction
+
+
+function! vimside#scheduler#SetUpdateTime(value) 
+  let minval = 100
+  if a:value < minval
+    throw "UpdateTime must be greater-than/equal-to ". minval ."ms: ". a:value
+  endif
+  let &updatetime = a:value
+endfunction
+
+function! vimside#scheduler#SetMaxMotionCounter(cnt)
+  if a:cnt < 1
+    throw "Motion counter must be positive: ". a:cnt
+  endif
+  let s:max_mcounter = a:cnt
+  if s:mcounter > s:max_mcounter
+    let s:mcounter = s:max_mcounter
+  endif
+endfunction
+
+"=============================================================================
+" Time
+"  job = [name, func, sec, msec, rsec, rmsec, -1, _]
+"=============================================================================
+
+function! vimside#scheduler#ClearTimeJob()
+  let l:js = s:jobs
+  let s:jobs = []
+
+  for l:job in l:js
+    if l:job[2] == -1
+      call add(s:jobs, l:job)
+    endif
+  endfor
+endfunction
+
+function! vimside#scheduler#AddTimeJob(name, func, sec, msec, repeat) 
+  let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
+  let l:tsec = a:sec + l:sec
+  let l:tmsec = a:msec + l:msec
+
+  let l:job = a:repeat
+          \ ? [a:name, a:func, l:tsec, l:tmsec, a:sec, a:msec, -1, -1]
+          \ : [a:name, a:func, l:tsec, l:tmsec, 0,     0,      -1, -1]
+
+  call add(s:jobs, l:job)
+endfunction
+
+
+function! vimside#scheduler#ReplaceTimeJob(name, func, sec, msec, repeat)
+  call vimside#scheduler#RemoveJob(a:name)
+  call vimside#scheduler#AddTimeJob(a:name, a:func, a:sec, a:msec, a:repeat)
+endfunction
+
+function! vimside#scheduler#TimeTrigger()
+  let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
+" call s:LOG("TimeTrigger: TOP [sec,msec]=[". l:sec .",". l:msec ."]")
+  let l:js = s:jobs
+  let s:jobs = []
+  let l:jobs = []
+
+  for l:job in l:js
+    let l:jsec = l:job[2]
+    let l:jmsec = l:job[3]
+    " is it a time job
+    if l:jsec != -1
+" call s:LOG("TimeTrigger:   [jsec,jmsec]=[". l:jsec .",". l:jmsec ."]")
+      if (l:jsec < sec) || (l:jsec == sec && l:jmsec <= msec)
+        try
+          call l:job[1]()
+        catch /.*/
+          call s:ERROR("TimeTrigger: ". v:exception ." at ". v:throwpoint)
+        endtry
+
+        " Is this a repeat
+        let l:jrsec = l:job[4]
+        let l:jrmsec = l:job[5]
+        if l:jrsec != 0 || l:jrmsec != 0
+" call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
+          let m = msec + l:jrmsec
+          if m >= 1000
+            let l:job[2] = sec + l:jrsec + m/1000
+            let l:job[3] = m - 1000
+          else
+            let l:job[2] = sec + l:jrsec
+            let l:job[3] = m
+          endif
+
+          " reset motion if it is repeat
+          let rcnt = l:job[7]
+          if rcnt > 0
+            let l:job[6] = rcnt + s:total_mcounter
+          endif
+
+" XXXXXXXXXXXXXXXXXXXXXX
+          call add(l:jobs, l:job)
+        endif
+      else
+        call add(l:jobs, l:job)
+      endif
+    else
+      call add(l:jobs, l:job)
+    endif
+  endfor
+
+  " One of the jobs might have added a job so we add to s:jobs
+  let s:jobs += l:jobs
+
+  if mode() == 'i'
+    call feedkeys("a\<BS>", 'n') 
+  else
+    call feedkeys("f\e", 'n') 
+  endif
+
+endfunction
+
+function! vimside#scheduler#GetRealTime() 
+  if has("win32") || has("dos32") || has("dos16") || has("os2")
+    " reltimestr -> %10.6lf
+    let tstr = reltimestr(reltime())
+    let len = len(tstr)
+    " echo strpart(printf("%10.6lf", 555555444.333),0, 9)
+    let secStr = strpart(tstr, 0, len-7)
+    " echo strpart(printf("%10.6lf", 555555444.333), 10, 3)
+    let msecStr = strpart(tstr, len-6, 3)
+    return [0 + secStr, 0 + msecStr]
+  else
+    " reltimestr -> %3ld.%06ld
+    let [sec, usec] = reltime()
+    return [sec, usec/1000]
+  endif
+endfunction
+
+function! vimside#scheduler#StartAutoTime() 
+  augroup VIMSIDE_TIME
+    au!
+    autocmd CursorHold * call vimside#scheduler#TimeTrigger()
+    autocmd CursorHoldI * call vimside#scheduler#TimeTrigger()
+  augroup END
+endfunction
+  
+function! vimside#scheduler#StopAutoTime() 
+  augroup VIMSIDE_TIME
+    au!
+  augroup END
+endfunction
+
+function! vimside#scheduler#ResetAutoTime() 
+  call vimside#scheduler#StopAutoTime()
+  call vimside#scheduler#StartAutoTime()
+endfunction
+
+
+
+" --------------------------------------------------------
+if 0 " TTTTT
+
+function! g:TJob1() 
+call s:LOG("TJob1:")
+endfunction
+function! g:TJob2() 
+call s:LOG("TJob2:")
+endfunction
+function! g:TJob3() 
+call s:LOG("TJob3:")
+endfunction
+function! g:TJob4() 
+call s:LOG("TJob4:")
+endfunction
+function! g:TJob5() 
+call s:LOG("TJob5:")
+endfunction
+function! g:TJob6() 
+call s:LOG("TJob6:")
+endfunction
+function! g:TJob7() 
+call s:LOG("TJob7:")
+endfunction
+
+function! g:TJob(name, func, n, repeat) 
+  call vimside#scheduler#AddTimeJob(a:name, a:func, 0, a:n*100, a:repeat) 
+endfunction
+
+nmap <Leader>at1 :call g:TJob("j1", function("g:TJob1"), 1,1)<CR>
+nmap <Leader>at2 :call g:TJob("j2", function("g:TJob2"), 2,1)<CR>
+nmap <Leader>at3 :call g:TJob("j3", function("g:TJob3"), 3,1)<CR>
+nmap <Leader>at4 :call g:TJob("j4", function("g:TJob4"), 4,1)<CR>
+nmap <Leader>at5 :call g:TJob("j5", function("g:TJob5"), 5,1)<CR>
+nmap <Leader>at6 :call g:TJob("j6", function("g:TJob6"), 6,1)<CR>
+nmap <Leader>at7 :call g:TJob("j7", function("g:TJob7"), 7,1)<CR>
+
+nmap <Leader>rt1 :call g:RemoveJob("j1")<CR>
+nmap <Leader>rt2 :call g:RemoveJob("j2")<CR>
+nmap <Leader>rt3 :call g:RemoveJob("j3")<CR>
+nmap <Leader>rt4 :call g:RemoveJob("j4")<CR>
+nmap <Leader>rt5 :call g:RemoveJob("j5")<CR>
+nmap <Leader>rt6 :call g:RemoveJob("j6")<CR>
+nmap <Leader>rt7 :call g:RemoveJob("j7")<CR>
+
+nmap <Leader>u01 :call vimside#scheduler#SetUpdateTime(100)<CR>
+nmap <Leader>u05 :call vimside#scheduler#SetUpdateTime(500)<CR>
+nmap <Leader>u10 :call vimside#scheduler#SetUpdateTime(1000)<CR>
+nmap <Leader>u40 :call vimside#scheduler#SetUpdateTime(4000)<CR>
+endif " TTTTT
+" --------------------------------------------------------
+
+"=============================================================================
+" Motion
+"  job = [name, func, -1, _, _, _, charcnt, rcharcnt]
+"=============================================================================
+
+let s:mcounter = 0
+let s:max_mcounter = 20
+let s:total_mcounter = 0
+
+function! vimside#scheduler#ClearMotionJob()
+  let l:js = s:jobs
+  let s:jobs = []
+
+  for job in l:js
+    if job[6] == -1
+      call add(s:jobs, job)
+    endif
+  endfor
+endfunction
+
+function! vimside#scheduler#AddMotionJob(name, func, charcnt, repeat) 
+" call s:LOG("AddMotionJob: TOP name=". a:name .", charcnt=". a:charcnt)
+  let l:mcnt = a:charcnt + s:total_mcounter
+  let l:job = a:repeat
+          \ ? [a:name, a:func, -1, 0, 0, 0, l:mcnt,  a:charcnt]
+          \ : [a:name, a:func, -1, 0, 0, 0, l:mcnt,  0]
+  call add(s:jobs, l:job)
+endfunction
+
+function! vimside#scheduler#ReplaceMotionJob(name, func, charcnt, repeat)
+  call vimside#scheduler#RemoveJob(a:name)
+  call vimside#scheduler#AddMotionJob(a:name, a:func, a:charcnt, a:repeat)
+endfunction
+
+function! vimside#scheduler#MotionTrigger()
+" call s:LOG("MotionTrigger: TOP s:total_mcounter=". s:total_mcounter .", s:mcounter=". s:mcounter)
+  let s:total_mcounter += 1
+  if s:mcounter <= 0
+    let l:sec = -1
+    let l:ccc = s:total_mcounter
+    let l:js = s:jobs
+" call s:LOG("MotionTrigger: len(jobs)=". len(l:js))
+    let s:jobs = []
+    let l:jobs = []
+
+    for l:job in l:js
+      let l:cc = l:job[6]
+      if l:cc != -1
+        if l:cc <= l:ccc
+" call s:LOG("MotionTrigger: job=". string(job))
+          try
+            call l:job[1]()
+          catch /.*/
+            call s:ERROR("MotionTrigger: ". v:exception ." at ". v:throwpoint)
+          endtry
+
+          " Is this a repeat
+          let l:rcnt = l:job[7]
+          if l:rcnt > 0
+            let l:job[6] = l:rcnt + l:ccc
+
+            " reset time if it is repeat
+            let l:jrsec = l:job[4]
+            let l:jrmsec = l:job[5]
+            if l:jrsec != 0 || l:jrmsec != 0
+              " only get real time if needed
+              if l:sec == -1
+                let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
+              endif
+              let l:m = l:msec + l:jrmsec
+              if m >= 1000
+                let l:job[2] = l:sec + l:jrsec + l:m/1000
+                let l:job[3] = l:m - 1000
+              else
+                let l:job[2] = l:sec + l:jrsec
+                let l:job[3] = l:m
+              endif
+            endif
+
+" XXXXXXXXXXXXXXXXXXXXXX
+            call add(l:jobs, l:job)
+          endif
+        else
+          call add(l:jobs, l:job)
+        endif
+      else
+        call add(l:jobs, l:job)
+      endif
+    endfor
+    let s:mcounter = s:max_mcounter
+
+    " One of the jobs might have added a job so we add to s:jobs
+    let s:jobs += l:jobs
+  else
+    let s:mcounter -= 1
+  endif
+endfunction
+
+function! vimside#scheduler#StartAutoMotion() 
+  augroup VIMSIDE_MOTION
+    au!
+    autocmd CursorMoved * call vimside#scheduler#MotionTrigger()
+    autocmd CursorMovedI * call vimside#scheduler#MotionTrigger()
+  augroup END
+endfunction
+  
+function! vimside#scheduler#StopAutoMotion() 
+  augroup VIMSIDE_MOTION
+    au!
+  augroup END
+endfunction
+
+function! vimside#scheduler#ResetAutoMotion() 
+  call vimside#scheduler#StopAutoMotion()
+  call vimside#scheduler#StartAutoMotion()
+endfunction
+
+
+
+" --------------------------------------------------------
+if 0 " MMMMM
+
+function! g:MJob1() 
+call s:LOG("MJob1:")
+endfunction
+function! g:MJob2() 
+call s:LOG("MJob2:")
+endfunction
+function! g:MJob3() 
+call s:LOG("MJob3:")
+endfunction
+function! g:MJob4() 
+call s:LOG("MJob4:")
+endfunction
+function! g:MJob5() 
+call s:LOG("MJob5:")
+endfunction
+function! g:MJob10() 
+call s:LOG("MJob10:")
+endfunction
+function! g:MJob20() 
+call s:LOG("MJob20:")
+endfunction
+
+function! g:MJob(name, func, charcnt, repeat) 
+  call vimside#scheduler#AddMotionJob(a:name, a:func, a:charcnt, a:repeat) 
+endfunction
+
+nmap <Leader>am01 :call g:MJob("j1", function("g:MJob1"), 1,1)<CR>
+nmap <Leader>am02 :call g:MJob("j2", function("g:MJob2"), 2,1)<CR>
+nmap <Leader>am03 :call g:MJob("j3", function("g:MJob3"), 3,1)<CR>
+nmap <Leader>am04 :call g:MJob("j4", function("g:MJob4"), 4,1)<CR>
+nmap <Leader>am05 :call g:MJob("j5", function("g:MJob5"), 5,1)<CR>
+nmap <Leader>am10 :call g:MJob("j10", function("g:MJob10"), 10,1)<CR>
+nmap <Leader>am20 :call g:MJob("j10", function("g:MJob20"), 20,1)<CR>
+
+nmap <Leader>rm1 :call g:RemoveJob("j1")<CR>
+nmap <Leader>rm2 :call g:RemoveJob("j2")<CR>
+nmap <Leader>rm3 :call g:RemoveJob("j3")<CR>
+nmap <Leader>rm4 :call g:RemoveJob("j4")<CR>
+nmap <Leader>rm5 :call g:RemoveJob("j5")<CR>
+nmap <Leader>rm6 :call g:RemoveJob("j6")<CR>
+nmap <Leader>rm7 :call g:RemoveJob("j7")<CR>
+
+
+nmap <Leader>c01 :call g:SetMaxMotionCounter(1)<CR>
+nmap <Leader>c05 :call g:SetMaxMotionCounter(5)<CR>
+nmap <Leader>c10 :call g:SetMaxMotionCounter(10)<CR>
+nmap <Leader>c20 :call g:SetMaxMotionCounter(20)<CR>
+
+endif " MMMMM
+" --------------------------------------------------------
+

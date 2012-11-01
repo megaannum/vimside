@@ -34,7 +34,8 @@ let g:vimside.ensime.info = {}
 
 " actions to be invoked on next ping (then cleared from list)
 let g:vimside.ping = {}
-let g:vimside.ping.actions = []
+" XXXXXXXXXXXXX
+" let g:vimside.ping.actions = []
 let g:vimside.ping.info = {}
 let g:vimside.ping.info.read_timeout = 0
 let g:vimside.ping.info.updatetime = 500
@@ -137,6 +138,14 @@ sleep 4
 
     call vimside#GetPortEnsime()
 
+    let l:name = "ping_ensime_server"
+    let l:Func = function("vimside#PingEnsimeServer")
+    let l:sec = 1
+    let l:msec = 0
+    let l:charcnt = 200
+    let l:repeat = 1
+    call vimside#scheduler#AddJob(l:name, l:Func, l:sec, l:msec, l:charcnt, l:repeat)
+
 sleep 2
 call s:LOG("vimside#StartEnsime get connection") 
     let g:vimside['socket'] = vimside#GetConnectionSocketEnsime()
@@ -154,7 +163,9 @@ endfunction
 
 function! vimside#StopEnsime()
   if g:vimside.started
-    call vimside#RemoveAutoCmds()
+" XXXXXXXXXXXXX
+    " call vimside#RemoveAutoCmds()
+    vimside#scheduler#ClearAuto()
     call vimside#swank#rpc#shutdown_server#Run()
 
     call vimside#ensime#io#close()
@@ -267,6 +278,21 @@ call s:LOG("socket=" . string(l:socket))
   return l:socket
 endfunction
 
+" ============================================================================
+" Ping
+" ============================================================================
+
+function! vimside#PingEnsimeServer()
+call s:LOG("vimside#PingEnsimeServer") 
+  let timeout = g:vimside.ping.info.read_timeout
+  let success = vimside#ensime#io#ping(timeout)
+  while success
+    let success = vimside#ensime#io#ping(timeout)
+  endwhile
+endfunction
+
+if 0 " XXXXXXXXXXXXX
+
 function! vimside#SetAutoCmds()
 call s:LOG("vimside#SetAutoCmds TOP") 
   let s:ping_info_updatetime = g:vimside.ping.info.updatetime
@@ -353,6 +379,7 @@ call s:LOG("CursorMoveReadFromEnsimeServer from(". s:max_ping_info_char_count . 
   endif
 endfunction
 
+endif " XXXXXXXXXXXXX
 
 " ============================================================================
 " Position Code

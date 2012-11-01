@@ -143,7 +143,9 @@ call s:LOG("CompletionsHandler_Ok dic=".  string(dic))
       let g:completions_results = sort(l:results, function("s:ListSorter"))
   call s:LOG("CompletionsHandler_Ok g:completions_results=".  string(g:completions_results)) 
 
-      " this triggers re-getting the completions
+      " This triggers re-getting the completions
+      " I did not think of this, this bit of cleverness 
+      " was found in Envim.
       call feedkeys("\<c-x>\<c-o>", 'n')
     endif
 

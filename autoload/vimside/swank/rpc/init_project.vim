@@ -64,7 +64,10 @@ call s:LOG("InitProject TOP")
   let l:rr.events = 'many'
   call vimside#ensime#swank#dispatch(l:rr)
 
-  call vimside#SetAutoCmds()
+" XXXXXXXXXXXXX
+" call vimside#SetAutoCmds()
+  call vimside#scheduler#StartAuto()
+
 
 if 0 " AAAAA
 call s:LOG("InitProject l:rr=". string(l:rr)) 

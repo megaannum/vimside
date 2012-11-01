@@ -99,7 +99,9 @@ function! g:ReplConfigHandler()
           \}
       call vimshell#set_context(context)
 
-      call vimside#RemoveAutoCmds()
+" XXXXXXXXXXXXX
+" call vimside#RemoveAutoCmds()
+      call vimside#scheduler#StopAuto()
 
 "sleep 1
       startinsert
@@ -170,7 +172,9 @@ endfunction
 
 function! g:ReplConfigVimShellCallbackAction()
 call s:LOG("ReplConfigVimShellCallbackAction") 
-  let &filetype = 'scala'
+  " let &filetype = 'scala'
+
+  let &filetype = s:filetype
   syntax on
 endfunction
 
@@ -180,9 +184,19 @@ call s:LOG("ReplConfigVimShellCallback")
 " REMOVE
   " call vimshell#util#delete_buffer()
 
-  call add(g:vimside.ping.actions, function("g:ReplConfigVimShellCallbackAction"))
+" XXXXXXXXXXXXX
+"  call add(g:vimside.ping.actions, function("g:ReplConfigVimShellCallbackAction"))
 
-  call vimside#SetAutoCmds()
+  let l:Func = function("g:ReplConfigVimShellCallbackAction")
+  let l:sec = 0
+  let l:msec = 100
+  let l:charcnt = 2
+  let l:repeat = 0
+  call vimside#scheduler#AddJob('repl_callback', l:Func, l:sec, l:msec, l:charcnt, l:repeat)
+
+" XXXXXXXXXXXXX
+" call vimside#SetAutoCmds()
+  call vimside#scheduler#StartAuto()
 
   let location = s:GetLocation()
   if location == 'split_window'

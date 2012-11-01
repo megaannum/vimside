@@ -130,7 +130,9 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_expecting")
   let g:vimside.ping.info.updatetime = s:rpc_expecting_updatetime 
   let g:vimside.ping.info.char_count = s:rpc_expecting_char_count 
 
-  call vimside#ResetAutoCmds()
+" XXXXXXXXXXXXX
+"   call vimside#ResetAutoCmds()
+  call vimside#scheduler#ResetAuto()
   if mode() == 'i'
     call feedkeys("a\<BS>")
   else

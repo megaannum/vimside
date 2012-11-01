@@ -39,12 +39,14 @@ endfunction
 "    timeout : Number read timeout in milliseconds
 " ------------------------------------------------------------ 
 function! vimside#ensime#io#ping(timeout)
+if 0 " XXXXXXXXXXXXXX
   if ! empty(g:vimside.ping.actions)
     for Action in g:vimside.ping.actions
       call Action()
     endfor
     let g:vimside.ping.actions = []
   endif
+endif " XXXXXXXXXXXXXX
 
   let success = 0
 
