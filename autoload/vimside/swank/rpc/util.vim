@@ -158,9 +158,9 @@ call s:LOG("vimside#swank#rpc#util#MakeRPCEnds TOP")
     let l:adic = {}
     for key in keys(l:args)
 
-      let l:adic[key] = has_key(l:other_replace_args)
-                      \ ?  l:other_replace_args[key]
-                      \ :  l:args[key]
+      let l:adic[key] = has_key(l:other_replace_args, key)
+                      \ ? l:other_replace_args[key]
+                      \ : l:args[key]
 
     endfor
     let l:rr['args'] = l:adic

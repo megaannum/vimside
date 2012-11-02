@@ -138,6 +138,7 @@ else
   vmap <Leader>vp :call vimside#forms#menu#MakePopUp('v')<CR>
 
 
+  nmap <Leader>vh :call vimside#HoverToSymbol()<CR>
 
   augroup VIMSIDE
     au!

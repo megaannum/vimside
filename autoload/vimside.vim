@@ -503,3 +503,239 @@ function!  vimside#StopAutoCmdCompletions()
     au!
   augroup END
 endfunction
+
+" ============================================================================
+" Hover to Symbol code
+" ============================================================================
+
+let s:hover_save_updatetime = 0
+let s:hover_updatetime = 600
+let s:hover_time_name = 'hover_time_job'
+
+let s:hover_save_max_mcounter = 0
+let s:hover_max_mcounter = 0
+let s:hover_motion_name = 'hover_motion_job'
+
+let s:hover_start = 0
+" let s:Hover_Stop = function("s:StopHoverToSymbol")
+
+function! vimside#HoverToSymbol()
+call s:LOG("vimside#HoverToSymbol") 
+  if s:hover_start
+    " call s:StopHoverToSymbol()
+    call s:Hover_Stop()
+  else
+    if s:DoBalloon() && s:IsBalloonSupported()
+call s:LOG("vimside#HoverToSymbol: DO BALLOON") 
+      let s:Hover_Stop = function("s:StopBalloonHoverToSymbol")
+      call s:StartBalloonHoverToSymbol()
+    else
+call s:LOG("vimside#HoverToSymbol: NO BALLOON") 
+      let s:Hover_Stop = function("s:StopHoverToSymbol")
+      call s:StartHoverToSymbol()
+    endif
+  endif
+endfunction
+
+
+function! g:HoverHandler_Ok(symbolinfo)
+" call s:LOG("g:HoverHandler_Ok ". string(a:symbolinfo)) 
+  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
+  if ! found
+    echoe "SymbolAtPoint ok: Badly formed Response"
+    call s:ERROR("SymbolAtPoint ok: Badly formed Response: ". string(a:symbolinfo))
+    return 0
+  endif
+
+" (:return 
+" (:ok 
+" (:name "bar_object1" 
+" :type (:name "Bar" :type-id 1 :full-name "com.megaanum.Bar" :decl-as class :pos (:file "/home/emberson/.vim/data/vimside/src/main/scala/com/megaanum/Bar.scala" :offset 214)) 
+" :decl-pos (:file "/home/emberson/.vim/data/vimside/src/main/scala/com/megaanum/Foo.scala" :offset 168) :owner-type-id 2)
+" ) 3)
+" 
+" 
+" (:return 
+" (:ok 
+" (:name "println" 
+" :type (:name "(x: Any)Unit" :type-id 7 :arrow-type t :result-type 
+" (:name "Unit" :type-id 8 :full-name "scala.Unit" :decl-as class) 
+" :param-sections (
+" (:params (("x" (:name "Any" :type-id 6 :full-name "scala.Any" :decl-as class))))
+" )
+" )
+" :decl-pos (:file "/home/emberson/scala/scala-2.10.0-M7/src/library/scala/Predef.scala" :offset 13271) 
+" :is-callable t 
+" :owner-type-id 9)) 71)
+"
+" (:return 
+" (:ok 
+" (:name "getBar" 
+" :type (:name "Bar" :type-id 5 :full-name "com.megaanum.Bar" :decl-as class :pos (:file "/home/emberson/.vim/data/vimside/src/main/scala/com/megaanum/Bar.scala" :offset 214)) 
+" :decl-pos (:file "/home/emberson/.vim/data/vimside/src/main/scala/com/megaanum/Foo.scala" :offset 237) :owner-type-id 6)) 5)
+" 
+
+  echo ""
+  if vimside#util#IsDictionary(dic)
+    if has_key(dic, ":type")
+      let tdic = dic[':type']
+      if has_key(tdic, ":arrow-type") && tdic[':arrow-type'] 
+        let name = dic[':name']
+        let tname = tdic[':name']
+          echo name . tname
+      else
+        if has_key(tdic, ":full-name")
+          let value = tdic[':full-name']
+          if value != "<none>.<none>"
+            echo value
+          endif
+        endif
+      endif
+    endif
+  endif
+
+  call vimside#scheduler#SetUpdateTime(s:hover_save_updatetime)
+  call vimside#scheduler#SetMaxMotionCounter(s:hover_max_mcounter)
+
+  call vimside#scheduler#RemoveJob(s:hover_motion_name)
+  let FuncMotion = function("g:JobMotionHoverToSymbol")
+  let charcnt = 0
+  let repeat = 0
+  call vimside#scheduler#AddMotionJob(s:hover_motion_name, FuncMotion, charcnt, repeat)
+
+  return 1
+endfunction
+
+function! g:JobTimeHoverToSymbol()
+  let dic = {
+        \ 'handler': {
+        \ 'ok': function("g:HoverHandler_Ok")
+        \ }
+        \ }
+  call vimside#swank#rpc#symbol_at_point#Run(dic)
+endfunction
+
+function! g:JobMotionHoverToSymbol()
+  call vimside#scheduler#SetMaxMotionCounter(s:hover_save_max_mcounter)
+  call vimside#scheduler#SetUpdateTime(s:hover_updatetime)
+
+  call vimside#scheduler#RemoveJob(s:hover_time_name)
+  let Func = function("g:JobTimeHoverToSymbol")
+  let sec = 0
+  let msec = 300
+  let repeat = 0
+  call vimside#scheduler#AddTimeJob(s:hover_time_name, Func, sec, msec, repeat)
+endfunction
+
+function! s:StartHoverToSymbol()
+  " save currnet time/motion settings
+  let s:hover_save_updatetime = vimside#scheduler#GetUpdateTime()
+  let s:hover_save_max_mcounter = vimside#scheduler#GetMaxMotionCounter()
+
+  call vimside#scheduler#SetUpdateTime(s:hover_updatetime)
+
+  let FuncTime = function("g:JobTimeHoverToSymbol")
+  let sec = 0
+  let msec = 300
+  let repeat = 0
+  call vimside#scheduler#AddTimeJob(s:hover_time_name, FuncTime, sec, msec, repeat)
+
+  let s:hover_start = 1
+endfunction
+
+function! s:StopHoverToSymbol()
+  call vimside#scheduler#RemoveJob(s:hover_motion_name)
+  call vimside#scheduler#RemoveJob(s:hover_time_name)
+  
+  call vimside#scheduler#SetUpdateTime(s:hover_save_updatetime)
+  call vimside#scheduler#SetMaxMotionCounter(s:hover_save_max_mcounter)
+
+  let s:hover_start = 0
+endfunction
+
+" ---------------------
+" Hover Balloon code
+" ---------------------
+
+function! s:DoBalloon()
+  " TODO make option
+  return 1
+endfunction
+
+function! s:IsBalloonSupported()
+  if has("balloon_eval")
+    return 1
+  else
+    " NOTE: for now console is not supported
+    return 0
+  endif
+endfunction
+
+function! s:GetCurrentBalloonOffset()
+  return line2byte(v:beval_lnum)+v:beval_col-1
+endfunction
+
+function! s:StopBalloonHoverToSymbol()
+  let &ballooneval = 0
+  let s:hover_start = 0
+endfunction
+
+function! s:StartBalloonHoverToSymbol()
+" call s:LOG("s:StartBalloonHoverToSymbol") 
+  set bexpr=g:HoverBalloonExpr()
+  let &ballooneval = 1
+  let s:hover_start = 1
+endfunction
+
+let s:hover_balloon_value = ''
+
+function! g:HoverBalloonHandler_Ok(symbolinfo)
+" call s:LOG("g:HoverBalloonHandler_Ok ". string(a:symbolinfo)) 
+  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
+  if ! found
+    echoe "SymbolAtPoint ok: Badly formed Response"
+    call s:ERROR("SymbolAtPoint ok: Badly formed Response: ". string(a:symbolinfo))
+    return 0
+  endif
+
+  let s:hover_balloon_value = ''
+  if vimside#util#IsDictionary(dic)
+    if has_key(dic, ":type")
+      let tdic = dic[':type']
+      if has_key(tdic, ":arrow-type") && tdic[':arrow-type'] 
+        let name = dic[':name']
+        let tname = tdic[':name']
+          let s:hover_balloon_value = name . tname
+      else
+        if has_key(tdic, ":full-name")
+          let value = tdic[':full-name']
+          if value != "<none>.<none>"
+            let s:hover_balloon_value = value
+          endif
+        endif
+      endif
+    endif
+  endif
+
+  return 1
+endfunction
+
+
+
+function! g:HoverBalloonExpr()
+" call s:LOG("g:HoverBalloonExpr") 
+  " return "HoverBalloon: offset=". s:GetCurrentBalloonOffset()
+  
+  let dic = {
+        \ 'handler': {
+        \   'ok': function("g:HoverBalloonHandler_Ok")
+        \ },
+        \ 'args': {
+        \   'offset': s:GetCurrentBalloonOffset()
+        \ }
+        \ }
+  call vimside#swank#rpc#symbol_at_point#Run(dic)
+
+  return s:hover_balloon_value
+endfunction
+

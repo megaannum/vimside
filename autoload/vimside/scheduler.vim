@@ -82,6 +82,10 @@ function! vimside#scheduler#ResetAuto()
 endfunction
 
 
+function! vimside#scheduler#GetUpdateTime() 
+  return &updatetime
+endfunction
+
 function! vimside#scheduler#SetUpdateTime(value) 
   let minval = 100
   if a:value < minval
@@ -90,8 +94,12 @@ function! vimside#scheduler#SetUpdateTime(value)
   let &updatetime = a:value
 endfunction
 
+function! vimside#scheduler#GetMaxMotionCounter()
+  return s:max_mcounter
+endfunction
+
 function! vimside#scheduler#SetMaxMotionCounter(cnt)
-  if a:cnt < 1
+  if a:cnt < 0
     throw "Motion counter must be positive: ". a:cnt
   endif
   let s:max_mcounter = a:cnt
