@@ -26,7 +26,7 @@ else
   " imap <tab> <c-r>=feedkeys("\<c-x>\<c-o>")<CR>
   " imap <tab> <c-x><c-o>
 
-  function TabToOmni()
+  function! TabToOmni()
     return "\<c-x>\<c-o>"
   endfunction
   inoremap <tab> <c-r>=TabToOmni()<CR>
