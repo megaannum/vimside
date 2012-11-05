@@ -28,7 +28,11 @@ function! vimside#plugins#Check()
   
   " Optional plugins
   silent! call forms#version()
-  if ! exists("*forms#version")
+  if exists("*forms#version")
+    let g:vimside.plugins.forms = 1
+  else
+    let g:vimside.plugins.forms = 0
+
     call add(warns, "Less functiona without Forms plugin: https://github.com/megaannum/forms")
     silent! call self#version()
     if ! exists("*self#version")

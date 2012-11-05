@@ -135,6 +135,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_expecting")
   call vimside#scheduler#ResetAuto()
   if mode() == 'i'
     call feedkeys("a\<BS>")
+  elseif mode() == 'c'
+    call feedkeys("\<SPACE>")
   else
     call feedkeys("f\e")
   endif
@@ -374,7 +376,7 @@ endfunction
 function! s:HandleResponse(children)
   let children = a:children
 
-call s:LOG("HandleResponse ". string(children))
+" call s:LOG("HandleResponse ". string(children))
 
   " Note that the first child really ought to be the keyword
   let top_kw_sexp = children[0]

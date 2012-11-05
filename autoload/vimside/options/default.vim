@@ -109,4 +109,17 @@ function! vimside#options#default#Load(option)
   call a:option.Set("swank-debug-trigger-thread-start", 'vimside#swank#event#debug_thread_start#Handle')
   call a:option.Set("swank-debug-trigger-thread-death", 'vimside#swank#event#debug_thread_death#Handle')
 
+
+  " Hover
+  " same as balloondelay default
+  call a:option.Set("vimside-hover-updatetime", 600)
+  " one character and hover move triggered
+  call a:option.Set("vimside-hover-max-char-mcounter", 0)
+  call a:option.Set("vimside-hover-balloon-enabled", 1)
+  call a:option.Set("vimside-hover-cmdline-job-time", 300)
+  call a:option.Set("vimside-hover-term-balloon-enabled", 1)
+  call a:option.Set("vimside-hover-term-balloon-fg", "red")
+  call a:option.Set("vimside-hover-term-balloon-bg", "white")
+  call a:option.Set("vimside-hover-term-job-time", 300)
+
 endfunction

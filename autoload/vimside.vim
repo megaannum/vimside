@@ -2,7 +2,7 @@
 " vimside.vim
 "
 " File:          vimside.vim
-" Summary:       VimSIde top level file
+" Summary:       Vimside top level file
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 " Version:       0.2
@@ -31,6 +31,8 @@ let g:vimside.warns = []
 
 let g:vimside.ensime = {} 
 let g:vimside.ensime.info = {} 
+
+let g:vimside.plugins = {} 
 
 " actions to be invoked on next ping (then cleared from list)
 let g:vimside.ping = {}
@@ -504,6 +506,8 @@ function!  vimside#StopAutoCmdCompletions()
   augroup END
 endfunction
 
+if 0 " HOVERCODE
+
 " ============================================================================
 " Hover to Symbol code
 " ============================================================================
@@ -520,19 +524,30 @@ let s:hover_start = 0
 " let s:Hover_Stop = function("s:StopHoverToSymbol")
 
 function! vimside#HoverToSymbol()
-call s:LOG("vimside#HoverToSymbol") 
   if s:hover_start
-    " call s:StopHoverToSymbol()
+call s:LOG("vimside#HoverToSymbol: STOP") 
     call s:Hover_Stop()
   else
     if s:DoBalloon() && s:IsBalloonSupported()
 call s:LOG("vimside#HoverToSymbol: DO BALLOON") 
-      let s:Hover_Stop = function("s:StopBalloonHoverToSymbol")
-      call s:StartBalloonHoverToSymbol()
+      " let s:Hover_Stop = function("s:StopBalloonHoverToSymbol")
+      " call s:StartBalloonHoverToSymbol()
+
+      let s:Hover_Stop = s:StartBalloonHoverToSymbol()
+
+    elseif s:DoTermHover() && s:IsHoverTermSupported()
+call s:LOG("vimside#HoverToSymbol: DO TERM HOVER") 
+      " let s:Hover_Stop = function("s:StopTermHoverToSymbol")
+      " call s:StartTermHoverToSymbol()
+
+      let s:Hover_Stop = s:StartTermHoverToSymbol()
+
     else
-call s:LOG("vimside#HoverToSymbol: NO BALLOON") 
-      let s:Hover_Stop = function("s:StopHoverToSymbol")
-      call s:StartHoverToSymbol()
+call s:LOG("vimside#HoverToSymbol: DO CMDLINE") 
+      "let s:Hover_Stop = function("s:StopHoverToSymbol")
+      "call s:StartHoverToSymbol()
+
+      let s:Hover_Stop = s:StartHoverToSymbol()
     endif
   endif
 endfunction
@@ -575,24 +590,8 @@ function! g:HoverHandler_Ok(symbolinfo)
 " :decl-pos (:file "/home/emberson/.vim/data/vimside/src/main/scala/com/megaanum/Foo.scala" :offset 237) :owner-type-id 6)) 5)
 " 
 
-  echo ""
-  if vimside#util#IsDictionary(dic)
-    if has_key(dic, ":type")
-      let tdic = dic[':type']
-      if has_key(tdic, ":arrow-type") && tdic[':arrow-type'] 
-        let name = dic[':name']
-        let tname = tdic[':name']
-          echo name . tname
-      else
-        if has_key(tdic, ":full-name")
-          let value = tdic[':full-name']
-          if value != "<none>.<none>"
-            echo value
-          endif
-        endif
-      endif
-    endif
-  endif
+  let text = s:GetHoverText(dic)
+  echo text
 
   call vimside#scheduler#SetUpdateTime(s:hover_save_updatetime)
   call vimside#scheduler#SetMaxMotionCounter(s:hover_max_mcounter)
@@ -641,21 +640,24 @@ function! s:StartHoverToSymbol()
   call vimside#scheduler#AddTimeJob(s:hover_time_name, FuncTime, sec, msec, repeat)
 
   let s:hover_start = 1
+
+  return function("s:StopHoverToSymbol")
 endfunction
 
 function! s:StopHoverToSymbol()
   call vimside#scheduler#RemoveJob(s:hover_motion_name)
   call vimside#scheduler#RemoveJob(s:hover_time_name)
   
+  " restore time/motion settings
   call vimside#scheduler#SetUpdateTime(s:hover_save_updatetime)
   call vimside#scheduler#SetMaxMotionCounter(s:hover_save_max_mcounter)
 
   let s:hover_start = 0
 endfunction
 
-" ---------------------
-" Hover Balloon code
-" ---------------------
+" ------------------------------
+" Hover GVim Balloon code
+" ------------------------------
 
 function! s:DoBalloon()
   " TODO make option
@@ -663,12 +665,7 @@ function! s:DoBalloon()
 endfunction
 
 function! s:IsBalloonSupported()
-  if has("balloon_eval")
-    return 1
-  else
-    " NOTE: for now console is not supported
-    return 0
-  endif
+  return (has("gui_running") && has("balloon_eval"))
 endfunction
 
 function! s:GetCurrentBalloonOffset()
@@ -685,6 +682,7 @@ function! s:StartBalloonHoverToSymbol()
   set bexpr=g:HoverBalloonExpr()
   let &ballooneval = 1
   let s:hover_start = 1
+  return function("s:StopBalloonHoverToSymbol")
 endfunction
 
 let s:hover_balloon_value = ''
@@ -698,24 +696,8 @@ function! g:HoverBalloonHandler_Ok(symbolinfo)
     return 0
   endif
 
-  let s:hover_balloon_value = ''
-  if vimside#util#IsDictionary(dic)
-    if has_key(dic, ":type")
-      let tdic = dic[':type']
-      if has_key(tdic, ":arrow-type") && tdic[':arrow-type'] 
-        let name = dic[':name']
-        let tname = tdic[':name']
-          let s:hover_balloon_value = name . tname
-      else
-        if has_key(tdic, ":full-name")
-          let value = tdic[':full-name']
-          if value != "<none>.<none>"
-            let s:hover_balloon_value = value
-          endif
-        endif
-      endif
-    endif
-  endif
+  let text = s:GetHoverText(dic)
+  let s:hover_balloon_value = text
 
   return 1
 endfunction
@@ -739,3 +721,484 @@ function! g:HoverBalloonExpr()
   return s:hover_balloon_value
 endfunction
 
+" ------------------------------
+" Hover Term Balloon code
+" ------------------------------
+
+let s:hover_term_supported = -1
+let s:hover_term_xwininfo_path = ''
+let s:hover_term_xdotool_path = ''
+let s:hover_term_dzen2_path = ''
+
+function! s:DoTermHover()
+  " TODO make option
+  return 1
+endfunction
+
+function! s:IsHoverTermSupported()
+  if s:hover_term_supported == -1
+    let s:hover_term_supported = s:CheckHoverTermRequiredExecutables()
+  endif
+  return s:hover_term_supported
+endfunction
+
+function! s:CheckHoverTermRequiredExecutables()
+  let l:requirements_met = 1
+  "- xwininfo
+  let [status, path] = g:ExistsExecutable('xwininfo')
+  if status
+    let s:hover_term_xwininfo_path = path
+  else
+    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    let l:requirements_met = 0
+  endif
+
+  "- xdotool
+  let [status, path] = g:ExistsExecutable('xdotool')
+  if status
+    let s:hover_term_xdotool_path = path
+  else
+    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    let l:requirements_met = 0
+  endif
+
+  "- dzen2
+  let [status, path] = g:ExistsExecutable('dzen2')
+  if status
+    let s:hover_term_dzen2_path = path
+  else
+    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    let l:requirements_met = 0
+  endif
+
+  return l:requirements_met
+endfunction
+
+" return [1, path] or [0, err_msg]
+function! g:ExistsExecutable(cmd)
+  let [status, out, err]i = s:execute_which(a:cmd)
+" call s:LOG("g:ExistsExecutable: status=". status .", out=". out .", err=". err)
+  return (status == 0) ? [1, out] : [0, err]
+endfunction
+
+" --------------
+
+" xdotool getmouselocation -> 
+" return [1, x_pixel, y_pixel]
+" return [0, -1, -11]
+function! g:GetMouseLocation()
+  let cmdline = 'xdotool getmouselocation'
+  let [status, out, err] = s:execute_cmd(cmdline)
+  if status == 0
+" call s:LOG("g:GetMouseLocation: out=". out)
+    let lines = split(out, ' ')
+    let xpx = 0 + lines[0][len('x:'):]
+    let ypx = 0 + lines[1][len('y:'):]
+" call s:LOG("g:GetMouseLocation: xpx=". xpx .", ypx=". ypx)
+    return [1, xpx, ypx]
+  else
+    call s:ERROR("g:GetMouseLocation: status=". status .", err=". err)
+    return [0, -1, -1]
+  endif
+endfunction
+
+" xdotool getactivewindow -> 
+" return [1, window_id]
+" return [0, -1]
+function! g:GetActiveWindowId()
+  let cmdline = 'xdotool getactivewindow'
+  let [status, out, err] = s:execute_cmd(cmdline)
+  if status == 0
+    let windowid = 0 + substitute(out, "\n", "", "g")
+    return [0, windowid]
+  else
+    call s:ERROR("g:GetActiveWindowId: status=". status .", err=". err)
+    return [0, -1]
+  endif
+endfunction
+
+" xwininfo -id WID ->
+" return [1, upperX, upperY, width, height]
+" return [0, -1, -1, -1, -1]
+function! g:GetWinInfo()
+  let cmdline = 'xwininfo -id '. $WINDOWID
+  let [status, out, err] = s:execute_cmd(cmdline)
+  if status == 0
+" call s:LOG("g:GetWinInfo: out=". out)
+    let lines = split(out, '\n')
+    let upperX = 0 + lines[3][len('  Absolute upper-left X:  '):]
+    let upperY = 0 + lines[4][len('  Absolute upper-left Y:  '):]
+    let width  = 0 + lines[7][len('  Width: '):]
+    let height = 0 + lines[8][len('  Height: '):]
+
+    return [1, upperX, upperY, width, height]
+  else
+    call s:ERROR("g:GetWinInfo: status=". status .", err=". err)
+    return [0, -1, -1, -1, -1]
+  endif
+endfunctio
+
+" return [rows, cols]
+function! g:GetTermSize()
+  let cols = winwidth(0)
+  let rows = winheight(0)
+  return [rows, cols]
+endfunction
+
+" not used
+function! g:GetCharDimension()
+  let [found, upperX, upperY, width, height] = g:GetWinInfo()
+  let [rows, cols] = g:GetTermSize()
+  let cwidth = float2nr((0.0+width)/cols)
+  let cheight = float2nr((0.0+height)/rows)
+
+  return [cwidth, cheight]
+endfunction
+
+" return [1, line, column]
+" return [0, -1, -1]
+function! g:GetTermMousePos()
+  let [found, xpx, ypx] = g:GetMouseLocation()
+"call s:LOG("g:GetTermMousePos: ". string([found, xpx, ypx, windowid]))
+  if ! found
+    return [0, -1, -1]
+  endif
+
+  let [found, windowid] = g:GetActiveWindowId()
+
+  " Must be a bug in xdotool getmouselocation
+  if windowid != $WINDOWID
+" call s:LOG("g:GetTermMousePos: WINDOWID=". $WINDOWID)
+    " mouse not in our window
+    return [0, -1, -1]
+  endif
+
+  let [found, upperX, upperY, width, height] = g:GetWinInfo()
+  if ! found
+    return [0, -1, -1]
+  endif
+
+  " Note: we could do a bounds chect that the mouse location is
+  " within the window bounds, but hopefully, the above windowid
+  " check is good enough.
+
+  let [rows, cols] = g:GetTermSize()
+
+  let column = float2nr((1.0 * (xpx - upperX) * cols) / width)
+  let lnum = float2nr((1.0 * (ypx - upperY) * rows) / height)
+
+" echo "ypx=". ypx .", upperY=". upperY .", height=". height .", rows=". rows .", y=". y
+  let topline = line('w0')
+  return [1, lnum + topline, column]
+endfunction
+
+" return [1, offset]
+" return [0, -1]
+function! s:GetCurrentTermOffset()
+  let [found, lnum, column] = g:GetTermMousePos()
+" call s:LOG("g:GetCurrentTermOffset: lnum,column=". string([lnum, column]))
+  return found ? [1, line2byte(lnum)+column-1] : [0, -1]
+endfunction
+
+" return [1, lnum, column, word]
+" return [0, -1, -1, '']
+function! g:GetWord()
+  let [found, lnum, column] = g:GetTermMousePos()
+  if ! found
+    return [0, -1, -1, '']
+  endif
+  let line = getline(lnum)
+" echo "lnum=". lnum .", line=". line
+
+  let llen = len(line)
+  if column > llen
+    let word = ''
+  else
+    let c = line[column]
+    if c == "\<CR>" || c == "\<Space>"
+      let word = ''
+    else
+      let rpos = column+1
+      while rpos < llen
+        let c = line[rpos]
+        if c == "\<CR>" || c == "\<Space>"
+          let rpos -= 1
+          break
+        else
+        endif
+        let rpos += 1
+      endwhile
+      let lpos = column-1
+      while rpos >= 0
+        let c = line[lpos]
+        if c == "\<Space>"
+          let lpos += 1
+          break
+        else
+        endif
+        let lpos -= 1
+      endwhile
+" echo "column=". column .", lpos=". lpos .", rpos=". rpos .", word=". line[lpos : rpos]
+      let word = line[lpos : rpos]
+    endif
+  endif
+
+  return [1, lnum, column, word]
+endfunction
+
+" --------------
+
+function! g:ShowBalloon(text)
+call s:LOG("g:ShowBalloon: text='". a:text ."'")
+  " NOTE: options
+  let [cwidth, cheight] = [8, 10]
+  let [found, xpx, ypx] = g:GetMouseLocation()
+  if found
+    let bg = 'white'
+    let fg = 'red'
+    let args = ' -w '. (len(a:text) * cwidth + 8)
+    let args .= ' -fg '. fg
+    let args .= ' -bg '. bg
+    let args .= ' -x '. xpx
+    let args .= ' -y '. ypx
+    let args .= ' -p '
+    let cmdline = 'echo '. a:text .' | dzen2 '. args
+    let subproc = s:start_cmd(cmdline)
+
+    let c = nr2char(getchar())
+    call feedkeys(c, 't')
+
+    call subproc.stdout.close()
+    call subproc.stderr.close()
+
+    let [cond, last_status] = subproc.waitpid()
+"echo "cond=". cond .", last_status=". last_status
+  endif
+endfunction
+
+function! g:HoverTermHandler_Ok(symbolinfo)
+call s:LOG("g:HoverTermHandler_Ok ". string(a:symbolinfo)) 
+  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
+  if ! found
+    echoe "SymbolAtPoint ok: Badly formed Response"
+    call s:ERROR("SymbolAtPoint ok: Badly formed Response: ". string(a:symbolinfo))
+    return 0
+  endif
+
+  let [found, lnum, column, word] = g:GetWord()
+call s:LOG("g:HoverTermHandler_Ok found=". found .", word='". word ."'") 
+  if found && word != ''
+    let text = s:GetHoverText(dic)
+    if text != ''
+      call g:ShowBalloon(text)
+    endif        
+  endif
+
+  let FuncTime = function("g:JobTimeFirstTermHoverToSymbol")
+  let sec = 0
+  let msec = 300
+  let repeat = 0
+  call vimside#scheduler#AddTimeJob(s:hover_time_name, FuncTime, sec, msec, repeat)
+
+  return 1
+endfunction
+
+function! g:JobTimeFirstTermHoverToSymbol()
+  let [found, offset] = s:GetCurrentTermOffset()
+  if found
+    let dic = {
+          \ 'handler': {
+          \ 'ok': function("g:HoverTermHandler_Ok")
+          \ },
+          \ 'args': {
+          \   'offset': offset
+          \ }
+          \ }
+    call vimside#swank#rpc#symbol_at_point#Run(dic)
+  else
+    let FuncTime = function("g:JobTimeFirstTermHoverToSymbol")
+    let sec = 0
+    let msec = 300
+    let repeat = 0
+    call vimside#scheduler#AddTimeJob(s:hover_time_name, FuncTime, sec, msec, repeat)
+  endif
+endfunction
+
+
+function! s:StartTermHoverToSymbol()
+  " save currnet time/motion settings
+  let s:hover_save_updatetime = vimside#scheduler#GetUpdateTime()
+  let s:hover_save_max_mcounter = vimside#scheduler#GetMaxMotionCounter()
+
+  call vimside#scheduler#SetUpdateTime(s:hover_updatetime)
+
+  let FuncTime = function("g:JobTimeFirstTermHoverToSymbol")
+  let sec = 0
+  let msec = 300
+  let repeat = 0
+  call vimside#scheduler#AddTimeJob(s:hover_time_name, FuncTime, sec, msec, repeat)
+
+  let s:hover_start = 1
+
+  return function("s:StopTermHoverToSymbol")
+endfunction
+
+function! s:StopTermHoverToSymbol()
+  call vimside#scheduler#RemoveJob(s:hover_motion_name)
+  call vimside#scheduler#RemoveJob(s:hover_time_name)
+  
+  " restore time/motion settings
+  call vimside#scheduler#SetUpdateTime(s:hover_save_updatetime)
+  call vimside#scheduler#SetMaxMotionCounter(s:hover_save_max_mcounter)
+
+  let s:hover_start = 0
+endfunction
+
+
+function! s:GetHoverText(dic)
+  let dic = a:dic
+  if vimside#util#IsDictionary(dic)
+    if has_key(dic, ":type")
+      let tdic = dic[':type']
+      if has_key(tdic, ":arrow-type") && tdic[':arrow-type'] 
+        let name = dic[':name']
+        let tname = tdic[':name']
+          return name . tname
+      else
+        if has_key(tdic, ":full-name")
+          let tname = tdic[':name']
+          let tfullname = tdic[':full-name']
+          if tfullname !~ '<none>.*'
+            return tfullname
+          else
+            return tname
+          endif
+        endif
+      endif
+    endif
+    return ''
+  else
+    return ''
+  endif
+endfunction
+
+" ------------------------------
+" Hover Vimproc support
+" ------------------------------
+
+function! s:execute_cmd(cmdline, ...)
+  " Expand % and #.
+  let cmdline = join(map(vimproc#parser#split_args_through(
+           \ vimproc#util#iconv(a:cmdline, vimproc#util#termencoding(), &encoding)), 
+            \ 'substitute(expand(v:val), "\n", " ", "g")'))
+
+  " Open pipe.
+  let subproc = vimproc#pgroup_open(cmdline, 1)
+
+  if a:0 == 1
+    call subproc.stdin.write(a:1)
+  elseif a:0 > 1
+    throw "s:execute_cmd TOO many arguments: ". string(a:000)
+  endif
+
+  call subproc.stdin.close()
+
+  let stdout = ''
+  let stderr = ''
+
+  while !subproc.stdout.eof || !subproc.stderr.eof
+    if !subproc.stdout.eof
+      let output = subproc.stdout.read(10000, 0)
+      if output != ''
+        let output = vimproc#util#iconv(output, vimproc#util#stdoutencoding(), &encoding)
+        let stdout .= output
+        sleep 1m
+      endif
+    endif
+
+    if !subproc.stderr.eof
+      let output = subproc.stderr.read(10000, 0)
+      if output != ''
+        let output = vimproc#util#iconv(output, vimproc#util#stderrencoding(), &encoding)
+        let stderr .= output
+        sleep 1m
+      endif
+    endif
+  endwhile
+
+  call subproc.stdout.close()
+  call subproc.stderr.close()
+
+  let [cond, last_status] = subproc.waitpid()
+
+  return [last_status, stdout, stderr]
+endfunction
+
+function! s:start_cmd(cmdline, ...)
+  " Expand % and #.
+  let cmdline = join(map(vimproc#parser#split_args_through(
+           \ vimproc#util#iconv(a:cmdline, vimproc#util#termencoding(), &encoding)), 
+            \ 'substitute(expand(v:val), "\n", " ", "g")'))
+
+  " Open pipe.
+  let subproc = vimproc#pgroup_open(cmdline, 1)
+
+  if a:0 == 1
+    call subproc.stdin.write(a:1)
+  elseif a:0 > 1
+    throw "s:start_cmd TOO many arguments: ". string(a:000)
+  endif
+
+  call subproc.stdin.close()
+
+  return subproc
+endfunction
+
+function! s:execute_which(cmd)
+  let cmdline = "which ". a:cmd
+
+  " Expand % and #.
+  let cmdline = join(map(vimproc#parser#split_args_through(
+           \ vimproc#util#iconv(cmdline, vimproc#util#termencoding(), &encoding)), 
+            \ 'substitute(expand(v:val), "\n", " ", "g")'))
+
+  " Open pipe.
+  let subproc = vimproc#pgroup_open(cmdline, 1)
+
+  call subproc.stdin.close()
+
+  let stdout = ''
+  let stderr = ''
+
+  while !subproc.stdout.eof || !subproc.stderr.eof
+    if !subproc.stdout.eof
+      let output = subproc.stdout.read(10000, 0)
+      if output != ''
+        let output = vimproc#util#iconv(output, vimproc#util#stdoutencoding(), &encoding)
+        let stdout .= output
+        sleep 1m
+      endif
+    endif
+
+    if !subproc.stderr.eof
+      let output = subproc.stderr.read(10000, 0)
+      if output != ''
+        let output = vimproc#util#iconv(output, vimproc#util#stderrencoding(), &encoding)
+        let stderr .= output
+        sleep 1m
+      endif
+    endif
+  endwhile
+
+  call subproc.stdout.close()
+  call subproc.stderr.close()
+
+  let [cond, last_status] = subproc.waitpid()
+
+  let stdout = substitute(stdout, "\n", "", "g")
+  let stderr = substitute(stderr, "\n", "", "g")
+
+  return [last_status, stdout, stderr]
+endfunction
+
+endif " HOVERCODE

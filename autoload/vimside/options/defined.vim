@@ -19,6 +19,7 @@ let g:OPTION_ENUM_KIND = 7
 let g:OPTION_FUNCTION_KIND = 8
 let g:OPTION_TIME_KIND = 9
 let g:OPTION_CHAR_COUNT_KIND = 10
+let g:OPTION_COLOR_KIND = 11
 
 
 "
@@ -80,6 +81,12 @@ function! vimside#options#defined#CheckValue(def, value, errors)
         call s:CheckEnumKind(def, value, errors)
       elseif def.kind == g:OPTION_FUNCTION_KIND
         call s:CheckFunctionKind(def, value, errors)
+      elseif def.kind == g:OPTION_TIME_KIND
+        call s:CheckTimeKind(def, value, errors)
+      elseif def.kind == g:OPTION_CHAR_COUNT_KIND
+        call s:CheckCharCountKind(def, value, errors)
+      elseif def.kind == g:OPTION_COLOR_KIND
+        call s:CheckColorKind(def, value, errors)
       else
         call add(errors, "Option '". def.name ."' unknown kind: '". string(def.kind) ."'")
       endif
@@ -161,16 +168,51 @@ function! s:CheckEnumKind(def, value, errors)
   else
     call add(errors, "Option Def '". def.name ."' of kind: Enum has no 'enum' key/value pair")
   endif
-      \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
 endfunction
 
 function! s:CheckFunctionKind(def, value, errors)
   let def = a:def
   let value = a:value
   let errors = a:errors
-
 endfunction
 
+function! s:CheckTimeKind(def, value, errors)
+  let def = a:def
+  let value = a:value
+  let errors = a:errors
+
+  if value < 0
+    call add(errors, "Option Def '". def.name ."' of kind: Time '". value ."' is less than 0")
+  endif
+endfunction
+
+function! s:CheckCharCountKind(def, value, errors)
+  let def = a:def
+  let value = a:value
+  let errors = a:errors
+
+  if value < 0
+    call add(errors, "Option Def '". def.name ."' of kind: CharCount '". value ."' is less than 0")
+  endif
+endfunction
+
+function! s:CheckColorKind(def, value, errors)
+  let def = a:def
+  let value = a:value
+  let errors = a:errors
+
+  if  g:vimside.plugins.forms
+    if forms#color#util#ConvertName_2_RGB(value) == ''
+      try
+        call forms#color#util#ParseRGB(value)
+      catch  /.*/
+        call add(errors, "Option Def '". def.name ."' of kind: Color '". value ."' unknown color")
+      endtry
+    endif
+  else
+    " TODO How to check color value without forms library ?
+  endif
+endfunction
 
 function! s:MakeOptions()
   let s:options = {}
@@ -391,7 +433,7 @@ function! s:MakeOptions()
   " Swank RPC Event Ping Info
   let s:options['swank-rpc-expecting-read-timeout'] = {
         \ 'name': 'swank-rpc-expecting-read-timeout',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Expecting response RPC socket read timeout."
@@ -399,7 +441,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-rpc-expecting-updatetime'] = {
         \ 'name': 'swank-rpc-expecting-updatetime',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Expecting response CurosrHold updatetime before ping."
@@ -407,7 +449,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-rpc-expecting-char-count'] = {
         \ 'name': 'swank-rpc-expecting-char-count',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
             \ 'description': [
             \ "Expecting response CursorMoved number of characters before ping."
@@ -415,7 +457,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-rpc-not-expecting-read-timeout'] = {
         \ 'name': 'swank-rpc-not-expecting-read-timeout',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Not expecting RPC socket read timeout."
@@ -423,7 +465,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-rpc-not-expecting-updatetime'] = {
         \ 'name': 'swank-rpc-not-expecting-updatetime',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Not expecting CurosrHold updatetime before ping."
@@ -431,7 +473,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-rpc-not-expecting-char-count'] = {
         \ 'name': 'swank-rpc-not-expecting-char-count',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
             \ 'description': [
             \ "Not expecting CursorMoved number of characters before ping."
@@ -439,7 +481,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-event-expecting-one-updatetime'] = {
         \ 'name': 'swank-event-expecting-one-updatetime',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Expecting one event CurosrHold updatetime before ping."
@@ -447,7 +489,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-event-expecting-one-char-count'] = {
         \ 'name': 'swank-event-expecting-one-char-count',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
             \ 'description': [
             \ "Expecting one event CursorMoved number of characters before ping."
@@ -455,7 +497,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-event-expecting-many-updatetime'] = {
         \ 'name': 'swank-event-expecting-many-updatetime',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
             \ 'description': [
             \ "Expecting many events CurosrHold updatetime before ping."
@@ -463,7 +505,7 @@ function! s:MakeOptions()
       \ }
   let s:options['swank-event-expecting-many-char-count'] = {
         \ 'name': 'swank-event-expecting-many-char-count',
-        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
             \ 'description': [
             \ "Expecting many events CursorMoved number of characters before ping."
@@ -820,6 +862,70 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'description': [
             \ "RPC debut trigger for ':type == threadDeath'."
+        \ ]
+      \ }
+
+  " Hover
+  let s:options['vimside-hover-updatetime'] = {
+        \ 'name': 'vimside-hover-updatetime',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'description': [
+            \ "How long in milliseconds before Hover CurosrHold event called."
+        \ ]
+      \ }
+  let s:options['vimside-hover-max-char-mcounter'] = {
+        \ 'name': 'vimside-hover-max-char-mcounter',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
+        \ 'description': [
+            \ "How many characters enterd long before Hover CurosrMoved event called."
+        \ ]
+      \ }
+  let s:options['vimside-hover-balloon-enabled'] = {
+        \ 'name': 'vimside-hover-balloon-enabled',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'description': [
+            \ "Is the GVim Symbol-name balloon enabled."
+        \ ]
+      \ }
+  let s:options['vimside-hover-cmdline-job-time'] = {
+        \ 'name': 'vimside-hover-cmdline-job-time',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'description': [
+            \ "Job time in milliseconds for Hover Command Line execution."
+        \ ]
+      \ }
+  let s:options['vimside-hover-term-balloon-enabled'] = {
+        \ 'name': 'vimside-hover-term-balloon-enabled',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'description': [
+            \ "Is the Vim Symbol-name term balloon enabled."
+        \ ]
+      \ }
+  let s:options['vimside-hover-term-balloon-fg'] = {
+        \ 'name': 'vimside-hover-term-balloon-fg',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'description': [
+            \ "Foreground color for term balloon (symbolic name or hex-value)."
+        \ ]
+      \ }
+  let s:options['vimside-hover-term-balloon-bg'] = {
+        \ 'name': 'vimside-hover-term-balloon-bg',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'description': [
+            \ "Background color for term balloon (symbolic name or hex-value)."
+        \ ]
+      \ }
+  let s:options['vimside-hover-term-job-time'] = {
+        \ 'name': 'vimside-hover-term-job-time',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'description': [
+            \ "Job time in milliseconds for Hover Term execution."
         \ ]
       \ }
 endfunction
