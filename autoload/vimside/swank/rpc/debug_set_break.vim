@@ -45,7 +45,7 @@ call s:LOG("debug_set_break TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-debug-set-break-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("debug_set_break BOTTOM") 

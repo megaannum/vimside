@@ -56,7 +56,7 @@ function! s:CheckHoverTermRequiredExecutables()
   if status
     let s:hover_term_xwininfo_path = path
   else
-    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    call s:ERROR("s:CheckHoverTermRequiredExecutables: err msg=". path)
     let l:requirements_met = 0
   endif
 
@@ -65,7 +65,7 @@ function! s:CheckHoverTermRequiredExecutables()
   if status
     let s:hover_term_xdotool_path = path
   else
-    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    call s:ERROR("s:CheckHoverTermRequiredExecutables: err msg=". path)
     let l:requirements_met = 0
   endif
 
@@ -74,7 +74,7 @@ function! s:CheckHoverTermRequiredExecutables()
   if status
     let s:hover_term_dzen2_path = path
   else
-    call s:Error("s:CheckHoverTermRequiredExecutables: err msg=". path)
+    call s:ERROR("s:CheckHoverTermRequiredExecutables: err msg=". path)
     let l:requirements_met = 0
   endif
 

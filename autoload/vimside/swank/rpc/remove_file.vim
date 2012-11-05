@@ -45,7 +45,7 @@ call s:LOG("remove_file TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-remove-file-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("remove_file BOTTOM") 

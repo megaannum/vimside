@@ -52,7 +52,7 @@ call s:LOG("exec_undo TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-exec-undo-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("exec_undo BOTTOM") 

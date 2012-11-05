@@ -50,7 +50,7 @@ call s:LOG("public_symbol_search TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-public-symbol-search-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("public_symbol_search BOTTOM") 

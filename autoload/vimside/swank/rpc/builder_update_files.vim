@@ -47,7 +47,7 @@ call s:LOG("builder_update_files TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-builder-update-files-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("builder_update_files BOTTOM") 

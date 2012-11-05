@@ -55,7 +55,7 @@ call s:LOG("symbol_designations TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-symbol-designations-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("symbol_designations BOTTOM") 

@@ -51,7 +51,7 @@ call s:LOG("method_bytecode TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-method-bytecode-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("method_bytecode BOTTOM") 

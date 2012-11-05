@@ -43,7 +43,7 @@ call s:LOG("debug_clear_all_breaks TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-debug-clear-all-breaks-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("debug_clear_all_breaks BOTTOM") 

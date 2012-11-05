@@ -49,7 +49,7 @@ call s:LOG("type_by_name_at_point TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-type-by-name_at_point-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("type_by_name_at_point BOTTOM") 

@@ -49,7 +49,7 @@ call s:LOG("expand_selection TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-expand-selection-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("expand_selection BOTTOM") 

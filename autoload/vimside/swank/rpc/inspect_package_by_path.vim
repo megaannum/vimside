@@ -49,7 +49,7 @@ call s:LOG("inspect_package_by_path TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-inspect-package-by-path-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("inspect_package_by_path BOTTOM") 

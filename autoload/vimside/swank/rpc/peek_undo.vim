@@ -59,7 +59,7 @@ call s:LOG("peek_undo TOP")
   " call vimside#ensime#swank#dispatch(l:rr)
 
   let msg = "Not Implemented Yet:" . 'swank-rpc-peek-undo-handler'
-  call s:Error(msg)
+  call s:ERROR(msg)
   echoerr msg
 
 call s:LOG("peek_undo BOTTOM") 
