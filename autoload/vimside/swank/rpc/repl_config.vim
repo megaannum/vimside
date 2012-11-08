@@ -99,22 +99,10 @@ function! g:ReplConfigHandler()
           \}
       call vimshell#set_context(context)
 
-" XXXXXXXXXXXXX
-" call vimside#RemoveAutoCmds()
       call vimside#scheduler#StopAuto()
 
-"sleep 1
       startinsert
       stopinsert
-
-if 0
-      let c = getchar(0)
-call s:LOG("ReplConfigHandler_Ok c=".  string(c)) 
-      while c != 0
-        let c = getchar(0)
-call s:LOG("ReplConfigHandler_Ok c=".  string(c)) 
-      endwhile
-endif
 
       let location = s:GetLocation()
 
@@ -128,9 +116,6 @@ endif
         let g:vimshell_split_command = 'tabnew!'
       endif
 
-if 0 " XXXX
-let s:bufnum = bufnr('%')
-endif " XXXX
       let s:filetype = &filetype
       call vimshell#execute_internal_command('iexe', args, context)
       call vimshell#hook#set('postexit', [ function("g:ReplConfigVimShellCallback") ])
@@ -181,11 +166,6 @@ endfunction
 function! g:ReplConfigVimShellCallback(context, cmdinfolist)
 call s:LOG("ReplConfigVimShellCallback") 
 
-" REMOVE
-  " call vimshell#util#delete_buffer()
-
-" XXXXXXXXXXXXX
-"  call add(g:vimside.ping.actions, function("g:ReplConfigVimShellCallbackAction"))
 
   let l:Func = function("g:ReplConfigVimShellCallbackAction")
   let l:sec = 0
@@ -194,8 +174,6 @@ call s:LOG("ReplConfigVimShellCallback")
   let l:repeat = 0
   call vimside#scheduler#AddJob('repl_callback', l:Func, l:sec, l:msec, l:charcnt, l:repeat)
 
-" XXXXXXXXXXXXX
-" call vimside#SetAutoCmds()
   call vimside#scheduler#StartAuto()
 
   let location = s:GetLocation()
@@ -206,21 +184,5 @@ call s:LOG("ReplConfigVimShellCallback")
   elseif location == 'tab'
     quit
   endif
-
-if 0 " XXXX
-let l:bufnum = bufnr('%')
-
-execute 'buffer '. s:bufnum
-unlet s:bufnum
-
-  " let &filetype = 'scala'
-  if exists('s:filetype')
-call s:LOG("ReplConfigVimShellCallback: s:filetype=". s:filetype) 
-    let &filetype = s:filetype
-  endif
-  syntax on
-
-execute 'buffer '. l:bufnum
-endif " XXXX
 
 endfunction

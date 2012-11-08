@@ -1,8 +1,8 @@
 " ============================================================================
-" plugins.vim
+" vimplugins.vim
 "
-" File:          plugins.vim
-" Summary:       Check is require plugins exist and warn about optional ones
+" File:          vimplugins.vim
+" Summary:       Check is require Vim plugins exist and warn about optional ones
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 "
@@ -10,7 +10,7 @@
 " Intro: {{{1
 " ============================================================================
 
-function! vimside#plugins#Check()
+function! vimside#vimplugins#Check()
   let errors = g:vimside.errors
   let warns = g:vimside.warns
 

@@ -14,6 +14,8 @@ function! vimside#ensime#config#Check(sexp)
     if ! isdirectory(value)
       call add(l:errmsg, "Not Directory key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['root_dir'] = value
     endif
   else
     echoerr "Check Ensime Config: not found " . key
@@ -27,6 +29,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type('')
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['name'] = value
     endif
   else
     echoerr "Check Ensime Config: not found " . key
@@ -40,6 +44,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type('')
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['module_name'] = value
     endif
   endif
   unlet value
@@ -50,6 +56,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type('')
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['active_subproject'] = value
     endif
   endif
   unlet value
@@ -60,6 +68,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type('')
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['version'] = value
     endif
   endif
   unlet value
@@ -70,6 +80,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type('')
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['package'] = value
     endif
   endif
   unlet value
@@ -94,6 +106,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['compiler_deps'] = value
   endif
   unlet value
 
@@ -117,6 +130,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['compiler_jars'] = value
   endif
   unlet value
 
@@ -140,6 +154,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['runtime_deps'] = value
   endif
   unlet value
 
@@ -163,6 +178,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['runtime_jars'] = value
   endif
   unlet value
 
@@ -186,6 +202,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['test_deps'] = value
   endif
   unlet value
 
@@ -196,18 +213,49 @@ function! vimside#ensime#config#Check(sexp)
       call add(l:errmsg, "Not List key(" . key . ") value:" . string(value))
       let l:rval = 0
     else
+      let source_roots = []
       for child in value
         let [found, strval] = vimside#sexp#Get_StringValue(child) 
         if found
           if ! isdirectory(strval) && ! filereadable(strval)
             call add(l:errmsg, "Not Directory or File key(" . key . ") value:" . string(strval))
             let l:rval = 0
+          else
+            call add(source_roots, strval) 
           endif
         else
           call add(l:errmsg, "Not SExp String key(" . key . ") value:" . string(child))
         endif
         unlet strval
       endfor
+      let g:vimside.project.info['source_roots'] = source_roots
+    endif 
+  endif
+  unlet value
+
+  let key = ":reference-source-roots"
+  let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
+  if found
+    if type(value) != type([])
+      call add(l:errmsg, "Not List key(" . key . ") value:" . string(value))
+      let l:rval = 0
+    else
+      let reference_source_roots = []
+      for child in value
+        let [found, strval] = vimside#sexp#Get_StringValue(child) 
+        if found
+          if ! isdirectory(strval) && ! filereadable(strval)
+            call add(l:errmsg, "Not Directory or File key(" . key . ") value:" . string(strval))
+            let l:rval = 0
+          else
+            call add(reference_source_roots, strval) 
+          endif
+        else
+          call add(l:errmsg, "Not SExp String key(" . key . ") value:" . string(child))
+        endif
+        unlet strval
+      endfor
+      let g:vimside.project.info['reference_source_roots'] = reference_source_roots
     endif
   endif
   unlet value
@@ -218,6 +266,8 @@ function! vimside#ensime#config#Check(sexp)
     if ! isdirectory(value)
       call add(l:errmsg, "Not Directory key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['target'] = value
     endif
   endif
   unlet value
@@ -228,6 +278,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type(0)
       call add(l:errmsg, "Not Boolean key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['disable_index_on_startup'] = value
     endif
   endif
   unlet value
@@ -238,6 +290,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type(0)
       call add(l:errmsg, "Not Boolean key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['disable_source_load_on_startup'] = value
     endif
   endif
   unlet value
@@ -248,6 +302,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type(0)
       call add(l:errmsg, "Not Boolean key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['disable_scala_jars_on_classpath'] = value
     endif
   endif
   unlet value
@@ -272,6 +328,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['only_include_in_index'] = value
   endif
   unlet value
 
@@ -295,6 +352,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['exclude_from_index'] = value
   endif
   unlet value
 
@@ -318,6 +376,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['compiler_args'] = value
   endif
   unlet value
 
@@ -341,6 +400,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['builder_args'] = value
   endif
   unlet value
 
@@ -364,6 +424,7 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['java_comipler_args'] = value
   endif
   unlet value
 
@@ -373,6 +434,8 @@ function! vimside#ensime#config#Check(sexp)
     if type(value) != type("")
       call add(l:errmsg, "Not String key(" . key . ") value:" . string(value))
       let l:rval = 0
+    else
+      let g:vimside.project.info['java_comipler_version'] = value
     endif
   endif
   unlet value
@@ -397,9 +460,11 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['sources'] = value
   endif
   unlet value
 
+if 0 " DUP
   let key = ":source-roots"
   let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
   if found
@@ -420,8 +485,10 @@ function! vimside#ensime#config#Check(sexp)
         unlet strval
       endfor
     endif
+    let g:vimside.project.info['source_roots'] = value
   endif
   unlet value
+endif " DUP
 
   let key = ":formatting-prefs"
   let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
@@ -570,6 +637,7 @@ function! vimside#ensime#config#Check(sexp)
 
       endwhile
     endif
+    let g:vimside.project.info['formatting_prefs'] = value
   endif
   unlet value
 

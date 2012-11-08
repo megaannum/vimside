@@ -64,12 +64,10 @@ call s:LOG("InitProject TOP")
   let l:rr.events = 'many'
   call vimside#ensime#swank#dispatch(l:rr)
 
-" XXXXXXXXXXXXX
-" call vimside#SetAutoCmds()
   call vimside#scheduler#StartAuto()
 
 
-if 0 " AAAAA
+if 0 " AAAAA TEST
 call s:LOG("InitProject l:rr=". string(l:rr)) 
 
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, {}, s:Handler, [l:rr])
@@ -132,10 +130,13 @@ call s:LOG("InitProjectHandler_Ok ".  vimside#sexp#ToString(a:projectInfo))
 call s:LOG("InitProjectHandler_Ok dic=".  string(dic)) 
 
     let l:name = dic[':project-name']
-    let l:source_roots = dic[':source-roots']
 
     let g:vimside.project.info['name'] = l:name
+if 0
+" this includes both sourceRoots and referenceSourceRoots
+    let l:source_roots = dic[':source-roots']
     let g:vimside.project.info['source_roots'] = l:source_roots
+endif
 
     return 1
   endfunction

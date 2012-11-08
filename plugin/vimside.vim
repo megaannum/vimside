@@ -16,9 +16,10 @@ if filereadable(s:plugin_user_path)
   source s:plugin_user_path
 else
   " Start Vimside 
-  nmap <silent> <Leader>vs :call vimside#StartEnsime()<CR>
+  " M-x ensime
+  nmap <silent> <Leader>vs :call vimside#command#StartEnsime()<CR>
   " Stop Vimside 
-  nmap <silent> <Leader>vS :call vimside#StopEnsime()<CR>
+  nmap <silent> <Leader>vS :call vimside#command#StopEnsime()<CR>
 
   " TAB
   "   Start completing a method/variable.
@@ -37,11 +38,11 @@ else
 
   " M-. (dot) or Control+Left-Click 
   "   Jump to definition of symbol under cursor.
-  nmap <silent> <Leader>v. :call vimside#swank#rpc#symbol_at_point#Run()<CR>
+  nmap <silent> <Leader>v. :call vimside#command#SymbolAtPoint()<CR>
 
   " M-, (comma)
   "   Pop back to previously visited position.
-  nmap <silent> <Leader>v, :call vimside#PreviousPosition()<CR>
+  nmap <silent> <Leader>v, :call vimside#command#PreviousPosition()<CR>
 
   " C-c C-v .
   "   Select the surrounding syntactic context. Subsequent taps of '.' 
@@ -55,6 +56,7 @@ else
 
   " Mouse Hover
   "   Echo the type of the expression under the cursor.
+  nmap <silent> <Leader>vh :call vimside#command#HoverToSymbol()<CR>
 
   " C-c C-v p
   "   Inspect the package of the current source file.
@@ -64,7 +66,7 @@ else
 
   " C-c C-v r
   "   List all references to the symbol under the cursor.
-  nmap <silent> <Leader>vr :call vimside#swank#rpc#uses_of_symbol_at_point#Run()<CR>
+  nmap <silent> <Leader>vr :call vimside#command#UsesOfSymbolAtPoint()<CR>
 
   " .
   "   Forward one page in the inspector history.
@@ -83,22 +85,22 @@ else
 
   " C-c C-v z
   "   Switch to the scala interpreter, with project classes in the classpath.
-  nmap <silent> <Leader>vz :call vimside#swank#rpc#repl_config#Run()<CR>
+  nmap <silent> <Leader>vz :call vimside#command#Repl()<CR>
 
   " C-c C-v c
   "   Typecheck the current file.
-  nmap <silent> <Leader>vc :call vimside#swank#rpc#typecheck_file#Run()<CR>
+  nmap <silent> <Leader>vc :call vimside#command#TypecheckFile()<CR>
 
   " C-c C-v a
   "   Typecheck all files in the project.
-  nmap <silent> <Leader>va :call vimside#swank#rpc#typecheck_all#Run()<CR>
+  nmap <silent> <Leader>va :call vimside#command#TypecheckAll()<CR>
 
   " C-c C-v e
   "   Show all errors and warnings in the project.
 
   " C-c C-v f
   "   Format the current Scala source file.
-  nmap <silent> <Leader>vf :call vimside#swank#rpc#format_source#Run()<CR>
+  nmap <silent> <Leader>vf :call vimside#command#FormatSource()<CR>
 
   " C-c C-v u
   "   Undo a refactoring or formatting change.
@@ -143,11 +145,11 @@ else
 
 
 
-  nmap <silent> <Leader>vp :call vimside#forms#menu#MakePopUp('n')<CR>
-  vmap <silent> <Leader>vp :call vimside#forms#menu#MakePopUp('v')<CR>
+  nmap <silent> <Leader>vp :call vimside#command#MapPopUp('n')<CR>
+  vmap <silent> <Leader>vp :call vimside#command#MapPopUp('v')<CR>
 
-
-  nmap <silent> <Leader>vh :call vimside#hover#ToSymbol()<CR>
+  nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
+  nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
 
   augroup VIMSIDE
     au!
