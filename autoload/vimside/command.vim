@@ -11,6 +11,8 @@
 " 
 " ============================================================================
 
+let s:LOG = function("vimside#log#log")
+let s:ERROR = function("vimside#log#error")
 
 function! vimside#command#StartEnsime()
   call vimside#StartEnsime()
@@ -57,11 +59,31 @@ function! vimside#command#MapPopUp(mode)
 endfunction
 
 function! vimside#command#BrowseSourceRoots()
-  call vimside#plugin#sourcebrowser#Run(g:vimside.project.info['source_roots'])
+  let [found, forms_use] = g:vimside.GetOption('vimside-forms-use')
+  let sources = g:vimside.project.info['source_roots']
+  if found
+    if forms_use
+      call vimside#forms#sourcebrowser#Run(sources)
+    else
+      call vimside#plugin#sourcebrowser#Run(sources)
+    endif
+  else
+    call s:ERROR("Vimside: Option not found: "'vimside-forms-use'")
+  endif
 endfunction
 
 function! vimside#command#BrowseReferenceSourceRoots()
-  call vimside#plugin#sourcebrowser#Run(g:vimside.project.info['reference_source_roots'])
+  let [found, forms_use] = g:vimside.GetOption('vimside-forms-use')
+  let sources = g:vimside.project.info['reference_source_roots']
+  if found
+    if forms_use
+      call vimside#forms#sourcebrowser#Run(sources)
+    else
+      call vimside#plugin#sourcebrowser#Run(sources)
+    endif
+  else
+    call s:ERROR("Vimside: Option not found: "'vimside-forms-use'")
+  endif
 endfunction
 
 

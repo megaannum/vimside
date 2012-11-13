@@ -122,4 +122,10 @@ function! vimside#options#default#Load(option)
   call a:option.Set("vimside-hover-term-balloon-bg", "white")
   call a:option.Set("vimside-hover-term-job-time", 300)
 
+  " Forms
+  " do not used Forms by default
+  call a:option.Set("vimside-forms-use", 0)
+
+  call a:option.Set("vimside-forms-sourcebrowser-open-in-tab", 1)
+
 endfunction

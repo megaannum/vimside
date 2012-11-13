@@ -24,7 +24,7 @@
 "
 "============================================================================
 " Info:
-"==================================================
+"============================================================================
 
 if 0
 let s:CWD = getcwd()
@@ -622,11 +622,7 @@ function! g:platform.globpath_file(path)
     let tmp = globpath(a:path, "*") . "\n" . globpath(a:path, ".[^.]*") "need to cut . and ..
     " can not show files start with .. such as ..foo , :(
     " I do not know how to write the shell regexp.
-    if tmp == "\n"
-      return ''
-    else
-      return tmp
-    endif
+    return (tmp == "\n") ? '' : tmp
   else
     return globpath(a:path, "*")
   endif
@@ -933,12 +929,7 @@ call s:LOG("Node_update_node: create node i=". i)
     endfor
 
     "find out which child has their own childs
-    if !empty(self.childs)
-      let self.hasOwnChilds = 1
-    else
-      let self.hasOwnChilds = 0
-      return
-    endif
+    let self.hasOwnChilds = !empty(self.childs)
 
     if g:conf.show_folder_status == 0
       for i in keys(self.childs)
@@ -995,53 +986,6 @@ call s:LOG("Node_toggle: paths equal")
     endif
   endif
 
-if 0
-      let childs = self.childs
-      let len = len(self.path)
-call s:LOG("Node_toggle: len=". len)
-      let name = strpart(a:path, len)
-call s:LOG("Node_toggle: name=". name)
-
-      let index = stridx(name, '/')
-      if len(name) > index
-        let name = strpart(name, 0, index+1)
-      endif
-call s:LOG("Node_toggle: name=". name)
-
-      let child = {}
-      if has_key(childs, name)
-        let child = childs[name]
-      endif
-call s:LOG("Node_toggle: child=". string(child))
-      let self.isopen = 1
-      call child.toggle(a:path)
-endif
-
-if 0
-    if s:is_windoz_like
-        let childPath = substitute(a:path, '^.\{-}\\', '', 'g')
-    else
-        let childPath = substitute(a:path, '^.\{-}\/', '', 'g')
-    endif
-    if childPath == ''
-        let self.isopen = !self.isopen
-        if self.isopen == 1
-            call self.updateNode()
-        endif
-    else
-        if s:is_windoz_like
-            let nodeName = matchstr(childPath, '^.\{-}\\')
-        else
-            let nodeName = matchstr(childPath, '^.\{-}\/')
-        endif
-        if !has_key(self.childs, nodeName)
-            echoerr "path error"
-        endif
-        let self.isopen = 1
-        call self.childs[nodeName].toggle(childPath)
-    endif
-endif
-
 call s:LOG("Node_toggle: BOTTOM")
 endfunction
 let s:Node.toggle = function("s:Node_toggle")
@@ -1052,13 +996,6 @@ let s:Node.toggle = function("s:Node_toggle")
 function! s:Node_open_path(path) dict
 call s:LOG("Node_open_path: TOP path=". a:path)
 call s:LOG("Node_open_path: self=". string(self))
-if 0
-  if s:is_windoz_like
-      let childPath = substitute(a:path, '^.\{-}\\', '', 'g')
-  else
-      let childPath = substitute(a:path, '^.\{-}\/', '', 'g')
-  endif
-endif
 
   if self.path == a:path
     call self.updateNode()
@@ -1070,55 +1007,6 @@ endif
       call s:ERROR("Node_open_path: child not found: ". a:path ." for node: ".  string(self))
     endif
   endif
-
-if 0
-    let childs = self.childs
-    let len = len(self.path)
-call s:LOG("Node_open_path: len=". len)
-    let name = strpart(a:path, len)
-call s:LOG("Node_open_path: name=". name)
-
-    let index = stridx(name, '/')
-    if len(name) > index
-      let name = strpart(name, 0, index+1)
-    endif
-call s:LOG("Node_open_path: name=". name)
-
-    let child = {}
-    if has_key(childs, name)
-      let child = childs[name]
-    endif
-call s:LOG("Node_open_path: child=". string(child))
-
-    call child.openPath(a:path)
-endif
-
-if 0
-let childPath = ''
-call s:LOG("Node_open_path: childPath=". childPath)
-    if childPath == ''
-      if empty(self.childs)
-        call self.updateNode()
-      endif
-    else
-      if s:is_windoz_like
-        let nodeName = matchstr(childPath, '^.\{-}\\')
-      else
-        let nodeName = matchstr(childPath, '^.\{-}\/')
-      endif
-call s:LOG("Node_open_path: nodeName=". nodeName)
-      if !has_key(self.childs, nodeName)
-        call self.updateNode()
-      endif
-      if !has_key(self.childs, nodeName) "refreshed and still can not find the path.
-        echoerr "Path error!"
-        return
-      else
-        let self.isopen = 1
-        call self.childs[nodeName].openPath(childPath)
-      endif
-    endif
-endif
 
 call s:LOG("Node_open_path: BOTTOM")
 endfunction
@@ -1238,15 +1126,6 @@ let s:Tree.togglePath = function("s:Tree_toggle_path")
 
 function! s:Tree_open_path(path) dict
 call s:LOG("Tree_open_path: TOP path=". a:path)
-
-if 0
-    if s:is_windoz_like
-        let rootNodeName = matchstr(a:path, '^.\{-}\\')
-    else
-        let rootNodeName = matchstr(a:path, '^.\{-}\/')
-    endif
-endif
-
 call s:LOG("Tree_open_path: rootNodes=". string(self.rootNodes))
   let [found, rootnode] = self.getRootNode(a:path)
   if found
@@ -1467,16 +1346,11 @@ let s:TreePanel.nodeClicked = function("s:TreePanel_node_clicked")
 
 function! s:TreePanel_path_changed(path) dict
   let tview = self
-  if tview.path == a:path
-    return
+  if tview.path != a:path
+    let tview.path = a:path
+    call tview.tree.openPath(tview.path)
+    call tview.drawTree()
   endif
-if 0
-    call g:platform.cdToPath(a:path)
-    let tview.path = g:platform.getcwd()
-endif
-  let tview.path = a:path
-  call tview.tree.openPath(tview.path)
-  call tview.drawTree()
 endfunction
 let s:TreePanel.pathChanged = function("s:TreePanel_path_changed")
 
@@ -2588,11 +2462,9 @@ endfunction
 function! VENew(path, sourceRoots)
 call s:LOG("VENew: path '". a:path ."', sourceRoots= ". string(a:sourceRoots))
 "    call s:VECreatePopMenu()
-  " let ftag = '_' . substitute(reltimestr(reltime()), '\.', '', 'g')
   let ftag = '_' . s:frame_tag
   let s:frame_tag += 1
 
-  " let l:sourceRoots = (a:sourceRoots == []) ? a:sourceRoots : a:sourceRoots
   let l:sourceRoots = []
   for i in a:sourceRoots
     if isdirectory(i)

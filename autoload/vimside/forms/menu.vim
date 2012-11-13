@@ -559,6 +559,18 @@ function! vimside#forms#menu#MakePopUp(mode)
                  \ 'type': 'separator'
                  \ })
 
+  call add(items, {
+            \ 'type': 'button',
+            \ 'label': '&Browse Source Roots',
+            \ 'command': ':call vimside#command#BrowseSourceRoots()'
+            \ })
+
+  call add(items, {
+            \ 'type': 'button',
+            \ 'label': '&Browse Reference Source Roots',
+            \ 'command': ':call vimside#command#BrowseReferenceSourceRoots()'
+            \ })
+
 " ["Go to SBT console" ensime-sbt-switch]
   let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
   let action.msg = 'Go to SBT console'

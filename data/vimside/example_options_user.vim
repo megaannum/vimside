@@ -27,6 +27,10 @@ function! g:VimsideOptionsUserLoad(option)
    " The Ensime Config  information is in a file called 'ensime_config.vim'
    " call a:option.Set("ensime-config-file-name", "ensime_config.vim")
    
+   
+   " Vimside uses Forms library 
+   " call a:option.Set("vimside-forms-use", 1)
+   
 
    " call a:option.Set("swank-rpc-symbol-at-point-location-same-file", "same_window.vim")
    " call a:option.Set("swank-rpc-symbol-at-point-location-same-file", "split_window.vim")

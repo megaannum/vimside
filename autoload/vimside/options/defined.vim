@@ -928,6 +928,25 @@ function! s:MakeOptions()
             \ "Job time in milliseconds for Hover Term execution."
         \ ]
       \ }
+
+  " Forms
+  let s:options['vimside-forms-use'] = {
+        \ 'name': 'vimside-forms-use',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'description': [
+            \ "When there are multiple implementations, use the Forms-based",
+            \ "one if available otherwise use the Vim-based implementation."
+        \ ]
+      \ }
+
+  let s:options['vimside-forms-sourcebrowser-open-in-tab'] = {
+        \ 'name': 'vimside-forms-sourcebrowser-open-in-tab',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'description': [
+            \ "Open the Forms sourcebrowser in its own tab."
+        \ ]
+      \ }
+
 endfunction
 
 function! vimside#options#defined#Load(options)
