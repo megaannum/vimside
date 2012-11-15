@@ -38,15 +38,28 @@ else
 
   " M-. (dot) or Control+Left-Click 
   "   Jump to definition of symbol under cursor.
-  nmap <silent> <Leader>v. :call vimside#command#SymbolAtPoint()<CR>
+  if has("gui_running")
+    nmap <silent> <m-.> :call vimside#command#SymbolAtPoint()<CR>
+  else
+    nmap <silent> <Leader>vm. :call vimside#command#SymbolAtPoint()<CR>
+  endif
 
   " M-, (comma)
   "   Pop back to previously visited position.
-  nmap <silent> <Leader>v, :call vimside#command#PreviousPosition()<CR>
+  if has("gui_running")
+    nmap <silent> <m-,> :call vimside#command#PreviousPosition()<CR>
+  else
+    nmap <silent> <Leader>vm, :call vimside#command#PreviousPosition()<CR>
+  endif
 
   " C-c C-v .
   "   Select the surrounding syntactic context. Subsequent taps of '.' 
   "   and ',' will grow and shrink the selection, respectively.
+  nmap <silent> <Leader>v. :call vimside#command#ExpandSelection('n')<CR>
+  vmap <silent> <Leader>v. :call vimside#command#ExpandSelection('v')<CR>
+  nmap <silent> <Leader>v, :call vimside#command#ContractSelection('n')<CR>
+  vmap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
+  " vnoremap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
 
   " C-c C-v v
   "   Search globally for methods or types.

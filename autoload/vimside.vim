@@ -398,7 +398,7 @@ endfunction
 
 function!  vimside#PreviousPosition()
   let positions = g:vimside.project.positions
-call s:LOG("vimside#PreviousPosition positions=". string(positions)) 
+" call s:LOG("vimside#PreviousPosition positions=". string(positions)) 
   let len = len(positions)
   if len > 0
     let [bufnum, pos] = positions
@@ -428,11 +428,11 @@ let g:completions_base = ''
 let g:completions_results = []
 
 function!  vimside#Completions(findstart, base)
-call s:LOG("vimside#Completions findstart=". a:findstart .", base=". a:base) 
+" call s:LOG("vimside#Completions findstart=". a:findstart .", base=". a:base) 
   if ! g:vimside.started
     return
   endif
-call s:LOG("vimside#Completions completions_phase=". s:completions_phase) 
+" call s:LOG("vimside#Completions completions_phase=". s:completions_phase) 
 
   if s:completions_phase == 0
     " Get Completions
@@ -443,9 +443,9 @@ call s:LOG("vimside#Completions completions_phase=". s:completions_phase)
       let pos = col('.') -1
       let bc = strpart(line,0,pos)
       let match_text = matchstr(bc, '\zs[^ \t#().[\]{}\''\";: ]*$')
-call s:LOG("vimside#Completions match_text=". match_text) 
+" call s:LOG("vimside#Completions match_text=". match_text) 
       let s:completions_start = len(bc)-len(match_text)
-call s:LOG("vimside#Completions completions_start=". s:completions_start) 
+" call s:LOG("vimside#Completions completions_start=". s:completions_start) 
       call vimside#StartAutoCmdCompletions()
       return s:completions_start 
     elseif ! g:completions_in_process
@@ -459,7 +459,7 @@ call s:LOG("vimside#Completions completions_start=". s:completions_start)
       else
         let s:completions_phase = 0
       endif
-call s:LOG("vimside#Completions return []")
+" call s:LOG("vimside#Completions return []")
       return []
     endif
   elseif ! g:completions_in_process
@@ -471,12 +471,12 @@ call s:LOG("vimside#Completions return []")
   else
     " Display Completions
     if a:findstart 
-call s:LOG("vimside#Completions completions_start=". s:completions_start) 
+" call s:LOG("vimside#Completions completions_start=". s:completions_start) 
       return s:completions_start
     else
       let s:completions_phase = 0
       let g:completions_base = ''
-call s:LOG("vimside#Completions g:completions_results=". string(g:completions_results))
+" call s:LOG("vimside#Completions g:completions_results=". string(g:completions_results))
       let g:completions_in_process = 0
       call vimside#StopAutoCmdCompletions()
       return g:completions_results
@@ -486,7 +486,7 @@ call s:LOG("vimside#Completions g:completions_results=". string(g:completions_re
 endfunction
 
 function!  vimside#AbortCompletions()
-call s:LOG("vimside#AbortCompletions") 
+" call s:LOG("vimside#AbortCompletions") 
   if pumvisible() == 0
     let s:completions_phase = 0
     let g:completions_in_process = 0
@@ -504,4 +504,84 @@ function!  vimside#StopAutoCmdCompletions()
   augroup VIMSIDE_COMPLETIONS
     au!
   augroup END
+endfunction
+
+" ============================================================================
+" Selection Code
+" ============================================================================
+
+" list of [file, start, end]
+let s:selections = []
+let s:selection_index = -1
+
+function!  vimside#ClearSelection()
+" call s:LOG("vimside#ClearSelection") 
+  let s:selection_index = -1
+  let s:selections = []
+endfunction
+
+function!  vimside#AddSelection(file, start, end)
+" call s:LOG("vimside#AddSelection") 
+  call add(s:selections, [a:file, a:start, a:end])
+  let s:selection_index = len(s:selections) - 1
+  call vimside#DisplaySelection(a:file, a:start, a:end)
+endfunction
+
+function!  vimside#ExpandSelection()
+" call s:LOG("vimside#ExpandSelection") 
+  if s:selection_index == -1
+    call vimside#ClearSelection()
+    return 0
+  elseif len(s:selections) == 0
+    call vimside#ClearSelection()
+    return 0
+  else
+    let [file, start, end] = s:selections[0]
+    let current_file = expand('%:p')
+    if file != current_file
+      call vimside#ClearSelection()
+      return 0
+    elseif s:selection_index + 1 < len(s:selections) 
+      let s:selection_index += 1
+      let [file, start, end] = s:selections[s:selection_index]
+      if file != current_file
+        call vimside#ClearSelection()
+        return 0
+      else
+        call vimside#DisplaySelection(file, start, end)
+        return 1
+      endif
+    else
+      return 0
+    endif
+  endif
+endfunction
+
+function!  vimside#ContractSelection()
+" call s:LOG("vimside#ContractSelection") 
+" call s:LOG("vimside#ContractSelection: s:selection_index=". s:selection_index) 
+  if s:selection_index > 0
+    let s:selection_index -= 1
+" call s:LOG("vimside#ContractSelection: len(s:selections)=". len(s:selections)) 
+    if len(s:selections) > s:selection_index
+      let [file, start, end] = s:selections[s:selection_index]
+" call s:LOG("vimside#ContractSelection: file=". file) 
+      let current_file = expand('%:p')
+" call s:LOG("vimside#ContractSelection: current_file=". current_file) 
+      if file == current_file
+        let m = mode()
+        if m == 'v' || m == 'V' || m == "\<C-v>"
+          execute "normal v"
+        endif
+        call vimside#DisplaySelection(file, start, end)
+      endif
+    endif
+  endif
+endfunction
+
+function!  vimside#DisplaySelection(file, start, end)
+" call s:LOG("vimside#DisplaySelection: start=". a:start .", end=". a:end) 
+  execute "goto ". (a:start+1)
+  execute "normal v"
+  execute "goto ". a:end
 endfunction

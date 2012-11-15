@@ -64,6 +64,8 @@ function! vimside#options#default#Load(owner)
   call owner.Set("swank-rpc-completions-handler", 'g:CompletionsHandler')
   call owner.Set("swank-rpc-connection-info-caller", 'g:ConnectionInfoCaller')
   call owner.Set("swank-rpc-connection-info-handler", 'g:ConnectionInfoHandler')
+  call owner.Set("swank-rpc-expand-selection-caller", 'g:ExpandSelectionCaller')
+  call owner.Set("swank-rpc-expand-selection-handler", 'g:ExpandSelectionHandler')
 
   call owner.Set("swank-rpc-format-source-caller", 'g:FormatSourceCaller')
   call owner.Set("swank-rpc-format-source-handler", 'g:FormatSourceHandler')

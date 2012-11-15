@@ -33,7 +33,7 @@ endfunction
 "    op_name  : String option name
 " ------------------------------------------------------------ 
 function! vimside#swank#rpc#util#GetOption(op_name)
-call s:LOG("vimside#swank#rpc#util#GetOption TOP") 
+" call s:LOG("vimside#swank#rpc#util#GetOption TOP") 
 
   let [found, handler_name] = g:vimside.GetOption(a:op_name)
   if ! found
@@ -73,7 +73,7 @@ endfunction
 "                   Strings or Funcrefs.
 " ------------------------------------------------------------ 
 function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, replace_args)
-call s:LOG("vimside#swank#rpc#util#MakeRPCEnds TOP") 
+" call s:LOG("vimside#swank#rpc#util#MakeRPCEnds TOP") 
   let l:StdCaller = a:StdCaller
   let l:args = a:args
   let l:StdHandler = a:StdHandler
@@ -169,7 +169,7 @@ call s:LOG("vimside#swank#rpc#util#MakeRPCEnds TOP")
     let l:rr['args'] = l:args
   endif
 
-call s:LOG("vimside#swank#rpc#util#MakeRPCEnds l:rr=". string(l:rr)) 
+" call s:LOG("vimside#swank#rpc#util#MakeRPCEnds l:rr=". string(l:rr)) 
   return l:rr
 endfunction
 

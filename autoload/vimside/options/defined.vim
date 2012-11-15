@@ -652,6 +652,25 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+  let l:options['swank-rpc-expand-selection-caller'] = {
+        \ 'name': 'swank-rpc-expand-selection-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC caller for 'swank:expand-selection'."
+          \ ]
+      \ }
+  let l:options['swank-rpc-expand-selection-handler'] = {
+        \ 'name': 'swank-rpc-expand-selection-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC handler for 'swank:expand-selection'."
+          \ ]
+      \ }
+
   let l:options['swank-rpc-format-source-caller'] = {
         \ 'name': 'swank-rpc-format-source-caller',
         \ 'type': g:OPTION_STRING_TYPE, 

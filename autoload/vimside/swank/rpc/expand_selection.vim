@@ -44,13 +44,21 @@ call s:LOG("expand_selection TOP")
     let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-expand-selection-caller')
   endif
 
-  let l:args = { }
-  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+    " TODO better error message display and logging
+    echoerr fn
+    return
+  endif
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-expand-selection-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  let offset = vimside#util#GetCurrentOffset()
+
+  let l:args = { }
+  let l:args['filename'] = fn
+  let l:args['start'] = offset
+  let l:args['end'] = offset
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("expand_selection BOTTOM") 
 endfunction
@@ -62,8 +70,11 @@ endfunction
 
 function! g:ExpandSelectionCaller(args)
   let cmd = "swank:expand-selection"
+  let fn = a:args.filename
+  let start_range = a:args.start
+  let end_range = a:args.end
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. fn .'" '. start_range .' '. end_range .')'
 endfunction
 
 
@@ -85,11 +96,14 @@ call s:LOG("ExpandSelectionHandler_Ok ".  vimside#sexp#ToString(a:ExpandSelectio
       call s:ERROR("ExpandSelection ok: Badly formed Response: ". string(a:ExpandSelection)) 
       return 0
     endif
-call s:LOG("ExpandSelectionHandler_Ok dic=".  string(dic)) 
+"call s:LOG("ExpandSelectionHandler_Ok dic=".  string(dic)) 
 
-    let l:pid = dic[':pid']
+    let current_file = expand('%:p')
+    let file = dic[':file']
+    let start = dic[':start']
+    let end = dic[':end']
 
-
+    call vimside#AddSelection(file, start, end)
 
     return 1
 

@@ -30,6 +30,39 @@ function! vimside#command#PreviousPosition()
   call vimside#PreviousPosition()
 endfunction
 
+function! vimside#command#ExpandSelection(mode) range
+  if a:mode == 'n'
+    call vimside#ClearSelection()
+    call vimside#swank#rpc#expand_selection#Run()
+  elseif a:mode == 'v'
+    if ! vimside#ExpandSelection()
+      let l:firstline = a:firstline
+      let l:firstcol = col("'<")
+      let l:lastline = a:lastline
+      let l:lastcol = col("'>")
+
+      let start = line2byte(l:firstline)+l:firstcol-1
+      if start > 1
+        let start -= 1
+      endif
+      let end = line2byte(l:lastline)+l:lastcol-1
+      let dic = {
+                \ 'args': {
+                \   'start': start,
+                \   'end': end
+                \ }
+                \ }
+      call vimside#swank#rpc#expand_selection#Run(dic)
+    endif
+  else
+    throw "vimside#command#ExpandSelection: bad mode: ". string(a:mode)
+  endif
+endfunction
+
+function! vimside#command#ContractSelection(mode) range
+  call vimside#ContractSelection()
+endfunction
+
 function! vimside#command#HoverToSymbol()
   call vimside#hover#ToSymbol()
 endfunction
