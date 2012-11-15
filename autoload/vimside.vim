@@ -100,8 +100,8 @@ let g:vimside.IndexerReady = function('g:IndexerReady')
 
 function! vimside#StartEnsime()
   if ! g:vimside.started 
-    " let msg = "Starting Ensime Engine ..."
-    " call vimside#cmdline#Display(msg)
+    let msg = "Starting Ensime Engine ..."
+    call vimside#cmdline#Display(msg)
 
 
     " Ok, are all of the plugins we need avaiable

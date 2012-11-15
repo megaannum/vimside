@@ -86,5 +86,8 @@ function! vimside#command#BrowseReferenceSourceRoots()
   endif
 endfunction
 
+function! vimside#command#OptionEditor()
+  call vimside#forms#optioneditor#Run()
+endfunction
 
 

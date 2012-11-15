@@ -570,6 +570,11 @@ function! vimside#forms#menu#MakePopUp(mode)
             \ 'label': '&Browse Reference Source Roots',
             \ 'command': ':call vimside#command#BrowseReferenceSourceRoots()'
             \ })
+  call add(items, {
+            \ 'type': 'button',
+            \ 'label': '&Options',
+            \ 'command': ':call vimside#command#OptionEditor()'
+            \ })
 
 " ["Go to SBT console" ensime-sbt-switch]
   let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})

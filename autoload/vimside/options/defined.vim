@@ -1,25 +1,87 @@
 
 " types
-let g:OPTION_BOOLEAN_TYPE = type(0)
-let g:OPTION_NUMBER_TYPE = type(0)
-let g:OPTION_STRING_TYPE = type('')
-let g:OPTION_FLOAT_TYPE = type(1.0)
-let g:OPTION_LIST_TYPE = type([])
+let g:OPTION_BOOLEAN_TYPE    = type(0)
+let g:OPTION_NUMBER_TYPE     = type(0)
+let g:OPTION_STRING_TYPE     = type('')
+let g:OPTION_FLOAT_TYPE      = type(1.0)
+let g:OPTION_LIST_TYPE       = type([])
 let g:OPTION_DICTIONARY_TYPE = type({})
 
+function! vimside#options#defined#GetTypeName(type)
+  if a:type == g:OPTION_BOOLEAN_TYPE
+    return 'Boolean'
+  elseif a:type == g:OPTION_NUMBER_TYPE
+    return 'Number'
+  elseif a:type == g:OPTION_STRING_TYPE
+    return 'String'
+  elseif a:type == g:OPTION_FLOAT_TYPE
+    return 'Float'
+  elseif a:type == g:OPTION_LIST_TYPE
+    return 'List'
+  elseif a:type == g:OPTION_DICTIONARY_TYPE
+    return 'Dictionary'
+  else
+    return 'Unknown Type'
+  endif
+endfunction
+
 " kinds
-let g:OPTION_UNKNOWN_KIND = 0
-let g:OPTION_FILE_NAME_KIND = 1
-let g:OPTION_FILE_PATH_KIND = 2
-let g:OPTION_DIR_PATH_KIND = 3
-let g:OPTION_DIR_NAME_KIND = 4
-let g:OPTION_HOST_NAME_KIND = 5
+let g:OPTION_UNKNOWN_KIND         = 0
+let g:OPTION_FILE_NAME_KIND       = 1
+let g:OPTION_FILE_PATH_KIND       = 2
+let g:OPTION_DIR_PATH_KIND        = 3
+let g:OPTION_DIR_NAME_KIND        = 4
+let g:OPTION_HOST_NAME_KIND       = 5
 let g:OPTION_POSITIVE_NUMBER_KIND = 6
-let g:OPTION_ENUM_KIND = 7
-let g:OPTION_FUNCTION_KIND = 8
-let g:OPTION_TIME_KIND = 9
-let g:OPTION_CHAR_COUNT_KIND = 10
-let g:OPTION_COLOR_KIND = 11
+let g:OPTION_ENUM_KIND            = 7
+let g:OPTION_FUNCTION_KIND        = 8
+let g:OPTION_TIME_KIND            = 9
+let g:OPTION_CHAR_COUNT_KIND      = 10
+let g:OPTION_COLOR_KIND           = 11
+
+function! vimside#options#defined#GetKindName(kind)
+  if a:kind == g:OPTION_UNKNOWN_KIND
+    return 'Unknown Kind'
+  elseif a:kind == g:OPTION_FILE_NAME_KIND
+    return 'File Name'
+  elseif a:kind == g:OPTION_FILE_PATH_KIND
+    return 'File Path'
+  elseif a:kind == g:OPTION_DIR_PATH_KIND
+    return 'Directory Path'
+  elseif a:kind == g:OPTION_DIR_NAME_KIND
+    return 'Directory Name'
+  elseif a:kind == g:OPTION_HOST_NAME_KIND
+    return 'Host Name'
+  elseif a:kind == g:OPTION_POSITIVE_NUMBER_KIND
+    return 'Positive Number'
+  elseif a:kind == g:OPTION_ENUM_KIND
+    return 'Enum'
+  elseif a:kind == g:OPTION_FUNCTION_KIND
+    return 'Function'
+  elseif a:kind == g:OPTION_TIME_KIND
+    return 'Time'
+  elseif a:kind == g:OPTION_CHAR_COUNT_KIND
+    return 'Character Count'
+  elseif a:kind == g:OPTION_COLOR_KIND
+    return 'Color'
+  else
+    return 'Unknown Kind'
+  endif
+endfunction
+
+" scope
+let g:OPTION_STATIC_SCOPE  = 0 " default
+let g:OPTION_DYNAMIC_SCOPE = 1
+
+function! vimside#options#defined#GetScopeName(scope)
+  if a:scope == g:OPTION_STATIC_SCOPE
+    return 'Static'
+  elseif a:scope == g:OPTION_DYNAMIC_SCOPE
+    return 'Dynamic'
+  else
+    return 'Unknown Scope'
+  endif
+endfunction
 
 
 "
@@ -29,6 +91,8 @@ let g:OPTION_COLOR_KIND = 11
 " 'kind'        optional  
 "                  Used to determine what additional validation checks
 "                  might be used.
+" 'scope'       mandatory 
+" 'parent'      optional 
 " 'description' mandatory
 "                  Used by the Option Form to help user understand the 
 "                  purpose of the option.
@@ -215,78 +279,88 @@ function! s:CheckColorKind(def, value, errors)
 endfunction
 
 function! s:MakeOptions()
-  let s:options = {}
+  let l:options = {}
 
-  let s:options['vimside-log-enabled'] = {
-          \ 'name': 'vimside-log-enabled', 
-          \ 'type': g:OPTION_BOOLEAN_TYPE, 
-          \ 'description': [
+  let l:options['vimside-log-enabled'] = {
+        \ 'name': 'vimside-log-enabled', 
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ 'Used to enable/disable Vimside logging.'
-          \ ]
+        \ ]
       \ }
-  let s:options['vimside-log-file-path'] = {
+  let l:options['vimside-log-file-path'] = {
         \ 'name': 'vimside-log-file-path',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Full path name of Vimside Log File.',
             \ 'Both the parent Directory and File must be writeable.',
-            \ 'If not set, then either the Ensime Config File Directory is used or.',
-            \ 'or the Current Working Directory (CWD). The CWD is used if.',
-            \ '"use_cwd_as_default_output_dir" to true (1).'
+            \ 'If not set, then either the Ensime Config File Directory is.',
+            \ 'is used or the Current Working Directory (CWD). The CWD is',
+            \ 'used if "use_cwd_as_default_output_dir" to true (1).'
           \ ]
       \ }
-  let s:options['vimside-log-file-name'] = {
+  let l:options['vimside-log-file-name'] = {
         \ 'name': 'vimside-log-file-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'File name of Vimside Log File.',
-            \ 'If "vimside_log_file_path" is set, then this option is ignored.'
+            \ 'If "vimside_log_file_path" is set, then this option',
+            \ 'is ignored.'
           \ ]
       \ }
-  let s:options['test-ensime-file-use'] = {
+  let l:options['test-ensime-file-use'] = {
         \ 'name': 'test-ensime-file-use',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'If true, then the test Ensime Config File located, generally, in',
-            \ 'the "data/vimside" Directory is used to initialize Ensime.'
+            \ 'If true, then the test Ensime Config File located, generally',
+            \ 'in the "data/vimside" Directory is used to initialize Ensime.'
           \ ]
       \ }
-  let s:options['test-ensime-file-dir'] = {
+  let l:options['test-ensime-file-dir'] = {
         \ 'name': 'test-ensime-file-dir',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'The Directory of the test Ensime Config File, generally, in',
           \  'the "data/vimside" Directory.'
           \ ]
       \ }
-  let s:options['use-cwd-as-default-output-dir'] = {
+  let l:options['use-cwd-as-default-output-dir'] = {
         \ 'name': 'use-cwd-as-default-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'If the option "vimside_log_file_path", then if true (1), the',
-            \ 'Current Working Directory is used and if false (0), then',
+            \ 'If the option "vimside_log_file_path", then if true (1),',
+            \ 'the Current Working Directory is used and if false (0), then',
             \ 'the Directory containing the Ensime Config File is used.'
           \ ]
       \ }
-  let s:options['ensime-config-file-name'] = {
+  let l:options['ensime-config-file-name'] = {
         \ 'name': 'ensime-config-file-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'The name of the Ensime Config File.',
             \ 'Generally, the name will be: "\.ensime", "_ensime", or',
-            \ '"ensime_config.vim". The first two names will have SExp definitions',
-            \ 'of the Ensime configuration while the last name will contain,',
-            \ 'a Vim script definition of the Ensime configuration.'
+            \ '"ensime_config.vim". The first two names will have SExp ',
+            \ 'definitions of the Ensime configuration while the last',
+            \ 'name will contain a Vim script definition of the Ensime',
+            \ 'configuration.'
           \ ]
       \ }
-  let s:options['ensime-install-path'] = {
+  let l:options['ensime-install-path'] = {
         \ 'name': 'ensime-install-path',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Directory where Ensime is installed.',
             \ 'Vimside provides default values, assuming VAM is used, of: ',
@@ -296,660 +370,742 @@ function! s:MakeOptions()
             \ 'depending upon OS.'
           \ ]
       \ }
-  let s:options['ensime-dist-dir'] = {
+  let l:options['ensime-dist-dir'] = {
         \ 'name': 'ensime-dist-dir',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'Name of SubDirectory of the Option "ensime_path" Directory value.',
-            \ 'This Directory name will generally indicate which Scale version',
-            \ 'Ensime was built with and possible the Ensime version.',
-            \ 'For example, ',
-            \ '"dist_2.9.2" or "ensime_2.9.2-0.9.8.1" or',
-            \ '"ensime_2.10.0-SNAPSHOT-0.9.7"'
+            \ 'Name of SubDirectory of the Option "ensime_path" Directory',
+            \ 'values, This Directory name will generally indicate which',
+            \ 'Scala version Ensime was built with and possible the Ensime.',
+            \ 'version. For example, ',
+            \ '  "dist_2.9.2" or "ensime_2.9.2-0.9.8.1" or',
+            \ '  "ensime_2.10.0-SNAPSHOT-0.9.7"'
           \ ]
       \ }
-  let s:options['ensime-dist-path'] = {
+  let l:options['ensime-dist-path'] = {
         \ 'name': 'ensime-dist-path',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'This is the full path to the Ensime distribution.',
-            \ 'This Directory name will generally indicate which Scale version',
-            \ 'If "ensime_path" is not set, then this option is used.'
+            \ 'This Directory name will generally indicate which Scale',
+            \ 'version, If "ensime_path" is not set, then this option',
+            \ 'is used.'
           \ ]
       \ }
-  let s:options['ensime-port-file-path'] = {
+  let l:options['ensime-port-file-path'] = {
         \ 'name': 'ensime-port-file-path',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'This is the full path to File where Ensime will write',
-            \ 'its socket server port number.'
+            \ 'its socket server port number. There is no default value.'
           \ ]
       \ }
-  let s:options['ensime-port-file-name'] = {
+  let l:options['ensime-port-file-name'] = {
         \ 'name': 'ensime-port-file-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'If the option "ensime_port_file_path" is not set, then this is',
-            \ 'the name of the file where Ensime will write its',
+            \ 'If the option "ensime_port_file_path" is not set, then this',
+            \ 'is the name of the file where Ensime will write its',
             \ 'socket server port number.',
             \ 'Either the Current Working Directory or the Ensime Config',
             \ 'Directory will be used as the location of this file.',
             \ 'depending on the setting of "use_cwd_as_default_output_dir".'
           \ ]
       \ }
-  let s:options['ensime-host-name'] = {
+  let l:options['ensime-host-name'] = {
         \ 'name': 'ensime-host-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_HOST_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'The host name of the machine where the Ensime Server is running.',
-            \ 'The default value is "localhost".'
+            \ 'The host name of the machine where the Ensime Server is.',
+            \ 'running. The default value is "localhost".'
           \ ]
       \ }
-  let s:options['ensime-port-file-max-wait'] = {
+  let l:options['ensime-port-file-max-wait'] = {
         \ 'name': 'ensime-port-file-max-wait',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'How long in seconds will Vimside wait for the Ensime Server.',
-            \ 'to write its socket server port number to the port file.'
+            \ 'How long in seconds will Vimside wait for the Ensime',
+            \ 'Server. to write its socket server port number to',
+            \ 'the port file.'
           \ ]
       \ }
-  let s:options['ensime-log-enabled'] = {
+  let l:options['ensime-log-enabled'] = {
         \ 'name': 'ensime-log-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'Will the standard and error output of the Ensime Server process',
-            \ 'be captured in a log file.'
+            \ 'Will the standard and error output of the Ensime Server',
+            \ 'process be captured in a log file.'
           \ ]
       \ }
-  let s:options['ensime-log-file-path'] = {
+  let l:options['ensime-log-file-path'] = {
         \ 'name': 'ensime-log-file-path',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_PATH_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Full path to Ensime Server log file.'
           \ ]
       \ }
-  let s:options['ensime-log-file-name'] = {
+  let l:options['ensime-log-file-name'] = {
         \ 'name': 'ensime-log-file-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'If the option "ensime_log_file_path" is not set, then this is',
-            \ 'the name of the file where Ensime output will be written.',
+            \ 'If the option "ensime_log_file_path" is not set, then this',
+            \ 'is the name of the file where Ensime output will be written.',
             \ 'Either the Current Working Directory or the Ensime Config',
             \ 'Directory will be used as the location of this file.',
             \ 'depending on the setting of "use_cwd_as_default_output_dir".'
           \ ]
       \ }
-  let s:options['swank-information'] = {
+  let l:options['swank-information'] = {
         \ 'name': 'swank-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'If an Ensime RPC call returns values than can be displayed',
-            \ 'as text information and the particular RPC call does not have',
-            \ 'an "information" option set, then the value of this option',
-            \ 'is used to determine what display mechanism to use.'
+            \ 'as text information and the particular RPC call does not',
+            \ 'have an "information" option set, then the value of this',
+            \ 'option is used to determine what display mechanism to use.'
           \ ]
       \ }
-  let s:options['swank-location-same-file'] = {
+  let l:options['swank-location-same-file'] = {
         \ 'name': 'swank-location-same-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ 'If an Ensime RPC call returns values with file/position values',
-            \ 'that would allow the user to go-to the specific location',
-            \ 'in the same (current) file to "see" the requested "information",',
-            \ 'then this is used to determine how the user position in the',
-            \ 'file is specified: same window simply jumping to a new location or',
-            \ 'the window on the file is split showing the new location in the',
-            \ 'new sub-window.'
+            \ 'If an Ensime RPC call returns values with file/position',
+            \ 'values that would allow the user to go-to the specific',
+            \ 'location in the same (current) file to "see" the requested',
+            \ '"information", then this is used to determine how the user',
+            \ 'position in the file is specified: same window simply jumping',
+            \ 'to a new location or the window on the file is split showing',
+            \ 'the new location in the new sub-window.'
           \ ]
       \ }
-  let s:options['swank-location-diff-file'] = {
+  let l:options['swank-location-diff-file'] = {
         \ 'name': 'swank-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'If an Ensime RPC call returns values with file/position values',
             \ 'that would allow the user to go-to the specific location',
             \ 'in a different file to "see" the requested "information",',
             \ 'then this is used to determine how the user sees in the',
-            \ 'different file: same window simply jumping to a new file/position',
-            \ 'or the window is split showing the new file/position in the',
-            \ 'new sub-window, or in a new tab.'
+            \ 'different file: same window simply jumping to a new',
+            \ 'file/position or the window is split showing the new',
+            \ 'file/position in the new sub-window, or in a new tab.'
           \ ]
       \ }
 
   " Swank RPC Event Ping Info
-  let s:options['swank-rpc-expecting-read-timeout'] = {
+  let l:options['swank-rpc-expecting-read-timeout'] = {
         \ 'name': 'swank-rpc-expecting-read-timeout',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Expecting response RPC socket read timeout."
           \ ]
       \ }
-  let s:options['swank-rpc-expecting-updatetime'] = {
+  let l:options['swank-rpc-expecting-updatetime'] = {
         \ 'name': 'swank-rpc-expecting-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Expecting response CurosrHold updatetime before ping."
           \ ]
       \ }
-  let s:options['swank-rpc-expecting-char-count'] = {
+  let l:options['swank-rpc-expecting-char-count'] = {
         \ 'name': 'swank-rpc-expecting-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
-            \ 'description': [
-            \ "Expecting response CursorMoved number of characters before ping."
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting response CursorMoved number of characters before.",
+            \ "ping."
           \ ]
       \ }
-  let s:options['swank-rpc-not-expecting-read-timeout'] = {
+  let l:options['swank-rpc-not-expecting-read-timeout'] = {
         \ 'name': 'swank-rpc-not-expecting-read-timeout',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Not expecting RPC socket read timeout."
           \ ]
       \ }
-  let s:options['swank-rpc-not-expecting-updatetime'] = {
+  let l:options['swank-rpc-not-expecting-updatetime'] = {
         \ 'name': 'swank-rpc-not-expecting-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Not expecting CurosrHold updatetime before ping."
           \ ]
       \ }
-  let s:options['swank-rpc-not-expecting-char-count'] = {
+  let l:options['swank-rpc-not-expecting-char-count'] = {
         \ 'name': 'swank-rpc-not-expecting-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Not expecting CursorMoved number of characters before ping."
           \ ]
       \ }
-  let s:options['swank-event-expecting-one-updatetime'] = {
+  let l:options['swank-event-expecting-one-updatetime'] = {
         \ 'name': 'swank-event-expecting-one-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Expecting one event CurosrHold updatetime before ping."
           \ ]
       \ }
-  let s:options['swank-event-expecting-one-char-count'] = {
+  let l:options['swank-event-expecting-one-char-count'] = {
         \ 'name': 'swank-event-expecting-one-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
-            \ 'description': [
-            \ "Expecting one event CursorMoved number of characters before ping."
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting one event CursorMoved number of characters before.",
+            \ "ping."
           \ ]
       \ }
-  let s:options['swank-event-expecting-many-updatetime'] = {
+  let l:options['swank-event-expecting-many-updatetime'] = {
         \ 'name': 'swank-event-expecting-many-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ "Expecting many events CurosrHold updatetime before ping."
           \ ]
       \ }
-  let s:options['swank-event-expecting-many-char-count'] = {
+  let l:options['swank-event-expecting-many-char-count'] = {
         \ 'name': 'swank-event-expecting-many-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
-            \ 'description': [
-            \ "Expecting many events CursorMoved number of characters before ping."
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting many events CursorMoved number of characters before",
+            \ "ping."
           \ ]
       \ }
   
   " Swank RPC
-  let s:options['swank-rpc-completions-caller'] = {
+  let l:options['swank-rpc-completions-caller'] = {
         \ 'name': 'swank-rpc-completions-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:completions'."
           \ ]
       \ }
-  let s:options['swank-rpc-completions-handler'] = {
+  let l:options['swank-rpc-completions-handler'] = {
         \ 'name': 'swank-rpc-completions-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:completions'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-connection-info-caller'] = {
+  let l:options['swank-rpc-connection-info-caller'] = {
         \ 'name': 'swank-rpc-connection-info-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:connection-info'."
           \ ]
       \ }
-  let s:options['swank-rpc-connection-info-handler'] = {
+  let l:options['swank-rpc-connection-info-handler'] = {
         \ 'name': 'swank-rpc-connection-info-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:connection-info'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-format-source-caller'] = {
+  let l:options['swank-rpc-format-source-caller'] = {
         \ 'name': 'swank-rpc-format-source-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:format-source'."
           \ ]
       \ }
-  let s:options['swank-rpc-format-source-handler'] = {
+  let l:options['swank-rpc-format-source-handler'] = {
         \ 'name': 'swank-rpc-format-source-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:format-source'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-init-project-caller'] = {
+  let l:options['swank-rpc-init-project-caller'] = {
         \ 'name': 'swank-rpc-init-project-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:init-project'."
           \ ]
       \ }
-  let s:options['swank-rpc-init-project-handler'] = {
+  let l:options['swank-rpc-init-project-handler'] = {
         \ 'name': 'swank-rpc-init-project-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:init-project'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-repl-config-caller'] = {
+  let l:options['swank-rpc-repl-config-caller'] = {
         \ 'name': 'swank-rpc-repl-config-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:repl-config'."
           \ ]
       \ }
-  let s:options['swank-rpc-repl-config-handler'] = {
+  let l:options['swank-rpc-repl-config-handler'] = {
         \ 'name': 'swank-rpc-repl-config-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:repl-config'."
           \ ]
       \ }
-  let s:options['swank-rpc-repl-config-location'] = {
+  let l:options['swank-rpc-repl-config-location'] = {
         \ 'name': 'swank-rpc-repl-config-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
         \ 'parent': 'swank-location-diff-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to display Scala Repl.'
           \ ]
       \ }
 
-  let s:options['swank-rpc-shutdown-server-caller'] = {
+  let l:options['swank-rpc-shutdown-server-caller'] = {
         \ 'name': 'swank-rpc-shutdown-server-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:shutdown-server'."
           \ ]
       \ }
-  let s:options['swank-rpc-shutdown-server-handler'] = {
+  let l:options['swank-rpc-shutdown-server-handler'] = {
         \ 'name': 'swank-rpc-shutdown-server-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:shutdown-server'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-symbol-at-point-caller'] = {
+  let l:options['swank-rpc-symbol-at-point-caller'] = {
         \ 'name': 'swank-rpc-symbol-at-point-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:symbol-at-point'."
           \ ]
       \ }
-  let s:options['swank-rpc-symbol-at-point-handler'] = {
+  let l:options['swank-rpc-symbol-at-point-handler'] = {
         \ 'name': 'swank-rpc-symbol-at-point-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:symbol-at-point'."
           \ ]
       \ }
-  let s:options['swank-rpc-symbol-at-point-information'] = {
+  let l:options['swank-rpc-symbol-at-point-information'] = {
         \ 'name': 'swank-rpc-symbol-at-point-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
         \ 'parent': 'swank-information',
-            \ 'description': [
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
             \ 'How to display the symbol-at-point information.'
           \ ]
       \ }
-  let s:options['swank-rpc-symbol-at-point-location-same-file'] = {
+  let l:options['swank-rpc-symbol-at-point-location-same-file'] = {
         \ 'name': 'swank-rpc-symbol-at-point-location-same-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window' ],
         \ 'parent': 'swank-location-same-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to symbol-at-point same file different pos.'
           \ ]
       \ }
-  let s:options['swank-rpc-symbol-at-point-location-diff-file'] = {
+  let l:options['swank-rpc-symbol-at-point-location-diff-file'] = {
         \ 'name': 'swank-rpc-symbol-at-point-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
         \ 'parent': 'swank-location-diff-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to symbol-at-point different file and pos.'
           \ ]
       \ }
 
-  let s:options['swank-rpc-typecheck-all-caller'] = {
+  let l:options['swank-rpc-typecheck-all-caller'] = {
         \ 'name': 'swank-rpc-typecheck-all-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:typecheck-all'."
           \ ]
       \ }
-  let s:options['swank-rpc-typecheck-all-handler'] = {
+  let l:options['swank-rpc-typecheck-all-handler'] = {
         \ 'name': 'swank-rpc-typecheck-all-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:typecheck-all'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-typecheck-file-caller'] = {
+  let l:options['swank-rpc-typecheck-file-caller'] = {
         \ 'name': 'swank-rpc-typecheck-file-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC caller for 'swank:typecheck-file'."
           \ ]
       \ }
-  let s:options['swank-rpc-typecheck-file-handler'] = {
+  let l:options['swank-rpc-typecheck-file-handler'] = {
         \ 'name': 'swank-rpc-typecheck-file-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:typecheck-file'."
           \ ]
       \ }
 
-  let s:options['swank-rpc-uses-of-symbol-at-point-caller'] = {
+  let l:options['swank-rpc-uses-of-symbol-at-point-caller'] = {
         \ 'name': 'swank-rpc-uses-of-symbol-at-point-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC caller for 'swank:uses-of-symbol-at-point'."
         \ ]
       \ }
-  let s:options['swank-rpc-uses-of-symbol-at-point-handler'] = {
+  let l:options['swank-rpc-uses-of-symbol-at-point-handler'] = {
         \ 'name': 'swank-rpc-uses-of-symbol-at-point-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
-            \ 'description': [
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
             \ "RPC handler for 'swank:uses-of-symbol-at-point'."
           \ ]
       \ }
-  let s:options['swank-rpc-uses-of-symbol-at-point-location'] = {
+  let l:options['swank-rpc-uses-of-symbol-at-point-location'] = {
         \ 'name': 'swank-rpc-uses-of-symbol-at-point-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
         \ 'parent': 'swank-location-diff-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to uses-of-symbol-at-point file and pos.'
           \ ]
       \ }
 
   " Event Trigger
-  let s:options['swank-event-trigger-compiler-ready'] = {
+  let l:options['swank-event-trigger-compiler-ready'] = {
         \ 'name': 'swank-event-trigger-compiler-ready',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC event trigger for ':compiler-ready'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-full-typecheck-finished'] = {
+  let l:options['swank-event-trigger-full-typecheck-finished'] = {
         \ 'name': 'swank-event-trigger-full-typecheck-finished',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC event trigger for ':full:typecheck-finished'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-indexer-ready'] = {
+  let l:options['swank-event-trigger-indexer-ready'] = {
         \ 'name': 'swank-event-trigger-indexer-ready',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC event trigger for ':indexer-ready'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-scala-notes'] = {
+  let l:options['swank-event-trigger-scala-notes'] = {
         \ 'name': 'swank-event-trigger-scala-notes',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC event trigger for ':scala-notes'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-java-notes'] = {
+  let l:options['swank-event-trigger-java-notes'] = {
         \ 'name': 'swank-event-trigger-java-notes',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC event trigger for ':java-notes'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-clear-all-scala--notes'] = {
-        \ 'name': 'swank-event-trigger-clear-all-scala--notes',
+  let l:options['swank-event-trigger-clear-all-scala-notes'] = {
+        \ 'name': 'swank-event-trigger-clear-all-scala-notes',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC event trigger for ':clear-all-scala--notes'."
+            \ "RPC event trigger for ':clear-all-scala-notes'."
         \ ]
       \ }
-  let s:options['swank-event-trigger-clear-all-java--notes'] = {
-        \ 'name': 'swank-event-trigger-clear-all-java--notes',
+  let l:options['swank-event-trigger-clear-all-java-notes'] = {
+        \ 'name': 'swank-event-trigger-clear-all-java-notes',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC event trigger for ':clear-all-java--notes'."
+            \ "RPC event trigger for ':clear-all-java-notes'."
         \ ]
       \ }
 
   " Debug Trigger
-  let s:options['swank-debug-trigger-output'] = {
+  let l:options['swank-debug-trigger-output'] = {
         \ 'name': 'swank-debug-trigger-output',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == output'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-stop'] = {
+  let l:options['swank-debug-trigger-stop'] = {
         \ 'name': 'swank-debug-trigger-stop',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == stop'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-breakpoint'] = {
+  let l:options['swank-debug-trigger-breakpoint'] = {
         \ 'name': 'swank-debug-trigger-breakpoint',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == breakpoint'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-death'] = {
+  let l:options['swank-debug-trigger-death'] = {
         \ 'name': 'swank-debug-trigger-death',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == death'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-start'] = {
+  let l:options['swank-debug-trigger-start'] = {
         \ 'name': 'swank-debug-trigger-start',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == start'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-disconnect'] = {
+  let l:options['swank-debug-trigger-disconnect'] = {
         \ 'name': 'swank-debug-trigger-disconnect',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == disconnect'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-exception'] = {
+  let l:options['swank-debug-trigger-exception'] = {
         \ 'name': 'swank-debug-trigger-exception',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == exception'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-thread-start'] = {
+  let l:options['swank-debug-trigger-thread-start'] = {
         \ 'name': 'swank-debug-trigger-thread-start',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == threadStart'."
         \ ]
       \ }
-  let s:options['swank-debug-trigger-thread-death'] = {
+  let l:options['swank-debug-trigger-thread-death'] = {
         \ 'name': 'swank-debug-trigger-thread-death',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "RPC debut trigger for ':type == threadDeath'."
         \ ]
       \ }
 
   " Hover
-  let s:options['vimside-hover-updatetime'] = {
+  let l:options['vimside-hover-updatetime'] = {
         \ 'name': 'vimside-hover-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "How long in milliseconds before Hover CurosrHold event called."
         \ ]
       \ }
-  let s:options['vimside-hover-max-char-mcounter'] = {
+  let l:options['vimside-hover-max-char-mcounter'] = {
         \ 'name': 'vimside-hover-max-char-mcounter',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "How many characters enterd long before Hover CurosrMoved event called."
+            \ "How many characters entered before Hover CurosrMoved",
+            \ "event called."
         \ ]
       \ }
-  let s:options['vimside-hover-balloon-enabled'] = {
+  let l:options['vimside-hover-balloon-enabled'] = {
         \ 'name': 'vimside-hover-balloon-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ "Is the GVim Symbol-name balloon enabled."
         \ ]
       \ }
-  let s:options['vimside-hover-cmdline-job-time'] = {
+  let l:options['vimside-hover-cmdline-job-time'] = {
         \ 'name': 'vimside-hover-cmdline-job-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "Job time in milliseconds for Hover Command Line execution."
         \ ]
       \ }
-  let s:options['vimside-hover-term-balloon-enabled'] = {
+  let l:options['vimside-hover-term-balloon-enabled'] = {
         \ 'name': 'vimside-hover-term-balloon-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ "Is the Vim Symbol-name term balloon enabled."
         \ ]
       \ }
-  let s:options['vimside-hover-term-balloon-fg'] = {
+  let l:options['vimside-hover-term-balloon-fg'] = {
         \ 'name': 'vimside-hover-term-balloon-fg',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Foreground color for term balloon (symbolic name or hex-value)."
+            \ "Foreground color for term balloon (symbolic name",
+            \ "or hex-value)."
         \ ]
       \ }
-  let s:options['vimside-hover-term-balloon-bg'] = {
+  let l:options['vimside-hover-term-balloon-bg'] = {
         \ 'name': 'vimside-hover-term-balloon-bg',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Background color for term balloon (symbolic name or hex-value)."
+            \ "Background color for term balloon (symbolic name",
+            \ "or hex-value)."
         \ ]
       \ }
-  let s:options['vimside-hover-term-job-time'] = {
+  let l:options['vimside-hover-term-job-time'] = {
         \ 'name': 'vimside-hover-term-job-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ "Job time in milliseconds for Hover Term execution."
         \ ]
       \ }
 
   " Forms
-  let s:options['vimside-forms-use'] = {
+  let l:options['vimside-forms-use'] = {
         \ 'name': 'vimside-forms-use',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "When there are multiple implementations, use the Forms-based",
-            \ "one if available otherwise use the Vim-based implementation."
+            \ "When there are multiple implementations, use the",
+            \ "Forms-based one if available otherwise use the",
+            \ "Vim-based implementation."
         \ ]
       \ }
 
-  let s:options['vimside-forms-sourcebrowser-open-in-tab'] = {
+  let l:options['vimside-forms-sourcebrowser-open-in-tab'] = {
         \ 'name': 'vimside-forms-sourcebrowser-open-in-tab',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ "Open the Forms sourcebrowser in its own tab."
         \ ]
       \ }
 
+  return l:options
 endfunction
 
 function! vimside#options#defined#Load(options)
-  call s:MakeOptions()
-  let a:options['defined'] = s:options
+  let a:options['defined'] = s:MakeOptions()
 endfunction

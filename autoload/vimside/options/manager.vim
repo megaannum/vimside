@@ -2,42 +2,22 @@
 " vimside#options#manager.vim
 "
 " File:          vimside#options#manager.vim
-" Summary:       Options for VimSIde
+" Summary:       Options for Vimside
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 "
 " ============================================================================
 " Intro: {{{1
 "   Steps:
-"     VimSIde sources this file.    
-"     Check if VimSIde global dictionary exists
+"     Vimside sources this file.    
+"     Check if Vimside global dictionary exists
 "     This file sources file "options_user.vim" if the file exists
 "     This file loads file "optionsdefault.vim"
 "     This file makes sure all required options have valid values.
 "     This file makes sure all required options have valid values.
-"   Options:
-"     test-ensime-file-use
-"     test-ensime-file-dir
-"
-"     use-cwd-as-default-output-dir
-"
-"     ensime-config-file-name
-"     ensime-install-path
-"     ensime-dist-dir
-"     ensime-dist-path
-"     ensime-port-file-path
-"     ensime-port-file-name
-"     ensime-host-name
-"     ensime-port-file-max-wait
-"     ensime-log-enabled
-"     ensime-log-file-path
-"     ensime-log-file-name
-"
-"     vimside-log-enabled
-"     vimside-log-file-path
-"     vimside-log-file-name
 "
 "
+"OLD
 " g:vimside {
 "   has option methods
 "   options {
@@ -52,6 +32,29 @@
 "     user {
 "       has option methods
 "       user override for some optiosn
+"     }
+"   }
+" }
+"NEW
+" owner == {
+"    methods
+"    keyvals {}
+" }
+" g:vimside {
+"   has 'public' option methods
+"   options {
+"     keyvals {}
+"     methods
+"     defined {
+"       definition of options
+"     }
+"     default (== owner){
+"       methods
+"       keyvals {} default values
+"     }
+"     user (== owner){
+"       keyvals {}
+"       methods and check
 "     }
 "   }
 " }
@@ -78,49 +81,64 @@ let s:full_dir=fnamemodify(s:full_path, ':h')
 if ! exists("g.vimside.options")
   let g:vimside['options'] = {}
 endif
+if ! exists("g.vimside.options.keyvals")
+  let g:vimside.options['keyvals'] = {}
+endif
 if ! exists("g.vimside.options.defined")
   let g:vimside.options['defined'] = {}
 endif
 if ! exists("g.vimside.options.user")
   let g:vimside.options['user'] = {}
 endif
+if ! exists("g.vimside.options.user.keyvals")
+  let g:vimside.options.user['keyvals'] = {}
+endif
 if ! exists("g.vimside.options.default")
   let g:vimside.options['default'] = {}
 endif
+if ! exists("g.vimside.options.default.keyvals")
+  let g:vimside.options.default['keyvals'] = {}
+endif
 
 function! vimside#options#manager#SetOptionPrivate(key, value) dict
-  if ! has_key(self, a:key)
+  let keyvals = self.keyvals
+  if ! has_key(keyvals, a:key)
     if has_key(self, 'check')
-      call self.check.func(a:key, a:value)
+      call self.check(a:key, a:value)
     endif
 
-    let self[a:key] = a:value
+    let keyvals[a:key] = a:value
   endif
 endfunction
 function! vimside#options#manager#UpdateOptionPrivate(key, value) dict
-  if has_key(self, a:key)
-    unlet self[a:key]
+  let keyvals = self.keyvals
+  if has_key(keyvals, a:key)
+    unlet keyvals[a:key]
   endif
-  let self[a:key] = a:value
+  let keyvals[a:key] = a:value
 endfunction
 function! vimside#options#manager#HasOptionPrivate(key) dict
-  return has_key(self, a:key)
+  let keyvals = self.keyvals
+  return has_key(keyvals, a:key)
 endfunction
 function! vimside#options#manager#GetOptionPrivate(key) dict
-  return has_key(self, a:key) ? [1, self[a:key]] : [0, '']
+  let keyvals = self.keyvals
+  return has_key(keyvals, a:key) ? [1, keyvals[a:key]] : [0, '']
 endfunction
 function! vimside#options#manager#RemoveOptionPrivate(key) dict
-  if has_key(self, a:key)
-    unlet self[a:key]
+  let keyvals = self.keyvals
+  if has_key(keyvals, a:key)
+    unlet keyvals[a:key]
   endif
 endfunction
 
-function! s:DefineOptionMethods(options)
-  let a:options.Set = function("vimside#options#manager#SetOptionPrivate")
-  let a:options.Update = function("vimside#options#manager#UpdateOptionPrivate")
-  let a:options.Has = function("vimside#options#manager#HasOptionPrivate")
-  let a:options.Get = function("vimside#options#manager#GetOptionPrivate")
-  let a:options.Remove = function("vimside#options#manager#RemoveOptionPrivate")
+function! s:DefineOptionMethods(owner)
+  let owner = a:owner
+  let owner.Set = function("vimside#options#manager#SetOptionPrivate")
+  let owner.Update = function("vimside#options#manager#UpdateOptionPrivate")
+  let owner.Has = function("vimside#options#manager#HasOptionPrivate")
+  let owner.Get = function("vimside#options#manager#GetOptionPrivate")
+  let owner.Remove = function("vimside#options#manager#RemoveOptionPrivate")
 endfunction
 
 call s:DefineOptionMethods(g:vimside.options)
@@ -128,10 +146,20 @@ call s:DefineOptionMethods(g:vimside.options.user)
 call s:DefineOptionMethods(g:vimside.options.default)
 
 
+" g:vimside  'public' option methods
 function! vimside#options#manager#SetOption(key, value) dict
-  if ! has_key(self.options, a:key)
-    let self.options[a:key] = a:value
+  let keyvals = self.options.keyvals
+  if ! has_key(keyvals, a:key)
+    let keyvals[a:key] = a:value
   endif
+endfunction
+
+function! vimside#options#manager#UpdateOption(key, value) dict
+  let keyvals = self.options.keyvals
+  if has_key(keyvals, a:key)
+    unlet keyvals[a:key]
+  endif
+  let keyvals[a:key] = a:value
 endfunction
 
 function! vimside#options#manager#GetOption(key) dict
@@ -180,32 +208,41 @@ function! vimside#options#manager#CheckOption(key) dict
   if ! self.options.Has(a:key)
     \ && ! self.options.user.Has(a:key)
     \ && ! self.options.default.Has(a:key)
-    echoerr "ERROR: VimSIde missing option: " . a:key
+    echoerr "ERROR: Vimside missing option: " . a:key
   endif
+endfunction
+function! vimside#options#manager#GetOptionDefinitions() dict
+  return self.options.defined
 endfunction
 
 let g:vimside.SetOption = function("vimside#options#manager#SetOption")
+let g:vimside.UpdateOption = function("vimside#options#manager#UpdateOption")
 let g:vimside.GetOption = function("vimside#options#manager#GetOption")
 let g:vimside.HasOption = function("vimside#options#manager#HasOption")
 let g:vimside.CheckOption = function("vimside#options#manager#CheckOption")
+let g:vimside.GetOptionDefinitions = function("vimside#options#manager#GetOptionDefinitions")
 
 
 
 
 
 
+if 0
 
-function! g:VimSIdeSetOption(key, value)
+function! g:VimsideSetOption(key, value)
   if ! has_key(g:vimside, a:key)
     let g:vimside[a:key] = a:value
   endif
 endfunction
-function! g:VimSIdeCheckOptionSet(key)
+function! g:VimsideCheckOptionSet(key)
   if ! has_key(g:vimside, a:key)
-    echoerr "ERROR: VimSIde missing option: " . a:key
+    echoerr "ERROR: Vimside missing option: " . a:key
   endif
 endfunction
-function! g:VimSIdeCheckDirectoryExists(dir, perms, errors)
+endif
+
+
+function! g:VimsideCheckDirectoryExists(dir, perms, errors)
   let dir = a:dir
   let perms = a:perms
   let l:errors = a:errors
@@ -233,20 +270,24 @@ function! g:VimSIdeCheckDirectoryExists(dir, perms, errors)
   return ok
 endfunction
 
+
+
+
+
+
 function! vimside#options#manager#LoadUser()
-  let g:vimside.options.user['check'] = {}
-  let g:vimside.options.user.check['defined'] = g:vimside.options.defined
 
   function! s:CheckDefinedFunc(key, value) dict
-    if has_key(self.defined, a:key)
-      let def = self.defined[a:key]
+    let defined = g:vimside.options.defined
+    if has_key(defined, a:key)
+      let def = defined[a:key]
       call vimside#options#defined#CheckValue(def, a:value, g:vimside.errors)
     else
       call add(g:vimside.errors, "Undefined User option: '". a:key . "'")
     endif
   endfunction
 
-  let g:vimside.options.user.check['func'] = function("s:CheckDefinedFunc")
+  let g:vimside.options.user['check'] = function("s:CheckDefinedFunc")
 
   " Source "options_user.vim" file if it exists
   let l:tmpfile = s:full_dir . '/../../../data/vimside/' . "options_user.vim"
@@ -263,11 +304,13 @@ endfunction
 " ===========================================================================
 function! vimside#options#manager#Load()
 
+  " loads option definitions at g:vimside.options.defined
   call vimside#options#defined#Load(g:vimside.options)
 
   call vimside#options#manager#LoadUser()
 
-  " This file loads options defined in "optionsdefault.vim"
+  " This file loads default options values from "default.vim"
+  " at g:vimside.options.default.options
   call vimside#options#default#Load(g:vimside.options.default)
 
 
@@ -289,7 +332,7 @@ function! vimside#options#manager#Load()
       if l:use_test_efile
         let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
         if found
-          if g:VimSIdeCheckDirectoryExists(l:test_dir, "r-x", l:errors)
+          if g:VimsideCheckDirectoryExists(l:test_dir, "r-x", l:errors)
             let l:ensime_config_file = l:test_dir . "/" . l:efname
           endif
 
@@ -313,7 +356,7 @@ function! vimside#options#manager#Load()
         if dir == ''
           call add(l:errors, "Can find ensime config file: '" . l:efname ."'")
         else
-          if g:VimSIdeCheckDirectoryExists(dir, "r-x", l:errors)
+          if g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
             let l:ensime_config_file = dir . "/" . l:efname
           endif
         endif
@@ -344,20 +387,20 @@ if 0
 "OLD
   let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
   if ! found
-    echoerr "VimSIde: Option not found: " . 'ensime-config-file-name'
+    echoerr "Vimside: Option not found: " . 'ensime-config-file-name'
   endif
 
   let [found, l:use_test_efile] = g:vimside.GetOption('test-ensime-file-use')
   if ! found
-    echoerr "VimSIde: Option not found: " . 'test-ensime-file-use'
+    echoerr "Vimside: Option not found: " . 'test-ensime-file-use'
   endif
 
   if l:use_test_efile
     let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
     if ! found
-      echoerr "VimSIde: Option not found: " . 'test-ensime-file-dir'
+      echoerr "Vimside: Option not found: " . 'test-ensime-file-dir'
     endif
-    call g:VimSIdeCheckDirectoryExists(l:test_dir)
+    call g:VimsideCheckDirectoryExists(l:test_dir)
 
     let l:ensime_config_file = l:test_dir . "/" . l:efname
   else
@@ -375,12 +418,12 @@ if 0
     " let l:ensime_config_file = findfile("l:efname", ".;")
 
     if dir == ''
-      echoerr "VimSIde: can find ensime config file: " . l:efname
+      echoerr "Vimside: can find ensime config file: " . l:efname
     endif
   endif
 
   if ! filereadable(l:ensime_config_file)
-    echoerr "VimSIde: can not read ensime config file: " . l:ensime_config_file
+    echoerr "Vimside: can not read ensime config file: " . l:ensime_config_file
   endif
 
   let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
@@ -399,7 +442,7 @@ endif
       call add(l:errors, "Option not found: '". 'ensime-install-path' ."'")
     endif
 
-    call g:VimSIdeCheckDirectoryExists(l:path, "r-x", l:errors)
+    call g:VimsideCheckDirectoryExists(l:path, "r-x", l:errors)
 
     " envim uses: ensime-common/src/main/python/Helper.py findLastDist
     "   to look for latest distribution directory
@@ -411,7 +454,7 @@ endif
     endif
 
     let l:distdirpath = l:path  . '/' . l:distdir
-    call g:VimSIdeCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
+    call g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
   
     call g:vimside.SetOption("ensime-dist-path", l:distdirpath)
 
@@ -421,7 +464,7 @@ endif
       call add(l:errors, "Option not found: '". 'ensime-dist-path' ."'")
     endif
 
-    call g:VimSIdeCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
+    call g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
 
   else
     call add(l:errors, "No Ensime Distribution path, set options 'ensime-install-path' or 'ensime-dist-path'")
@@ -462,6 +505,16 @@ endif
         let portdir = $HOME
       endif
     endif
+
+    let [found, l:pfilename] = g:vimside.GetOption('ensime-port-file-name')
+    if ! found
+        call add(l:errors, "Option not found: '". 'ensime-port-file-name' ."'")
+    endif
+
+    let value = portdir . '/' . l:pfilename
+    call g:vimside.SetOption('ensime-port-file-path', value)
+
+if 0
       if g:vimside.HasOption("ensime-port-file-name")
         let [found, l:pfilename] = g:vimside.GetOption('ensime-port-file-name')
         if ! found
@@ -474,6 +527,7 @@ endif
         let value = portdir . '/_ensime_port'
         call g:vimside.SetOption('ensime-port-file-path', value)
       endif
+endif
   endif
 
   let [found, hostname] = g:vimside.GetOption('ensime-host-name')
@@ -533,7 +587,7 @@ endif
     call g:vimside.SetOption('ensime-log-file-path', value)
   endif
 
-  " Log for output of VimSIde
+  " Log for output of Vimside
   if g:vimside.HasOption("vimside-log-file-path")
     let [found, s:lfilepath] = g:vimside.GetOption('vimside-log_file-path')
     if ! found
@@ -543,7 +597,7 @@ endif
     if filewritable(s:lfilepath) != 1
       let s:lfiledir=fnamemodify(s:lfilepath, ':h')
       if filewritable(s:lfiledir) != 2
-        call add(l:errors, "Can not create VimSIde log file in directory: '". s:lfiledir ."'")
+        call add(l:errors, "Can not create Vimside log file in directory: '". s:lfiledir ."'")
       endif
     endif
   else

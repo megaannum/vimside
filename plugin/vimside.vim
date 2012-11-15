@@ -148,6 +148,8 @@ else
   nmap <silent> <Leader>vp :call vimside#command#MapPopUp('n')<CR>
   vmap <silent> <Leader>vp :call vimside#command#MapPopUp('v')<CR>
 
+  nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
+
   nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
   nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
 
