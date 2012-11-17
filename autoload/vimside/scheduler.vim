@@ -17,21 +17,8 @@
 " motion.
 " ============================================================================
 
-if 0
-function! s:LOG(msg)
-  let t = exists("*strftime")
-           \ ? strftime("%Y%m%d-%H%M%S: ")
-           \ : "" . localtime() . ": "
-
-  execute "redir >> " . "AUTO_LOG"
-  silent echo "INFO: ". t . a:msg
-  execute "redir END"
-endfunction
-
-else
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
-endif
 
 "=============================================================================
 " General Jobs
@@ -91,6 +78,7 @@ function! vimside#scheduler#SetUpdateTime(value)
   if a:value < minval
     throw "UpdateTime must be greater-than/equal-to ". minval ."ms: ". a:value
   endif
+call s:LOG("vimside#scheduler#SetUpdateTime: value=". a:value)
   let &updatetime = a:value
 endfunction
 
@@ -242,57 +230,6 @@ endfunction
 
 
 
-" --------------------------------------------------------
-if 0 " TTTTT
-
-function! g:TJob1() 
-call s:LOG("TJob1:")
-endfunction
-function! g:TJob2() 
-call s:LOG("TJob2:")
-endfunction
-function! g:TJob3() 
-call s:LOG("TJob3:")
-endfunction
-function! g:TJob4() 
-call s:LOG("TJob4:")
-endfunction
-function! g:TJob5() 
-call s:LOG("TJob5:")
-endfunction
-function! g:TJob6() 
-call s:LOG("TJob6:")
-endfunction
-function! g:TJob7() 
-call s:LOG("TJob7:")
-endfunction
-
-function! g:TJob(name, func, n, repeat) 
-  call vimside#scheduler#AddTimeJob(a:name, a:func, 0, a:n*100, a:repeat) 
-endfunction
-
-nmap <Leader>at1 :call g:TJob("j1", function("g:TJob1"), 1,1)<CR>
-nmap <Leader>at2 :call g:TJob("j2", function("g:TJob2"), 2,1)<CR>
-nmap <Leader>at3 :call g:TJob("j3", function("g:TJob3"), 3,1)<CR>
-nmap <Leader>at4 :call g:TJob("j4", function("g:TJob4"), 4,1)<CR>
-nmap <Leader>at5 :call g:TJob("j5", function("g:TJob5"), 5,1)<CR>
-nmap <Leader>at6 :call g:TJob("j6", function("g:TJob6"), 6,1)<CR>
-nmap <Leader>at7 :call g:TJob("j7", function("g:TJob7"), 7,1)<CR>
-
-nmap <Leader>rt1 :call g:RemoveJob("j1")<CR>
-nmap <Leader>rt2 :call g:RemoveJob("j2")<CR>
-nmap <Leader>rt3 :call g:RemoveJob("j3")<CR>
-nmap <Leader>rt4 :call g:RemoveJob("j4")<CR>
-nmap <Leader>rt5 :call g:RemoveJob("j5")<CR>
-nmap <Leader>rt6 :call g:RemoveJob("j6")<CR>
-nmap <Leader>rt7 :call g:RemoveJob("j7")<CR>
-
-nmap <Leader>u01 :call vimside#scheduler#SetUpdateTime(100)<CR>
-nmap <Leader>u05 :call vimside#scheduler#SetUpdateTime(500)<CR>
-nmap <Leader>u10 :call vimside#scheduler#SetUpdateTime(1000)<CR>
-nmap <Leader>u40 :call vimside#scheduler#SetUpdateTime(4000)<CR>
-endif " TTTTT
-" --------------------------------------------------------
 
 "=============================================================================
 " Motion

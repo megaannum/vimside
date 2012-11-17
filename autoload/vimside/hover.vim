@@ -5,12 +5,6 @@
 " Summary:       Vimside Hover to Symbol
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
-" Version:       0.2
-" Modifications:
-"
-" Tested on vim 7.3 on Linux
-"
-" Depends upon: NONE
 "
 " ============================================================================
 " Intro: {{{1

@@ -38,6 +38,9 @@ else
 
   " M-. (dot) or Control+Left-Click 
   "   Jump to definition of symbol under cursor.
+  "   Note that the Meta/Alt keys, while easy to use with GVim, are,
+  "   at best, an advanture and, at worst, impossible, to get working
+  "   with non-GVim - thus the mapping is different for non-gui-running.
   if has("gui_running")
     nmap <silent> <m-.> :call vimside#command#SymbolAtPoint()<CR>
   else
@@ -55,11 +58,17 @@ else
   " C-c C-v .
   "   Select the surrounding syntactic context. Subsequent taps of '.' 
   "   and ',' will grow and shrink the selection, respectively.
-  nmap <silent> <Leader>v. :call vimside#command#ExpandSelection('n')<CR>
-  vmap <silent> <Leader>v. :call vimside#command#ExpandSelection('v')<CR>
-  nmap <silent> <Leader>v, :call vimside#command#ContractSelection('n')<CR>
-  vmap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
-  " vnoremap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
+
+  map <silent> <Leader>v. :call vimside#command#ExpandSelection()<CR>
+  map <silent> <Leader>v, :call vimside#command#ContractSelection()<CR>
+
+if 0
+  " X nmap <silent> <Leader>v. :call vimside#command#ExpandSelection('n')<CR>
+  " X vmap <silent> <Leader>v. :call vimside#command#ExpandSelection('v')<CR>
+  " X nmap <silent> <Leader>v, :call vimside#command#ContractSelection('n')<CR>
+  " X vmap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
+  " X vnoremap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
+endif
 
   " C-c C-v v
   "   Search globally for methods or types.

@@ -55,17 +55,15 @@ function! vimside#forms#menu#MakeMenuSource()
 
   call add(items, {
             \ 'type': 'button',
-            \ 'label': 'Format &Source',
-            \ 'command': ':call vimside#swank#rpc#format_source#Run()")'
+            \ 'label': 'Format &Source...',
+            \ 'command': ':call vimside#command#FormatSource()'
             \ })
 
 " ["Find all references" ensime-show-uses-of-symbol-at-point]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Find all references'
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Find all references',
-            \ 'action': action
+            \ 'label': '&Find all references...',
+            \ 'command': ':call vimside#command#SymbolAtPoint()'
             \ })
   
 " ["Inspect type" ensime-inspect-type-at-point]
@@ -105,21 +103,17 @@ function! vimside#forms#menu#MakeMenuSource()
             \ })
   
 " ["Typecheck file" ensime-typecheck-current-file]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Typecheck file'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Typecheck file',
-            \ 'action': action
+            \ 'command': ':call vimside#command#TypecheckFile()'
             \ })
   
 " ["Typecheck project" ensime-typecheck-all]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Typecheck project'
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Typecheck project',
-            \ 'action': action
+            \ 'label': '&Typecheck project...',
+            \ 'command': ':call vimside#command#TypecheckAll()'
             \ })
   
 " ["Show all errors and warnings" ensime-show-all-errors-and-warnings]
@@ -264,13 +258,28 @@ function! vimside#forms#menu#MakeMenuNavidation()
             \ 'action': action
             \ })
 
+  function! VimsideExpandSelectionCommand()
+    if exists("s:firstline")
+      if ! vimside#ExpandSelection()
+        call vimside#command#ExpandRangeSelection(s:firstline, s:firstcol, s:lastline, s:lastcol)
+      endif
+    else 
+      call vimside#command#ExpandSelection('n')
+    endif
+  endfunction
+
 " ["Expand selection" ensime-expand-selection-command]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Expand selection'
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Expand selection',
-            \ 'action': action
+            \ 'label': '&Expand selection...',
+            \ 'command': ':call VimsideExpandSelectionCommand()'
+            \ })
+
+" ["Contract selection" ensime-contract-selection-command]
+  call add(items, {
+            \ 'type': 'button',
+            \ 'label': '&Contract selection...',
+            \ 'command': ':call vimside#command#ContractSelection("n")'
             \ })
 
 " ["Search" ensime-search]
@@ -472,7 +481,7 @@ endfunction
 " parameters: 
 "   mode : 'n' (normal) or 'v' (visual)
 "---------------------------------------------------------------------------
-function! vimside#forms#menu#MakePopUp(mode)
+function! vimside#forms#menu#MakePopUp(mode) range
   if a:mode == 'n'
     if exists("s:firstline")
       unlet s:firstline
@@ -561,18 +570,18 @@ function! vimside#forms#menu#MakePopUp(mode)
 
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Browse Source Roots',
+            \ 'label': '&Browse Source Roots...',
             \ 'command': ':call vimside#command#BrowseSourceRoots()'
             \ })
 
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Browse Reference Source Roots',
+            \ 'label': '&Browse Reference Source Roots...',
             \ 'command': ':call vimside#command#BrowseReferenceSourceRoots()'
             \ })
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Options',
+            \ 'label': '&Options...',
             \ 'command': ':call vimside#command#OptionEditor()'
             \ })
 
@@ -588,7 +597,7 @@ function! vimside#forms#menu#MakePopUp(mode)
 " ["Go to Scala REPL" ensime-inf-switch]
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Goto Scala REPL',
+            \ 'label': '&Goto Scala REPL...',
             \ 'command': ':call vimside#swank#rpc#repl_config#Run()'
             \ })
 

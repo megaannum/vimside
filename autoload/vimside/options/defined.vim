@@ -670,6 +670,37 @@ function! s:MakeOptions()
             \ "RPC handler for 'swank:expand-selection'."
           \ ]
       \ }
+  let l:options['swank-rpc-expand-selection-information'] = {
+        \ 'name': 'swank-rpc-expand-selection-information',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['visual', 'highlight' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "RPC handler for 'swank:expand-selection' information.",
+            \ "Use either Vim visual mode or highlighting."
+          \ ]
+      \ }
+  let l:options['swank-rpc-expand-selection-highlight-color-dark'] = {
+        \ 'name': 'swank-rpc-expand-selection-highlight-color-dark',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "RPC handler for 'swank:expand-selection' highlight color.",
+            \ "when background is dark."
+          \ ]
+      \ }
+  let l:options['swank-rpc-expand-selection-highlight-color-light'] = {
+        \ 'name': 'swank-rpc-expand-selection-highlight-color-light',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_COLOR_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "RPC handler for 'swank:expand-selection' highlight color.",
+            \ "when background is light."
+          \ ]
+      \ }
 
   let l:options['swank-rpc-format-source-caller'] = {
         \ 'name': 'swank-rpc-format-source-caller',

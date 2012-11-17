@@ -32,14 +32,18 @@ function! vimside#util#GetCurrentOffset()
   return line2byte(line("."))+col(".")-1
 endfunction
 
-" return line and column of offset
+" return [line, column] of offset
 function! vimside#util#GetLineColumnFromOffset(offset, ...)
   if a:0 == 0
     " current file
-    let line = byte2line(a:offset)
-    let offline = line2byte(line)
-    let column = a:offset - offline
-    return [line, column]
+    if a:offset == 0
+      return [1, 1]
+    else
+      let line = byte2line(a:offset)
+      let offline = line2byte(line)
+      let column = a:offset - offline
+      return [line, column]
+    endif
   else
     let file = a:1
     try

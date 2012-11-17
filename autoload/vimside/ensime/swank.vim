@@ -130,6 +130,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_expecting")
   let g:vimside.ping.info.updatetime = s:rpc_expecting_updatetime 
   let g:vimside.ping.info.char_count = s:rpc_expecting_char_count 
 
+  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
+
 " XXXXXXXXXXXXX
 "   call vimside#ResetAutoCmds()
   call vimside#scheduler#ResetAuto()
@@ -149,6 +151,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_not_expecting")
   let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
   let g:vimside.ping.info.updatetime = s:rpc_not_expecting_updatetime 
   let g:vimside.ping.info.char_count = s:rpc_not_expecting_char_count 
+
+  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
 function! vimside#ensime#swank#ping_info_set_event_expecting_one()
@@ -156,6 +160,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_event_expecting_one")
   let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
   let g:vimside.ping.info.updatetime = s:event_expecting_one_updatetime
   let g:vimside.ping.info.char_count = s:event_expecting_one_char_count
+
+  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
 function! vimside#ensime#swank#ping_info_set_event_expecting_many()
@@ -163,6 +169,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_event_expecting_many")
   let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
   let g:vimside.ping.info.updatetime = s:event_expecting_many_updatetime
   let g:vimside.ping.info.char_count = s:event_expecting_many_char_count
+
+  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
 function! vimside#ensime#swank#handle(response)

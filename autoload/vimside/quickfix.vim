@@ -10,7 +10,7 @@ endif
 endfunction
 
 function! s:Clear()
-call setqflist([])
+  call setqflist([])
 endfunction
 
 function! s:Write(entries)
