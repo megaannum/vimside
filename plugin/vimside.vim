@@ -58,17 +58,8 @@ else
   " C-c C-v .
   "   Select the surrounding syntactic context. Subsequent taps of '.' 
   "   and ',' will grow and shrink the selection, respectively.
-
   map <silent> <Leader>v. :call vimside#command#ExpandSelection()<CR>
   map <silent> <Leader>v, :call vimside#command#ContractSelection()<CR>
-
-if 0
-  " X nmap <silent> <Leader>v. :call vimside#command#ExpandSelection('n')<CR>
-  " X vmap <silent> <Leader>v. :call vimside#command#ExpandSelection('v')<CR>
-  " X nmap <silent> <Leader>v, :call vimside#command#ContractSelection('n')<CR>
-  " X vmap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
-  " X vnoremap <silent> <Leader>v, :call vimside#command#ContractSelection('v')<CR>
-endif
 
   " C-c C-v v
   "   Search globally for methods or types.

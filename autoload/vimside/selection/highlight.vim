@@ -126,8 +126,30 @@ function! s:GetMatchRanges(line1, line2, column1, column2)
   return range
 endfunction
 
+
 let s:line_start = -1
 let s:line_end = -1
+let s:auto_set = 0
+
+function! vimside#selection#highlight#SetAutoCmds()
+  if ! s:auto_set
+    augroup VIMSIDE_SELECT_HL
+      autocmd!
+      autocmd CursorMoved * call vimside#selection#highlight#Clear()
+      autocmd BufLeave * call vimside#selection#highlight#Clear()
+    augroup END
+    let s:auto_set = 1
+  endif
+endfunction
+
+function! vimside#selection#highlight#RemoveAutoCmds()
+  if s:auto_set
+    augroup VIMSIDE_SELECT_HL
+      autocmd!
+    augroup END
+    let s:auto_set = 0
+  endif
+endfunction
 
 function! vimside#selection#highlight#CursorMoved()
   let lnum = line(".")
@@ -137,6 +159,7 @@ endfunction
 
 function! vimside#selection#highlight#Clear()
 call s:LOG("vimside#selection#highlight#Clear: TOP") 
+  call vimside#selection#highlight#RemoveAutoCmds()
   if exists("s:sids")
 call s:LOG("vimside#selection#highlight#Clear: clearing sids") 
     for sid in s:sids
@@ -157,6 +180,7 @@ endfunction
 
 function! vimside#selection#highlight#Display(file, start, end)
 call s:LOG("vimside#selection#highlight#Display: start=". a:start .", end=". a:end) 
+  call vimside#selection#highlight#SetAutoCmds()
   let current_file = expand('%:p')
   if a:file == current_file
     let [line1, column1] = vimside#util#GetLineColumnFromOffset(a:start)
