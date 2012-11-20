@@ -39,13 +39,13 @@ let g:vimside_hover_motion_name = 'hover_motion_job'
 function! s:LoadUpdateTimes()
   let [found, value] = g:vimside.GetOption('vimside-hover-updatetime')
   if ! found
-    throw "Vimside: Option not found: "'vimside-hover-updatetime'"
+    throw "Option not found: "'vimside-hover-updatetime'"
   endif
   let g:vimside_hover_updatetime = value
 
   let [found, value] = g:vimside.GetOption('vimside-hover-max-char-mcounter')
   if ! found
-    throw "Vimside: Option not found: "'vimside-hover-max-char-mcounter'"
+    throw "Option not found: "'vimside-hover-max-char-mcounter'"
   endif
   let g:vimside_hover_max_mcounter = value
 
@@ -55,9 +55,9 @@ call s:LoadUpdateTimes()
 
 let s:vimside_hover_started = 0
 
-function! vimside#hover#ToSymbol()
+function! vimside#command#hover#ToSymbol()
   if s:vimside_hover_started
-" call s:LOG("vimside#hover#ToSymbol: STOP") 
+" call s:LOG("vimside#command#hover#ToSymbol: STOP") 
     try 
       call s:Hover_Stop()
     finally
@@ -66,15 +66,15 @@ function! vimside#hover#ToSymbol()
 
   else
     try 
-      if vimside#hover#balloon#Enabled() && vimside#hover#balloon#IsSupported()
-" call s:LOG("vimside#hover#ToSymbol: DO BALLOON") 
-        let s:Hover_Stop = vimside#hover#balloon#Start()
-      elseif vimside#hover#term#Enabled() && vimside#hover#term#IsSupported()
-" call s:LOG("vimside#hover#ToSymbol: DO TERM HOVER") 
-        let s:Hover_Stop = vimside#hover#term#Start()
+      if vimside#command#hover#balloon#Enabled() && vimside#command#hover#balloon#IsSupported()
+" call s:LOG("vimside#command#hover#ToSymbol: DO BALLOON") 
+        let s:Hover_Stop = vimside#command#hover#balloon#Start()
+      elseif vimside#command#hover#term#Enabled() && vimside#command#hover#term#IsSupported()
+" call s:LOG("vimside#command#hover#ToSymbol: DO TERM HOVER") 
+        let s:Hover_Stop = vimside#command#hover#term#Start()
       else
-" call s:LOG("vimside#hover#ToSymbol: DO CMDLINE") 
-        let s:Hover_Stop = vimside#hover#cmdline#Start()
+" call s:LOG("vimside#command#hover#ToSymbol: DO CMDLINE") 
+        let s:Hover_Stop = vimside#command#hover#cmdline#Start()
       endif
     finally
       let s:vimside_hover_started = 1

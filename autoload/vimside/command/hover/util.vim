@@ -1,5 +1,5 @@
 
-function! vimside#hover#util#GetHoverText(dic)
+function! vimside#command#hover#util#GetHoverText(dic)
   let dic = a:dic
   if vimside#util#IsDictionary(dic)
     if has_key(dic, ":type")

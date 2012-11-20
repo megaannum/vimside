@@ -5,7 +5,7 @@
 " Summary:       Vimside top level file
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
-" Version:       0.2
+" Version:       0.2.1
 " Modifications:
 "
 " Tested on vim 7.3 on Linux
@@ -386,6 +386,7 @@ endif " XXXXXXXXXXXXX
 " ============================================================================
 " Position Code
 " ============================================================================
+if 0 " YYYXXX
 function!  vimside#ClearPosition()
   let g:vimside.project.positions = []
 endfunction
@@ -409,6 +410,7 @@ function!  vimside#PreviousPosition()
     call setpos('.', pos)
   endif
 endfunction
+endif " YYYXXX
 
 " ============================================================================
 " Completion code
@@ -510,6 +512,8 @@ endfunction
 " Selection Code
 " ============================================================================
 
+if 0 " XXXXXXXXXX
+
 " list of [file, start, end]
 let s:selections = []
 let s:selection_index = -1
@@ -585,3 +589,5 @@ function!  vimside#DisplaySelection(file, start, end)
   execute "normal v"
   execute "goto ". a:end
 endfunction
+
+endif " XXXXXXXXXX

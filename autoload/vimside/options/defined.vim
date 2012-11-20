@@ -652,6 +652,43 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+  let l:options['swank-rpc-public-symbol-search-caller'] = {
+        \ 'name': 'swank-rpc-public-symbol-search-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC caller for 'swank:public-symbol-search'."
+          \ ]
+      \ }
+  let l:options['swank-rpc-public-symbol-search-handler'] = {
+        \ 'name': 'swank-rpc-public-symbol-search-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC handler for 'swank:public-symbol-search'."
+          \ ]
+      \ }
+  let l:options['public-symbol-search-close-empty-display'] = {
+        \ 'name': 'public-symbol-search-close-empty-display',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "For 'swank:public-symbol-search' close quickfix window",
+            \ "if there are no search results."
+          \ ]
+      \ }
+  let l:options['public-symbol-search-do-incremental'] = {
+        \ 'name': 'public-symbol-search-do-incremental',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "For 'swank:public-symbol-search' do incremental search.",
+            \ "As search terms are entered, search results are displayed."
+          \ ]
+      \ }
+
   let l:options['swank-rpc-expand-selection-caller'] = {
         \ 'name': 'swank-rpc-expand-selection-caller',
         \ 'type': g:OPTION_STRING_TYPE, 

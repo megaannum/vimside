@@ -2,13 +2,13 @@
 " vimside#option#default.vim
 "
 " File:          vimside#option#default.vim
-" Summary:       Default Options for VimSIde
+" Summary:       Default Options for Vimside
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 "
 " ============================================================================
 " Intro: {{{1
-"   Default options for VimSIde - and nothing else
+"   Default options for Vimside - and nothing else
 "   Options:
 "     ensime-install-path
 "     TODO: make following a user option or search for it
@@ -65,6 +65,11 @@ function! vimside#options#default#Load(owner)
 
   call owner.Set("swank-rpc-connection-info-caller", 'g:ConnectionInfoCaller')
   call owner.Set("swank-rpc-connection-info-handler", 'g:ConnectionInfoHandler')
+
+  call owner.Set("swank-rpc-public-symbol-search-caller", 'g:PublicSymbolSearchCaller')
+  call owner.Set("swank-rpc-public-symbol-search-handler", 'g:PublicSymbolSearchHandler')
+  call owner.Set("public-symbol-search-close-empty-display", 0)
+  call owner.Set("public-symbol-search-do-incremental", 1)
 
   call owner.Set("swank-rpc-expand-selection-caller", 'g:ExpandSelectionCaller')
   call owner.Set("swank-rpc-expand-selection-handler", 'g:ExpandSelectionHandler')

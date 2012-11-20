@@ -19,7 +19,7 @@ let s:hover_term_msec = 0
 function! s:LoadJobTimes()
   let [found, msec] = g:vimside.GetOption('vimside-hover-term-job-time')
   if ! found
-    throw "Vimside: Option not found: "'vimside-hover-term-job-time'"
+    throw "Option not found: "'vimside-hover-term-job-time'"
   endif
 
   let s:hover_term_sec = (msec >= 1000) ? msec/1000 : 0 
@@ -34,15 +34,15 @@ let s:hover_term_xwininfo_path = ''
 let s:hover_term_xdotool_path = ''
 let s:hover_term_dzen2_path = ''
 
-function! vimside#hover#term#Enabled()
+function! vimside#command#hover#term#Enabled()
   let [found, enabled] = g:vimside.GetOption('vimside-hover-term-balloon-enabled')
   if ! found
-    throw "Vimside: Option not found: "'vimside-hover-term-balloon-enabled'"
+    throw "Option not found: "'vimside-hover-term-balloon-enabled'"
   endif
   return enabled
 endfunction
 
-function! vimside#hover#term#IsSupported()
+function! vimside#command#hover#term#IsSupported()
   if s:hover_term_supported == -1
     let s:hover_term_supported = s:CheckHoverTermRequiredExecutables()
   endif
@@ -257,11 +257,11 @@ function! g:ShowBalloon(text)
   if found
     let [found, bg] = g:vimside.GetOption('vimside-hover-term-balloon-bg')
     if ! found
-      throw "Vimside: Option not found: "'vimside-hover-term-balloon-bg'"
+      throw "Option not found: "'vimside-hover-term-balloon-bg'"
     endif
     let [found, fg] = g:vimside.GetOption('vimside-hover-term-balloon-fg')
     if ! found
-      throw "Vimside: Option not found: "'vimside-hover-term-balloon-fg'"
+      throw "Option not found: "'vimside-hover-term-balloon-fg'"
     endif
     let args = ' -w '. (len(a:text) * cwidth + 8)
     let args .= ' -fg '. fg
@@ -283,25 +283,25 @@ function! g:ShowBalloon(text)
   endif
 endfunction
 
-function! vimside#hover#term#Handler_Ok(symbolinfo)
-" call s:LOG("vimside#hover#term#Handler_Ok ". string(a:symbolinfo)) 
+function! vimside#command#hover#term#Handler_Ok(symbolinfo)
+" call s:LOG("vimside#command#hover#term#Handler_Ok ". string(a:symbolinfo)) 
   let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
   if ! found
-    echoe "vimside#hover#term#Handler_Ok: Badly formed Response"
-    call s:ERROR("vimside#hover#term#Handler_Ok: Badly formed Response: ". string(a:symbolinfo))
+    echoe "vimside#command#hover#term#Handler_Ok: Badly formed Response"
+    call s:ERROR("vimside#command#hover#term#Handler_Ok: Badly formed Response: ". string(a:symbolinfo))
     return 0
   endif
 
   let [found, lnum, column, word] = g:GetWord()
-" call s:LOG("vimside#hover#term#Handler_Ok found=". found .", word='". word ."'") 
+" call s:LOG("vimside#command#hover#term#Handler_Ok found=". found .", word='". word ."'") 
   if found && word != ''
-    let text = vimside#hover#util#GetHoverText(dic)
+    let text = vimside#command#hover#util#GetHoverText(dic)
     if text != ''
       call g:ShowBalloon(text)
     endif        
   endif
 
-  let FuncTime = function("vimside#hover#term#JobTime")
+  let FuncTime = function("vimside#command#hover#term#JobTime")
   let sec = s:hover_term_sec
   let msec = s:hover_term_msec
   let repeat = 0
@@ -310,12 +310,12 @@ function! vimside#hover#term#Handler_Ok(symbolinfo)
   return 1
 endfunction
 
-function! vimside#hover#term#JobTime()
+function! vimside#command#hover#term#JobTime()
   let [found, offset] = s:GetCurrentTermOffset()
   if found
     let dic = {
           \ 'handler': {
-          \ 'ok': function("vimside#hover#term#Handler_Ok")
+          \ 'ok': function("vimside#command#hover#term#Handler_Ok")
           \ },
           \ 'args': {
           \   'offset': offset
@@ -323,7 +323,7 @@ function! vimside#hover#term#JobTime()
           \ }
     call vimside#swank#rpc#symbol_at_point#Run(dic)
   else
-    let FuncTime = function("vimside#hover#term#JobTime")
+    let FuncTime = function("vimside#command#hover#term#JobTime")
     let sec = s:hover_term_sec
     let msec = s:hover_term_msec
     let repeat = 0
@@ -332,23 +332,23 @@ function! vimside#hover#term#JobTime()
 endfunction
 
 
-function! vimside#hover#term#Start()
+function! vimside#command#hover#term#Start()
   " save currnet time/motion settings
   let g:vimside_hover_save_updatetime = vimside#scheduler#GetUpdateTime()
   let g:vimside_hover_save_max_mcounter = vimside#scheduler#GetMaxMotionCounter()
 
   call vimside#scheduler#SetUpdateTime(g:vimside_hover_updatetime)
 
-  let FuncTime = function("vimside#hover#term#JobTime")
+  let FuncTime = function("vimside#command#hover#term#JobTime")
   let sec = s:hover_term_sec
   let msec = s:hover_term_msec
   let repeat = 0
   call vimside#scheduler#AddTimeJob(g:vimside_hover_time_name, FuncTime, sec, msec, repeat)
 
-  return function("vimside#hover#term#Stop")
+  return function("vimside#command#hover#term#Stop")
 endfunction
 
-function! vimside#hover#term#Stop()
+function! vimside#command#hover#term#Stop()
   call vimside#scheduler#RemoveJob(g:vimside_hover_motion_name)
   call vimside#scheduler#RemoveJob(g:vimside_hover_time_name)
   

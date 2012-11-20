@@ -13,12 +13,12 @@
 
 let [s:found, s:log_file] = g:vimside.GetOption('vimside-log-file-path')
 if ! s:found
-  echoerr "VimSIde: Option not found: " . 'vimside-log-file-path'
+  echoerr "Option not found: " . 'vimside-log-file-path'
 endif
 
 let [s:found, s:log_enabled] = g:vimside.GetOption('vimside-log-enabled')
 if ! s:found
-  echoerr "VimSIde: Option not found: " . 'vimside-log-enabled'
+  echoerr "Option not found: " . 'vimside-log-enabled'
 endif
 
 function! vimside#log#log(msg)

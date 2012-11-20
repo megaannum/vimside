@@ -105,7 +105,7 @@ function! vimside#forms#menu#MakeMenuSource()
 " ["Typecheck file" ensime-typecheck-current-file]
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Typecheck file',
+            \ 'label': '&Typecheck file...',
             \ 'command': ':call vimside#command#TypecheckFile()'
             \ })
   
@@ -117,12 +117,10 @@ function! vimside#forms#menu#MakeMenuSource()
             \ })
   
 " ["Show all errors and warnings" ensime-show-all-errors-and-warnings]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Show all errors and warnings'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Show all errors and warnings',
-            \ 'action': action
+            \ 'command': ':call vimside#command#ShowErrorsAndWarning()'
             \ })
   
 " ["Undo source change" ensime-undo-peek])
@@ -287,8 +285,8 @@ function! vimside#forms#menu#MakeMenuNavidation()
   let action.msg = 'Search'
   call add(items, {
             \ 'type': 'button',
-            \ 'label': '&Search',
-            \ 'action': action
+            \ 'label': '&Search...',
+            \ 'command': ':call vimside#command#Search()'
             \ })
 
 " ["Scalex-Search" ensime-scalex])

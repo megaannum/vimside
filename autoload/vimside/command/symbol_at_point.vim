@@ -1,8 +1,8 @@
 " ============================================================================
-" error.vim
+" symbol_at_point.vim
 "
-" File:          error.vim
-" Summary:       Error maager for Vimside
+" File:          symbol_at_point.vim
+" Summary:       Vimside Symbol At Point
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 "
@@ -13,20 +13,7 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
-let s:errors = []
 
-function! vimside#error#record(msg)
-  echoerr a:msg
-  let t = exists("*strftime")
-        \ ? strftime("%Y%m%d-%H%M%S: ")    
-        \ : "" . localtime() . ": "
-  all add(s:errors, t .': '. a:msg)
-endfunction
-
-function! vimside#error#get()
-  return copy(s:errors)
-endfunction
-
-function! vimside#error#clear()
-  let s:errors = []
+function!  vimside#command#symbol_at_point#Run()
+  call vimside#swank#rpc#symbol_at_point#Run()
 endfunction

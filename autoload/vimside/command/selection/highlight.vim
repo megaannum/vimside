@@ -18,7 +18,7 @@ let s:ERROR = function("vimside#log#error")
 function! s:GetOption(name)
   let [found, value] = g:vimside.GetOption(a:name)
   if ! found
-    throw "Vimside: Option not found: '". a:name ."'
+    throw "Option not found: '". a:name ."'
   endif
   return value
 endfunction
@@ -131,18 +131,18 @@ let s:line_start = -1
 let s:line_end = -1
 let s:auto_set = 0
 
-function! vimside#selection#highlight#SetAutoCmds()
+function! vimside#command#selection#highlight#SetAutoCmds()
   if ! s:auto_set
     augroup VIMSIDE_SELECT_HL
       autocmd!
-      autocmd CursorMoved * call vimside#selection#highlight#Clear()
-      autocmd BufLeave * call vimside#selection#highlight#Clear()
+      autocmd CursorMoved * call vimside#command#selection#highlight#Clear()
+      autocmd BufLeave * call vimside#command#selection#highlight#Clear()
     augroup END
     let s:auto_set = 1
   endif
 endfunction
 
-function! vimside#selection#highlight#RemoveAutoCmds()
+function! vimside#command#selection#highlight#RemoveAutoCmds()
   if s:auto_set
     augroup VIMSIDE_SELECT_HL
       autocmd!
@@ -151,50 +151,50 @@ function! vimside#selection#highlight#RemoveAutoCmds()
   endif
 endfunction
 
-function! vimside#selection#highlight#CursorMoved()
+function! vimside#command#selection#highlight#CursorMoved()
   let lnum = line(".")
-call s:LOG("vimside#selection#highlight#CursorMoved: lnum=". lnum) 
+call s:LOG("vimside#command#selection#highlight#CursorMoved: lnum=". lnum) 
   return lnum < s:line_start || lnum > s:line_end
 endfunction
 
-function! vimside#selection#highlight#Clear()
-call s:LOG("vimside#selection#highlight#Clear: TOP") 
-  call vimside#selection#highlight#RemoveAutoCmds()
+function! vimside#command#selection#highlight#Clear()
+call s:LOG("vimside#command#selection#highlight#Clear: TOP") 
+  call vimside#command#selection#highlight#RemoveAutoCmds()
   if exists("s:sids")
-call s:LOG("vimside#selection#highlight#Clear: clearing sids") 
+call s:LOG("vimside#command#selection#highlight#Clear: clearing sids") 
     for sid in s:sids
-call s:LOG("vimside#selection#highlight#Clear: clear sid=". sid) 
+call s:LOG("vimside#command#selection#highlight#Clear: clear sid=". sid) 
       try
         if matchdelete(sid) == -1
-call s:LOG("vimside#selection#highlight#Clear: failed to clear sid=". sid) 
+call s:LOG("vimside#command#selection#highlight#Clear: failed to clear sid=". sid) 
         endif
       catch /.*/
-call s:ERROR("vimside#selection#highlight#Clear: sid=". sid) 
+call s:ERROR("vimside#command#selection#highlight#Clear: sid=". sid) 
       endtry
     endfor
     unlet s:sids
   endif
-call s:LOG("vimside#selection#highlight#Clear: matches=". string(getmatches())) 
-call s:LOG("vimside#selection#highlight#Clear: BOTTOM") 
+call s:LOG("vimside#command#selection#highlight#Clear: matches=". string(getmatches())) 
+call s:LOG("vimside#command#selection#highlight#Clear: BOTTOM") 
 endfunction
 
-function! vimside#selection#highlight#Display(file, start, end)
-call s:LOG("vimside#selection#highlight#Display: start=". a:start .", end=". a:end) 
-  call vimside#selection#highlight#SetAutoCmds()
+function! vimside#command#selection#highlight#Display(file, start, end)
+call s:LOG("vimside#command#selection#highlight#Display: start=". a:start .", end=". a:end) 
+  call vimside#command#selection#highlight#SetAutoCmds()
   let current_file = expand('%:p')
   if a:file == current_file
     let [line1, column1] = vimside#util#GetLineColumnFromOffset(a:start)
     let [line2, column2] = vimside#util#GetLineColumnFromOffset(a:end)
     let s:line_start = line1
     let s:line_end = line2
-call s:LOG("vimside#selection#highlight#Display: line1=". line1 .", column1=". column1) 
-call s:LOG("vimside#selection#highlight#Display: line2=". line2 .", column2=". column2) 
+call s:LOG("vimside#command#selection#highlight#Display: line1=". line1 .", column1=". column1) 
+call s:LOG("vimside#command#selection#highlight#Display: line2=". line2 .", column2=". column2) 
 
     let patterns = s:GetMatchRanges(line1, line2, column1, column2)
     let s:sids = []
     for pattern in patterns
       let sid = matchadd("VimsideSeclection_HL", pattern)
-call s:LOG("vimside#selection#highlight#Display: sid=". sid) 
+call s:LOG("vimside#command#selection#highlight#Display: sid=". sid) 
       call add(s:sids, sid)
     endfor
   endif

@@ -17,7 +17,11 @@ if filereadable(s:plugin_user_path)
 else
   " Start Vimside 
   " M-x ensime
-  nmap <silent> <Leader>vs :call vimside#command#StartEnsime()<CR>
+  if has("gui_running")
+    nmap <silent> <m-x> :call vimside#command#StartEnsime()<CR>
+  else
+    nmap <silent> <Leader>vs :call vimside#command#StartEnsime()<CR>
+  endif
   " Stop Vimside 
   nmap <silent> <Leader>vS :call vimside#command#StopEnsime()<CR>
 
@@ -63,9 +67,11 @@ else
 
   " C-c C-v v
   "   Search globally for methods or types.
+  map <silent> <Leader>vv :call vimside#command#Search()<CR>
 
   " Control+Right-Click(on an imported package)
   "   Inspect the package under cursor.
+  " NOT IMPLEMENTED YET
 
   " Mouse Hover
   "   Echo the type of the expression under the cursor.
@@ -73,9 +79,11 @@ else
 
   " C-c C-v p
   "   Inspect the package of the current source file.
+  " NOT IMPLEMENTED YET
 
   " C-c C-v o
   "   Inspect the package specified in .ensime as :package.
+  " NOT IMPLEMENTED YET
 
   " C-c C-v r
   "   List all references to the symbol under the cursor.
@@ -83,18 +91,23 @@ else
 
   " .
   "   Forward one page in the inspector history.
+  " NOT IMPLEMENTED YET
 
   " ,
   "   Backward one page in the inspector history.
+  " NOT IMPLEMENTED YET
 
   " C-n or TAB
   "   Forward one link in the inspector.
+  " NOT IMPLEMENTED YET
 
   " C-p
   "   Backward one link in the inspector.
+  " NOT IMPLEMENTED YET
 
   " C-c C-v s
   "   Switch to the sbt command-line (works for sbt projects only)
+  " NOT IMPLEMENTED YET
 
   " C-c C-v z
   "   Switch to the scala interpreter, with project classes in the classpath.
@@ -109,7 +122,8 @@ else
   nmap <silent> <Leader>va :call vimside#command#TypecheckAll()<CR>
 
   " C-c C-v e
-  "   Show all errors and warnings in the project.
+  "   (Re-)Show all errors and warnings in the project.
+  nmap <silent> <Leader>ve :call vimside#command#ShowErrorsAndWarning()<CR>
 
   " C-c C-v f
   "   Format the current Scala source file.
@@ -117,9 +131,11 @@ else
 
   " C-c C-v u
   "   Undo a refactoring or formatting change.
+  " NOT IMPLEMENTED YET
 
   " M-n
   "   Go to the next compilation note in the current buffer.
+  " NOT IMPLEMENTED YET
 
   " C-c C-d x
   "   Where x is one of:
@@ -134,6 +150,7 @@ else
   "     q Kill the debug session.
   "     i Inspect the local variable at cursor.
   "     t Show backtrace.
+  " NOT IMPLEMENTED YET
 
   " C-c C-r x
   "   Where x is one of:
@@ -143,28 +160,32 @@ else
   "     m Extract method.
   "     i Inline local.
   "     t Add import for type at point.
+  " NOT IMPLEMENTED YET
   
   " C-c C-b x
   "   Where x is one of:
   "     b Build the entire project.
   "     r Rebuild the project, incrementally.
+  " NOT IMPLEMENTED YET
 
   " M-x ensime-reload
   "   Reload the .ensime file and recompile the project. Useful if you hit 
   "   a server bug.
+  " NOT IMPLEMENTED YET
 
   " M-x ensime-config-get
   "   Start the automatic configuration file generator.
+  " NOT IMPLEMENTED YET
 
 
 
-  nmap <silent> <Leader>vp :call vimside#command#MapPopUp('n')<CR>
-  vmap <silent> <Leader>vp :call vimside#command#MapPopUp('v')<CR>
-
-  nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
+  nmap <silent> <Leader>vp :call vimside#command#MakePopUp('n')<CR>
+  vmap <silent> <Leader>vp :call vimside#command#MapkeopUp('v')<CR>
 
   nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
   nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
+
+  nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
 
   augroup VIMSIDE
     au!

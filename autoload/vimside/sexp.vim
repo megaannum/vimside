@@ -598,7 +598,7 @@ function! vimside#sexp#SourceFile(filepath)
 " echo "SourceFile: filepath=" . a:filepath
 
   if ! filereadable(a:filepath)
-      throw "VimSIde Vim Ensime Config file can not be read: " . a:filepath
+      throw "Vimside Vim Ensime Config file can not be read: " . a:filepath
   endif
   if exists("g:ensime_config")
     let l;ec = g:ensime_config
@@ -634,7 +634,7 @@ function! vimside#sexp#SourceFile(filepath)
     execute ":source " . a:filepath
 
     if ! exists("g:ensime_config")
-      throw "VimSIde Vim Ensime Config file did not define g:ensime_config: " . a:filepath
+      throw "Vimside Vim Ensime Config file did not define g:ensime_config: " . a:filepath
     endif
 
     return g:ensime_config
@@ -678,7 +678,7 @@ function! vimside#sexp#ParseFile(filepath)
 endfunction
 
 function! vimside#sexp#Parse(in)
-"call s:log("s:Parse: TOP in=". a:in)
+" call s:log("s:Parse: TOP in=". a:in)
   let slist = s:SubParse(a:in, 0, len(a:in))
 "call s:log("s:Parse: len(slist)=".len(slist))
 "call s:log("s:Parse: slist=".  vimside#sexp#ToString(slist))
@@ -688,7 +688,7 @@ function! vimside#sexp#Parse(in)
 endfunction
 
 function! s:SubParse(in, pos, len)
-"call s:log("s:SubParse: TOP")
+" call s:log("s:SubParse: TOP")
   let in = a:in
   let len = a:len
 "call s:log("s:SubParse: len=".len)
@@ -700,7 +700,7 @@ function! s:SubParse(in, pos, len)
 
   while pos < len
     let c = in[pos]
-"call s:log("s:SubParse: pos=".pos)
+" call s:log("s:SubParse: pos=".pos)
 " call s:log("s:SubParse: c=".c)
     if c == ';'
       " parse to end of file or endofline
@@ -771,6 +771,8 @@ function! s:MakeSExp(s)
     return vimside#sexp#Make_Keyword(s)
   elseif s =~ '^[a-zA-Z][a-zA-Z0-9-:]*$'
     return vimside#sexp#Make_Symbol(s)
+  elseif s[0] == "'" && s[1:] =~ '^[a-zA-Z][a-zA-Z0-9-:]*$'
+    return vimside#sexp#Make_Symbol(s[1:])
   else
     throw "Error: s:MakeSExp: <" .s. ">"
   endif
@@ -797,6 +799,38 @@ endfunction
 
 " return [1, pos] or [0, _]
 function! s:FindMatchingParen(in, pos, len)
+  let in = a:in
+  let pos = a:pos
+  let len = a:len
+
+  let in_double_quote = 0
+  let paren_depth = 0
+
+  while pos < len
+    let c = in[pos]
+" call s:log("s:FindMatchingParen: pos=".pos)
+" call s:log("s:FindMatchingParen: c=".c)
+    if c == '"'
+      let in_double_quote = in_double_quote ? 0 : 1
+    elseif c == "\\"
+      " skip next character
+      let pos += 1
+    elseif ! in_double_quote && c == '('
+      let paren_depth += 1
+    elseif ! in_double_quote && c == ')'
+      let paren_depth -= 1
+      if paren_depth == 0
+        return [1, pos]
+      endif
+    endif
+
+    let pos += 1
+  endwhile
+
+  return [0, -1]
+endfunction
+
+function! s:FindMatchingParenOLD_BAD(in, pos, len)
   let in = a:in
   let pos = a:pos
   let len = a:len

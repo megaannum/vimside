@@ -33,6 +33,11 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("vimside-forms-use", 1)
    
 
+  " search options
+  " call owner.Set("public-symbol-search-do-incremental", 0)
+  " call owner.Set("public-symbol-search-close-empty-display", 1)
+  
+
   " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "same_window.vim")
   " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "split_window.vim")
   " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "vsplit_window.vim")

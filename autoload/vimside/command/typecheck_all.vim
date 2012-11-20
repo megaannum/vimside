@@ -1,8 +1,8 @@
 " ============================================================================
-" error.vim
+" typecheck_all.vim
 "
-" File:          error.vim
-" Summary:       Error maager for Vimside
+" File:          typecheck_all.vim
+" Summary:       Vimside Typecheck All
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
 "
@@ -13,20 +13,7 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
-let s:errors = []
 
-function! vimside#error#record(msg)
-  echoerr a:msg
-  let t = exists("*strftime")
-        \ ? strftime("%Y%m%d-%H%M%S: ")    
-        \ : "" . localtime() . ": "
-  all add(s:errors, t .': '. a:msg)
-endfunction
-
-function! vimside#error#get()
-  return copy(s:errors)
-endfunction
-
-function! vimside#error#clear()
-  let s:errors = []
+function!  vimside#command#typecheck_all#Run()
+  call vimside#swank#rpc#typecheck_all#Run()
 endfunction

@@ -126,7 +126,7 @@ call s:LOG("SymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolinfo))
       return 0
     endif
 
-    call vimside#SetPosition()
+    call vimside#command#position#Set()
 
     let current_file = expand('%:p')
     if has_key(dic, ":decl-pos")

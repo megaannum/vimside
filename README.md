@@ -7,12 +7,168 @@ Vim Scala IDE (VimSIde) built upon ENSIME
 This is a pre-alpha release of Vimside, a Vim Scala IDE.
 Only a small number of all of the ENSIME capabilities have
 been implemented and it has only been tested against the
-very small scala/java test source project bundled with it.
+very small Scala/Java test source project bundled with it.
 
 I have checked the source into github primarily so that
 the source is somewhere other than on my local machines.
 I expect to continue to update the sources on github
 frequently, flushing out the features.
+
+Current Supported Ensime Commands:
+
+  Start Ensime
+    This makes sure that the current environment and Option settings are
+    correct and then launches the Ensime backend server. The Ensime server
+    writes a file where it puts the socket port that its client should use.
+    Vimside reads that file, gets the port number, and provides Ensime
+    with configuration information.
+
+  Stop Ensime
+    There is also an autocmd that will kill the Ensime server when the 
+    user exists Vim.
+
+  Map <Tab> to Omni-Code Completion in insert mode
+    This mapping maybe overridden by the mapping is some other plugin
+    (like a snipmate binding), So, if it does not seem to work for you
+    list the current mappings and see what is overriding it.
+    Very Useful.
+
+  Symbol At Point
+    With cursor on variable, jump to the definition of its symbol.
+    One can easily jump back and forth.
+    The Emacs key binding uses the Meta key. In GVim I could get this
+    to work and so in GVim the key mapping mirrors the Emacs Ensime
+    key binding. But, with Vim in an XTerm, I could not get the Meta/Alt
+    key to be recognized (and there is NO single place where there is
+    a definitive, failsafe guide for getting Meta/Alt key mappings to 
+    work, so I have a different binding for Vim.
+    Very useful.
+    Implementations: 1
+
+  Selection Expand/Contract
+    Select the surrounding syntactic context and easily shrink/grow the
+    selection.
+    Implementations: 2
+
+  Global Public Search
+    Search for method or types through project code using space separated
+    search terms.
+    Useful.
+    Implementations: 1
+
+  Hover To Symbol
+    Place cursor (or mouse) over a variable and its Symbol will be 
+    displayed. 
+    Cute but requires frequent server polling.
+    Implementations: 3
+
+  Use of Symbol At Point
+    List all references to the symbol under the cursor.
+    Very useful.
+    Implementations: 1
+
+  Launch Repl
+    Switch to the Scala interpreter, with project classes in the classpath.
+    TBD: cut/paste code fragments into Repl.
+    Implementations: 1
+
+  Typecheck Current File
+    Typecheck the current file and display errors and warnings.
+    Very useful.
+    Implementations: 1
+
+  Typecheck All Files
+    Typecheck the all files and display errors and warnings.
+    Very useful.
+    Implementations: 1
+
+  Re-Show Errors/Warnings
+    Show all errors and warnings in the project.
+    Very useful.
+    Implementations: 1
+
+  Format Source
+    Format the current Scala source file.
+    Useful.
+    Implementations: 1
+
+  Popup Menu
+    Bring up Popup menu with all Vimside commands (requires Forms library).
+    Useful for folks who have not yet learned the key mappings.
+    Implementations: 1
+
+  Browse Source Roots
+    Directory browser of project sources (project code base).
+    Implementations: 2
+
+  Browse Reference Source Roots
+    Directory browser of project reference sources (Java and Scala libraries).
+    Implementations: 2
+
+  Option Viewer/Editor
+    Bring up the Option Viewer/Editor (requires Forms library). Lets one
+    see all of the Vimside configurable Options and their current value.
+    To be implemented will be an Editor allowing for the modification of
+    some "dynamic" Options at runtime.
+    Implementations: 1
+
+  Completions
+    OmmiCompletions using <c-x><c-o>.
+    Very Useful.
+    Implementations: 1
+
+
+Ensime Capabilities to be Supported:
+
+  Package Inspector
+    Inspect imported package, current file's package and the package
+    specified in the ensime configuration ':package'.
+
+  Type Inspector
+    Click on type and see information, Click on information and see its 
+    information. Move about Inspector history.
+
+  SBT Command-Line
+    Switch to the sbt command-line (works for sbt projects only)
+
+  Scalex
+    Seems to be a dead project (see: http://scalex.org/)
+
+  Open Browser Info
+    Open 'http:.... doc page'
+
+
+  Re-Show Errors/Warnings
+    Show all errors and warnings in the project.
+
+  Refactoring
+    Rename the symbol at point.
+    Organize imports.
+    Extract local.
+    Extract method.
+    Inline local.
+    Add import for type at point.
+
+  Building
+    Build the entire project.
+    Rebuild the project incrementally.
+
+  Run Application
+
+  Debug Application
+    Start and run the debugger.
+    Start and run the debugger.
+    Set a breakpoint.
+    Clear a breakpoint.
+    Step.
+    Step over.
+    Step out.
+    Continue from a breakpoint.
+    Kill the debug session.
+    Inspect the local variable at cursor.
+    Show backtrace.
+
+  And others
 
 
 # Installation
@@ -32,7 +188,7 @@ for a C-language binding to sockets
 for launching and managing communications with the Scala Repl.
 
 
-## Directory layout
+## Vimside Directory layout
 
 After unpacking the Vimside directory layout should look like:
 
@@ -44,16 +200,60 @@ After unpacking the Vimside directory layout should look like:
       data/
         " data that persists between invocations of a plugin
         vimside/
-            " examples, local test scala/java source tree
+            " examples, local test Scala/Java source tree
       doc/
         vimside.txt
       plugin/
         vimside.vim
 
 
+## Intalling from Vim.org
+
+Anyway, to get the Vimside zip file from vim.org go to
+http://www.vim.org/scripts/script.php?script_id=4298
+and download the latest version. Unzip it in your '.vim'
+directory (on Linux systems).
+
+
+Now, Vimside depends upon Vimshell and Vimproc.  It is recommended that 
+you get the latest releases of these since they both were modified to add
+some support for capabilities identified while creating Vimside. They are
+located at:
+[Vimproc](https://github.com/Shougo/vimproc)
+[Vimshell](https://github.com/Shougo/vimshell)
+Download them both and unzip them.
+
+For Vimproc, there is an additional step because it includes a C-language 
+library. You must compile the library for your machine.  Vimproc comes with 
+a number of make-files. Pick the right one and build the library. Since 
+Vimside is for Scala programmers, I expect that building a C-library with 
+a supplied makefile will not be too challenging :-)
+
+In addition, Vimside can be configured so that it can use the Vim
+Forms and Self libraries. The latest version of these can be gotten
+from github or you can get released versions from vim.org:
+[Self](http://www.vim.org/scripts/script.php?script_id=4150)
+[Forms]( http://www.vim.org/scripts/script.php?script_id=3072)
+
+For most of the Vimside commands there are associated Options that configure 
+how the command can be used. Many such Options allow the user to run one 
+of multiple possible implementations.  In particular, there might be a 
+"native" Vim, non-Forms-based solution and also a Forms-based solution. The 
+Forms-based solution is built upon "native" Vim but requires the downloading 
+of the above two libraries: Self and Forms. Each such command with multiple 
+implementations can be configure individually to use or not use Forms.
+
+What's more, the Forms library allows one to used a popup menu
+(useful if you do not know all of the Vimside key-mappings yet).
+And, it is expected that the package-inspector and the type-inspector
+will only have Forms implementations - how to do a type-inspector
+otherwise might be a challenge.
+
 ## Intalling with vim-addon-manager (VAM)
 
-For more information about vim-addon-manager, see [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) and [Vim-addon-manager getting started](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-getting-started.txt)
+For more information about vim-addon-manager, see 
+[vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) and 
+[Vim-addon-manager getting started](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-getting-started.txt)
 
 In your .vimrc, add self as shown below:
 
@@ -70,6 +270,7 @@ In your .vimrc, add self as shown below:
       let g:vim_addon_manager.plugin_sources['forms'] = {'type': 'git', 'url': 'git://github.com/megaannum/forms'}
       let g:vim_addon_manager.plugin_sources['vimproc'] = {'type': 'git', 'url': 'git://github.com/Shougo/vimproc'}
       let g:vim_addon_manager.plugin_sources['vimshell'] = {'type': 'git', 'url': 'git://github.com/Shougo/vimshell'}
+      let g:vim_addon_manager.plugin_sources['ensime'] = {"type": "git", "url": "git://github.com/aemoncannon/ensime", "branch" : "scala-2.9"}
       let g:vim_addon_manager.plugin_sources['vimside'] = {'type': 'git', 'url': 'git://github.com/megaannum/vimside'}
 
 
@@ -78,6 +279,7 @@ In your .vimrc, add self as shown below:
         \ 'forms',
         \ 'vimproc',
         \ 'vimshell',
+        \ 'ensime',
         \ 'vimside'
         \ ]
 
@@ -105,14 +307,29 @@ if you would like to download and install the plugins.
 
 I do not use pathogen. An example usage would be welcome.
 
+## Ensime Install
+
+Ensime can be downloaded from https://github.com/aemoncannon/ensime
+and its on-line manual is at: aemoncannon.github.com/ensime/index.html/.
+
+In addition, for ENSIME, there are pre-built releases available at:
+https://github.com/aemoncannon/ensime/downloads.
+I highly recommend getting these (Scala 2.9.2 and/or 2.10.0-SNAPSHOT)
+rather than trying to build the Ensime Scala code yourself.
+
+Currently, Vimside does not support the Ensime SBT commands (yet to be
+implemented). When such support is created, there is an additional
+library, an SBT Plugin that supports integration with the ENSIME IDE:
+https://github.com/aemoncannon/ensime-sbt-cmd
+
 # Usage
 
 Look at the plugin/vimside.vim file for key mappings: how to
 start the Ensime server and the currently supported commands.
 
 RECOMMENDED for initial testing:
-To run against test Scala/Java project, 
-first in data/vimside copy example_options_user.vim to options_user.vim.
+To run against test Scala/Java project, first in data/vimside directory
+copy example_options_user.vim to options_user.vim.
 
   > cd $HOME/.vim/data/vimside
   > /bin/cp example_options_user.vim options_user.vim

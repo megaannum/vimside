@@ -387,18 +387,18 @@ if 0
 "OLD
   let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
   if ! found
-    echoerr "Vimside: Option not found: " . 'ensime-config-file-name'
+    echoerr "Option not found: " . 'ensime-config-file-name'
   endif
 
   let [found, l:use_test_efile] = g:vimside.GetOption('test-ensime-file-use')
   if ! found
-    echoerr "Vimside: Option not found: " . 'test-ensime-file-use'
+    echoerr "Option not found: " . 'test-ensime-file-use'
   endif
 
   if l:use_test_efile
     let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
     if ! found
-      echoerr "Vimside: Option not found: " . 'test-ensime-file-dir'
+      echoerr "Option not found: " . 'test-ensime-file-dir'
     endif
     call g:VimsideCheckDirectoryExists(l:test_dir)
 
