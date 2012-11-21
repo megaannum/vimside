@@ -1,7 +1,7 @@
 vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.2
+Version:     0.2.3
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -751,6 +751,13 @@ Show backtrace.
 
 ==============================================================================
 9. Release notes                                       *vimside-release-notes*
+0.2.3   - Fix: ~
+    Made example options file 'example_options_user.vim' maybe easier to
+    understand and use.
+    Modified Option manager so that the 'ensime-dist-path' takes precedence
+    over the combination of the two Options 'ensime-install-path' and
+    'ensime-dist-dir'.
+
 0.2.2   - Fix: ~
     Added documentation and example Option setting code to
     example_options_user.vim.

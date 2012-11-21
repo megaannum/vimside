@@ -13,9 +13,12 @@ let s:full_dir=fnamemodify(s:full_path, ':h')
 
 function! g:VimsideOptionsUserLoad(owner)
   let owner = a:owner
-  call owner.Set("test-ensime-file-dir", s:full_dir)
+
+  "--------------
+  " Enable logging
   call owner.Set("ensime-log-enabled", 1)
   call owner.Set("vimside-log-enabled", 1)
+  "--------------
 
   "--------------
   " Where is Ensime installed
@@ -32,20 +35,29 @@ function! g:VimsideOptionsUserLoad(owner)
   "--------------
 
 
-  " call owner.Set("use-cwd-as-default-output-dir", 1)
-  
-  " uncomment to run against demonstration test code
+  "--------------
+  " To run against ensime test project code
+  " Location of test directory
+  " call owner.Set("test-ensime-file-dir", s:full_dir)
+  " Uncomment to run against demonstration test code
   " call owner.Set("test-ensime-file-use", 1)
-   
-  " The Ensime Config  information is in a file called '_ensime'
-  " call owner.Set("ensime-config-file-name", "_ensime")
-   
-  " The Ensime Config  information is in a file called 'ensime_config.vim'
+  " The Ensime Config information is in a file called 'ensime_config.vim'
   " call owner.Set("ensime-config-file-name", "ensime_config.vim")
+  "--------------
+
+  "--------------
+  " To run against one of your own projects
+  " The Ensime Config  information is in a file called '_ensime'
+  "  Emacs Ensime calls the file '.ensime' - you can call it 
+  "  whatever you want as long as you set its name here.
+  " call owner.Set("ensime-config-file-name", "_ensime")
+  "--------------
    
    
+  "--------------
   " Vimside uses Forms library 
   " call owner.Set("vimside-forms-use", 1)
+  "--------------
    
   " call owner.Set("swank-rpc-expand-selection-information", 'visual')
 

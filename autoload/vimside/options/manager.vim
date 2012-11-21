@@ -329,7 +329,7 @@ function! vimside#options#manager#Load()
 
         " look in current directory and walk up directories until ensime
         " config file is found.
-        let dir = s:full_dir
+        let dir = getcwd()
         while dir != '/'
           let l:tmp_config_file = dir . '/' . l:efname
           if filereadable(l:tmp_config_file)
