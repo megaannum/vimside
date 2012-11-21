@@ -17,6 +17,21 @@ function! g:VimsideOptionsUserLoad(owner)
   call owner.Set("ensime-log-enabled", 1)
   call owner.Set("vimside-log-enabled", 1)
 
+  "--------------
+  " Where is Ensime installed
+  " call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+  " call owner.Set("ensime-install-path", $HOME . "/vimfiles/vim-addons/ensime")
+
+  " Which build version of Ensime to use. 
+  " Must be directory under 'ensime-install-path' directory
+  " call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+  " call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+
+  " Or, full path to Ensime build version
+  " call owner.Set("ensime-dist-path", "SOME_PATH_TO_ENSIME_BUILD_DIR")
+  "--------------
+
+
   " call owner.Set("use-cwd-as-default-output-dir", 1)
   
   " uncomment to run against demonstration test code
@@ -32,6 +47,7 @@ function! g:VimsideOptionsUserLoad(owner)
   " Vimside uses Forms library 
   " call owner.Set("vimside-forms-use", 1)
    
+  " call owner.Set("swank-rpc-expand-selection-information", 'visual')
 
   " search options
   " call owner.Set("public-symbol-search-do-incremental", 0)

@@ -22,11 +22,20 @@ function! vimside#options#default#Load(owner)
   let owner = a:owner
   call owner.Set("test-ensime-file-use", 0)
 
-  if  has('win16') || has('win32') || has('win64')
-    call owner.Set("ensime-install-path", $HOME . "/vimfiles/vim-addons/ensime")
+  if  has("win32") || has("win95") || has("win64") 
+            \ || has("win16") || has("dos32")
+    let ensime_install_path = $HOME . "/vimfiles/vim-addons/ensime"
+    if isdirectory(ensime_install_path)
+      call owner.Set("ensime-install-path", ensime_install_path)
+    endif
+
     call owner.Set("ensime-config-file-name", "_ensime")
   else
-    call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+    let ensime_install_path = $HOME . "/.vim/vim-addons/ensime"
+    if isdirectory(ensime_install_path)
+      call owner.Set("ensime-install-path", ensime_install_path)
+    endif
+
     call owner.Set("ensime-config-file-name", ".ensime")
   endif
   call owner.Set("use-cwd-as-default-output-dir", 0)
@@ -73,7 +82,7 @@ function! vimside#options#default#Load(owner)
 
   call owner.Set("swank-rpc-expand-selection-caller", 'g:ExpandSelectionCaller')
   call owner.Set("swank-rpc-expand-selection-handler", 'g:ExpandSelectionHandler')
-  call owner.Set("swank-rpc-expand-selection-information", 'visual')
+  call owner.Set("swank-rpc-expand-selection-information", 'highlight')
   call owner.Set("swank-rpc-expand-selection-highlight-color-dark", '5fffff')
   call owner.Set("swank-rpc-expand-selection-highlight-color-light", '5fffff')
 

@@ -227,21 +227,6 @@ let g:vimside.GetOptionDefinitions = function("vimside#options#manager#GetOption
 
 
 
-if 0
-
-function! g:VimsideSetOption(key, value)
-  if ! has_key(g:vimside, a:key)
-    let g:vimside[a:key] = a:value
-  endif
-endfunction
-function! g:VimsideCheckOptionSet(key)
-  if ! has_key(g:vimside, a:key)
-    echoerr "ERROR: Vimside missing option: " . a:key
-  endif
-endfunction
-endif
-
-
 function! g:VimsideCheckDirectoryExists(dir, perms, errors)
   let dir = a:dir
   let perms = a:perms
@@ -383,60 +368,21 @@ function! vimside#options#manager#Load()
   endif
 
 
-if 0
-"OLD
-  let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
-  if ! found
-    echoerr "Option not found: " . 'ensime-config-file-name'
-  endif
-
-  let [found, l:use_test_efile] = g:vimside.GetOption('test-ensime-file-use')
-  if ! found
-    echoerr "Option not found: " . 'test-ensime-file-use'
-  endif
-
-  if l:use_test_efile
-    let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
-    if ! found
-      echoerr "Option not found: " . 'test-ensime-file-dir'
-    endif
-    call g:VimsideCheckDirectoryExists(l:test_dir)
-
-    let l:ensime_config_file = l:test_dir . "/" . l:efname
-  else
-    " look in current directory and walk up directories until ensime
-    " config file is found.
-    let dir = s:full_dir
-    while dir != '/'
-      let l:ensime_config_file = dir . '/' . l:efname
-      if filereadable(l:ensime_config_file)
-        break
-      endif
-      unlet l:ensime_config_file
-      let dir = fnamemodify(dir, ":h")
-    endwhile
-    " let l:ensime_config_file = findfile("l:efname", ".;")
-
-    if dir == ''
-      echoerr "Vimside: can find ensime config file: " . l:efname
-    endif
-  endif
-
-  if ! filereadable(l:ensime_config_file)
-    echoerr "Vimside: can not read ensime config file: " . l:ensime_config_file
-  endif
-
-  let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
-  call g:vimside.SetOption("ensime_config_dir", l:ensime_config_dir)
-  call g:vimside.SetOption("ensime_config_file", l:ensime_config_file)
-"OLD
-endif
-
-
 
 
   " Do we have the Ensime Distribution path
-  if g:vimside.HasOption("ensime-install-path")
+  let got_ensime_dir = 0
+
+  if g:vimside.HasOption("ensime-dist-path")
+    let [found, l:distdirpath] = g:vimside.GetOption('ensime-dist-path')
+    if ! found
+      call add(l:errors, "Option not found: '". 'ensime-dist-path' ."'")
+    endif
+
+    let got_ensime_dir = g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
+  endif
+
+  if ! got_ensime_dir && g:vimside.HasOption("ensime-install-path")
     let [found, l:path] = g:vimside.GetOption('ensime-install-path')
     if ! found
       call add(l:errors, "Option not found: '". 'ensime-install-path' ."'")
@@ -454,19 +400,14 @@ endif
     endif
 
     let l:distdirpath = l:path  . '/' . l:distdir
-    call g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
+    let got_ensime_dir = g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
   
-    call g:vimside.SetOption("ensime-dist-path", l:distdirpath)
-
-  elseif g:vimside.HasOption("ensime-dist-path")
-    let [found, l:distdirpath] = g:vimside.GetOption('ensime-dist-path')
-    if ! found
-      call add(l:errors, "Option not found: '". 'ensime-dist-path' ."'")
+    if got_ensime_dir
+      call g:vimside.SetOption("ensime-dist-path", l:distdirpath)
     endif
+  endif
 
-    call g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
-
-  else
+  if ! got_ensime_dir
     call add(l:errors, "No Ensime Distribution path, set options 'ensime-install-path' or 'ensime-dist-path'")
   endif
 
@@ -514,20 +455,6 @@ endif
     let value = portdir . '/' . l:pfilename
     call g:vimside.SetOption('ensime-port-file-path', value)
 
-if 0
-      if g:vimside.HasOption("ensime-port-file-name")
-        let [found, l:pfilename] = g:vimside.GetOption('ensime-port-file-name')
-        if ! found
-          call add(l:errors, "Option not found: '". 'ensime-port-file-name' ."'")
-        endif
-
-        let value = portdir . '/' . l:pfilename
-        call g:vimside.SetOption('ensime-port-file-path', value)
-      else
-        let value = portdir . '/_ensime_port'
-        call g:vimside.SetOption('ensime-port-file-path', value)
-      endif
-endif
   endif
 
   let [found, hostname] = g:vimside.GetOption('ensime-host-name')

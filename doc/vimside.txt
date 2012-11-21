@@ -1,7 +1,7 @@
 vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.1
+Version:     0.2.2
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -16,10 +16,11 @@ For Vim instructions on installing this 'txt' file, enter:
   2. Installation                                |vimside-install|
       2.1 Download                                   |vimside-download|
       2.2 Dependency                                 |vimside-dependency|
-      2.3 Directory layout                           |vimside-directory-layout|
-      2.4 Plugin Managers                            |vimside-plugin-managers|
-	2.4.1 VAM                                      |vimside-vam|
-	2.4.2 Pathogen                                 |vimside-pathogen|
+      2.3 Ensime                                     |vimside-ensime|
+      2.4 Directory layout                           |vimside-directory-layout|
+      2.5 Plugin Managers                            |vimside-plugin-managers|
+	2.5.1 VAM                                      |vimside-vam|
+	2.5.2 Pathogen                                 |vimside-pathogen|
   3. Test Configure                              |vimside-test-configure|
   4. Running                                     |vimside-running|
   5. Options                                     |vimside-options|
@@ -124,7 +125,75 @@ create one's own Scala IDE.
 
 2.2 Dependency                                             v*imside-dependency*
 
-2.3 Directory layout                                 *vimside-directory-layout*
+2.2 Ensime                                                     v*imside-ensime*
+
+Ensime is not a Vim plugin. It is a Scale program. It has to be installed
+and built or a pre-build version has to be used. It can be downloaded
+from:
+
+    https://github.com/aemoncannon/ensime
+
+One can the follow the instructions there and build it. 
+
+I have never done this. Rather, I have downloaded a pre-build bundle. 
+One for Scala 2.9 and another for Scala 10.0. These can be found at:
+
+    https://github.com/aemoncannon/ensime/downloads
+
+The Ensime build directory has the following layout (using
+ensime_2.9.2-0.9.8.1 as an example):
+
+    ensime_2.9.2-0.9.8.1/
+	bin/                 
+	LICENSE
+	elisp/
+	lib/                 
+	README.md
+
+Having built Ensime or downloaded a pre-built package, you must
+set an Option in Vimside so that Vimside can locate the script
+used to start the Ensime server. To set a Vimside Option, you
+must copy the 'example_options_user.vim' located in
+'data/vimside' to a file called 'options_user.vim' and
+edit it.
+
+There is two different ways to do this.
+
+The first is to set the Option 'ensime-install-path' to the
+location of downloaded Ensime source. If you use the VAM plugin manager,
+then Ensime will be in the directory:
+
+  $HOME . "/.vim/vim-addons/ensime
+or
+  $HOME .  "/vimfiles/vim-addons/ensime
+
+so you would set the Option according
+
+  call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+or
+  call owner.Set("ensime-install-path", $HOME .  "/vimfiles/vim-addons/ensime")
+
+Then depending upon the name of the build directory, which is under the
+'ensime-install-path' Option value directory location, you would
+set the value of the Option 'ensime-dist-dir' to that directory name.
+For example:
+
+    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+or
+    call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+
+Alternatively, you can specify the full path to the ensime distribution
+using the Option 'ensime-dist-path'. As an example, if you installed
+an Ensime build package in some Scala directory, you might set
+the Option as:
+
+    call owner.Set("ensime-dist-path", $HOME .  "/scala/ensime/ensime_2.9.2-0.9.8.1")
+
+If you set the 'ensime-dist-path', it is checked first and if it exists it
+is used rather than the 'ensime-install-path' and 'ensime-dist-dir' combination.
+
+
+2.4 Directory layout                                 *vimside-directory-layout*
 
 After unpacking the {Vimside} directory layout should look like: 
     $HOME/.vim/
@@ -150,12 +219,12 @@ code will be under '$HOME/.vim/vim-addons/vimside'. And, the libraries
 that Vimside depends upon, if they too are being managed with VAM, they
 will also be loacated under the 'vim-addons' directory.
 
-2.4 Plugin Managers                                   *vimside-plugin-managers*
+2.5 Plugin Managers                                   *vimside-plugin-managers*
 
 Vim plugin managers make installing and, even more important, managing 
 plugin upgrade easy. Well, I think so.
 
-2.4.1 VAM                                                         *vimside-vam*
+2.5.1 VAM                                                         *vimside-vam*
 
 For more information about vim-addon-manager, see [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) and [Vim-addon-manager getting started](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-getting-started.txt)
 
@@ -205,7 +274,7 @@ and build the C-language file 'proc.c' using one of the supplied make files.
 Now start Vim. You will be asked by vim-addon-manager if you would like 
 to download and install the plugins.
 
-2.4.2 Pathogen                                               *vimside-pathogen*
+2.5.2 Pathogen                                               *vimside-pathogen*
 
 I do not use pathogen. An example usage would be welcome.
 
@@ -682,6 +751,10 @@ Show backtrace.
 
 ==============================================================================
 9. Release notes                                       *vimside-release-notes*
+0.2.2   - Fix: ~
+    Added documentation and example Option setting code to
+    example_options_user.vim.
+
 0.2.1   - Fix: ~
     Reorganized command vim files.
     Added doc/vimside.txt
@@ -707,4 +780,4 @@ Show backtrace.
 
 ==============================================================================
 
- vim:tw=78:ts=8:noet:ft=help:fo+=t:norl:noet:
+vim:tw=78:ts=8:noet:ft=help:fo+=t:norl:noet:

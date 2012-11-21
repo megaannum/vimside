@@ -317,6 +317,71 @@ https://github.com/aemoncannon/ensime/downloads.
 I highly recommend getting these (Scala 2.9.2 and/or 2.10.0-SNAPSHOT)
 rather than trying to build the Ensime Scala code yourself.
 
+Ensime is not a Vim plugin. It is a Scale program. It has to be installed
+and built or a pre-build version has to be used. It can be downloaded
+from:
+
+    https://github.com/aemoncannon/ensime
+
+One can the follow the instructions there and build it. 
+
+I have never done this. Rather, I have downloaded a pre-build bundle. 
+One for Scala 2.9 and another for Scala 10.0. These can be found at:
+
+    https://github.com/aemoncannon/ensime/downloads
+
+The Ensime build directory has the following layout (using
+ensime_2.9.2-0.9.8.1 as an example):
+
+    ensime_2.9.2-0.9.8.1/
+	bin/                 
+	LICENSE
+	elisp/
+	lib/                 
+	README.md
+
+Having built Ensime or downloaded a pre-built package, you must
+set an Option in Vimside so that Vimside can locate the script
+used to start the Ensime server. To set a Vimside Option, you
+must copy the 'example_options_user.vim' located in
+'data/vimside' to a file called 'options_user.vim' and
+edit it.
+
+There is two different ways to do this.
+
+The first is to set the Option 'ensime-install-path' to the
+location of downloaded Ensime source. If you use the VAM plugin manager,
+then Ensime will be in the directory:
+
+  $HOME . "/.vim/vim-addons/ensime
+or
+  $HOME .  "/vimfiles/vim-addons/ensime
+
+so you would set the Option according
+
+  call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+or
+  call owner.Set("ensime-install-path", $HOME .  "/vimfiles/vim-addons/ensime")
+
+Then depending upon the name of the build directory, which is under the
+'ensime-install-path' Option value directory location, you would
+set the value of the Option 'ensime-dist-dir' to that directory name.
+For example:
+
+    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+or
+    call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+
+Alternatively, you can specify the full path to the ensime distribution
+using the Option 'ensime-dist-path'. As an example, if you installed
+an Ensime build package in some Scala directory, you might set
+the Option as:
+
+    call owner.Set("ensime-dist-path", $HOME .  "/scala/ensime/ensime_2.9.2-0.9.8.1")
+
+If you set the 'ensime-dist-path', it is checked first and if it exists it
+is used rather than the 'ensime-install-path' and 'ensime-dist-dir' combination.
+
 Currently, Vimside does not support the Ensime SBT commands (yet to be
 implemented). When such support is created, there is an additional
 library, an SBT Plugin that supports integration with the ENSIME IDE:
