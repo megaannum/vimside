@@ -21,8 +21,6 @@ endfunction
 function! vimside#command#StopEnsime() range
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#ensime#Stop()
-  else
-    call s:ERROR("Ensime must be started first")
   endif
 endfunction
 

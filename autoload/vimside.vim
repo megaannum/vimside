@@ -5,7 +5,7 @@
 " Summary:       Vimside top level file
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
-" Version:       0.2.4
+" Version:       0.2.5
 " Modifications:
 "
 " Tested on vim 7.3 on Linux

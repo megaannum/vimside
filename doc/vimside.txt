@@ -1,7 +1,7 @@
 vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.4
+Version:     0.2.5
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -125,7 +125,7 @@ create one's own Scala IDE.
 
 2.2 Dependency                                             v*imside-dependency*
 
-2.2 Ensime                                                     v*imside-ensime*
+2.3 Ensime                                                     v*imside-ensime*
 
 Ensime is not a Vim plugin. It is a Scale program. It has to be installed
 and built or a pre-build version has to be used. It can be downloaded
@@ -416,6 +416,17 @@ Vimside session.
 
 ==============================================================================
 6. Key Mappings                                              *vimside-mappings*
+
+Vimside has key mappings as short cuts for command execution. It comes
+with a set of default mappings which mirror the key bindings that Emacs-Ensime
+has. There is also the ability for a user to define their own key mappings
+and these will be loaded rather than the default ones. The default key
+mappings are in the file 'plugin/vimside.vim' and user-defined key
+mappings can be in the file 'data/vimside/plugin_user.vim'. One may
+either use one or the other but not both sets of key mappings;
+at the top of the default key mapping file, it tests to determine if
+a user key mapping file exists and, if it does, then it is sourced
+rather than sourcing the rest of the default file.
 
 6.1 Default
 
@@ -751,6 +762,9 @@ Show backtrace.
 
 ==============================================================================
 9. Release notes                                       *vimside-release-notes*
+0.2.5   - Fix: ~
+    Stop Ensime command no longer prints error message if Ensime was not
+    started.
 0.2.4   - Fix: ~
     Fixed term and cmdline hover so that they respond more quickly.
     Fixed Expand Selection 'highlight' cleared when cursor moves.
