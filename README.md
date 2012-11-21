@@ -334,11 +334,11 @@ The Ensime build directory has the following layout (using
 ensime_2.9.2-0.9.8.1 as an example):
 
     ensime_2.9.2-0.9.8.1/
-	bin/                 
-	LICENSE
-	elisp/
-	lib/                 
-	README.md
+        bin/                 
+        LICENSE
+        elisp/
+        lib/                 
+        README.md
 
 Having built Ensime or downloaded a pre-built package, you must
 set an Option in Vimside so that Vimside can locate the script
@@ -353,15 +353,19 @@ The first is to set the Option 'ensime-install-path' to the
 location of downloaded Ensime source. If you use the VAM plugin manager,
 then Ensime will be in the directory:
 
-  $HOME . "/.vim/vim-addons/ensime
+    $HOME . "/.vim/vim-addons/ensime
+
 or
-  $HOME .  "/vimfiles/vim-addons/ensime
+
+    $HOME .  "/vimfiles/vim-addons/ensime
 
 so you would set the Option according
 
-  call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+    call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
+
 or
-  call owner.Set("ensime-install-path", $HOME .  "/vimfiles/vim-addons/ensime")
+
+    call owner.Set("ensime-install-path", $HOME .  "/vimfiles/vim-addons/ensime")
 
 Then depending upon the name of the build directory, which is under the
 'ensime-install-path' Option value directory location, you would
@@ -369,7 +373,9 @@ set the value of the Option 'ensime-dist-dir' to that directory name.
 For example:
 
     call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+
 or
+
     call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
 
 Alternatively, you can specify the full path to the ensime distribution
