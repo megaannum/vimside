@@ -49,6 +49,8 @@ call s:LOG("TypecheckAll TOP")
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
   call vimside#ensime#swank#dispatch(l:rr)
 
+  call vimside#cmdline#Display("This may take a moment...")
+
 call s:LOG("TypecheckAll BOTTOM") 
 endfunction
 

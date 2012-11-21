@@ -307,6 +307,8 @@ function! vimside#command#hover#term#Handler_Ok(symbolinfo)
   let repeat = 0
   call vimside#scheduler#AddTimeJob(g:vimside_hover_time_name, FuncTime, sec, msec, repeat)
 
+  let g:vimside.swank.ping_data.updatetime = g:vimside_hover_updatetime
+
   return 1
 endfunction
 

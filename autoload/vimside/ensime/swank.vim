@@ -218,17 +218,36 @@ endfunction
 
 function! s:PostHandle(success, got_event)
   if a:success && empty(g:vimside.swank.rpc.waiting)
-    let l:events = g:vimside.swank.events
-    if l:events == '0'
-      call vimside#ensime#swank#ping_info_set_rpc_not_expecting()
-    elseif l:events == 'many'
-      call vimside#ensime#swank#ping_info_set_event_expecting_many()
-    elseif a:got_event
-      if l:events == '1'
+    if empty(g:vimside.swank.ping_data)
+      let l:events = g:vimside.swank.events
+      if l:events == '0'
         call vimside#ensime#swank#ping_info_set_rpc_not_expecting()
-      else
+      elseif l:events == 'many'
         call vimside#ensime#swank#ping_info_set_event_expecting_many()
+      elseif a:got_event
+        if l:events == '1'
+          call vimside#ensime#swank#ping_info_set_rpc_not_expecting()
+        else
+          call vimside#ensime#swank#ping_info_set_event_expecting_many()
+        endif
       endif
+    else
+      if has_key(g:vimside.swank.ping_data, 'read_timeout')
+        let g:vimside.ping.info.read_timeout = g:vimside.swank.ping_data.read_timeout
+      endif
+      if has_key(g:vimside.swank.ping_data, 'char_count')
+        let l:char_count = g:vimside.swank.ping_data.char_count
+        let g:vimside.ping.info.char_count = l:char_count
+        call vimside#scheduler#SetMaxMotionCounter(l:char_count)
+      endif
+
+      if has_key(g:vimside.swank.ping_data, 'updatetime')
+        let l:updatetime = g:vimside.swank.ping_data.updatetime
+        let g:vimside.ping.info.updatetime = l:updatetime
+        call vimside#scheduler#SetUpdateTime(l:updatetime)
+      endif
+      " clear rpc handler specific data
+      let g:vimside.swank.ping_data = {}
     endif
   endif
 endfunction
@@ -455,13 +474,6 @@ function! s:HandleResponse(children)
       call s:ERROR("HandleResponse: Body ':abort' not List: ". string(children)) 
       return 1
     endif
-
-if 0
-    if len(body_list) != 2
-      call s:ERROR("HandleResponse: Body ':abort' not List length 2: ". string(children)) 
-      return 1
-    endif
-endif
 
     let code_sexp = body_list[0]
     let detail_sexp = body_list[1]

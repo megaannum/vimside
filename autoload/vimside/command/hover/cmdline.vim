@@ -43,14 +43,17 @@ function! vimside#command#hover#cmdline#Handler_Ok(symbolinfo)
   let text = vimside#command#hover#util#GetHoverText(dic)
   echo text
 
-  call vimside#scheduler#SetUpdateTime(g:vimside_hover_save_updatetime)
-  call vimside#scheduler#SetMaxMotionCounter(g:vimside_hover_max_mcounter)
+  " call vimside#scheduler#SetUpdateTime(g:vimside_hover_save_updatetime)
+  " call vimside#scheduler#SetMaxMotionCounter(g:vimside_hover_max_mcounter)
 
   call vimside#scheduler#RemoveJob(g:vimside_hover_motion_name)
   let FuncMotion = function("vimside#command#hover#cmdline#JobMotion")
   let charcnt = 0
   let repeat = 0
   call vimside#scheduler#AddMotionJob(g:vimside_hover_motion_name, FuncMotion, charcnt, repeat)
+
+  let g:vimside.swank.ping_data.updatetime = g:vimside_hover_updatetime
+  let g:vimside.swank.ping_data.char_count = g:vimside_hover_max_mcounter
 
   return 1
 endfunction

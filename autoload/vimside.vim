@@ -5,7 +5,7 @@
 " Summary:       Vimside top level file
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
-" Version:       0.2.3
+" Version:       0.2.4
 " Modifications:
 "
 " Tested on vim 7.3 on Linux
@@ -66,6 +66,10 @@ let g:vimside.swank.rpc = {}
 " waiting = { id: rr }
 let g:vimside.swank.rpc.waiting = {} 
 let g:vimside.swank.events = '0'
+" holds 'read_timeout', 'updatetime' and 'char_count'
+" set by command handler when it needs to override default
+" behavior in swank s:PostHandle
+let g:vimside.swank.ping_data = {}
 
 
 " how often each event has been recieved

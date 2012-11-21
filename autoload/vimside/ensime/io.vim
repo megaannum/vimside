@@ -23,10 +23,10 @@ let s:ERROR = function("vimside#log#error")
 "    port  : Number Ensime Server port number
 " ------------------------------------------------------------ 
 function! vimside#ensime#io#open(host, port)
-call s:LOG("vimside#ensime#io#open: host:port=" . a:host .":". a:port) 
+" call s:LOG("vimside#ensime#io#open: host:port=" . a:host .":". a:port) 
 
   let l:socket = vimproc#socket_open(a:host, a:port)
-call s:LOG("vimside#ensime#io#open:  socket=" . string(l:socket)) 
+" call s:LOG("vimside#ensime#io#open:  socket=" . string(l:socket)) 
   return l:socket
 endfunction
 
@@ -52,7 +52,7 @@ endif " XXXXXXXXXXXXXX
 
   let response = vimside#ensime#io#read(a:timeout)
   if response != ''
-call s:LOG("vimside#ensime#io#ping: response=". response) 
+" call s:LOG("vimside#ensime#io#ping: response=". response) 
     let success = vimside#ensime#swank#handle(response)
   endif
 
@@ -69,21 +69,21 @@ endfunction
 function! vimside#ensime#io#read(...)
   let l:socket = g:vimside['socket']
   let timeout = (a:0 > 0) ? a:1 : 100
-if timeout != 0
-call s:LOG("vimside#ensime#io#read Not 0 timeout=".timeout) 
-endif
+" if timeout != 0
+" call s:LOG("vimside#ensime#io#read Not 0 timeout=".timeout) 
+" endif
 
   " read swank message byte count
   let nrStr = l:socket.read(6, timeout)
-"call s:LOG("Read nrStr=".nrStr) 
+" call s:LOG("Read nrStr=".nrStr) 
   if nrStr == ''
     return ''
   else
     " its a swank message, read body
     let nr = str2nr(nrStr, 16)
-call s:LOG("Read nr=".nr) 
+" call s:LOG("Read nr=".nr) 
    let msg = l:socket.read(nr, 100)
-call s:LOG("Read msg=".msg) 
+" call s:LOG("Read msg=".msg) 
    return msg
   endif
 endfunction
@@ -109,17 +109,17 @@ function! vimside#ensime#io#write(msg)
   let msg = a:msg
   let s:msg_counter += 1
   let full_msg = "(:swank-rpc " .msg. " ". s:msg_counter . ")"
-call s:LOG("vimside#ensime#io#write full_msg=".full_msg) 
+" call s:LOG("vimside#ensime#io#write full_msg=".full_msg) 
 
   let mlen = len(full_msg)
-call s:LOG("Write mlen=".mlen) 
+" call s:LOG("Write mlen=".mlen) 
   let mlen = printf("%06x", mlen)
-call s:LOG("Write mlen=".mlen) 
+" call s:LOG("Write mlen=".mlen) 
 
   let output = mlen . full_msg
   let l:socket = g:vimside['socket']
   let nleft = l:socket.write(output, 100)
-call s:LOG("Write BOTTOM nleft=".nleft) 
+" call s:LOG("Write BOTTOM nleft=".nleft) 
   return s:msg_counter
 endfunction
 

@@ -57,7 +57,7 @@ let s:vimside_hover_started = 0
 
 function! vimside#command#hover#ToSymbol()
   if s:vimside_hover_started
-" call s:LOG("vimside#command#hover#ToSymbol: STOP") 
+call s:LOG("vimside#command#hover#ToSymbol: STOP") 
     try 
       call s:Hover_Stop()
     finally
@@ -67,13 +67,13 @@ function! vimside#command#hover#ToSymbol()
   else
     try 
       if vimside#command#hover#balloon#Enabled() && vimside#command#hover#balloon#IsSupported()
-" call s:LOG("vimside#command#hover#ToSymbol: DO BALLOON") 
+call s:LOG("vimside#command#hover#ToSymbol: DO BALLOON") 
         let s:Hover_Stop = vimside#command#hover#balloon#Start()
       elseif vimside#command#hover#term#Enabled() && vimside#command#hover#term#IsSupported()
-" call s:LOG("vimside#command#hover#ToSymbol: DO TERM HOVER") 
+call s:LOG("vimside#command#hover#ToSymbol: DO TERM HOVER") 
         let s:Hover_Stop = vimside#command#hover#term#Start()
       else
-" call s:LOG("vimside#command#hover#ToSymbol: DO CMDLINE") 
+call s:LOG("vimside#command#hover#ToSymbol: DO CMDLINE") 
         let s:Hover_Stop = vimside#command#hover#cmdline#Start()
       endif
     finally

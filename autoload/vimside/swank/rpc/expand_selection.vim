@@ -103,7 +103,7 @@ call s:LOG("ExpandSelectionHandler_Ok ".  vimside#sexp#ToString(a:ExpandSelectio
     let start = dic[':start']
     let end = dic[':end']
 
-    call vimside#selection#Add(file, start, end)
+    call vimside#command#selection#Add(file, start, end)
 
     return 1
 

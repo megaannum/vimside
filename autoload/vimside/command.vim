@@ -133,7 +133,7 @@ endfunction
 
 function! vimside#command#MakePopUp(mode) range
   if exists("g:vimside.started") && g:vimside.started
-    vimside#command#popup_menu#Run(a:mode)
+    call vimside#command#popup_menu#Run(a:mode)
   else
     call s:ERROR("Ensime must be started first")
   endif

@@ -1,7 +1,7 @@
 vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.3
+Version:     0.2.4
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -751,24 +751,27 @@ Show backtrace.
 
 ==============================================================================
 9. Release notes                                       *vimside-release-notes*
+0.2.4   - Fix: ~
+    Fixed term and cmdline hover so that they respond more quickly.
+    Fixed Expand Selection 'highlight' cleared when cursor moves.
+    Added message to typecheck RPC (that it might take a moment).
+    Expanded option help in 'example_options_user.vim'
+    Single reference source root now assumed for Scala in 'ensime_config.vim'
 0.2.3   - Fix: ~
     Made example options file 'example_options_user.vim' maybe easier to
     understand and use.
     Modified Option manager so that the 'ensime-dist-path' takes precedence
     over the combination of the two Options 'ensime-install-path' and
     'ensime-dist-dir'.
-
 0.2.2   - Fix: ~
     Added documentation and example Option setting code to
     example_options_user.vim.
-
 0.2.1   - Fix: ~
     Reorganized command vim files.
     Added doc/vimside.txt
     Added ShowErrorsAndWarnings command.
     Removed 'Vimside' from missing Option exception
     Fixed sexp parser so that it could parse Ensime selection data.
-
 0.2.0   - Fix: ~
     Forms Label checks that 'text' is String or Number.
 

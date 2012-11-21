@@ -59,12 +59,41 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("vimside-forms-use", 1)
   "--------------
    
-  " call owner.Set("swank-rpc-expand-selection-information", 'visual')
+  "--------------
+  " Open source brower in its own tab
+  " call owner.Set("vimside-forms-sourcebrowser-open-in-tab", 1)
+  "--------------
+   
+  "--------------
+  " Hover Options
+  " call owner.Set("vimside-hover-balloon-enabled", 1)
+  " call owner.Set("vimside-hover-term-balloon-enabled", 1)
+  " call owner.Set("vimside-hover-term-balloon-fg", "red")
+  " call owner.Set("vimside-hover-term-balloon-bg", "white")
+  "
+  " The following Hover Options should normally not be changed
+  " call owner.Set("vimside-hover-updatetime", 600)
+  " one character and hover move triggered
+  " call owner.Set("vimside-hover-max-char-mcounter", 0)
+  " call owner.Set("vimside-hover-cmdline-job-time", 300)
+  " call owner.Set("vimside-hover-term-job-time", 300)
+  "--------------
 
-  " search options
+
+  "--------------
+  " Selection using 'highlight' or 'visual'
+  " call owner.Set("swank-rpc-expand-selection-information", 'visual')
+  "--------------
+
+  "--------------
+  " Search options
   " call owner.Set("public-symbol-search-do-incremental", 0)
   " call owner.Set("public-symbol-search-close-empty-display", 1)
+  "--------------
   
+
+
+
 
   " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "same_window.vim")
   " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "split_window.vim")

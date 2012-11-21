@@ -26,8 +26,7 @@ let source_roots = g:SExp(
                 \ )
 let reference_source_roots = g:SExp(
                 \ g:Str(s:java_home . "/src"),
-                \ g:Str(s:scala_home . "/src/library"),
-                \ g:Str(s:scala_home . "/src/compiler")
+                \ g:Str(s:scala_home . "/src")
                 \ )
 let include_index = g:SExp(
                       \ g:Str('com\\.megaannum\\.\*')

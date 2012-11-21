@@ -130,13 +130,14 @@ endfunction
 let s:line_start = -1
 let s:line_end = -1
 let s:auto_set = 0
+call s:LOG("vimside#command#selection#highlight# LOADING ") 
 
 function! vimside#command#selection#highlight#SetAutoCmds()
   if ! s:auto_set
     augroup VIMSIDE_SELECT_HL
       autocmd!
-      autocmd CursorMoved * call vimside#command#selection#highlight#Clear()
-      autocmd BufLeave * call vimside#command#selection#highlight#Clear()
+      autocmd CursorMoved * call vimside#command#selection#Clear()
+      autocmd BufLeave * call vimside#command#selection#Clear()
     augroup END
     let s:auto_set = 1
   endif
@@ -154,6 +155,8 @@ endfunction
 function! vimside#command#selection#highlight#CursorMoved()
   let lnum = line(".")
 call s:LOG("vimside#command#selection#highlight#CursorMoved: lnum=". lnum) 
+" call s:LOG("vimside#command#selection#highlight#CursorMoved: s:line_start=". s:line_start) 
+" call s:LOG("vimside#command#selection#highlight#CursorMoved: s:line_end=". s:line_end) 
   return lnum < s:line_start || lnum > s:line_end
 endfunction
 
@@ -189,6 +192,8 @@ call s:LOG("vimside#command#selection#highlight#Display: start=". a:start .", en
     let s:line_end = line2
 call s:LOG("vimside#command#selection#highlight#Display: line1=". line1 .", column1=". column1) 
 call s:LOG("vimside#command#selection#highlight#Display: line2=". line2 .", column2=". column2) 
+call s:LOG("vimside#command#selection#highlight#Display: s:line_start=". s:line_start) 
+call s:LOG("vimside#command#selection#highlight#Display: s:line_end=". s:line_end) 
 
     let patterns = s:GetMatchRanges(line1, line2, column1, column2)
     let s:sids = []

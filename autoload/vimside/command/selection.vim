@@ -23,6 +23,7 @@ let s:selections_offset = -1
 
 
 function! s:Init()
+call s:LOG("selection: s:Init: TOP") 
   let [found, value] = g:vimside.GetOption('swank-rpc-expand-selection-information')
   if ! found
     throw "Option not found: "'swank-rpc-expand-selection-information'"
@@ -112,6 +113,7 @@ call s:LOG("vimside#command#selection#Expand slen == 0")
       let [file, start, end] = s:selections[0]
       let current_file = expand('%:p')
       if file != current_file
+call s:LOG("vimside#command#selection#Expand new file") 
         call vimside#command#selection#Clear()
         call vimside#swank#rpc#expand_selection#Run()
 
@@ -158,38 +160,6 @@ call s:LOG("vimside#command#selection#Expand EXPAND")
 
 call s:LOG("vimside#command#selection#Expand BOTTOM") 
 endfunction
-
-if 0
-function!  vimside#command#selection#ExpandOLD()
-call s:LOG("vimside#command#selection#Expand") 
-  if s:selection_index == -1
-    call vimside#command#selection#Clear()
-    return 0
-  elseif len(s:selections) == 0
-    call vimside#command#selection#Clear()
-    return 0
-  else
-    let [file, start, end] = s:selections[0]
-    let current_file = expand('%:p')
-    if file != current_file
-      call vimside#command#selection#Clear()
-      return 0
-    elseif s:selection_index + 1 < len(s:selections) 
-      let s:selection_index += 1
-      let [file, start, end] = s:selections[s:selection_index]
-      if file != current_file
-        call vimside#command#selection#Clear()
-        return 0
-      else
-        call s:selection_display(file, start, end)
-        return 1
-      endif
-    else
-      return 0
-    endif
-  endif
-endfunction
-endif
 
 function!  vimside#command#selection#Contract()
 call s:LOG("vimside#command#selection#Contract TOP") 
