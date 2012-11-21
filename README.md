@@ -353,19 +353,19 @@ The first is to set the Option 'ensime-install-path' to the
 location of downloaded Ensime source. If you use the VAM plugin manager,
 then Ensime will be in the directory:
 
-    $HOME . "/.vim/vim-addons/ensime
+    $HOME/.vim/vim-addons/ensime
 
 or
 
-    $HOME .  "/vimfiles/vim-addons/ensime
+    $HOME/vimfiles/vim-addons/ensime.
 
-so you would set the Option according
+so you would set the Option accordingly:
 
     call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
 
 or
 
-    call owner.Set("ensime-install-path", $HOME .  "/vimfiles/vim-addons/ensime")
+    call owner.Set("ensime-install-path", $HOME . "/vimfiles/vim-addons/ensime")
 
 Then depending upon the name of the build directory, which is under the
 'ensime-install-path' Option value directory location, you would
@@ -383,7 +383,7 @@ using the Option 'ensime-dist-path'. As an example, if you installed
 an Ensime build package in some Scala directory, you might set
 the Option as:
 
-    call owner.Set("ensime-dist-path", $HOME .  "/scala/ensime/ensime_2.9.2-0.9.8.1")
+    call owner.Set("ensime-dist-path", $HOME . "/scala/ensime/ensime_2.9.2-0.9.8.1")
 
 If you set the 'ensime-dist-path', it is checked first and if it exists it
 is used rather than the 'ensime-install-path' and 'ensime-dist-dir' combination.
@@ -402,13 +402,13 @@ RECOMMENDED for initial testing:
 To run against test Scala/Java project, first in data/vimside directory
 copy example_options_user.vim to options_user.vim.
 
-  > cd $HOME/.vim/data/vimside
-  > /bin/cp example_options_user.vim options_user.vim
+    > cd $HOME/.vim/data/vimside
+    > /bin/cp example_options_user.vim options_user.vim
 
 Then, in options_user.vim uncomment the following two lines:
 
-   call a:option.Set("test-ensime-file-use", 1)
-   call a:option.Set("ensime-config-file-name", "ensime_config.vim")
+    call a:option.Set("test-ensime-file-use", 1)
+    call a:option.Set("ensime-config-file-name", "ensime_config.vim")
 
 This tells Vimside to use the test project code and to use the
 ensime_config.vim as the source for Ensime Configuration.
