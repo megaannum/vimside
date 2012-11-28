@@ -441,6 +441,48 @@ Then, in options_user.vim uncomment the following two lines:
 This tells Vimside to use the test project code and to use the
 ensime_config.vim as the source for Ensime Configuration.
 
+If one want to have one or more projects then one will most likely
+want to have project specific Vimside configuration capabilities.
+There is an Option for that.
+
+There is a single file to configure Vimside Options under '.vim', 
+'data/vimside/options_user.vim'. This is sufficient if you only have
+a single project on your machine. But, if you have or plan to have more
+than one projects on your machine you might want to have project
+specific option configuration files. There are two Options that 
+control this.
+
+The first Option is: 'vimside-project-options-enabled' and if 
+true (default is false), then Vimside will look for a configuration
+file with name given by the second Option: 'vimside-project-options-file-name'.
+
+The default value of the 'vimside-project-options-file-name' Option
+is 'options_project.vim'.
+
+While in the 'options_user.vim' file, an Option value is set using
+the 'Set' function, e.g,:
+
+  call owner.Set("vimside-scala-version", "2.9.2")
+
+In the 'options_project.vim' file, the Option Update function must be used:
+
+  call owner.Update("vimside-scala-version", "2.10.0")
+
+This is because "Set" can only be called once per-Option (while, 'Update'
+can be called any number of times).
+
+So, in the 'options_user.vim' one might have:
+
+  call owner.Set("vimside-scala-version", "2.9.2")
+  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+  call owner.Set("ensime-config-file-name", "ensime_config.vim")
+
+in a project file there might be:
+
+  call owner.Update("vimside-scala-version", "2.10.0")
+  call owner.Update("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+  call owner.Update("ensime-config-file-name", "_ensime")
+
 # Supported Platforms
 
 Ought to work most everywhere

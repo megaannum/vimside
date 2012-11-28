@@ -89,9 +89,9 @@ endfunction
 function! g:InitProjectCaller(args)
   let cmd = "swank:init-project"
 
-  let [found, ensime_config_file] = g:vimside.GetOption('ensime_config_file')
+  let [found, ensime_config_file] = g:vimside.GetOption('ensime-config-file')
   if ! found
-    throw "Option not found: " . 'ensime_config_file'
+    throw "Option not found: 'ensime-config-file'"
   endif
 
 call s:LOG("InitProject ensime_config_file=". string(ensime_config_file)) 

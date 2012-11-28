@@ -260,6 +260,7 @@ endfunction
 
 
 
+" Global user overrides of default values
 function! vimside#options#manager#LoadUser()
 
   function! s:CheckDefinedFunc(key, value) dict
@@ -279,13 +280,61 @@ function! vimside#options#manager#LoadUser()
   let g:vimside.options.user['check'] = function("s:CheckDefinedFunc")
 
   " Source "options_user.vim" file if it exists
-  let l:tmpfile = s:full_dir . '/../../../data/vimside/' . "options_user.vim"
+  let l:option_file_name = "options_user.vim"
+  let l:tmpfile = s:full_dir . '/../../../data/vimside/' . l:option_file_name
   if filereadable(l:tmpfile)
     execute ":source " . l:tmpfile
     call g:VimsideOptionsUserLoad(g:vimside.options.user)
   endif
 endfunction
 
+" ---------------------------------------------------------------------
+" See if there is a project local (up the cwd dir-chain) file
+" containing additional user set Options.
+" This can be used as a project specific override
+" ---------------------------------------------------------------------
+function! vimside#options#manager#LoadProject(errors)
+  let l:errors = a:errors
+
+  let [found, l:look_local] = g:vimside.GetOption('vimside-project-options-enabled')
+  if found
+    if l:look_local
+      let [found, l:file_name] = g:vimside.GetOption('vimside-project-options-file-name')
+      if found
+        let l:option_file_name = "options_user.vim"
+        let l:vimside_dir = s:full_dir . '/../../../data/vimside/'
+        let l:vimside_dir = fnamemodify(l:vimside_dir, ":p")
+
+        " Now look in current directory and walk up directories until ensime
+        let dir = getcwd()
+
+        " Do not want to re-source the data/vimside.options_user.vim file
+        if dir == l:vimside_dir && l:option_file_name == l:file_name
+          let dir = fnamemodify(dir, ":h")
+        endif
+
+        while dir != '/'
+          let l:tmp_file = dir . '/' . l:file_name
+          if filereadable(l:tmp_file)
+            break
+          endif
+          let dir = fnamemodify(dir, ":h")
+        endwhile
+
+        if dir != '/' && g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
+          let l:option_file = dir . "/" . l:file_name
+          execute ":source " . l:option_file
+          call g:VimsideOptionsProjectLoad(g:vimside.options.user)
+        endif
+
+      else
+        call add(l:errors, "Option not found: 'vimside-local-options-user-file-name'")
+      endif
+    endif
+  else
+    call add(l:errors, "Option not found: 'vimside-local-options-user-enabled'")
+  endif
+endfunction
 
 " ===========================================================================
 "
@@ -301,6 +350,7 @@ function! vimside#options#manager#Load()
   " at g:vimside.options.default.options
   call vimside#options#default#Load(g:vimside.options.default)
 
+  " Global user overrides of default values
   call vimside#options#manager#LoadUser()
 
   " ---------------------------------------------------------------------
@@ -308,6 +358,14 @@ function! vimside#options#manager#Load()
   " ---------------------------------------------------------------------
 
   let l:errors = g:vimside.errors
+
+  " ---------------------------------------------------------------------
+  " First, see if there is a local (up the cwd dir-chain) file
+  " containing additional user set Options.
+  " This can be used as a project specific override
+  " ---------------------------------------------------------------------
+  call vimside#options#manager#LoadProject(l:errors)
+
 
   " ---------------------------------------------
   " Locate the dot ensime file and directory
@@ -341,7 +399,7 @@ function! vimside#options#manager#Load()
           let dir = fnamemodify(dir, ":h")
         endwhile
 
-        if dir == ''
+        if dir == '/'
           call add(l:errors, "Can find ensime config file: '" . l:efname ."'")
         else
           if g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
@@ -366,8 +424,10 @@ function! vimside#options#manager#Load()
     endif
 
     let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
-    call g:vimside.SetOption("ensime_config_dir", l:ensime_config_dir)
-    call g:vimside.SetOption("ensime_config_file", l:ensime_config_file)
+    call g:vimside.SetOption("ensime-config-dir", l:ensime_config_dir)
+    call g:vimside.SetOption("ensime-config-file", l:ensime_config_file)
+  else
+    call add(l:errors, "Could not load ensime config file: '". l:efname ."'")
   endif
 
 

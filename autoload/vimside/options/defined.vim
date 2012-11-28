@@ -328,6 +328,24 @@ function! s:MakeOptions()
         \ ]
       \ }
 
+  let l:options['vimside-project-options--enabled'] = {
+        \ 'name': 'vimside-project-options--enabled', 
+        \ 'type': g:OPTION_BOOLEAN_TYPE,
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Load a project-local user options file.'
+        \ ]
+      \ }
+  let l:options['vimside-project-options-file-name'] = {
+        \ 'name': 'vimside-project-options-file-name', 
+        \ 'type': g:OPTION_STRING_TYPE,
+        \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'File name of a project-local options file.'
+        \ ]
+      \ }
+
   let l:options['vimside-log-enabled'] = {
         \ 'name': 'vimside-log-enabled', 
         \ 'type': g:OPTION_BOOLEAN_TYPE, 

@@ -54,6 +54,9 @@ function! vimside#options#default#Load(owner)
   call owner.Set("vimside-java-version", "1.6")
   call owner.Set("vimside-scala-version", "2.9.2")
 
+  call owner.Set("vimside-project-options-enabled", 0)
+  call owner.Set("vimside-project-options-file-name", "options_project.vim")
+
   call owner.Set("vimside-log-enabled", 0)
   call owner.Set("vimside-log-file-name", "VIMSIDE_LOG")
 

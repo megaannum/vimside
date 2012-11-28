@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.5
+Version:     0.2.7
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -25,6 +25,8 @@ For Vim instructions on installing this 'txt' file, enter:
     2.5.2 Pathogen                                 |vimside-pathogen|
   3. Test Configure                              |vimside-test-configure|
   4. Running                                     |vimside-running|
+    4.1 Project Config
+    4.2 Start and Stop
   5. Options                                     |vimside-options|
     5.1 Dynamic vs Static
     5.2 Vimside Configuration
@@ -402,6 +404,49 @@ existing project.
 ==============================================================================
 4. Running                                                    *vimside-running*
 
+4.1 Project Config
+
+There is a single file to configure Vimside Options under '.vim', 
+'data/vimside/options_user.vim'. This is sufficient if you only have
+a single project on your machine. But, if you have or plan to have more
+than one projects on your machine you might want to have project
+specific option configuration files. There are two Options that 
+control this.
+
+The first Option is: 'vimside-project-options-enabled' and if 
+true (default is false), then Vimside will look for a configuration
+file with name given by the second Option: 'vimside-project-options-file-name'.
+
+The default value of the 'vimside-project-options-file-name' Option
+is 'options_project.vim'.
+
+While in the 'options_user.vim' file, an Option value is set using
+the 'Set' function, e.g,:
+
+  call owner.Set("vimside-scala-version", "2.9.2")
+
+In the 'options_project.vim' file, the Option Update function must be used:
+
+  call owner.Update("vimside-scala-version", "2.10.0")
+
+This is because "Set" can only be called once per-Option (while, 'Update'
+can be called any number of times).
+
+So, in the 'options_user.vim' one might have:
+
+  call owner.Set("vimside-scala-version", "2.9.2")
+  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+  call owner.Set("ensime-config-file-name", "ensime_config.vim")
+
+in a project file there might be:
+
+  call owner.Update("vimside-scala-version", "2.10.0")
+  call owner.Update("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+  call owner.Update("ensime-config-file-name", "_ensime")
+
+
+4.2 Start and Stop
+
 To run Vimside one simply starts Vim and then start the Ensime Server. This
 is done by executing the command:
 
@@ -495,6 +540,8 @@ Vimside session.
 
   'vimside-java-version'
   'vimside-scala-version'
+  'vimside-project-options-enabled'
+  'vimside-project-options-file-name'
   'vimside-log-enabled'
   'vimside-log-file-path'
   'vimside-log-file-name'
@@ -1226,6 +1273,52 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.7   - Fix: ~
+  Added ability to configure Vimside/Ensime on a per-project basis.
+0.2.6   - Fix: ~
+  Issue 1 fixed bug concerning ftplugin omnifunc=vimside#command#completions#Run
+  Fixed bug when completions returns no values.
+  Added Show Document Browser command
+  Added more documentation
+  Added version file/function
+  In plugin/vimside.vim Scala key mapping now with 'autocmd FileType scala' guard
+  Added remaining RPC Caller/Handler Options
+  Add vararg to all ':ok' RPC handlers for optional 'data'
+  Added 'data' to possible RPC dispatch dictionary
+  Fixed Option Viewer/Editor so that long values wrap.
+  Changed Option name from '-use-cwd-as-default-output-dir' to 'vimside-use-cwd-as-output-dir'
+  Changed Option name from 'vimside-forms-use' to 'forms-use'
+  Changed Option name from 'vimside-forms-sourcebrowser-open-in-tab' to 'tailor-forms-sourcebrowser-open-in-tab'
+  Changed Option name from 'vimside-hover-updatetime' to 'tailor-hover-updatetime'
+  Changed Option name from 'vimside-hover-max-char-mcounter' to 'tailor-hover-max-char-mcounter'
+  Changed Option name from 'vimside-hover-cmdline-job-time' to 'tailor-hover-cmdline-job-time'
+  Changed Option name from 'vimside-hover-term-balloon-fg' to 'tailor-hover-term-balloon-fg'
+  Changed Option name from 'vimside-hover-term-balloon-bg' to 'tailor-hover-term-balloon-bg'
+  Changed Option name from 'vimside-hover-term-job-time' to 'tailor-hover-term-job-time'
+  Changed Option name from 'swank-information' to 'tailor-information'
+  Changed Option name from 'swank-location-same-file' to 'tailor-information'
+  Changed Option name from 'swank-location-diff-file' to 'tailor-location-diff-file'
+  Changed Option name from 'public-symbol-search-close-empty-display' to 'tailor-symbol-search-close-empty-display'
+  Changed Option name from 'public-symbol-search-do-incremental' to 'tailor-symbol-search-do-incremental'
+  Changed Option name from 'swank-rpc-expand-selection-information' to 'tailor-expand-selection-information'
+  Changed Option name from 'swank-rpc-expand-selection-highlight-color-dark' to 'tailor-expand-selection-highlight-color-dark'
+  Changed Option name from 'swank-rpc-expand-selection-highlight-color-light' to 
+    'taior-expand-selection-highlight-color-light'
+  Changed Option name from 'swank-rpc-symbol-at-point-information' to 'tailor-symbol-at-point-information'
+  Changed Option name from 'swank-rpc-symbol-at-point-location-same-file' to 'tailor-symbol-at-point-location-same-file'
+  Changed Option name from 'swank-rpc-symbol-at-point-location-diff-file' to 'tailor-symbol-at-point-location-diff-file'
+  Changed Option name from 'swank-rpc-repl-config-location' to 'tailor-repl-config-location'
+  Changed Option name from 'swank-rpc-uses-of-symbol-at-point-location' to 'tailor-uses-of-symbol-at-point-location'
+  Changed Option name from 'swank-rpc-expecting-read-timeout' to 'scheduler-rpc-expecting-read-timeout'
+  Changed Option name from 'swank-rpc-expecting-updatetime' to 'scheduler-rpc-expecting-updatetime'
+  Changed Option name from 'swank-rpc-expecting-char-count' to 'scheduler-rpc-expecting-char-count'
+  Changed Option name from 'swank-rpc-not-expecting-read-timeout' to 'scheduler-rpc-not-expecting-read-timeout'
+  Changed Option name from 'swank-rpc-not-expecting-updatetime' to 'scheduler-rpc-not-expecting-updatetime'
+  Changed Option name from 'swank-rpc-not-expecting-char-count' to 'scheduler-rpc-not-expecting-char-count'
+  Changed Option name from 'swank-event-expecting-one-updatetime' to 'scheduler-event-expecting-one-updatetime'
+  Changed Option name from 'swank-event-expecting-one-char-count' to 'scheduler-event-expecting-one-char-count'
+  Changed Option name from 'swank-event-expecting-many-updatetime' to 'scheduler-event-expecting-many-updatetime'
+  Changed Option name from 'swank-event-expecting-many-char-count' to 'scheduler-event-expecting-many-char-count'
 0.2.5   - Fix: ~
     Stop Ensime command no longer prints error message if Ensime was not
     started.

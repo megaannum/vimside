@@ -16,8 +16,21 @@ function! g:VimsideOptionsUserLoad(owner)
 
   "--------------
   " Enable logging
-  call owner.Set("ensime-log-enabled", 1)
-  call owner.Set("vimside-log-enabled", 1)
+  " call owner.Set("ensime-log-enabled", 1)
+  " call owner.Set("vimside-log-enabled", 1)
+  "--------------
+
+  "--------------
+  " Output logs and ensime port file to local dir
+  " If you start Vim is some project sub-directory, this will place
+  " things in that directory (which may not be what you want).
+  " call owner.Set("vimside-use-cwd-as-output-dir", 0)
+  "--------------
+  
+  "--------------
+  " Also load project specific options
+  " call owner.Set("vimside-project-options-enabled", 1)
+  " call owner.Set("vimside-project-options-file-name", "options_project.vim")
   "--------------
 
   "--------------
@@ -99,7 +112,10 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("tailor-symbol-search-close-empty-display", 1)
   "--------------
   
-
+  "--------------
+  " Re-order which unix browser command to try first
+  " call owner.Set("tailor-browser-unix-commands", ['firefox', 'xdg-open', 'opera'])
+  "--------------
 
 
 
