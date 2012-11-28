@@ -37,7 +37,7 @@ call s:LOG("debug_next TOP")
 
   if ! exists("s:Handler")
     let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-next-handler')
-    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-next-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-next-caller')
   endif
 
   let l:args = { }
@@ -73,22 +73,13 @@ function! g:DebugNextHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:DebugNextHandler_Ok(sexp_rval)
-call s:LOG("DebugNextHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
-    if ! found 
-      echoe "DebugNext ok: Badly formed Response"
-      call s:ERROR("DebugNext ok: Badly formed Response: ". string(a:sexp_rval)) 
-      return 0
-    endif
+  function! g:DebugNextHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("DebugNextHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

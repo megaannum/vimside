@@ -73,22 +73,13 @@ function! g:BuilderRemoveFilesHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:BuilderRemoveFilesHandler_Ok(builderRemoveFiles)
-call s:LOG("BuilderRemoveFilesHandler_Ok ".  vimside#sexp#ToString(a:builderRemoveFiles)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:builderRemoveFiles) 
-    if ! found 
-      echoe "BuilderRemoveFiles ok: Badly formed Response"
-      call s:ERROR("BuilderRemoveFiles ok: Badly formed Response: ". string(a:builderRemoveFiles)) 
-      return 0
-    endif
+  function! g:BuilderRemoveFilesHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("BuilderRemoveFilesHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

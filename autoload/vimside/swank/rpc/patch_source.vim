@@ -74,22 +74,13 @@ function! g:PatchSourceHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:PatchSourceHandler_Ok(patchSource)
-call s:LOG("PatchSourceHandler_Ok ".  vimside#sexp#ToString(a:patchSource)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:patchSource) 
-    if ! found 
-      echoe "PatchSource ok: Badly formed Response"
-      call s:ERROR("PatchSource ok: Badly formed Response: ". string(a:patchSource)) 
-      return 0
-    endif
+  function! g:PatchSourceHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("PatchSourceHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

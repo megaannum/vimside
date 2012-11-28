@@ -78,22 +78,13 @@ function! g:CallCompletionHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:CallCompletionHandler_Ok(callCompletion)
-call s:LOG("CallCompletionHandler_Ok ".  vimside#sexp#ToString(a:callCompletion)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:callCompletion) 
-    if ! found 
-      echoe "CallCompletion ok: Badly formed Response"
-      call s:ERROR("CallCompletion ok: Badly formed Response: ". string(a:callCompletion)) 
-      return 0
-    endif
+  function! g:CallCompletionHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("CallCompletionHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

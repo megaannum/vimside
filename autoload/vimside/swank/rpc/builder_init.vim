@@ -70,22 +70,13 @@ function! g:BuilderInitHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:BuilderInitHandler_Ok(builderInit)
-call s:LOG("BuilderInitHandler_Ok ".  vimside#sexp#ToString(a:builderInit)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:builderInit) 
-    if ! found 
-      echoe "BuilderInit ok: Badly formed Response"
-      call s:ERROR("BuilderInit ok: Badly formed Response: ". string(a:builderInit)) 
-      return 0
-    endif
+  function! g:BuilderInitHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("BuilderInitHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

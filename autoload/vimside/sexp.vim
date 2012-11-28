@@ -229,7 +229,7 @@ endfunction
 " Note that this assumes that EACH of the SExp Lists are either
 "  keyword/value pairs, a list of simple values or a list of lists.
 "
-" return [1 ,  kw_dic_value] or [1, list_of_values]
+" return [1 ,  kw_dic_value] or [1, list_of_value(s)]
 " return [0 ,  reason]
 function! vimside#sexp#Convert_KeywordValueList2Dictionary(sexp) 
   if type(a:sexp) == type({})
@@ -601,7 +601,7 @@ function! vimside#sexp#SourceFile(filepath)
       throw "Vimside Vim Ensime Config file can not be read: " . a:filepath
   endif
   if exists("g:ensime_config")
-    let l;ec = g:ensime_config
+    let l:ec = g:ensime_config
     unlet g:ensime_config
   endif
 

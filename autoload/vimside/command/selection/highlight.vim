@@ -36,10 +36,10 @@ endfunction
 
 function! s:InitGui()
   if &background == 'light' 
-    let selectedColor = s:GetOption('swank-rpc-expand-selection-highlight-color-light')
+    let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-light')
 
   else " &background == 'dark'
-    let selectedColor = s:GetOption('swank-rpc-expand-selection-highlight-color-dark')
+    let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-dark')
   endif
 call s:LOG("s:InitGui: selectedColor=". selectedColor) 
   execute "hi VimsideSeclection_HL gui=bold guibg=#" . selectedColor
@@ -48,9 +48,9 @@ endfunction
 function! s:InitCTerm()
   if g:vimside.plugins.forms
     if &background == 'light' 
-      let selectedColor = s:GetOption('swank-rpc-expand-selection-highlight-color-light')
+      let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-light')
     else " &background == 'dark'
-      let selectedColor = s:GetOption('swank-rpc-expand-selection-highlight-color-dark')
+      let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-dark')
     endif
 call s:LOG("s:InitCTerm: selectedColor=". selectedColor) 
     let selectedNumber = s:Color_2_Number(selectedColor)

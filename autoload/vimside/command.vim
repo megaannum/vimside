@@ -41,23 +41,23 @@ function! vimside#command#PreviousPosition() range
 endfunction
 
 function! vimside#command#ExpandSelection() range
-call s:LOG("vimside#command#ExpandSelection TOP")
+" call s:LOG("vimside#command#ExpandSelection TOP")
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#selection#Expand()
   else
     call s:ERROR("Ensime must be started first")
   endif
-call s:LOG("vimside#command#ExpandSelection BOTTOM")
+" call s:LOG("vimside#command#ExpandSelection BOTTOM")
 endfunction
 
 function! vimside#command#ContractSelection() range
-call s:LOG("vimside#command#ContractSelection TOP")
+" call s:LOG("vimside#command#ContractSelection TOP")
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#selection#Contract()
   else
     call s:ERROR("Ensime must be started first")
   endif
-call s:LOG("vimside#command#ContractSelection BOTTOM")
+" call s:LOG("vimside#command#ContractSelection BOTTOM")
 endfunction
 
 function! vimside#command#HoverToSymbol() range
@@ -69,13 +69,21 @@ function! vimside#command#HoverToSymbol() range
 endfunction
 
 function! vimside#command#Search() range
-call s:LOG("vimside#command#Search TOP")
+" call s:LOG("vimside#command#Search TOP")
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#search#Run()
   else
     call s:ERROR("Ensime must be started first")
   endif
-call s:LOG("vimside#command#Search BOTTOM")
+" call s:LOG("vimside#command#Search BOTTOM")
+endfunction
+
+function! vimside#command#ShowDocSymbolAtPoint() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#show_doc_symbol_at_point#Run()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
 endfunction
 
 function! vimside#command#UsesOfSymbolAtPoint() range

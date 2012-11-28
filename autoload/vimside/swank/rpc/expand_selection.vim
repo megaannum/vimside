@@ -88,14 +88,8 @@ function! g:ExpandSelectionHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ExpandSelectionHandler_Ok(ExpandSelection)
-call s:LOG("ExpandSelectionHandler_Ok ".  vimside#sexp#ToString(a:ExpandSelection)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:ExpandSelection) 
-    if ! found 
-      echoe "ExpandSelection ok: Badly formed Response"
-      call s:ERROR("ExpandSelection ok: Badly formed Response: ". string(a:ExpandSelection)) 
-      return 0
-    endif
+  function! g:ExpandSelectionHandler_Ok(dic, ...)
+    let dic = a:dic
 "call s:LOG("ExpandSelectionHandler_Ok dic=".  string(dic)) 
 
     let current_file = expand('%:p')
@@ -106,7 +100,6 @@ call s:LOG("ExpandSelectionHandler_Ok ".  vimside#sexp#ToString(a:ExpandSelectio
     call vimside#command#selection#Add(file, start, end)
 
     return 1
-
   endfunction
 
   return { 

@@ -46,23 +46,22 @@ endfunction
 " ------------------------------------------------------------ 
 " vimside#swank#rpc#util#MakeRPCEnds: {{{2
 "  Build the RPC caller/handler Dictionary.
-"  If replace_arg is an empty list (by far the most common case) then
-"  what is retured is:
+"  What is retured is:
 "   {
-"      'caller': a:StdCaller,
-"      'args': = a:args,
-"      'handler': a:StdHandler()
-"   }
-"  where the 'handler' value is a Dictionary:
-"   {
-"      'abort': <Funcref for RPC abort reponse>,
-"      'ok': <Funcref for RPC ok reponse>
+"      'caller': <FuncRef for calling RPC>
+"      'args': = <map of zero or more arguments>
+"      'handler': {
+"           'abort': <Funcref for RPC abort reponse>,
+"           'ok': <Funcref for RPC ok reponse>
+"      }
+"      'events':   " optional events value ('0' '1', 'many')
+"      'data':     " optional map of data to be passed to handler
 "   }
 "  parameters: 
 "    StdCaller  : Funcref of RPC's Caller as defined by Option value.
 "    args       : Dictionary of arguments to Caller.
 "    StdHandler : Funcref of RPC's Handler as defined by Option value. 
-"    replace_args : List with optional single Dictionary value.
+"    infoList : List with optional single Dictionary value.
 "                   If one or more of the keys: 'caller', 'handler',
 "                   the 'handler' subkeys 'ok' or 'abort' or 'args'
 "                   is in the Dictionary then those are used in
@@ -72,38 +71,36 @@ endfunction
 "                   'handler', 'ok' and/or 'abort' they maybe either
 "                   Strings or Funcrefs.
 " ------------------------------------------------------------ 
-function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, replace_args)
+function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, infoList)
 " call s:LOG("vimside#swank#rpc#util#MakeRPCEnds TOP") 
   let l:StdCaller = a:StdCaller
   let l:args = a:args
   let l:StdHandler = a:StdHandler
-  let l:replace_args = a:replace_args
-  let l:replace_args_len = len(l:replace_args)
+  let l:infoList = a:infoList
+  let l:infoList_len = len(l:infoList)
 
   let l:rr = { }
-  " default, no events generated
-  let l:rr['events'] = '0'
 
-  if l:replace_args_len == 0
+  if l:infoList_len == 0
     let rr['caller'] = l:StdCaller
     let rr['handler'] = l:StdHandler()
 
-  elseif l:replace_args_len == 1
-    let l:replace_arg = l:replace_args[0]
-    call vimside#util#IsDictionary(l:replace_arg, 1)
+  elseif l:infoList_len == 1
+    let l:info = l:infoList[0]
+    call vimside#util#IsDictionary(l:info, 1)
 
-    if has_key(l:replace_arg, 'caller') 
-      let rr['caller'] = s:MakeFuncRef(l:replace_arg['caller'])
+    if has_key(l:info, 'caller') 
+      let rr['caller'] = s:MakeFuncRef(l:info['caller'])
     else
       let rr['caller'] = l:StdCaller
     endif
 
-    if has_key(l:replace_arg, 'handler') 
-      let l:ReplaceHandlerValue = l:replace_arg['handler']
+    if has_key(l:info, 'handler') 
+      let l:ReplaceHandlerValue = l:info['handler']
       if vimside#util#IsDictionary(l:ReplaceHandlerValue)
         let l:Replace_handler = l:ReplaceHandlerValue
       else
-        let l:TmpArgHandler = s:MakeFuncRef(l:replace_arg['handler'])
+        let l:TmpArgHandler = s:MakeFuncRef(l:info['handler'])
         let l:Replace_handler = l:TmpArgHandler()
       endif
 
@@ -153,13 +150,13 @@ function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, replac
 
   call vimside#util#IsDictionary(l:args, 1)
 
-  if exists("l:replace_arg") && has_key(l:replace_arg, 'args') 
-    let l:other_replace_args = l:replace_arg['args']
+  if exists("l:info") && has_key(l:info, 'args') 
+    let l:info_args = l:info['args']
     let l:adic = {}
     for key in keys(l:args)
 
-      let l:adic[key] = has_key(l:other_replace_args, key)
-                      \ ? l:other_replace_args[key]
+      let l:adic[key] = has_key(l:info_args, key)
+                      \ ? l:info_args[key]
                       \ : l:args[key]
 
     endfor
@@ -167,6 +164,17 @@ function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, replac
 
   else
     let l:rr['args'] = l:args
+  endif
+
+  if exists("l:info") && has_key(l:info, 'events') 
+    let l:rr['events'] = l:info.events
+  else
+    " default, no events generated
+    let l:rr['events'] = '0'
+  endif
+
+  if exists("l:info") && has_key(l:info, 'data') 
+    let l:rr['data'] = deepcopy(l:info.data)
   endif
 
 " call s:LOG("vimside#swank#rpc#util#MakeRPCEnds l:rr=". string(l:rr)) 

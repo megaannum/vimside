@@ -97,14 +97,8 @@ function! g:CompletionsHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:CompletionsHandler_Ok(completions)
-" call s:LOG("CompletionsHandler_Ok ".  vimside#sexp#ToString(a:completions)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:completions) 
-    if ! found 
-      echoe "Completions ok: Badly formed Response"
-      call s:ERROR("Completions ok: Badly formed Response: ". string(a:completions)) 
-      return 0
-    endif
+  function! g:CompletionsHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("CompletionsHandler_Ok dic=".  string(dic)) 
 
     let base = g:completions_base
@@ -112,7 +106,7 @@ call s:LOG("CompletionsHandler_Ok dic=".  string(dic))
 
     let l:results = []
 
-    if g:completions_in_process
+    if g:completions_in_process && has_key(dic, ':completions')
       let completions = dic[':completions']
       for comp in completions
         let word = comp[':name']
@@ -141,7 +135,7 @@ call s:LOG("CompletionsHandler_Ok dic=".  string(dic))
       endfunction
 
       let g:completions_results = sort(l:results, function("s:ListSorter"))
-  call s:LOG("CompletionsHandler_Ok g:completions_results=".  string(g:completions_results)) 
+call s:LOG("CompletionsHandler_Ok g:completions_results=".  string(g:completions_results)) 
 
       " This triggers re-getting the completions
       " I did not think of this, this bit of cleverness 

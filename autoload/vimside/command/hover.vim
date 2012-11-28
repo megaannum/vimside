@@ -11,12 +11,12 @@
 " Supports two types of Hover to Symbol name approaches.
 " For both GVim and Vim, one can have the Symbol name displayed on
 " the Command Line. Place cursor, over value, wait for the time
-" given by the option 'vimside-hover-updatetime', and the value's
+" given by the option 'tailor-hover-updatetime', and the value's
 " Symbol name appears on the Command Line.
 " The second approach the mouse pointer is used to select the value
 " whose Symbol is to be displayed in, what Vim, calls
 " a balloon. For GVim, the built-in balloon mechanism is used; 
-" wait for the time given by the option 'vimside-hover-updatetime', 
+" wait for the time given by the option 'tailor-hover-updatetime', 
 " and the Symbol name appears in a balloon.
 " For Vim (running on a Linux system which has both xdotool and dzen2 
 " installed) placing the mouse pointer over the value and the
@@ -37,15 +37,15 @@ let g:vimside_hover_max_mcounter = 0
 let g:vimside_hover_motion_name = 'hover_motion_job'
 
 function! s:LoadUpdateTimes()
-  let [found, value] = g:vimside.GetOption('vimside-hover-updatetime')
+  let [found, value] = g:vimside.GetOption('tailor-hover-updatetime')
   if ! found
-    throw "Option not found: "'vimside-hover-updatetime'"
+    throw "Option not found: "'tailor-hover-updatetime'"
   endif
   let g:vimside_hover_updatetime = value
 
-  let [found, value] = g:vimside.GetOption('vimside-hover-max-char-mcounter')
+  let [found, value] = g:vimside.GetOption('tailor-hover-max-char-mcounter')
   if ! found
-    throw "Option not found: "'vimside-hover-max-char-mcounter'"
+    throw "Option not found: "'tailor-hover-max-char-mcounter'"
   endif
   let g:vimside_hover_max_mcounter = value
 

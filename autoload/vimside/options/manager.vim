@@ -163,19 +163,19 @@ function! vimside#options#manager#UpdateOption(key, value) dict
 endfunction
 
 function! vimside#options#manager#GetOption(key) dict
-  let [found, value_top] = self.options.Get(a:key)
+  let [found, Value_top] = self.options.Get(a:key)
   if found
-    return [1, value_top]
+    return [1, Value_top]
   endif
-  let [found, value_user] = self.options.user.Get(a:key)
+  let [found, Value_user] = self.options.user.Get(a:key)
   if found
-    call self.options.Set(a:key, value_user)
-    return [1, value_user]
+    call self.options.Set(a:key, Value_user)
+    return [1, Value_user]
   endif
-  let [found, value_default] = self.options.default.Get(a:key)
+  let [found, Value_default] = self.options.default.Get(a:key)
   if found
-    call self.options.Set(a:key, value_default)
-    return [1, value_default]
+    call self.options.Set(a:key, Value_default)
+    return [1, Value_default]
   endif
 
   let defined = g:vimside.options.defined
@@ -183,9 +183,9 @@ function! vimside#options#manager#GetOption(key) dict
     let def = defined[a:key]
     if has_key(def, "parent")
       let parent_key = def.parent
-      let [found, value_parent] = g:vimside.GetOption(parent_key)
+      let [found, Value_parent] = g:vimside.GetOption(parent_key)
       if found
-        return [1, value_parent]
+        return [1, Value_parent]
       endif
     endif
   endif
@@ -264,9 +264,13 @@ function! vimside#options#manager#LoadUser()
 
   function! s:CheckDefinedFunc(key, value) dict
     let defined = g:vimside.options.defined
+    let default = g:vimside.options.default
     if has_key(defined, a:key)
       let def = defined[a:key]
       call vimside#options#defined#CheckValue(def, a:value, g:vimside.errors)
+
+    elseif has_key(default.keyvals, a:key)
+      " TODO when OPTION_KEY_KIND templates carries type/kind info, checkit
     else
       call add(g:vimside.errors, "Undefined User option: '". a:key . "'")
     endif
@@ -289,16 +293,15 @@ endfunction
 " ===========================================================================
 function! vimside#options#manager#Load()
 
-  " loads option definitions at g:vimside.options.defined
+  " Loads option definitions at g:vimside.options.defined
+  " Must be called before loading default values.
   call vimside#options#defined#Load(g:vimside.options)
-
-  call vimside#options#manager#LoadUser()
 
   " This file loads default options values from "default.vim"
   " at g:vimside.options.default.options
   call vimside#options#default#Load(g:vimside.options.default)
 
-
+  call vimside#options#manager#LoadUser()
 
   " ---------------------------------------------------------------------
   " Make sure all required options have valid values.
@@ -399,6 +402,28 @@ function! vimside#options#manager#Load()
       call add(l:errors, "Option not found: '". 'ensime-dist-dir' ."'")
     endif
 
+    " Check that Java and Scala versions agree with Option values
+    " Get Scala version from ensime distribution directory name
+    let l:ensime_scala_version = matchlist(l:distdir, '[a-zA-Z]*_\(\d\+\.\d\+\.\d\+\)-\(.*\)')[1]
+    let [found, l:vimside_scala_version] = g:vimside.GetOption('vimside-scala-version')
+    if ! found
+      call add(l:errors, "Option not found: '". 'vimside-scala-version' ."'")
+    endif
+
+    if l:ensime_scala_version != l:vimside_scala_version
+      call add(l:errors, "Scala versions do not match: vimside:'". l:vimside_scala_version ."' and ensime:'". l:ensime_scala_version ."'")
+    endif
+
+    let l:tmp = split(system("java -version"), "\n")[0]
+    let l:ensime_java_version = matchlist(l:tmp, '[a-zA-Z ]* "\(\d\+\.\d\+\)\(.*\)"')[1]
+    let [found, l:vimside_java_version] = g:vimside.GetOption('vimside-java-version')
+    if ! found
+      call add(l:errors, "Option not found: '". 'vimside-java-version' ."'")
+    endif
+    if l:ensime_java_version != l:vimside_java_version
+      call add(l:errors, "Java versions do not match: vimside:'". l:vimside_java_version ."' and ensime:'". l:ensime_java_version ."'")
+    endif
+
     let l:distdirpath = l:path  . '/' . l:distdir
     let got_ensime_dir = g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
   
@@ -411,9 +436,9 @@ function! vimside#options#manager#Load()
     call add(l:errors, "No Ensime Distribution path, set options 'ensime-install-path' or 'ensime-dist-path'")
   endif
 
-  let [found, l:use_cwd] = g:vimside.GetOption('use-cwd-as-default-output-dir')
+  let [found, l:use_cwd] = g:vimside.GetOption('vimside-use-cwd-as-output-dir')
   if ! found
-    call add(l:errors, "Option not found: '". 'use-cwd-as-default-output-dir' ."'")
+    call add(l:errors, "Option not found: '". 'vimside-use-cwd-as-output-dir' ."'")
   endif
 
 

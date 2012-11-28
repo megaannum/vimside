@@ -11,15 +11,43 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+
+function! s:makeValueGlyph(label, value, max_width)
+  let offset = len(a:label)
+  let val_len = len(a:value)
+  if val_len < a:max_width
+    let value_glyph = forms#newLabel({'text': a:label . a:value})
+  else
+    let textlines = []
+    let start = 0
+    while start < a:max_width
+      if start == 0
+        let line = a:label .  strpart(a:value, start, a:max_width-offset)
+      else
+        let line = repeat(' ', offset) .  strpart(a:value, start, a:max_width-offset)
+      endif
+      call add(textlines, line)
+" call s:LOG("line=". line)
+
+      let start += (a:max_width - offset)
+    endwhile
+    let value_glyph = forms#newText({'textlines': textlines})
+  endif
+  return value_glyph
+endfunction
+
 function! vimside#forms#optioneditor#Run()
-call s:LOG("vimside#forms#optioneditor#Run")
+" call s:LOG("vimside#forms#optioneditor#Run")
+
+  let win_width = winwidth(0)
+  let max_value_width = win_width - 10
 
   "...........................
   let title = forms#newLabel({'text': "Options"})
 
   "...........................
   function! StaticAction(...) dict
-call s:LOG("StaticAction")
+" call s:LOG("StaticAction")
     call self.deck.setCard(0)
   endfunction
   
@@ -31,7 +59,7 @@ call s:LOG("StaticAction")
                               \ 'action': staticaction })
 
   function! DynamicAction(...) dict
-call s:LOG("DynamicAction")
+" call s:LOG("DynamicAction")
     call self.deck.setCard(1)
   endfunction
   
@@ -57,7 +85,7 @@ call s:LOG("DynamicAction")
 if 0
 for key in keys(g:vimside.options.user.keyvals)
   if key != 'check'
-call s:LOG("key=". key .", value=". string(g:vimside.options.user.keyvals[key]))
+" call s:LOG("key=". key .", value=". string(g:vimside.options.user.keyvals[key]))
   endif
 endfor
 endif
@@ -66,12 +94,14 @@ endif
   let dynamic_defs = {}
   let definitions = g:vimside.GetOptionDefinitions()
   for key in sort(keys(definitions))
+if 0
     let [found, v] = g:vimside.GetOption(key)
     if found
-call s:LOG("key=". key ."=". string(v))
+" call s:LOG("key=". key ."=". string(v))
     else
-call s:LOG("key=". key ."=NOT_FOUND")
+" call s:LOG("key=". key ."=NOT_FOUND")
     endif
+endif
 
     let def = definitions[key]
     if def.scope == g:OPTION_DYNAMIC_SCOPE
@@ -138,20 +168,22 @@ call s:LOG("key=". key ."=NOT_FOUND")
     if found
       let value_default = string(val_default)
     else
-      let value_default = 'none'
+      let value_default = 'not set'
     endif
     unlet val_default
-    let val_default_label = forms#newLabel({'text': 'default: ' . value_default})
+    " let val_default_glyph = forms#newLabel({'text': 'default: ' . value_default})
+" call s:LOG("value_default=". value_default)
+    let val_default_glyph = s:makeValueGlyph('default: ', value_default, max_value_width)
 
     let [found, val_user] = g:vimside.options.user.Get(key)
     if found
       let value_user = string(val_user)
     else
-      let value_user = 'none'
+      let value_user = 'not set'
     endif
     unlet val_user
-    let val_user_label = forms#newLabel({'text': 'user: ' . value_user})
-
+" call s:LOG("value_user=". value_user)
+    let val_user_glyph = s:makeValueGlyph('user: ', value_user, max_value_width)
 
     let namelabel = forms#newLabel({'text': key})
 
@@ -178,8 +210,8 @@ call s:LOG("key=". key ."=NOT_FOUND")
     let vpoly = forms#newVPoly({ 
                         \ 'children': [
                           \ namelabel, 
-                          \ val_default_label,
-                          \ val_user_label,
+                          \ val_default_glyph,
+                          \ val_user_glyph,
                           \ hpoly,
                           \ descriptiontext
                         \ ],
@@ -283,20 +315,22 @@ call forms#log("DoStaticDeckSelectAction.execute: " . pos)
     if found
       let value_default = string(val_default)
     else
-      let value_default = 'none'
+      let value_default = 'not set'
     endif
     unlet val_default
-    let val_default_label = forms#newLabel({'text': 'default: ' . value_default})
+" call s:LOG("value_default=". value_default)
+    let val_default_glyph = s:makeValueGlyph('default: ', value_default, max_value_width)
 
     let [found, val_user] = g:vimside.options.user.Get(key)
     if found
       let value_user = string(val_user)
     else
-      let value_user = 'none'
+      let value_user = 'not set'
     endif
     unlet val_user
-    let val_user_label = forms#newLabel({'text': 'user: ' . value_user})
-
+" call s:LOG("value_user=". value_user)
+    
+    let val_user_glyph = s:makeValueGlyph('user: ', value_user, max_value_width)
 
     let namelabel = forms#newLabel({'text': key})
 
@@ -323,8 +357,8 @@ call forms#log("DoStaticDeckSelectAction.execute: " . pos)
     let vpoly = forms#newVPoly({ 
                         \ 'children': [
                           \ namelabel, 
-                          \ val_default_label,
-                          \ val_user_label,
+                          \ val_default_glyph,
+                          \ val_user_glyph,
                           \ hpoly,
                           \ descriptiontext
                         \ ],
@@ -415,7 +449,7 @@ endif
   let box = forms#newBox({ 'body': vpoly} )
   let bg = forms#newBackground({ 'body': box} )
 
-  let [found, in_tab] = g:vimside.GetOption('vimside-forms-sourcebrowser-open-in-tab')
+  let [found, in_tab] = g:vimside.GetOption('tailor-forms-sourcebrowser-open-in-tab')
   let attrs = { 'open_in_tab': (found && in_tab),
               \ 'body': bg
               \ }

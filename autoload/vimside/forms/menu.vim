@@ -307,12 +307,10 @@ function! vimside#forms#menu#MakeMenuDocumentation()
   let items = []
 
 " ["Browse documentation of symbol" ensime-show-doc-for-symbol-at-point])
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Browse documentation of symbol'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Browse documentaion of symbol',
-            \ 'action': action
+            \ 'command': ':call vimside#command#ShowDocSymbolAtPoint()'
             \ })
   let attrs = { 'items': items }
   let submenu = forms#newMenu(attrs)

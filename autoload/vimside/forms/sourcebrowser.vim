@@ -222,7 +222,7 @@ call forms#log("NODE SELECT: ". a:node.name)
 
   let bg = forms#newBackground({ 'body': vpoly} )
 
-  let [found, in_tab] = g:vimside.GetOption('vimside-forms-sourcebrowser-open-in-tab')
+  let [found, in_tab] = g:vimside.GetOption('tailor-forms-sourcebrowser-open-in-tab')
   let attrs = { 'open_in_tab': (found && in_tab),
               \ 'body': bg
               \ }

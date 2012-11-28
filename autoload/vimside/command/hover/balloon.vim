@@ -52,14 +52,8 @@ function! vimside#command#hover#balloon#Start()
 endfunction
 
 
-function! vimside#command#hover#balloon#Handler_Ok(symbolinfo)
-" call s:LOG("vimside#command#hover#balloon#Handler_Ok ". string(a:symbolinfo)) 
-  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
-  if ! found
-    echoe "vimside#command#hover#balloon#Handler_Ok: Badly formed Response"
-    call s:ERROR("vimside#command#hover#balloon#Handler_Ok: Badly formed Response: ". string(a:symbolinfo))
-    return 0
-  endif
+function! vimside#command#hover#balloon#Handler_Ok(dic, ...)
+  let dic = a:dic
 
   let text = vimside#command#hover#util#GetHoverText(dic)
   let s:hover_balloon_value = text

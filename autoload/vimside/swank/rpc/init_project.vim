@@ -119,14 +119,8 @@ function! g:InitProjectHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:InitProjectHandler_Ok(projectInfo)
-call s:LOG("InitProjectHandler_Ok ".  vimside#sexp#ToString(a:projectInfo)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:projectInfo) 
-    if ! found 
-      echoe "InitProject ok: Badly formed Response"
-      call s:ERROR("InitProject ok: Badly formed Response: ". string(a:projectInfo)) 
-      return 0
-    endif
+  function! g:InitProjectHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("InitProjectHandler_Ok dic=".  string(dic)) 
 
     let l:name = dic[':project-name']

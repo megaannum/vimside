@@ -34,7 +34,7 @@ else
   function! TabToOmni()
     return "\<c-x>\<c-o>"
   endfunction
-  inoremap <tab> <c-r>=TabToOmni()<CR>
+  autocmd FileType scala inoremap <tab> <c-r>=TabToOmni()<CR>
 
 
   " C-c C-v i or Control+Right-Click
@@ -46,28 +46,36 @@ else
   "   at best, an advanture and, at worst, impossible, to get working
   "   with non-GVim - thus the mapping is different for non-gui-running.
   if has("gui_running")
-    nmap <silent> <m-.> :call vimside#command#SymbolAtPoint()<CR>
+    autocmd FileType scala nmap <silent> <m-.> :call vimside#command#SymbolAtPoint()<CR>
   else
-    nmap <silent> <Leader>vm. :call vimside#command#SymbolAtPoint()<CR>
+    autocmd FileType scala nmap <silent> <Leader>vm. :call vimside#command#SymbolAtPoint()<CR>
   endif
 
   " M-, (comma)
   "   Pop back to previously visited position.
   if has("gui_running")
-    nmap <silent> <m-,> :call vimside#command#PreviousPosition()<CR>
+    autocmd FileType scala nmap <silent> <m-,> :call vimside#command#PreviousPosition()<CR>
   else
-    nmap <silent> <Leader>vm, :call vimside#command#PreviousPosition()<CR>
+    autocmd FileType scala nmap <silent> <Leader>vm, :call vimside#command#PreviousPosition()<CR>
   endif
 
   " C-c C-v .
   "   Select the surrounding syntactic context. Subsequent taps of '.' 
   "   and ',' will grow and shrink the selection, respectively.
-  map <silent> <Leader>v. :call vimside#command#ExpandSelection()<CR>
-  map <silent> <Leader>v, :call vimside#command#ContractSelection()<CR>
+  autocmd FileType scala map <silent> <Leader>v. :call vimside#command#ExpandSelection()<CR>
+  autocmd FileType scala map <silent> <Leader>v, :call vimside#command#ContractSelection()<CR>
 
   " C-c C-v v
   "   Search globally for methods or types.
-  map <silent> <Leader>vv :call vimside#command#Search()<CR>
+  autocmd FileType scala map <silent> <Leader>vv :call vimside#command#Search()<CR>
+
+  " C-c C-v x
+  "   Scalex search for methods or types.
+  " NOT IMPLEMENTED YET
+  
+  " C-c C-v t
+  "   Show (web api) documentation for symbol at point
+  autocmd FileType scala map <silent> <Leader>vt :call vimside#command#ShowDocSymbolAtPoint()<CR>
 
   " Control+Right-Click(on an imported package)
   "   Inspect the package under cursor.
@@ -75,7 +83,7 @@ else
 
   " Mouse Hover
   "   Echo the type of the expression under the cursor.
-  nmap <silent> <Leader>vh :call vimside#command#HoverToSymbol()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vh :call vimside#command#HoverToSymbol()<CR>
 
   " C-c C-v p
   "   Inspect the package of the current source file.
@@ -87,7 +95,7 @@ else
 
   " C-c C-v r
   "   List all references to the symbol under the cursor.
-  nmap <silent> <Leader>vr :call vimside#command#UsesOfSymbolAtPoint()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vr :call vimside#command#UsesOfSymbolAtPoint()<CR>
 
   " .
   "   Forward one page in the inspector history.
@@ -111,23 +119,23 @@ else
 
   " C-c C-v z
   "   Switch to the scala interpreter, with project classes in the classpath.
-  nmap <silent> <Leader>vz :call vimside#command#Repl()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vz :call vimside#command#Repl()<CR>
 
   " C-c C-v c
   "   Typecheck the current file.
-  nmap <silent> <Leader>vc :call vimside#command#TypecheckFile()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vc :call vimside#command#TypecheckFile()<CR>
 
   " C-c C-v a
   "   Typecheck all files in the project.
-  nmap <silent> <Leader>va :call vimside#command#TypecheckAll()<CR>
+  autocmd FileType scala nmap <silent> <Leader>va :call vimside#command#TypecheckAll()<CR>
 
   " C-c C-v e
   "   (Re-)Show all errors and warnings in the project.
-  nmap <silent> <Leader>ve :call vimside#command#ShowErrorsAndWarning()<CR>
+  autocmd FileType scala nmap <silent> <Leader>ve :call vimside#command#ShowErrorsAndWarning()<CR>
 
   " C-c C-v f
   "   Format the current Scala source file.
-  nmap <silent> <Leader>vf :call vimside#command#FormatSource()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vf :call vimside#command#FormatSource()<CR>
 
   " C-c C-v u
   "   Undo a refactoring or formatting change.
@@ -150,6 +158,7 @@ else
   "     q Kill the debug session.
   "     i Inspect the local variable at cursor.
   "     t Show backtrace.
+  "     a Clear all breakes
   " NOT IMPLEMENTED YET
 
   " C-c C-r x
@@ -166,6 +175,11 @@ else
   "   Where x is one of:
   "     b Build the entire project.
   "     r Rebuild the project, incrementally.
+  "
+  "     s sbt switch
+  "     c sbt do complete
+  "     n sbt do clean
+  "     p sbt do package
   " NOT IMPLEMENTED YET
 
   " M-x ensime-reload
@@ -179,16 +193,17 @@ else
 
 
 
-  nmap <silent> <Leader>vp :call vimside#command#MakePopUp('n')<CR>
-  vmap <silent> <Leader>vp :call vimside#command#MapkeopUp('v')<CR>
+  autocmd FileType scala nmap <silent> <Leader>vp :call vimside#command#MakePopUp('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>vp :call vimside#command#MapkeopUp('v')<CR>
 
-  nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
-  nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
 
-  nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
+  autocmd FileType scala nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
 
   augroup VIMSIDE
     au!
     autocmd VimLeave * call vimside#StopEnsime()
+    " autocmd VimLeave scala call vimside#StopEnsime()
   augroup END
 endif

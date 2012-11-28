@@ -21,6 +21,15 @@ function! g:VimsideOptionsUserLoad(owner)
   "--------------
 
   "--------------
+  " Defined Java versions: '1.5', '1.6', '1.7'
+  " Defined Scala versions: '2.9.2', '2.10.0'
+  " Minor version numbers not needed
+  " Scala version MUST match 'ensime-dist-dir' used.
+  " call owner.Set("vimside-java-version", "1.6")
+  " call owner.Set("vimside-scala-version", "2.9.2")
+  "--------------
+
+  "--------------
   " Where is Ensime installed
   " call owner.Set("ensime-install-path", $HOME . "/.vim/vim-addons/ensime")
   " call owner.Set("ensime-install-path", $HOME . "/vimfiles/vim-addons/ensime")
@@ -53,66 +62,65 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("ensime-config-file-name", "_ensime")
   "--------------
    
-   
   "--------------
   " Vimside uses Forms library 
-  " call owner.Set("vimside-forms-use", 1)
+  " call owner.Set("forms-use", 1)
   "--------------
    
   "--------------
   " Open source brower in its own tab
-  " call owner.Set("vimside-forms-sourcebrowser-open-in-tab", 1)
+  " call owner.Set("tailor-forms-sourcebrowser-open-in-tab", 1)
   "--------------
    
   "--------------
   " Hover Options
   " call owner.Set("vimside-hover-balloon-enabled", 1)
   " call owner.Set("vimside-hover-term-balloon-enabled", 1)
-  " call owner.Set("vimside-hover-term-balloon-fg", "red")
-  " call owner.Set("vimside-hover-term-balloon-bg", "white")
+  " call owner.Set("tailor-hover-term-balloon-fg", "red")
+  " call owner.Set("tailor-hover-term-balloon-bg", "white")
   "
   " The following Hover Options should normally not be changed
-  " call owner.Set("vimside-hover-updatetime", 600)
+  " call owner.Set("tailor-hover-updatetime", 600)
   " one character and hover move triggered
-  " call owner.Set("vimside-hover-max-char-mcounter", 0)
-  " call owner.Set("vimside-hover-cmdline-job-time", 300)
-  " call owner.Set("vimside-hover-term-job-time", 300)
+  " call owner.Set("tailor-hover-max-char-mcounter", 0)
+  " call owner.Set("tailor-hover-cmdline-job-time", 300)
+  " call owner.Set("tailor-hover-term-job-time", 300)
   "--------------
 
 
   "--------------
   " Selection using 'highlight' or 'visual'
-  " call owner.Set("swank-rpc-expand-selection-information", 'visual')
+  " call owner.Set("tailor-expand-selection-information", 'visual')
   "--------------
 
   "--------------
   " Search options
-  " call owner.Set("public-symbol-search-do-incremental", 0)
-  " call owner.Set("public-symbol-search-close-empty-display", 1)
+  " call owner.Set("tailor-symbol-search-do-incremental", 0)
+  " call owner.Set("tailor-symbol-search-close-empty-display", 1)
   "--------------
   
 
 
 
 
-  " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "same_window.vim")
-  " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "split_window.vim")
-  " call owner.Set("swank-rpc-symbol-at-point-location-same-file", "vsplit_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-same-file", "same_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-same-file", "split_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-same-file", "vsplit_window.vim")
   
-  " call owner.Set("swank-rpc-symbol-at-point-location-diff-file", "same_window.vim")
-  " call owner.Set("swank-rpc-symbol-at-point-location-diff-file", "split_window.vim")
-  " call owner.Set("swank-rpc-symbol-at-point-location-diff-file", "vsplit_window.vim")
-  " call owner.Set("swank-rpc-symbol-at-point-location-diff-file", "tab")
+  " call owner.Set("tailor-symbol-at-point-location-diff-file", "same_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-diff-file", "split_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-diff-file", "vsplit_window.vim")
+  " call owner.Set("tailor-symbol-at-point-location-diff-file", "tab")
   
    
-  " call owner.Set("swank-rpc-uses-of-symbol-at-point-location", "same_window")
-  " call owner.Set("swank-rpc-uses-of-symbol-at-point-location", "split_window")
-  " call owner.Set("swank-rpc-uses-of-symbol-at-point-location", "vsplit_window")
-  " call owner.Set("swank-rpc-uses-of-symbol-at-point-location", "tab")
+  " call owner.Set("tailor-uses-of-symbol-at-point-location", "same_window")
+  " call owner.Set("tailor-uses-of-symbol-at-point-location", "split_window")
+  " call owner.Set("tailor-uses-of-symbol-at-point-location", "vsplit_window")
+  " call owner.Set("tailor-uses-of-symbol-at-point-location", "tab")
   
-  " call owner.Set("swank-rpc-repl-config-location", "same_window")
-  " call owner.Set("swank-rpc-repl-config-location", "split_window")
-  " call owner.Set("swank-rpc-repl-config-location", "vsplit_window")
-  " call owner.Set("swank-rpc-repl-config-location", "tab")
+  " call owner.Set("tailor-repl-config-location", "same_window")
+  " call owner.Set("tailor-repl-config-location", "split_window")
+  " call owner.Set("tailor-repl-config-location", "vsplit_window")
+  " call owner.Set("tailor-repl-config-location", "tab")
 endfunction
 

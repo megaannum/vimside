@@ -67,17 +67,11 @@ function! g:ReplConfigHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ReplConfigHandler_Ok(okResp)
-" call s:LOG("ReplConfigHandler_Ok " .  vimside#sexp#ToString(a:okResp)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:okResp) 
-    if ! found 
-      echoe "ReplConfig ok: Badly formed Response"
-      call s:ERROR("ReplConfig ok: Badly formed Response: ". string(a:okResp)) 
-      return 0
-    endif
+  function! g:ReplConfigHandler_Ok(dic, ...)
+    let dic = a:dic
 
-" call s:LOG("ReplConfigHandler_Ok diclist=".  string(diclist)) 
-    let classpath = diclist[':classpath']
+" call s:LOG("ReplConfigHandler_Ok dic=".  string(dic)) 
+    let classpath = dic[':classpath']
 " call s:LOG("ReplConfigHandler_Ok classpath=".  string(classpath)) 
 
     " TODO: run Scala Repl in Vim Window
@@ -139,15 +133,15 @@ function! g:ReplConfigHandler()
 endfunction
 
 function! s:GetLocation()
-  let [found, location] = g:vimside.GetOption('swank-rpc-repl-config-location')
+  let [found, location] = g:vimside.GetOption('tailor-repl-config-location')
   if ! found
-    call s:ERROR("Option not found 'swank-rpc-repl-config-location'") 
+    call s:ERROR("Option not found 'tailor-repl-config-location'") 
     let location = 'same_window'
   elseif location != 'same_window' 
       \ && location != 'split_window'
       \ && location != 'vsplit_window'
       \ && location != 'tab'
-    call s:ERROR("Option 'swank-rpc-repl-config-location' has bad location value '". location ."'") 
+    call s:ERROR("Option 'tailor-repl-config-location' has bad location value '". location ."'") 
     let location = 'same_window'
 
   endif
@@ -156,7 +150,7 @@ endfunction
 
 
 function! g:ReplConfigVimShellCallbackAction()
-call s:LOG("ReplConfigVimShellCallbackAction") 
+call s:LOG("ReplConfigVimShellCallbackAction: filetype=". s:filetype) 
   " let &filetype = 'scala'
 
   let &filetype = s:filetype

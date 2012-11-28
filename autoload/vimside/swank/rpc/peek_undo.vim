@@ -87,22 +87,13 @@ function! g:PeekUndoHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:PeekUndoHandler_Ok(peekUndo)
-call s:LOG("PeekUndoHandler_Ok ".  vimside#sexp#ToString(a:peekUndo)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:peekUndo) 
-    if ! found 
-      echoe "PeekUndo ok: Badly formed Response"
-      call s:ERROR("PeekUndo ok: Badly formed Response: ". string(a:peekUndo)) 
-      return 0
-    endif
+  function! g:PeekUndoHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("PeekUndoHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

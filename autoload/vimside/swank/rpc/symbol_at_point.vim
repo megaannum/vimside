@@ -117,14 +117,9 @@ function! g:SymbolAtPointHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:SymbolAtPointHandler_Ok(symbolinfo)
-call s:LOG("SymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolinfo)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo) 
-    if ! found 
-      echoe "SymbolAtPoint ok: Badly formed Response"
-      call s:ERROR("SymbolAtPoint ok: Badly formed Response: ". string(a:symbolinfo)) 
-      return 0
-    endif
+  function! g:SymbolAtPointHandler_Ok(dic, ...)
+    let dic = a:dic
+call s:LOG("SymbolAtPointHandler_Ok ".  string(dic)) 
 
     call vimside#command#position#Set()
 
@@ -135,14 +130,14 @@ call s:LOG("SymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolinfo))
       let offset = declpos[':offset']
 
       if current_file == file
-        let [found, location] = g:vimside.GetOption('swank-rpc-symbol-at-point-location-same-file')
+        let [found, location] = g:vimside.GetOption('tailor-symbol-at-point-location-same-file')
         if ! found
-          call s:ERROR("Option not found 'swank-rpc-symbol-at-point-location-same-file'") 
+          call s:ERROR("Option not found 'tailor-symbol-at-point-location-same-file'") 
           let location = 'same_window'
         elseif location != 'same_window' 
             \ && location != 'split_window'
             \ && location != 'vsplit_window'
-          call s:ERROR("Option 'swank-rpc-symbol-at-point-location-same-file' has bad location value '". location ."'") 
+          call s:ERROR("Option 'tailor-symbol-at-point-location-same-file' has bad location value '". location ."'") 
           let location = 'same_window'
 
         endif
@@ -163,21 +158,21 @@ call s:LOG("SymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolinfo))
         return 1
 
       else
-        let [found, location] = g:vimside.GetOption('swank-rpc-symbol-at-point-location-diff-file')
+        let [found, location] = g:vimside.GetOption('tailor-symbol-at-point-location-diff-file')
         if ! found
-          call s:ERROR("Option not found 'swank-rpc-symbol-at-point-location-diff-file'") 
+          call s:ERROR("Option not found 'tailor-symbol-at-point-location-diff-file'") 
           let location = 'same_window'
         elseif location != 'same_window' 
             \ && location != 'split_window'
             \ && location != 'vsplit_window'
             \ && location != 'tab'
-          call s:ERROR("Option 'swank-rpc-symbol-at-point-location-diff-file' has bad location value '". location ."'") 
+          call s:ERROR("Option 'tailor-symbol-at-point-location-diff-file' has bad location value '". location ."'") 
 
           let location = 'same_window'
         endif
 
         if location == 'same_window'
-          execute "edit ". file
+          " execute "edit ". file
           let [line, column] = vimside#util#GetLineColumnFromOffset(offset)
           execute ":normal ". line  ."G". column ." "
         elseif location == 'split_window'

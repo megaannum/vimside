@@ -62,6 +62,12 @@ Current Supported Ensime Commands:
     Cute but requires frequent server polling.
     Implementations: 3
 
+  Open Browser Info
+    With cursor over Scala/Java variable, type, etc. invoke the associated
+    on-line web api documentation (if it exists).
+    Useful.
+    Implementations: 1
+
   Use of Symbol At Point
     List all references to the symbol under the cursor.
     Very useful.
@@ -211,8 +217,8 @@ After unpacking the Vimside directory layout should look like:
 
 Anyway, to get the Vimside zip file from vim.org go to
 http://www.vim.org/scripts/script.php?script_id=4298
-and download the latest version. Unzip it in your '.vim'
-directory (on Linux systems).
+and download the latest version. Unzip it in your '.vim' or 'vimfiles'
+directory.
 
 
 Now, Vimside depends upon Vimshell and Vimproc.  It is recommended that 
@@ -330,8 +336,8 @@ One for Scala 2.9 and another for Scala 10.0. These can be found at:
 
     https://github.com/aemoncannon/ensime/downloads
 
-The Ensime build directory has the following layout (using
-ensime_2.9.2-0.9.8.1 as an example):
+The Ensime build directory has the following layout using
+ensime_2.9.2-0.9.8.1 as an example:
 
     ensime_2.9.2-0.9.8.1/
         bin/                 
@@ -339,6 +345,35 @@ ensime_2.9.2-0.9.8.1 as an example):
         elisp/
         lib/                 
         README.md
+
+or ensime_2.10.0-SNAPSHOT-0.9.7:
+
+    ensime_2.10.0-SNAPSHOT-0.9.7/
+        bin/  
+        elisp/  
+        lib/  
+        LICENSE  
+        README.md
+
+It is important that the value of the 'vimside-scala-version'
+Option agrees with the Ensime build version. For
+ensime_2.9.2-0.9.8.1 (the default value):
+
+    call owner.Set("vimside-scala-version", "2.9.2")
+
+and for ensime_2.10.0-SNAPSHOT-0.9.7:
+
+    call owner.Set("vimside-scala-version", "2.10.0")
+
+These values can be set in 'data/vimside/options_user.vim'.
+
+In addition, the version of Java ($JAVA_HOME/bin/java -version)
+in the window  that runs Vim (or launched GVim) must agree with
+the value of the Option 'vimside-java-version'. This Option
+has the default value of '1.6' and can be set, again, in
+'data/vimside/options_user.vim':
+
+    call owner.Set("vimside-java-version", "1.6")
 
 Having built Ensime or downloaded a pre-built package, you must
 set an Option in Vimside so that Vimside can locate the script

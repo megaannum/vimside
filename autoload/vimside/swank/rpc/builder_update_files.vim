@@ -75,22 +75,13 @@ function! g:BuilderUpdateFilesHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:BuilderUpdateFilesHandler_Ok(builderUpdateFiles)
-call s:LOG("BuilderUpdateFilesHandler_Ok ".  vimside#sexp#ToString(a:builderUpdateFiles)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:builderUpdateFiles) 
-    if ! found 
-      echoe "BuilderUpdateFiles ok: Badly formed Response"
-      call s:ERROR("BuilderUpdateFiles ok: Badly formed Response: ". string(a:builderUpdateFiles)) 
-      return 0
-    endif
+  function! g:BuilderUpdateFilesHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("BuilderUpdateFilesHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

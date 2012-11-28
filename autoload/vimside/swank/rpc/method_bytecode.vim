@@ -79,22 +79,13 @@ function! g:MethodBytecodeHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:MethodBytecodeHandler_Ok(MethodBytecode)
-call s:LOG("MethodBytecodeHandler_Ok ".  vimside#sexp#ToString(a:MethodBytecode)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:MethodBytecode) 
-    if ! found 
-      echoe "MethodBytecode ok: Badly formed Response"
-      call s:ERROR("MethodBytecode ok: Badly formed Response: ". string(a:MethodBytecode)) 
-      return 0
-    endif
+  function! g:MethodBytecodeHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("MethodBytecodeHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

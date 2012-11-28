@@ -17,9 +17,9 @@ let s:hover_term_sec = 0
 let s:hover_term_msec = 0
 
 function! s:LoadJobTimes()
-  let [found, msec] = g:vimside.GetOption('vimside-hover-term-job-time')
+  let [found, msec] = g:vimside.GetOption('tailor-hover-term-job-time')
   if ! found
-    throw "Option not found: "'vimside-hover-term-job-time'"
+    throw "Option not found: "'tailor-hover-term-job-time'"
   endif
 
   let s:hover_term_sec = (msec >= 1000) ? msec/1000 : 0 
@@ -255,13 +255,13 @@ function! g:ShowBalloon(text)
   let [cwidth, cheight] = [8, 10]
   let [found, xpx, ypx] = s:GetMouseLocation()
   if found
-    let [found, bg] = g:vimside.GetOption('vimside-hover-term-balloon-bg')
+    let [found, bg] = g:vimside.GetOption('tailor-hover-term-balloon-bg')
     if ! found
-      throw "Option not found: "'vimside-hover-term-balloon-bg'"
+      throw "Option not found: "'tailor-hover-term-balloon-bg'"
     endif
-    let [found, fg] = g:vimside.GetOption('vimside-hover-term-balloon-fg')
+    let [found, fg] = g:vimside.GetOption('tailor-hover-term-balloon-fg')
     if ! found
-      throw "Option not found: "'vimside-hover-term-balloon-fg'"
+      throw "Option not found: "'tailor-hover-term-balloon-fg'"
     endif
     let args = ' -w '. (len(a:text) * cwidth + 8)
     let args .= ' -fg '. fg
@@ -283,14 +283,8 @@ function! g:ShowBalloon(text)
   endif
 endfunction
 
-function! vimside#command#hover#term#Handler_Ok(symbolinfo)
-" call s:LOG("vimside#command#hover#term#Handler_Ok ". string(a:symbolinfo)) 
-  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
-  if ! found
-    echoe "vimside#command#hover#term#Handler_Ok: Badly formed Response"
-    call s:ERROR("vimside#command#hover#term#Handler_Ok: Badly formed Response: ". string(a:symbolinfo))
-    return 0
-  endif
+function! vimside#command#hover#term#Handler_Ok(dic, ...)
+  let dic = a:dic
 
   let [found, lnum, column, word] = g:GetWord()
 " call s:LOG("vimside#command#hover#term#Handler_Ok found=". found .", word='". word ."'") 

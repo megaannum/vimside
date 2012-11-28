@@ -64,17 +64,9 @@ function! g:ShutdownServerHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ShutdownServerHandler_Ok(okResp)
-" call s:LOG("ShutdownServerHandler_Ok " .  vimside#sexp#ToString(a:okResp)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:okResp) 
-    if ! found 
-      echoe "ShutdownServer ok: Badly formed Response"
-      call s:ERROR("ShutdownServer ok: Badly formed Response: ". string(a:okResp)) 
-      return 0
-    endif
-
-" call s:LOG("ShutdownServerHandler_Ok diclist=".  string(diclist)) 
-
+  function! g:ShutdownServerHandler_Ok(dic, ...)
+    let dic = a:dic
+" call s:LOG("ShutdownServerHandler_Ok dic=".  string(dic)) 
 
     let msg = "Ensime Server Shutdown"
     call vimside#cmdline#Display(msg) 

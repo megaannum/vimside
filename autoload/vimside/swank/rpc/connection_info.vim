@@ -66,14 +66,8 @@ function! g:ConnectionInfoHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ConnectionInfoHandler_Ok(infoList)
-call s:LOG("ConnectionInfoHandler_Ok ".  vimside#sexp#ToString(a:infoList)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:infoList) 
-    if ! found 
-      echoe "ConnectionInfo ok: Badly formed Response"
-      call s:ERROR("ConnectionInfo ok: Badly formed Response: ". string(a:infoList)) 
-      return 0
-    endif
+  function! g:ConnectionInfoHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("ConnectionInfoHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']

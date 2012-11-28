@@ -80,20 +80,12 @@ function! g:FormatSourceHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:FormatSourceHandler_Ok(okResp)
-call s:LOG("FormatSourceHandler_Ok " .  vimside#sexp#ToString(a:okResp)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:okResp) 
-    if ! found 
-      echoe "FormatSource ok: Badly formed Response"
-      call s:ERROR("FormatSource ok: Badly formed Response: ". string(a:okResp)) 
-      return 0
-    endif
-
-call s:LOG("FormatSourceHandler_Ok diclist=".  string(diclist)) 
+  function! g:FormatSourceHandler_Ok(dic, ...)
+    let dic = a:dic
+call s:LOG("FormatSourceHandler_Ok diclist=".  string(dic)) 
 
     call feedkeys("\<CR>")
     call feedkeys(":e!\<CR>")
-
 
     return 1
   endfunction

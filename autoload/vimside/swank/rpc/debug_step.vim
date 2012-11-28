@@ -37,7 +37,7 @@ call s:LOG("debug_step TOP")
 
   if ! exists("s:Handler")
     let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-step-handler')
-    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-step-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-step-caller')
   endif
 
   let l:args = { }
@@ -73,22 +73,13 @@ function! g:DebugStepOutHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:DebugStepOutHandler_Ok(sexp_rval)
-call s:LOG("DebugStepOutHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
-    if ! found 
-      echoe "DebugStepOut ok: Badly formed Response"
-      call s:ERROR("DebugStepOut ok: Badly formed Response: ". string(a:sexp_rval)) 
-      return 0
-    endif
+  function! g:DebugStepOutHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("DebugStepOutHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

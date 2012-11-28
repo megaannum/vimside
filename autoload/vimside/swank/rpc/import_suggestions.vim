@@ -85,22 +85,13 @@ function! g:ImportSuggestionsHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ImportSuggestionsHandler_Ok(importSuggestions)
-call s:LOG("ImportSuggestionsHandler_Ok ".  vimside#sexp#ToString(a:importSuggestions)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:importSuggestions) 
-    if ! found 
-      echoe "ImportSuggestions ok: Badly formed Response"
-      call s:ERROR("ImportSuggestions ok: Badly formed Response: ". string(a:importSuggestions)) 
-      return 0
-    endif
+  function! g:ImportSuggestionsHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("ImportSuggestionsHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

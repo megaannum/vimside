@@ -36,7 +36,7 @@ let s:ERROR = function("vimside#log#error")
 
 " public API
 function! vimside#swank#rpc#uses_of_symbol_at_point#Run(...)
-call s:LOG("UsesOfSymbolAtPoint TOP") 
+" call s:LOG("UsesOfSymbolAtPoint TOP") 
 
   if ! exists("s:Handler")
     let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-uses-of-symbol-at-point-handler')
@@ -49,7 +49,7 @@ call s:LOG("UsesOfSymbolAtPoint TOP")
     echoerr fn
     return
   endif
-call s:LOG("UsesOfSymbolAtPoint fn=".fn) 
+" call s:LOG("UsesOfSymbolAtPoint fn=".fn) 
     let offset = vimside#util#GetCurrentOffset()
 
   let l:args = { }
@@ -58,7 +58,7 @@ call s:LOG("UsesOfSymbolAtPoint fn=".fn)
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
   call vimside#ensime#swank#dispatch(l:rr)
 
-call s:LOG("UsesOfSymbolAtPoint BOTTOM") 
+" call s:LOG("UsesOfSymbolAtPoint BOTTOM") 
 endfunction
 
 
@@ -85,15 +85,9 @@ function! g:UsesOfSymbolAtPointHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:UsesOfSymbolAtPointHandler_Ok(symbolRefList)
-call s:LOG("UsesOfSymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolRefList)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolRefList) 
-    if ! found 
-      echoe "UsesOfSymbolAtPoint ok: Badly formed Response"
-      call s:ERROR("UsesOfSymbolAtPoint ok: Badly formed Response: ". string(a:symbolRefList)) 
-      return 0
-    endif
-
+  function! g:UsesOfSymbolAtPointHandler_Ok(diclist, ...)
+    let diclist = a:diclist
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok dic=list".  string(diclist)) 
     let entries = []
 
     let current_file = expand('%:p')
@@ -147,7 +141,7 @@ call s:LOG("UsesOfSymbolAtPointHandler_Ok ".  vimside#sexp#ToString(a:symbolRefL
     call vimside#quickfix#Display(entries)
 
     let bn = bufnr("$")
-call s:LOG("UsesOfSymbolAtPointHandler_Ok bn=".  bn) 
+"call s:LOG("UsesOfSymbolAtPointHandler_Ok bn=".  bn) 
     if bn != -1
       augroup VIMSIDE_USAP
         autocmd!
@@ -165,16 +159,16 @@ call s:LOG("UsesOfSymbolAtPointHandler_Ok bn=".  bn)
 endfunction
 
 function! s:GetLocation()
-  let [found, location] = g:vimside.GetOption('swank-rpc-uses-of-symbol-at-point-location')
+  let [found, location] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-location')
   if ! found
-    call s:ERROR("Option not found 'swank-rpc-uses-of-symbol-at-point-location'") 
+    call s:ERROR("Option not found 'tailor-uses-of-symbol-at-point-location'") 
     let location = 'same_window'
 
   elseif location != 'tab'
     \ && location != 'split_window'
     \ && location != 'vsplit_window'
     \ && location != 'same_window'
-    call s:ERROR("Option 'swank-rpc-uses-of-symbol-at-point-location' has bad location value '". location ."'") 
+    call s:ERROR("Option 'tailor-uses-of-symbol-at-point-location' has bad location value '". location ."'") 
 
     let location = 'same_window'
   endif
@@ -183,7 +177,7 @@ function! s:GetLocation()
 endfunction
 
 function! s:QuickFixClose()
-call s:LOG("QuickFixClose:") 
+" call s:LOG("QuickFixClose:") 
 
   augroup VIMSIDE_USAP
    autocmd!

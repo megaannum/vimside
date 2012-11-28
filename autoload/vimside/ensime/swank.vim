@@ -53,74 +53,74 @@ endfunction
 function! vimside#ensime#swank#load_ping_info()
   let errors = g:vimside.errors
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-expecting-read-timeout')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-read-timeout')
   if found
     let s:rpc_expecting_read_timeout = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-expecting-read-timeout'"
+    call add(errors, ": Option not found: 'scheduler-rpc-expecting-read-timeout'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-expecting-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-updatetime')
   if found
     let s:rpc_expecting_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-expecting-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-rpc-expecting-updatetime'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-expecting-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-char-count')
   if found
     let s:rpc_expecting_char_count = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-expecting-char-count'"
+    call add(errors, ": Option not found: 'scheduler-rpc-expecting-char-count'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-not-expecting-read-timeout')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-read-timeout')
   if found
     let s:rpc_not_expecting_read_timeout = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-not-expecting-read-timeout'"
+    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-read-timeout'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-not-expecting-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-updatetime')
   if found
     let s:rpc_not_expecting_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-not-expecting-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-updatetime'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-rpc-not-expecting-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-char-count')
   if found
     let s:rpc_not_expecting_char_count = l:value
   else
-    call add(errors, ": Option not found: 'swank-rpc-not-expecting-char-count'"
+    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-char-count'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-event-expecting-one-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-one-updatetime')
   if found
     let s:event_expecting_one_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'swank-event-expecting-one-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-event-expecting-one-updatetime'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-event-expecting-one-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-one-char-count')
   if found
     let s:event_expecting_one_char_count = l:value
   else
-    call add(errors, ": Option not found: 'swank-event-expecting-one-char-count'"
+    call add(errors, ": Option not found: 'scheduler-event-expecting-one-char-count'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-event-expecting-many-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-many-updatetime')
   if found
     let s:event_expecting_many_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'swank-event-expecting-many-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-event-expecting-many-updatetime'"
   endif
 
-  let [found, l:value] = g:vimside.GetOption('swank-event-expecting-many-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-many-char-count')
   if found
     let s:event_expecting_many_char_count = l:value
   else
-    call add(errors, ": Option not found: 'swank-event-expecting-many-char-count'"
+    call add(errors, ": Option not found: 'scheduler-event-expecting-many-char-count'"
   endif
 endfunction
 
@@ -465,8 +465,20 @@ function! s:HandleResponse(children)
     return 1
   endif
   if kind_kw == ':ok'
+    " maybe Dictionary or List of value(s)
+    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(body_sexp)
+    if ! found
+      echoe "HandleResponse: Badly formed Response"
+      call s:ERROR("HandleResponse: Badly formed Response: ". string(body_sexp))
+      return 1
+    endif
+
     " return 0 or 1
-    call rr.handler.ok(body_sexp)
+    if has_key(rr, 'data')
+      call rr.handler.ok(dic, rr.data)
+    else
+      call rr.handler.ok(dic)
+    endif
 
   elseif kind_kw == ':abort'
     let [found, body_list] =  vimside#sexp#Get_ListValue(body_sexp) 

@@ -34,7 +34,7 @@ call s:LOG("cancelc_refactor TOP")
 
   if ! exists("s:Handler")
     let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-cancelc-refactor-handler')
-    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-cancelc-refactor-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-cancelc-refactor-caller')
   endif
 
   let l:args = { }
@@ -70,22 +70,13 @@ function! g:CancelRefactorHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:CancelRefactorHandler_Ok(CancelRefactor)
-call s:LOG("CancelRefactorHandler_Ok ".  vimside#sexp#ToString(a:CancelRefactor)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:CancelRefactor) 
-    if ! found 
-      echoe "CancelRefactor ok: Badly formed Response"
-      call s:ERROR("CancelRefactor ok: Badly formed Response: ". string(a:CancelRefactor)) 
-      return 0
-    endif
+  function! g:CancelRefactorHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("CancelRefactorHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

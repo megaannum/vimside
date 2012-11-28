@@ -76,22 +76,13 @@ function! g:PackageMemberCompletionHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:PackageMemberCompletionHandler_Ok(packageMemberCompletion)
-call s:LOG("PackageMemberCompletionHandler_Ok ".  vimside#sexp#ToString(a:packageMemberCompletion)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:packageMemberCompletion) 
-    if ! found 
-      echoe "PackageMemberCompletion ok: Badly formed Response"
-      call s:ERROR("PackageMemberCompletion ok: Badly formed Response: ". string(a:packageMemberCompletion)) 
-      return 0
-    endif
+  function! g:PackageMemberCompletionHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("PackageMemberCompletionHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

@@ -80,22 +80,13 @@ function! g:ExecUndoHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ExecUndoHandler_Ok(execUndo)
-call s:LOG("ExecUndoHandler_Ok ".  vimside#sexp#ToString(a:execUndo)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:execUndo) 
-    if ! found 
-      echoe "ExecUndo ok: Badly formed Response"
-      call s:ERROR("ExecUndo ok: Badly formed Response: ". string(a:execUndo)) 
-      return 0
-    endif
+  function! g:ExecUndoHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("ExecUndoHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

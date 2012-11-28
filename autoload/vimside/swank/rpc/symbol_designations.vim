@@ -83,22 +83,13 @@ function! g:SymbolDesignationsHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:SymbolDesignationsHandler_Ok(SymbolDesignations)
-call s:LOG("SymbolDesignationsHandler_Ok ".  vimside#sexp#ToString(a:SymbolDesignations)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:SymbolDesignations) 
-    if ! found 
-      echoe "SymbolDesignations ok: Badly formed Response"
-      call s:ERROR("SymbolDesignations ok: Badly formed Response: ". string(a:SymbolDesignations)) 
-      return 0
-    endif
+  function! g:SymbolDesignationsHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("SymbolDesignationsHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

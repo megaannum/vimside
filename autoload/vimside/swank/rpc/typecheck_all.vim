@@ -76,16 +76,9 @@ function! g:TypecheckAllHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:TypecheckAllHandler_Ok(okResp)
-call s:LOG("TypecheckAllHandler_Ok ".  vimside#sexp#ToString(a:okResp)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:okResp) 
-    if ! found 
-      echoe "TypecheckAll ok: Badly formed Response"
-      call s:ERROR("TypecheckAll ok: Badly formed Response: ". string(a:okResp)) 
-      return 0
-    endif
-
-call s:LOG("TypechecAllHandler_Ok diclist=".  string(diclist)) 
+  function! g:TypecheckAllHandler_Ok(dic, ...)
+    let dic = a:dic
+call s:LOG("TypechecAllHandler_Ok diclist=".  string(dic)) 
     return 1
   endfunction
 

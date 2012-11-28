@@ -100,7 +100,9 @@ let g:conf.preview_split_location = "belowright"
 let g:conf.show_hidden_files = 1
 
 "External explorer name
-if (has("win32") || has("win95") || has("win64") || has("win16") || has("dos32"))
+" TODO remove
+" if (has("win32") || has("win95") || has("win64") || has("win16") || has("dos32"))
+if g:vimside.os.is_mswin
     let g:conf.external_explorer = "explorer.exe"
 else
     let g:conf.external_explorer = "nautilus"
@@ -362,7 +364,9 @@ let g:platform = {}
 
 "has win
 function! g:platform.haswin32()
-  return (has("win32") || has("win95") || has("win64") || has("win16") || has("dos32"))
+  " TODO remove
+  " return (has("win32") || has("win95") || has("win64") || has("win16") || has("dos32"))
+  return g:vimside.os.is_mswin
 endfunction
 
 let s:is_windoz = g:platform.haswin32() 

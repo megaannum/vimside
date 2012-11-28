@@ -73,22 +73,13 @@ function! g:RemoveFileHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:RemoveFileHandler_Ok(removeFile)
-call s:LOG("RemoveFileHandler_Ok ".  vimside#sexp#ToString(a:removeFile)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:removeFile) 
-    if ! found 
-      echoe "RemoveFile ok: Badly formed Response"
-      call s:ERROR("RemoveFile ok: Badly formed Response: ". string(a:removeFile)) 
-      return 0
-    endif
+  function! g:RemoveFileHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("RemoveFileHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

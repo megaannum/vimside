@@ -15,7 +15,7 @@ let s:ERROR = function("vimside#log#error")
 
 
 function!  vimside#command#browse_source_roots#Run()
-  let [found, forms_use] = g:vimside.GetOption('vimside-forms-use')
+  let [found, forms_use] = g:vimside.GetOption('forms-use')
   let sources = g:vimside.project.info['source_roots']
   if found
     if forms_use
@@ -24,6 +24,6 @@ function!  vimside#command#browse_source_roots#Run()
       call vimside#plugin#sourcebrowser#Run(sources)
     endif
   else
-    call s:ERROR("Option not found: "'vimside-forms-use'")
+    call s:ERROR("Option not found: "'forms-use'")
   endif
 endfunction

@@ -76,22 +76,13 @@ function! g:ExecRefactorHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:ExecRefactorHandler_Ok(ExecRefactor)
-call s:LOG("ExecRefactorHandler_Ok ".  vimside#sexp#ToString(a:ExecRefactor)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:ExecRefactor) 
-    if ! found 
-      echoe "ExecRefactor ok: Badly formed Response"
-      call s:ERROR("ExecRefactor ok: Badly formed Response: ". string(a:ExecRefactor)) 
-      return 0
-    endif
+  function! g:ExecRefactorHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("ExecRefactorHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

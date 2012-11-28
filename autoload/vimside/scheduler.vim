@@ -193,7 +193,10 @@ function! vimside#scheduler#TimeTrigger()
 endfunction
 
 function! vimside#scheduler#GetRealTime() 
-  if has("win32") || has("dos32") || has("dos16") || has("os2")
+  " TODO remove
+  " if has("win32") || has("dos32") || has("dos16") || has("os2")
+
+  if g:vimside.os.is_mswin
     " reltimestr -> %10.6lf
     let tstr = reltimestr(reltime())
     let len = len(tstr)

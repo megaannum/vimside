@@ -464,32 +464,6 @@ function! vimside#ensime#config#Check(sexp)
   endif
   unlet value
 
-if 0 " DUP
-  let key = ":source-roots"
-  let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
-  if found
-    if type(value) != type([])
-      call add(l:errmsg, "Not List key(" . key . ") value:" . string(value))
-      let l:rval = 0
-    else
-      for child in value
-        let [found, strval] = vimside#sexp#Get_StringValue(child) 
-        if found
-          if ! isdirectory(strval) 
-            call add(l:errmsg, "Not Directory key(" . key . ") value:" . string(child))
-            let l:rval = 0
-          endif
-        else
-          call add(l:errmsg, "Not SExp String key(" . key . ") value:" . string(child))
-        endif
-        unlet strval
-      endfor
-    endif
-    let g:vimside.project.info['source_roots'] = value
-  endif
-  unlet value
-endif " DUP
-
   let key = ":formatting-prefs"
   let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
   if found

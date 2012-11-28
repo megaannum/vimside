@@ -5,7 +5,7 @@
 " Summary:       Vimside top level file
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2012
-" Version:       0.2.5
+" Version:       See: autoload/vimside/version.vim
 " Modifications:
 "
 " Tested on vim 7.3 on Linux
@@ -18,11 +18,12 @@
 
 
 function! vimside#version()
-  return '0.2'
+  return vimside#version#Str()
 endfunction
 
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
+
 
 let g:vimside = {} 
 let g:vimside.started = 0
@@ -80,6 +81,39 @@ let g:vimside.debug_event_handlers = {}
 let g:vimside.event_trigger = {} 
 let g:vimside.debug_trigger = {} 
 
+let g:vimside.os = {}
+let g:vimside.os.name = 'unknown'
+for osn in ["unix", 
+          \ "win16", "win32", "win64", "win32unix", "win95", "dos32", 
+          \ "mac", "macunix", "amiga", "os2", "qnx", "beos", "vms"]
+  if has(osn)
+    let g:vimside.os.name = osn
+    break
+  endif
+endfor
+
+let g:vimside.os.is_cygwin = 0
+let g:vimside.os.is_unix = 0
+let g:vimside.os.is_mswin = 0
+let g:vimside.os.is_macunix = 0
+let g:vimside.os.is_unknown = 0
+
+if has("win32unix") && has("unix") 
+  let g:vimside.os.kind = "cygwin"
+  let g:vimside.os.is_cygwin = 1
+elseif !has("win32unix") && has("unix") && !has("macunix")
+  let g:vimside.os.kind = "unix"
+  let g:vimside.os.is_unix = 1
+elseif has('win16') || has('win32') || has('win64') || has('dos32')
+  let g:vimside.os.kind = "mswin"
+  let g:vimside.os.is_mswin = 1
+elseif has('macunix'
+  let g:vimside.os.kind = "macunix"
+  let g:vimside.os.is_macunix = 1
+else
+  let g:vimside.os.kind = "unknown"
+  let g:vimside.os.is_unknown = 1
+endif
 
 function! g:ResponsePending()
   return ! empty(g:vimside.rpc.waiting)
@@ -182,20 +216,20 @@ endfunction
 function! vimside#StartEnsimeServer()
   let [found, portfile] = g:vimside.GetOption('ensime-port-file-path')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime-port-file-path'"
+    echoerr "Option not found: "'ensime-port-file-path'"
   endif
 
 call s:LOG("vimside#StartEnsimeServer portfile=" . portfile) 
   let [found, dpath] = g:vimside.GetOption('ensime-dist-path')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime-dist-path'"
+    echoerr "Option not found: "'ensime-dist-path'"
   endif
 
   let cmd = 'cd ' . dpath . ' && ./bin/server ' . shellescape(portfile)
 
   let [s:found, l:log_enabled] = g:vimside.GetOption('ensime-log-enabled')
   if ! s:found
-    echoerr "Vimside: Option not found: "'ensime-log-enabled'"
+    echoerr "Option not found: "'ensime-log-enabled'"
   endif
 
 " echo "StartEnsimeServer: log_enabled=" . l:log_enabled
@@ -209,7 +243,7 @@ call s:LOG("vimside#StartEnsimeServer portfile=" . portfile)
 
     let [found, l:logfile] = g:vimside.GetOption('ensime-log-file-path')
     if ! found
-      echoerr "Vimside: Option not found: "'ensime-log-file-path'"
+      echoerr "Option not found: "'ensime-log-file-path'"
     endif
 
     call writefile(lines, l:logfile)
@@ -217,7 +251,10 @@ call s:LOG("vimside#StartEnsimeServer portfile=" . portfile)
     execute "silent !" . cmd . " &>> " . l:logfile . " &"
 
   else
-    if has('win16') || has('win32') || has('win64')
+    " TODO remove
+    " if has('win16') || has('win32') || has('win64')
+    
+    if g:vimside.os.is_mswin 
       " Note: do not know if this is correct
       let l:logfile = "NUL"
     else
@@ -233,14 +270,14 @@ function! vimside#GetPortEnsime()
 call s:LOG("vimside#GetPortEnsime TOP") 
   let [found, portfile] = g:vimside.GetOption('ensime-port-file-path')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime-port-file-path'"
+    echoerr "Option not found: "'ensime-port-file-path'"
   endif
 
   " wait for port file to be created and written to
   let cnt = 0
   let [found, max_cnt] = g:vimside.GetOption('ensime-port-file-max-wait')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime-port-file-max-wait'"
+    echoerr "Option not found: "'ensime-port-file-max-wait'"
   endif
 
 call s:LOG("vimside#GetPortEnsime max_cnt=" . max_cnt) 
@@ -269,18 +306,18 @@ call s:LOG("vimside#GetConnectionSocketEnsime TOP")
 
   let [found, port] = g:vimside.GetOption('ensime_port_number')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime_port_number'"
+    echoerr "Option not found: "'ensime_port_number'"
   endif
 
   let [found, host] = g:vimside.GetOption('ensime-host-name')
   if ! found
-    echoerr "Vimside: Option not found: "'ensime-host-name'"
+    echoerr "Option not found: "'ensime-host-name'"
   endif
 
 call s:LOG("host:port=" . host .":". port) 
 
   let l:socket = vimside#ensime#io#open(host, port)
-call s:LOG("socket=" . string(l:socket)) 
+" call s:LOG("socket=" . string(l:socket)) 
   return l:socket
 endfunction
 
@@ -297,125 +334,7 @@ call s:LOG("vimside#PingEnsimeServer")
   endwhile
 endfunction
 
-if 0 " XXXXXXXXXXXXX
-
-function! vimside#SetAutoCmds()
-call s:LOG("vimside#SetAutoCmds TOP") 
-  let s:ping_info_updatetime = g:vimside.ping.info.updatetime
-  let &updatetime = s:ping_info_updatetime
-  let s:max_ping_info_char_count = g:vimside.ping.info.char_count
-  let s:ping_info_char_count = s:max_ping_info_char_count
-
-  augroup VIMSIDE_CMD
-    autocmd!
-    autocmd CursorHold * call vimside#CursorHoldReadFromEnsimeServer()
-    autocmd CursorHoldI * call vimside#CursorHoldReadFromEnsimeServer()
-    autocmd CursorMoved * call vimside#CursorMoveReadFromEnsimeServer()
-    autocmd CursorMovedI * call vimside#CursorMoveReadFromEnsimeServer()
-  augroup END
-endfunction
-
-function! vimside#RemoveAutoCmds()
-  augroup VIMSIDE_CMD
-    autocmd!
-  augroup END
-endfunction
-
-function! vimside#ResetAutoCmds()
-  call vimside#RemoveAutoCmds()
-  call vimside#SetAutoCmds()
-endfunction
-
-
-" let s:max_read_from_ensime_server = 10
-
-"
-"  updatetime option
-"    sync command 
-"      startup
-"        shorten time (startup_time) lengthen after (startup_cnt)
-"      normal
-"        shorten time (normal_time) lengthen after (normal_cnt)
-"  call feedkeys("f\e") 
-"
-function! vimside#CursorHoldReadFromEnsimeServer()
-call s:LOG("CursorHoldReadFromEnsimeServer TOP ") 
-
-  if s:ping_info_updatetime != g:vimside.ping.info.updatetime
-call s:LOG("CursorHoldReadFromEnsimeServer from(". s:ping_info_updatetime. ")to(". g:vimside.ping.info.updatetime .")") 
-    let s:ping_info_updatetime = g:vimside.ping.info.updatetime
-    let &updatetime = s:ping_info_updatetime
-  endif
-
-  let timeout = g:vimside.ping.info.read_timeout
-  let success = vimside#ensime#io#ping(timeout)
-  while success
-    let success = vimside#ensime#io#ping(timeout)
-  endwhile
-
-" call s:LOG("CursorHoldReadFromEnsimeServer feedkeys: updatetime=". &updatetime) 
-  " call feedkeys("f\e", 'n') 
-  " call feedkeys(a:keys, 'n') 
-  if mode() == 'i'
-    call feedkeys("a\<BS>", 'n')
-  else
-    call feedkeys("f\e", 'n')
-  endif
-
-endfunction
-
-function! vimside#CursorMoveReadFromEnsimeServer()
-" call s:LOG("CursorMoveReadFromEnsimeServer TOP") 
-  if s:max_ping_info_char_count != g:vimside.ping.info.char_count
-call s:LOG("CursorMoveReadFromEnsimeServer from(". s:max_ping_info_char_count . ")to(". g:vimside.ping.info.char_count .")") 
-    let s:max_ping_info_char_count = g:vimside.ping.info.char_count
-    let s:ping_info_char_count = s:max_ping_info_char_count
-  endif
-
-  if s:ping_info_char_count <= 0
-    let timeout = 0
-    let success = vimside#ensime#io#ping(timeout)
-    while success
-      let success = vimside#ensime#io#ping(timeout)
-    endwhile
-
-    let s:ping_info_char_count = s:max_ping_info_char_count
-  else
-    let s:ping_info_char_count -= 1
-  endif
-endfunction
-
-endif " XXXXXXXXXXXXX
-
-" ============================================================================
-" Position Code
-" ============================================================================
-if 0 " YYYXXX
-function!  vimside#ClearPosition()
-  let g:vimside.project.positions = []
-endfunction
-
-function!  vimside#SetPosition()
-  let bufnum = bufnr("%")
-  let pos = getpos(".")
-  let g:vimside.project.positions = [bufnum, pos]
-endfunction
-
-function!  vimside#PreviousPosition()
-  let positions = g:vimside.project.positions
-" call s:LOG("vimside#PreviousPosition positions=". string(positions)) 
-  let len = len(positions)
-  if len > 0
-    let [bufnum, pos] = positions
-
-    call vimside#SetPosition()
-
-    execute "buffer ". bufnum
-    call setpos('.', pos)
-  endif
-endfunction
-endif " YYYXXX
-
+if 0 " YYYYYYYYYYYYYYY
 " ============================================================================
 " Completion code
 " ============================================================================
@@ -511,87 +430,4 @@ function!  vimside#StopAutoCmdCompletions()
     au!
   augroup END
 endfunction
-
-" ============================================================================
-" Selection Code
-" ============================================================================
-
-if 0 " XXXXXXXXXX
-
-" list of [file, start, end]
-let s:selections = []
-let s:selection_index = -1
-
-function!  vimside#ClearSelection()
-" call s:LOG("vimside#ClearSelection") 
-  let s:selection_index = -1
-  let s:selections = []
-endfunction
-
-function!  vimside#AddSelection(file, start, end)
-" call s:LOG("vimside#AddSelection") 
-  call add(s:selections, [a:file, a:start, a:end])
-  let s:selection_index = len(s:selections) - 1
-  call vimside#DisplaySelection(a:file, a:start, a:end)
-endfunction
-
-function!  vimside#ExpandSelection()
-" call s:LOG("vimside#ExpandSelection") 
-  if s:selection_index == -1
-    call vimside#ClearSelection()
-    return 0
-  elseif len(s:selections) == 0
-    call vimside#ClearSelection()
-    return 0
-  else
-    let [file, start, end] = s:selections[0]
-    let current_file = expand('%:p')
-    if file != current_file
-      call vimside#ClearSelection()
-      return 0
-    elseif s:selection_index + 1 < len(s:selections) 
-      let s:selection_index += 1
-      let [file, start, end] = s:selections[s:selection_index]
-      if file != current_file
-        call vimside#ClearSelection()
-        return 0
-      else
-        call vimside#DisplaySelection(file, start, end)
-        return 1
-      endif
-    else
-      return 0
-    endif
-  endif
-endfunction
-
-function!  vimside#ContractSelection()
-" call s:LOG("vimside#ContractSelection") 
-" call s:LOG("vimside#ContractSelection: s:selection_index=". s:selection_index) 
-  if s:selection_index > 0
-    let s:selection_index -= 1
-" call s:LOG("vimside#ContractSelection: len(s:selections)=". len(s:selections)) 
-    if len(s:selections) > s:selection_index
-      let [file, start, end] = s:selections[s:selection_index]
-" call s:LOG("vimside#ContractSelection: file=". file) 
-      let current_file = expand('%:p')
-" call s:LOG("vimside#ContractSelection: current_file=". current_file) 
-      if file == current_file
-        let m = mode()
-        if m == 'v' || m == 'V' || m == "\<C-v>"
-          execute "normal v"
-        endif
-        call vimside#DisplaySelection(file, start, end)
-      endif
-    endif
-  endif
-endfunction
-
-function!  vimside#DisplaySelection(file, start, end)
-" call s:LOG("vimside#DisplaySelection: start=". a:start .", end=". a:end) 
-  execute "goto ". (a:start+1)
-  execute "normal v"
-  execute "goto ". a:end
-endfunction
-
-endif " XXXXXXXXXX
+endif " YYYYYYYYYYYYYYY

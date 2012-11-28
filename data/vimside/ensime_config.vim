@@ -16,8 +16,6 @@ if s:java_home == ''
 endif
 
 let compile_jars = g:SExp(
-                     \ g:Str(s:scala_home . "/lib/scala-library.jar"),
-                     \ g:Str(s:scala_home . "/lib/scala-compiler.jar"), 
                      \ g:Str(s:full_dir . "/build/classes")
                      \ )
 let source_roots = g:SExp(

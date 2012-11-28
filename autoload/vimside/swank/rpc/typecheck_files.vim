@@ -81,16 +81,10 @@ function! g:TypecheckFilesHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:TypecheckFilesHandler_Ok(okResp)
-call s:LOG("TypecheckFilesHandler_Ok ".  vimside#sexp#ToString(a:okResp)) 
-    let [found, diclist] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:okResp) 
-    if ! found 
-      echoe "TypecheckFiles ok: Badly formed Response"
-      call s:ERROR("TypecheckFiles ok: Badly formed Response: ". string(a:okResp)) 
-      return 0
-    endif
+  function! g:TypecheckFilesHandler_Ok(dic, ...)
+    let dic = a:dic
+call s:LOG("TypechecFilesHandler_Ok diclist=".  string(dic)) 
 
-call s:LOG("TypechecFilesHandler_Ok diclist=".  string(diclist)) 
     return 1
   endfunction
 

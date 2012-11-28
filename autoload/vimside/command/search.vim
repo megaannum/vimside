@@ -24,15 +24,15 @@ let s:start_phrase = 'Search Terms> '
 let s:line = ''
 
 function! s:Init()
-  let [found, value] = g:vimside.GetOption('public-symbol-search-close-empty-display')
+  let [found, value] = g:vimside.GetOption('tailor-symbol-search-close-empty-display')
   if ! found
-    throw "Option not found: "'public-symbol-search-close-empty-display'"
+    throw "Option not found: "'tailor-symbol-search-close-empty-display'"
   endif
   let s:close_list_when_empty_option = value
 
-  let [found, value] = g:vimside.GetOption('public-symbol-search-do-incremental')
+  let [found, value] = g:vimside.GetOption('tailor-symbol-search-do-incremental')
   if ! found
-    throw "Option not found: "'public-symbol-search-do-incremental'"
+    throw "Option not found: "'tailor-symbol-search-do-incremental'"
   endif
 
   let s:do_incremental_search_option = value

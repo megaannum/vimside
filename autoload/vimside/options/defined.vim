@@ -38,6 +38,8 @@ let g:OPTION_FUNCTION_KIND        = 8
 let g:OPTION_TIME_KIND            = 9
 let g:OPTION_CHAR_COUNT_KIND      = 10
 let g:OPTION_COLOR_KIND           = 11
+let g:OPTION_URL_KIND             = 12
+let g:OPTION_KEY_KIND             = 13
 
 function! vimside#options#defined#GetKindName(kind)
   if a:kind == g:OPTION_UNKNOWN_KIND
@@ -64,6 +66,10 @@ function! vimside#options#defined#GetKindName(kind)
     return 'Character Count'
   elseif a:kind == g:OPTION_COLOR_KIND
     return 'Color'
+  elseif a:kind == g:OPTION_URL_KIND
+    return 'URL'
+  elseif a:kind == g:OPTION_KEY_KIND
+    return 'Key'
   else
     return 'Unknown Kind'
   endif
@@ -151,6 +157,10 @@ function! vimside#options#defined#CheckValue(def, value, errors)
         call s:CheckCharCountKind(def, value, errors)
       elseif def.kind == g:OPTION_COLOR_KIND
         call s:CheckColorKind(def, value, errors)
+      elseif def.kind == g:OPTION_URL_KIND
+        call s:CheckUrlKind(def, value, errors)
+      elseif def.kind == g:OPTION_KEY_KIND
+        call s:CheckKeyKind(def, value, errors)
       else
         call add(errors, "Option '". def.name ."' unknown kind: '". string(def.kind) ."'")
       endif
@@ -278,8 +288,45 @@ function! s:CheckColorKind(def, value, errors)
   endif
 endfunction
 
+function! s:CheckUrlKind(def, value, errors)
+  let def = a:def
+  let value = a:value
+  let errors = a:errors
+  " TODO How to check a valid URL?
+endfunction
+
+function! s:CheckKeyKind(def, value, errors)
+  let def = a:def
+  let value = a:value
+  let errors = a:errors
+  " TODO How to check a valid KeyL?
+endfunction
+
+
 function! s:MakeOptions()
   let l:options = {}
+
+  " supported java and scala versions
+  let l:options['vimside-java-version'] = {
+        \ 'name': 'vimside-java-version', 
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['1.5', '1.6', '1.7'],
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Supported Java versions.'
+        \ ]
+      \ }
+  let l:options['vimside-scala-version'] = {
+        \ 'name': 'vimside-scala-version', 
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['2.9.2', '2.10.0'],
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Supported Scala versions.'
+        \ ]
+      \ }
 
   let l:options['vimside-log-enabled'] = {
         \ 'name': 'vimside-log-enabled', 
@@ -332,8 +379,8 @@ function! s:MakeOptions()
           \  'the "data/vimside" Directory.'
           \ ]
       \ }
-  let l:options['use-cwd-as-default-output-dir'] = {
-        \ 'name': 'use-cwd-as-default-output-dir',
+  let l:options['vimside-use-cwd-as-output-dir'] = {
+        \ 'name': 'vimside-use-cwd-as-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
@@ -472,8 +519,8 @@ function! s:MakeOptions()
             \ 'depending on the setting of "use_cwd_as_default_output_dir".'
           \ ]
       \ }
-  let l:options['swank-information'] = {
-        \ 'name': 'swank-information',
+  let l:options['tailor-information'] = {
+        \ 'name': 'tailor-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
@@ -485,8 +532,8 @@ function! s:MakeOptions()
             \ 'option is used to determine what display mechanism to use.'
           \ ]
       \ }
-  let l:options['swank-location-same-file'] = {
-        \ 'name': 'swank-location-same-file',
+  let l:options['tailor-location-same-file'] = {
+        \ 'name': 'tailor-location-same-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window' ],
@@ -501,8 +548,8 @@ function! s:MakeOptions()
             \ 'the new location in the new sub-window.'
           \ ]
       \ }
-  let l:options['swank-location-diff-file'] = {
-        \ 'name': 'swank-location-diff-file',
+  let l:options['tailor-location-diff-file'] = {
+        \ 'name': 'tailor-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
@@ -519,8 +566,8 @@ function! s:MakeOptions()
       \ }
 
   " Swank RPC Event Ping Info
-  let l:options['swank-rpc-expecting-read-timeout'] = {
-        \ 'name': 'swank-rpc-expecting-read-timeout',
+  let l:options['scheduler-rpc-expecting-read-timeout'] = {
+        \ 'name': 'scheduler-rpc-expecting-read-timeout',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -528,8 +575,8 @@ function! s:MakeOptions()
             \ "Expecting response RPC socket read timeout."
           \ ]
       \ }
-  let l:options['swank-rpc-expecting-updatetime'] = {
-        \ 'name': 'swank-rpc-expecting-updatetime',
+  let l:options['scheduler-rpc-expecting-updatetime'] = {
+        \ 'name': 'scheduler-rpc-expecting-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -537,8 +584,8 @@ function! s:MakeOptions()
             \ "Expecting response CurosrHold updatetime before ping."
           \ ]
       \ }
-  let l:options['swank-rpc-expecting-char-count'] = {
-        \ 'name': 'swank-rpc-expecting-char-count',
+  let l:options['scheduler-rpc-expecting-char-count'] = {
+        \ 'name': 'scheduler-rpc-expecting-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -547,8 +594,8 @@ function! s:MakeOptions()
             \ "ping."
           \ ]
       \ }
-  let l:options['swank-rpc-not-expecting-read-timeout'] = {
-        \ 'name': 'swank-rpc-not-expecting-read-timeout',
+  let l:options['scheduler-rpc-not-expecting-read-timeout'] = {
+        \ 'name': 'scheduler-rpc-not-expecting-read-timeout',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -556,8 +603,8 @@ function! s:MakeOptions()
             \ "Not expecting RPC socket read timeout."
           \ ]
       \ }
-  let l:options['swank-rpc-not-expecting-updatetime'] = {
-        \ 'name': 'swank-rpc-not-expecting-updatetime',
+  let l:options['scheduler-rpc-not-expecting-updatetime'] = {
+        \ 'name': 'scheduler-rpc-not-expecting-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -565,8 +612,8 @@ function! s:MakeOptions()
             \ "Not expecting CurosrHold updatetime before ping."
           \ ]
       \ }
-  let l:options['swank-rpc-not-expecting-char-count'] = {
-        \ 'name': 'swank-rpc-not-expecting-char-count',
+  let l:options['scheduler-rpc-not-expecting-char-count'] = {
+        \ 'name': 'scheduler-rpc-not-expecting-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -574,8 +621,8 @@ function! s:MakeOptions()
             \ "Not expecting CursorMoved number of characters before ping."
           \ ]
       \ }
-  let l:options['swank-event-expecting-one-updatetime'] = {
-        \ 'name': 'swank-event-expecting-one-updatetime',
+  let l:options['scheduler-event-expecting-one-updatetime'] = {
+        \ 'name': 'scheduler-event-expecting-one-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -583,8 +630,8 @@ function! s:MakeOptions()
             \ "Expecting one event CurosrHold updatetime before ping."
           \ ]
       \ }
-  let l:options['swank-event-expecting-one-char-count'] = {
-        \ 'name': 'swank-event-expecting-one-char-count',
+  let l:options['scheduler-event-expecting-one-char-count'] = {
+        \ 'name': 'scheduler-event-expecting-one-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -593,8 +640,8 @@ function! s:MakeOptions()
             \ "ping."
           \ ]
       \ }
-  let l:options['swank-event-expecting-many-updatetime'] = {
-        \ 'name': 'swank-event-expecting-many-updatetime',
+  let l:options['scheduler-event-expecting-many-updatetime'] = {
+        \ 'name': 'scheduler-event-expecting-many-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -602,8 +649,8 @@ function! s:MakeOptions()
             \ "Expecting many events CurosrHold updatetime before ping."
           \ ]
       \ }
-  let l:options['swank-event-expecting-many-char-count'] = {
-        \ 'name': 'swank-event-expecting-many-char-count',
+  let l:options['scheduler-event-expecting-many-char-count'] = {
+        \ 'name': 'scheduler-event-expecting-many-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -613,65 +660,1098 @@ function! s:MakeOptions()
           \ ]
       \ }
   
-  " Swank RPC
-  let l:options['swank-rpc-completions-caller'] = {
-        \ 'name': 'swank-rpc-completions-caller',
+  " Start Swank RPC
+  
+  let l:options['swank-rpc-builder-add-files-handler'] = {
+        \ 'name': 'swank-rpc-builder-add-files-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC caller for 'swank:completions'."
+            \ "RPC Handler for 'swank:builder-add-files'."
           \ ]
       \ }
+
+  let l:options['swank-rpc-builder-add-files-caller'] = {
+        \ 'name': 'swank-rpc-builder-add-files-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:builder-add-files'."
+          \ ]
+      \ }
+
+  let l:options['swank-rpc-builder-init-handler'] = {
+        \ 'name': 'swank-rpc-builder-init-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:builder-init'."
+          \ ]
+      \ }
+
+  let l:options['swank-rpc-builder-init-caller'] = {
+        \ 'name': 'swank-rpc-builder-init-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:builder-init'."
+          \ ]
+      \ }
+
+  let l:options['swank-rpc-builder-remove-files-handler'] = {
+        \ 'name': 'swank-rpc-builder-remove-files-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:builder-remove-files'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-builder-remove-files-caller'] = {
+        \ 'name': 'swank-rpc-builder-remove-files-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:builder-remove-files'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-builder-update-files-handler'] = {
+        \ 'name': 'swank-rpc-builder-update-files-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:builder-update-files'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-builder-update-files-caller'] = {
+        \ 'name': 'swank-rpc-builder-update-files-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:builder-update-files'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-call-completion-handler'] = {
+        \ 'name': 'swank-rpc-call-completion-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:call-completion'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-call-completion-caller'] = {
+        \ 'name': 'swank-rpc-call-completion-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:call-completion'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-cancel-refactor-handler'] = {
+        \ 'name': 'swank-rpc-cancel-refactor-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:cancel-refactor'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-cancel-refactor-caller'] = {
+        \ 'name': 'swank-rpc-cancel-refactor-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:cancel-refactor'."
+          \ ]
+      \ }
+  
   let l:options['swank-rpc-completions-handler'] = {
         \ 'name': 'swank-rpc-completions-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC handler for 'swank:completions'."
+            \ "RPC Handler for 'swank:completions'."
           \ ]
       \ }
-
-  let l:options['swank-rpc-connection-info-caller'] = {
-        \ 'name': 'swank-rpc-connection-info-caller',
+  
+  let l:options['swank-rpc-completions-caller'] = {
+        \ 'name': 'swank-rpc-completions-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC caller for 'swank:connection-info'."
+            \ "RPC Caller for 'swank:completions'."
           \ ]
       \ }
+  
   let l:options['swank-rpc-connection-info-handler'] = {
         \ 'name': 'swank-rpc-connection-info-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC handler for 'swank:connection-info'."
+            \ "RPC Handler for 'swank:connection-info'."
           \ ]
       \ }
-
-  let l:options['swank-rpc-public-symbol-search-caller'] = {
-        \ 'name': 'swank-rpc-public-symbol-search-caller',
+  
+  let l:options['swank-rpc-connection-info-caller'] = {
+        \ 'name': 'swank-rpc-connection-info-caller',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC caller for 'swank:public-symbol-search'."
+            \ "RPC Caller for 'swank:connection-info'."
           \ ]
       \ }
+  
+  let l:options['swank-rpc-debug-active-vm-handler'] = {
+        \ 'name': 'swank-rpc-debug-active-vm-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-active-vm'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-active-vm-caller'] = {
+        \ 'name': 'swank-rpc-debug-active-vm-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-active-vm'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-attach-handler'] = {
+        \ 'name': 'swank-rpc-debug-attach-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-attach'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-attach-caller'] = {
+        \ 'name': 'swank-rpc-debug-attach-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-attach'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-backtrace-handler'] = {
+        \ 'name': 'swank-rpc-debug-backtrace-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-backtrace'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-backtrace-caller'] = {
+        \ 'name': 'swank-rpc-debug-backtrace-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-backtrace'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-clear-all-breaks-handler'] = {
+        \ 'name': 'swank-rpc-debug-clear-all-breaks-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-clear-all-breaks'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-clear-all-breaks-caller'] = {
+        \ 'name': 'swank-rpc-debug-clear-all-breaks-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-clear-all-breaks'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-clear-break-handler'] = {
+        \ 'name': 'swank-rpc-debug-clear-break-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-clear-break'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-clear-break-caller'] = {
+        \ 'name': 'swank-rpc-debug-clear-break-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-clear-break'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-continue-handler'] = {
+        \ 'name': 'swank-rpc-debug-continue-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-continue'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-continue-caller'] = {
+        \ 'name': 'swank-rpc-debug-continue-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-continue'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-list-breakpoints-handler'] = {
+        \ 'name': 'swank-rpc-debug-list-breakpoints-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-list-breakpoints'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-list-breakpoints-caller'] = {
+        \ 'name': 'swank-rpc-debug-list-breakpoints-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-list-breakpoints'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-locate-name-handler'] = {
+        \ 'name': 'swank-rpc-debug-locate-name-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-locate-name'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-locate-name-caller'] = {
+        \ 'name': 'swank-rpc-debug-locate-name-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-locate-name'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-next-handler'] = {
+        \ 'name': 'swank-rpc-debug-next-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-next'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-next-caller'] = {
+        \ 'name': 'swank-rpc-debug-next-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-next'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-run-handler'] = {
+        \ 'name': 'swank-rpc-debug-run-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-run'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-run-caller'] = {
+        \ 'name': 'swank-rpc-debug-run-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-run'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-set-break-handler'] = {
+        \ 'name': 'swank-rpc-debug-set-break-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-set-break'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-set-break-caller'] = {
+        \ 'name': 'swank-rpc-debug-set-break-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-set-break'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-set-value-handler'] = {
+        \ 'name': 'swank-rpc-debug-set-value-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-set-value'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-set-value-caller'] = {
+        \ 'name': 'swank-rpc-debug-set-value-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-set-value'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-start-handler'] = {
+        \ 'name': 'swank-rpc-debug-start-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-start'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-start-caller'] = {
+        \ 'name': 'swank-rpc-debug-start-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-start'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-step-out-handler'] = {
+        \ 'name': 'swank-rpc-debug-step-out-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-step-out'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-step-out-caller'] = {
+        \ 'name': 'swank-rpc-debug-step-out-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-step-out'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-step-handler'] = {
+        \ 'name': 'swank-rpc-debug-step-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-step'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-step-caller'] = {
+        \ 'name': 'swank-rpc-debug-step-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-step'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-stop-handler'] = {
+        \ 'name': 'swank-rpc-debug-stop-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-stop'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-stop-caller'] = {
+        \ 'name': 'swank-rpc-debug-stop-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-stop'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-to-string-handler'] = {
+        \ 'name': 'swank-rpc-debug-to-string-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-to-string'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-to-string-caller'] = {
+        \ 'name': 'swank-rpc-debug-to-string-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-to-string'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-value-handler'] = {
+        \ 'name': 'swank-rpc-debug-value-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:debug-value'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-debug-value-caller'] = {
+        \ 'name': 'swank-rpc-debug-value-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:debug-value'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-exec-refactor-handler'] = {
+        \ 'name': 'swank-rpc-exec-refactor-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:exec-refactor'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-exec-refactor-caller'] = {
+        \ 'name': 'swank-rpc-exec-refactor-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:exec-refactor'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-exec-undo-handler'] = {
+        \ 'name': 'swank-rpc-exec-undo-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:exec-undo'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-exec-undo-caller'] = {
+        \ 'name': 'swank-rpc-exec-undo-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:exec-undo'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-expand-selection-handler'] = {
+        \ 'name': 'swank-rpc-expand-selection-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:expand-selection'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-expand-selection-caller'] = {
+        \ 'name': 'swank-rpc-expand-selection-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:expand-selection'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-format-source-handler'] = {
+        \ 'name': 'swank-rpc-format-source-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:format-source'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-format-source-caller'] = {
+        \ 'name': 'swank-rpc-format-source-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:format-source'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-import-suggestions-handler'] = {
+        \ 'name': 'swank-rpc-import-suggestions-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:import-suggestions'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-import-suggestions-caller'] = {
+        \ 'name': 'swank-rpc-import-suggestions-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:import-suggestions'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-init-project-handler'] = {
+        \ 'name': 'swank-rpc-init-project-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:init-project'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-init-project-caller'] = {
+        \ 'name': 'swank-rpc-init-project-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:init-project'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-package-by-path-handler'] = {
+        \ 'name': 'swank-rpc-inspect-package-by-path-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:inspect-package-by-path'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-package-by-path-caller'] = {
+        \ 'name': 'swank-rpc-inspect-package-by-path-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:inspect-package-by-path'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-type-at-point-handler'] = {
+        \ 'name': 'swank-rpc-inspect-type-at-point-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:inspect-type-at_point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-type-at-point-caller'] = {
+        \ 'name': 'swank-rpc-inspect-type-at-point-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:inspect-type-at_point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-type-by-id-handler'] = {
+        \ 'name': 'swank-rpc-inspect-type-by-id-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:inspect-type-by-id'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-inspect-type-by-id-caller'] = {
+        \ 'name': 'swank-rpc-inspect-type-by-id-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:inspect-type-by-id'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-method-bytecode-handler'] = {
+        \ 'name': 'swank-rpc-method-bytecode-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:method-bytecode'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-method-bytecode-caller'] = {
+        \ 'name': 'swank-rpc-method-bytecode-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:method-bytecode'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-package-member-completion-handler'] = {
+        \ 'name': 'swank-rpc-package-member-completion-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:package-member-completion'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-package-member-completion-caller'] = {
+        \ 'name': 'swank-rpc-package-member-completion-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:package-member-completion'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-patch-source-handler'] = {
+        \ 'name': 'swank-rpc-patch-source-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:patch-source'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-patch-source-caller'] = {
+        \ 'name': 'swank-rpc-patch-source-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:patch-source'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-peek-undo-handler'] = {
+        \ 'name': 'swank-rpc-peek-undo-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:peek-undo'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-peek-undo-caller'] = {
+        \ 'name': 'swank-rpc-peek-undo-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:peek-undo'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-prepare-refactor-handler'] = {
+        \ 'name': 'swank-rpc-prepare-refactor-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:prepare-refactor'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-prepare-refactor-caller'] = {
+        \ 'name': 'swank-rpc-prepare-refactor-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:prepare-refactor'."
+          \ ]
+      \ }
+  
   let l:options['swank-rpc-public-symbol-search-handler'] = {
         \ 'name': 'swank-rpc-public-symbol-search-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "RPC handler for 'swank:public-symbol-search'."
+            \ "RPC Handler for 'swank:public-symbol-search'."
           \ ]
       \ }
-  let l:options['public-symbol-search-close-empty-display'] = {
-        \ 'name': 'public-symbol-search-close-empty-display',
+  
+  let l:options['swank-rpc-public-symbol-search-caller'] = {
+        \ 'name': 'swank-rpc-public-symbol-search-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:public-symbol-search'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-remove-file-handler'] = {
+        \ 'name': 'swank-rpc-remove-file-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:remove-file'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-remove-file-caller'] = {
+        \ 'name': 'swank-rpc-remove-file-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:remove-file'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-repl-config-handler'] = {
+        \ 'name': 'swank-rpc-repl-config-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:repl-config'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-repl-config-caller'] = {
+        \ 'name': 'swank-rpc-repl-config-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:repl-config'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-shutdown-server-handler'] = {
+        \ 'name': 'swank-rpc-shutdown-server-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:shutdown-server'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-shutdown-server-caller'] = {
+        \ 'name': 'swank-rpc-shutdown-server-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:shutdown-server'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-symbol-at-point-handler'] = {
+        \ 'name': 'swank-rpc-symbol-at-point-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:symbol-at-point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-symbol-at-point-caller'] = {
+        \ 'name': 'swank-rpc-symbol-at-point-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:symbol-at-point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-symbol-designations-handler'] = {
+        \ 'name': 'swank-rpc-symbol-designations-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:symbol-designations'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-symbol-designations-caller'] = {
+        \ 'name': 'swank-rpc-symbol-designations-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:symbol-designations'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-at-point-handler'] = {
+        \ 'name': 'swank-rpc-type-at-point-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:type-at-point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-at-point-caller'] = {
+        \ 'name': 'swank-rpc-type-at-point-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:type-at-point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-id-handler'] = {
+        \ 'name': 'swank-rpc-type-by-id-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:type-by-id'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-id-caller'] = {
+        \ 'name': 'swank-rpc-type-by-id-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:type-by-id'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-name_at_point-handler'] = {
+        \ 'name': 'swank-rpc-type-by-name_at_point-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:type-by-name_at_point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-name_at_point-caller'] = {
+        \ 'name': 'swank-rpc-type-by-name_at_point-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:type-by-name_at_point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-name-handler'] = {
+        \ 'name': 'swank-rpc-type-by-name-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:type-by-name'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-type-by-name-caller'] = {
+        \ 'name': 'swank-rpc-type-by-name-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:type-by-name'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-typecheck-all-handler'] = {
+        \ 'name': 'swank-rpc-typecheck-all-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:typecheck-all'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-typecheck-all-caller'] = {
+        \ 'name': 'swank-rpc-typecheck-all-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:typecheck-all'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-typecheck-files-handler'] = {
+        \ 'name': 'swank-rpc-typecheck-files-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:typecheck-files'."
+          \ ]
+      \ }
+
+  let l:options['swank-rpc-typecheck-files-caller'] = {
+        \ 'name': 'swank-rpc-typecheck-files-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:typecheck-files'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-typecheck-file-handler'] = {
+        \ 'name': 'swank-rpc-typecheck-file-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:typecheck-file'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-typecheck-file-caller'] = {
+        \ 'name': 'swank-rpc-typecheck-file-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:typecheck-file'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-uses-of-symbol-at-point-handler'] = {
+        \ 'name': 'swank-rpc-uses-of-symbol-at-point-handler',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Handler for 'swank:uses-of-symbol-at-point'."
+          \ ]
+      \ }
+  
+  let l:options['swank-rpc-uses-of-symbol-at-point-caller'] = {
+        \ 'name': 'swank-rpc-uses-of-symbol-at-point-caller',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_FUNCTION_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "RPC Caller for 'swank:uses-of-symbol-at-point'."
+          \ ]
+      \ }
+  
+  
+  
+  " End Swank RPC
+  
+  
+
+
+
+  let l:options['tailor-symbol-search-close-empty-display'] = {
+        \ 'name': 'tailor-symbol-search-close-empty-display',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -679,8 +1759,8 @@ function! s:MakeOptions()
             \ "if there are no search results."
           \ ]
       \ }
-  let l:options['public-symbol-search-do-incremental'] = {
-        \ 'name': 'public-symbol-search-do-incremental',
+  let l:options['tailor-symbol-search-do-incremental'] = {
+        \ 'name': 'tailor-symbol-search-do-incremental',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -689,26 +1769,8 @@ function! s:MakeOptions()
           \ ]
       \ }
 
-  let l:options['swank-rpc-expand-selection-caller'] = {
-        \ 'name': 'swank-rpc-expand-selection-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:expand-selection'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-expand-selection-handler'] = {
-        \ 'name': 'swank-rpc-expand-selection-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:expand-selection'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-expand-selection-information'] = {
-        \ 'name': 'swank-rpc-expand-selection-information',
+  let l:options['tailor-expand-selection-information'] = {
+        \ 'name': 'tailor-expand-selection-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['visual', 'highlight' ],
@@ -718,8 +1780,8 @@ function! s:MakeOptions()
             \ "Use either Vim visual mode or highlighting."
           \ ]
       \ }
-  let l:options['swank-rpc-expand-selection-highlight-color-dark'] = {
-        \ 'name': 'swank-rpc-expand-selection-highlight-color-dark',
+  let l:options['tailor-expand-selection-highlight-color-dark'] = {
+        \ 'name': 'tailor-expand-selection-highlight-color-dark',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -728,8 +1790,8 @@ function! s:MakeOptions()
             \ "when background is dark."
           \ ]
       \ }
-  let l:options['swank-rpc-expand-selection-highlight-color-light'] = {
-        \ 'name': 'swank-rpc-expand-selection-highlight-color-light',
+  let l:options['tailor-expand-selection-highlight-color-light'] = {
+        \ 'name': 'tailor-expand-selection-highlight-color-light',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -739,207 +1801,62 @@ function! s:MakeOptions()
           \ ]
       \ }
 
-  let l:options['swank-rpc-format-source-caller'] = {
-        \ 'name': 'swank-rpc-format-source-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:format-source'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-format-source-handler'] = {
-        \ 'name': 'swank-rpc-format-source-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:format-source'."
-          \ ]
-      \ }
 
-  let l:options['swank-rpc-init-project-caller'] = {
-        \ 'name': 'swank-rpc-init-project-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:init-project'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-init-project-handler'] = {
-        \ 'name': 'swank-rpc-init-project-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:init-project'."
-          \ ]
-      \ }
-
-  let l:options['swank-rpc-repl-config-caller'] = {
-        \ 'name': 'swank-rpc-repl-config-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:repl-config'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-repl-config-handler'] = {
-        \ 'name': 'swank-rpc-repl-config-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:repl-config'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-repl-config-location'] = {
-        \ 'name': 'swank-rpc-repl-config-location',
+  let l:options['tailor-repl-config-location'] = {
+        \ 'name': 'tailor-repl-config-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
-        \ 'parent': 'swank-location-diff-file',
+        \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to display Scala Repl.'
           \ ]
       \ }
 
-  let l:options['swank-rpc-shutdown-server-caller'] = {
-        \ 'name': 'swank-rpc-shutdown-server-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:shutdown-server'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-shutdown-server-handler'] = {
-        \ 'name': 'swank-rpc-shutdown-server-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:shutdown-server'."
-          \ ]
-      \ }
 
-  let l:options['swank-rpc-symbol-at-point-caller'] = {
-        \ 'name': 'swank-rpc-symbol-at-point-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:symbol-at-point'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-symbol-at-point-handler'] = {
-        \ 'name': 'swank-rpc-symbol-at-point-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:symbol-at-point'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-symbol-at-point-information'] = {
-        \ 'name': 'swank-rpc-symbol-at-point-information',
+  let l:options['tailor-symbol-at-point-information'] = {
+        \ 'name': 'tailor-symbol-at-point-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
-        \ 'parent': 'swank-information',
+        \ 'parent': 'tailor-information',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to display the symbol-at-point information.'
           \ ]
       \ }
-  let l:options['swank-rpc-symbol-at-point-location-same-file'] = {
-        \ 'name': 'swank-rpc-symbol-at-point-location-same-file',
+  let l:options['tailor-symbol-at-point-location-same-file'] = {
+        \ 'name': 'tailor-symbol-at-point-location-same-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window' ],
-        \ 'parent': 'swank-location-same-file',
+        \ 'parent': 'tailor-location-same-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to symbol-at-point same file different pos.'
           \ ]
       \ }
-  let l:options['swank-rpc-symbol-at-point-location-diff-file'] = {
-        \ 'name': 'swank-rpc-symbol-at-point-location-diff-file',
+  let l:options['tailor-symbol-at-point-location-diff-file'] = {
+        \ 'name': 'tailor-symbol-at-point-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
-        \ 'parent': 'swank-location-diff-file',
+        \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to symbol-at-point different file and pos.'
           \ ]
       \ }
 
-  let l:options['swank-rpc-typecheck-all-caller'] = {
-        \ 'name': 'swank-rpc-typecheck-all-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:typecheck-all'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-typecheck-all-handler'] = {
-        \ 'name': 'swank-rpc-typecheck-all-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:typecheck-all'."
-          \ ]
-      \ }
 
-  let l:options['swank-rpc-typecheck-file-caller'] = {
-        \ 'name': 'swank-rpc-typecheck-file-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:typecheck-file'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-typecheck-file-handler'] = {
-        \ 'name': 'swank-rpc-typecheck-file-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:typecheck-file'."
-          \ ]
-      \ }
 
-  let l:options['swank-rpc-uses-of-symbol-at-point-caller'] = {
-        \ 'name': 'swank-rpc-uses-of-symbol-at-point-caller',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC caller for 'swank:uses-of-symbol-at-point'."
-        \ ]
-      \ }
-  let l:options['swank-rpc-uses-of-symbol-at-point-handler'] = {
-        \ 'name': 'swank-rpc-uses-of-symbol-at-point-handler',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_FUNCTION_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ "RPC handler for 'swank:uses-of-symbol-at-point'."
-          \ ]
-      \ }
-  let l:options['swank-rpc-uses-of-symbol-at-point-location'] = {
-        \ 'name': 'swank-rpc-uses-of-symbol-at-point-location',
+  let l:options['tailor-uses-of-symbol-at-point-location'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
-        \ 'parent': 'swank-location-diff-file',
+        \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to uses-of-symbol-at-point file and pos.'
@@ -1095,8 +2012,8 @@ function! s:MakeOptions()
       \ }
 
   " Hover
-  let l:options['vimside-hover-updatetime'] = {
-        \ 'name': 'vimside-hover-updatetime',
+  let l:options['tailor-hover-updatetime'] = {
+        \ 'name': 'tailor-hover-updatetime',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -1104,8 +2021,8 @@ function! s:MakeOptions()
             \ "How long in milliseconds before Hover CurosrHold event called."
         \ ]
       \ }
-  let l:options['vimside-hover-max-char-mcounter'] = {
-        \ 'name': 'vimside-hover-max-char-mcounter',
+  let l:options['tailor-hover-max-char-mcounter'] = {
+        \ 'name': 'tailor-hover-max-char-mcounter',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -1122,8 +2039,8 @@ function! s:MakeOptions()
             \ "Is the GVim Symbol-name balloon enabled."
         \ ]
       \ }
-  let l:options['vimside-hover-cmdline-job-time'] = {
-        \ 'name': 'vimside-hover-cmdline-job-time',
+  let l:options['tailor-hover-cmdline-job-time'] = {
+        \ 'name': 'tailor-hover-cmdline-job-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -1139,8 +2056,8 @@ function! s:MakeOptions()
             \ "Is the Vim Symbol-name term balloon enabled."
         \ ]
       \ }
-  let l:options['vimside-hover-term-balloon-fg'] = {
-        \ 'name': 'vimside-hover-term-balloon-fg',
+  let l:options['tailor-hover-term-balloon-fg'] = {
+        \ 'name': 'tailor-hover-term-balloon-fg',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -1149,8 +2066,8 @@ function! s:MakeOptions()
             \ "or hex-value)."
         \ ]
       \ }
-  let l:options['vimside-hover-term-balloon-bg'] = {
-        \ 'name': 'vimside-hover-term-balloon-bg',
+  let l:options['tailor-hover-term-balloon-bg'] = {
+        \ 'name': 'tailor-hover-term-balloon-bg',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
@@ -1159,8 +2076,8 @@ function! s:MakeOptions()
             \ "or hex-value)."
         \ ]
       \ }
-  let l:options['vimside-hover-term-job-time'] = {
-        \ 'name': 'vimside-hover-term-job-time',
+  let l:options['tailor-hover-term-job-time'] = {
+        \ 'name': 'tailor-hover-term-job-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -1168,10 +2085,46 @@ function! s:MakeOptions()
             \ "Job time in milliseconds for Hover Term execution."
         \ ]
       \ }
+  
+  " Browser
+  let l:options['tailor-browser-keys-platform'] = {
+        \ 'name': 'tailor-browser-keys-platform',
+        \ 'type': g:OPTION_LIST_TYPE, 
+        \ 'kind': g:OPTION_KEY_KIND, 
+        \ 'templates': {
+                \ 'commands': 'tailor-browser-{key}-commands',
+                \ 'url_funcs': 'tailor-browser-{key}-url-funcname'
+                \ }, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "Keys for generating Browser Component Options."
+        \ ]
+      \ }
 
+  " Show Doc Url
+  " For each {key} and {version} value if the 'url-base' template is
+  " defined in default.vim, then the 'regex' and 'func-ref' templates
+  " MUST also be defined in default.vim.
+  " It is ok for a 'url-base' to exists for some {key}/{version}
+  " combinations and not for other combinations.
+  let l:options['tailor-show-doc-keys'] = {
+        \ 'name': 'tailor-show-doc-keys',
+        \ 'type': g:OPTION_LIST_TYPE, 
+        \ 'kind': g:OPTION_KEY_KIND, 
+        \ 'templates': {
+                \ 'url_base': 'tailor-show-doc-{key}{version}-url-base',
+                \ 'regex': 'tailor-show-doc-{key}-regex',
+                \ 'funcref': 'tailor-show-doc-{key}-func-ref'
+                \ }, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "Keys for generating Browser Component Options."
+        \ ]
+      \ }
+  
   " Forms
-  let l:options['vimside-forms-use'] = {
-        \ 'name': 'vimside-forms-use',
+  let l:options['forms-use'] = {
+        \ 'name': 'forms-use',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -1181,8 +2134,8 @@ function! s:MakeOptions()
         \ ]
       \ }
 
-  let l:options['vimside-forms-sourcebrowser-open-in-tab'] = {
-        \ 'name': 'vimside-forms-sourcebrowser-open-in-tab',
+  let l:options['tailor-forms-sourcebrowser-open-in-tab'] = {
+        \ 'name': 'tailor-forms-sourcebrowser-open-in-tab',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [

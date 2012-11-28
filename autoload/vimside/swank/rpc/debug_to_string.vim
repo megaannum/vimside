@@ -40,7 +40,7 @@ call s:LOG("debug_to_string TOP")
 
   if ! exists("s:Handler")
     let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-to-string-handler')
-    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-to-string-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-debug-to-string-caller')
   endif
 
   let l:args = { }
@@ -76,22 +76,13 @@ function! g:DebugToStringHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:DebugToStringHandler_Ok(sexp_rval)
-call s:LOG("DebugToStringHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
-    if ! found 
-      echoe "DebugToString ok: Badly formed Response"
-      call s:ERROR("DebugToString ok: Badly formed Response: ". string(a:sexp_rval)) 
-      return 0
-    endif
+  function! g:DebugToStringHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("DebugToStringHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

@@ -36,8 +36,8 @@ function! vimside#swank#rpc#builder_add_files#Run(...)
 call s:LOG("builder_add_files TOP") 
 
   if ! exists("s:Handler")
-    let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('wank-rpc-builder-add-files-handler)
-    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('wank-rpc-builder-add-files-caller')
+    let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-builder-add-files-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-builder-add-files-caller')
   endif
 
   let l:args = { }
@@ -76,22 +76,13 @@ function! g:BuilderAddFilesHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:BuilderAddFilesHandler_Ok(builderAddFiles)
-call s:LOG("BuilderAddFilesHandler_Ok ".  vimside#sexp#ToString(a:builderAddFiles)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:builderAddFiles) 
-    if ! found 
-      echoe "BuilderAddFiles ok: Badly formed Response"
-      call s:ERROR("BuilderAddFiles ok: Badly formed Response: ". string(a:builderAddFiles)) 
-      return 0
-    endif
+  function! g:BuilderAddFilesHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("BuilderAddFilesHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

@@ -101,14 +101,8 @@ function! g:PublicSymbolSearchHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:PublicSymbolSearchHandler_Ok(publicSymbolSearch)
-"call s:LOG("PublicSymbolSearchHandler_Ok ".  vimside#sexp#ToString(a:publicSymbolSearch)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:publicSymbolSearch) 
-    if ! found 
-      echoe "PublicSymbolSearch ok: Badly formed Response"
-      call s:ERROR("PublicSymbolSearch ok: Badly formed Response: ". string(a:publicSymbolSearch)) 
-      return 0
-    endif
+  function! g:PublicSymbolSearchHandler_Ok(dic, ...)
+    let dic = a:dic
 "call s:LOG("PublicSymbolSearchHandler_Ok dic=".  string(dic)) 
 
     if type(dic) != type([])

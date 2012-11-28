@@ -75,22 +75,12 @@ function! g:TypeByNameHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:TypeByNameHandler_Ok(sexp_rval)
-call s:LOG("TypeByNameHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
-    if ! found 
-      echoe "TypeByName ok: Badly formed Response"
-      call s:ERROR("TypeByName ok: Badly formed Response: ". string(a:sexp_rval)) 
-      return 0
-    endif
+  function! g:TypeByNameHandler_Ok(dic, ...)
 call s:LOG("TypeByNameHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 

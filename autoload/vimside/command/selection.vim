@@ -24,9 +24,9 @@ let s:selections_offset = -1
 
 function! s:Init()
 call s:LOG("selection: s:Init: TOP") 
-  let [found, value] = g:vimside.GetOption('swank-rpc-expand-selection-information')
+  let [found, value] = g:vimside.GetOption('tailor-expand-selection-information')
   if ! found
-    throw "Option not found: "'swank-rpc-expand-selection-information'"
+    throw "Option not found: "'tailor-expand-selection-information'"
   endif
   if value == 'visual'
     let s:selection_clear = function("vimside#command#selection#visual#Clear")

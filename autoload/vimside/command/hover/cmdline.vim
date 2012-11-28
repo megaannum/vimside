@@ -19,9 +19,9 @@ let s:hover_cmdline_sec = 0
 let s:hover_cmdline_msec = 0
 
 function! s:LoadJobTimes()
-  let [found, msec] = g:vimside.GetOption('vimside-hover-cmdline-job-time')
+  let [found, msec] = g:vimside.GetOption('tailor-hover-cmdline-job-time')
   if ! found
-    throw "Option not found: "'vimside-hover-cmdline-job-time'"
+    throw "Option not found: "'tailor-hover-cmdline-job-time'"
   endif
   let s:hover_cmdline_sec = (msec >= 1000) ? msec/1000 : 0 
   let s:hover_cmdline_msec = msec - s:hover_cmdline_sec
@@ -31,14 +31,8 @@ endfunction
 call s:LoadJobTimes()
 
 
-function! vimside#command#hover#cmdline#Handler_Ok(symbolinfo)
-" call s:LOG("vimside#command#hover#cmdline#Handler_Ok ". string(a:symbolinfo)) 
-  let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:symbolinfo)
-  if ! found
-    echoe "SymbolAtPoint ok: Badly formed Response"
-    call s:ERROR("SymbolAtPoint ok: Badly formed Response: ". string(a:symbolinfo))
-    return 0
-  endif
+function! vimside#command#hover#cmdline#Handler_Ok(dic, ...)
+  let dic = a:dic
 
   let text = vimside#command#hover#util#GetHoverText(dic)
   echo text

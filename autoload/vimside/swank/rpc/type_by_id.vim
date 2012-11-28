@@ -35,6 +35,8 @@ let s:ERROR = function("vimside#log#error")
 
 
 " public API
+  " callers MUST supply their own args['id'] value
+  " callers MUST supply their own args['handler'] value
 function! vimside#swank#rpc#type_by_id#Run(...)
 call s:LOG("type_by_id TOP") 
 
@@ -44,12 +46,10 @@ call s:LOG("type_by_id TOP")
   endif
 
   let l:args = { }
+  " callers MUST supply their own ids
+  let l:args['id'] = 0
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-type-by-id-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("type_by_id BOTTOM") 
 endfunction
@@ -61,8 +61,9 @@ endfunction
 
 function! g:TypeByIdCaller(args)
   let cmd = "swank:type-by-id"
+  let id = a:args.id
 
-  return '('. cmd .')'
+  return '('. cmd .' '. id .')'
 endfunction
 
 
@@ -76,22 +77,13 @@ function! g:TypeByIdHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:TypeByIdHandler_Ok(sexp_rval)
-call s:LOG("TypeByIdHandler_Ok ".  vimside#sexp#ToString(a:sexp_rval)) 
-    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:sexp_rval) 
-    if ! found 
-      echoe "TypeById ok: Badly formed Response"
-      call s:ERROR("TypeById ok: Badly formed Response: ". string(a:sexp_rval)) 
-      return 0
-    endif
+  function! g:TypeByIdHandler_Ok(dic, ...)
+    let dic = a:dic
 call s:LOG("TypeByIdHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
-
-
     return 1
-
   endfunction
 
   return { 
