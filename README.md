@@ -140,13 +140,6 @@ Ensime Capabilities to be Supported:
   Scalex
     Seems to be a dead project (see: http://scalex.org/)
 
-  Open Browser Info
-    Open 'http:.... doc page'
-
-
-  Re-Show Errors/Warnings
-    Show all errors and warnings in the project.
-
   Refactoring
     Rename the symbol at point.
     Organize imports.
