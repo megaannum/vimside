@@ -2160,6 +2160,16 @@ function! s:MakeOptions()
             \ "Open the Forms sourcebrowser in its own tab."
         \ ]
       \ }
+  
+  " Typecheck file on write
+  let l:options['tailor-type-check-file-on-write'] = {
+        \ 'name': 'tailor-type-check-file-on-write',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Typecheck a file when it is written."
+        \ ]
+      \ }
 
   return l:options
 endfunction

@@ -125,6 +125,12 @@ else
   "   Typecheck the current file.
   autocmd FileType scala nmap <silent> <Leader>vc :call vimside#command#TypecheckFile()<CR>
 
+  augroup VIMSIDE_ON_WRITE
+    au!
+    autocmd BufWritePost scala call vimside#command#TypecheckFileOnWrite()
+  augroup END
+
+
   " C-c C-v a
   "   Typecheck all files in the project.
   autocmd FileType scala nmap <silent> <Leader>va :call vimside#command#TypecheckAll()<CR>
@@ -201,7 +207,7 @@ else
 
   autocmd FileType scala nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
 
-  augroup VIMSIDE
+  augroup VIMSIDE_STOP
     au!
     autocmd VimLeave * call vimside#StopEnsime()
     " autocmd VimLeave scala call vimside#StopEnsime()

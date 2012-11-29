@@ -439,7 +439,7 @@ function! vimside#options#manager#Load()
   if g:vimside.HasOption("ensime-dist-path")
     let [found, l:distdirpath] = g:vimside.GetOption('ensime-dist-path')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-dist-path' ."'")
+      call add(l:errors, "Option not found: 'ensime-dist-path'")
     endif
 
     let got_ensime_dir = g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
@@ -448,7 +448,7 @@ function! vimside#options#manager#Load()
   if ! got_ensime_dir && g:vimside.HasOption("ensime-install-path")
     let [found, l:path] = g:vimside.GetOption('ensime-install-path')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-install-path' ."'")
+      call add(l:errors, "Option not found: 'ensime-install-path'")
     endif
 
     call g:VimsideCheckDirectoryExists(l:path, "r-x", l:errors)
@@ -459,7 +459,7 @@ function! vimside#options#manager#Load()
 
     let [found, l:distdir] = g:vimside.GetOption('ensime-dist-dir')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-dist-dir' ."'")
+      call add(l:errors, "Option not found: 'ensime-dist-dir'")
     endif
 
     " Check that Java and Scala versions agree with Option values
@@ -467,7 +467,7 @@ function! vimside#options#manager#Load()
     let l:ensime_scala_version = matchlist(l:distdir, '[a-zA-Z]*_\(\d\+\.\d\+\.\d\+\)-\(.*\)')[1]
     let [found, l:vimside_scala_version] = g:vimside.GetOption('vimside-scala-version')
     if ! found
-      call add(l:errors, "Option not found: '". 'vimside-scala-version' ."'")
+      call add(l:errors, "Option not found: 'vimside-scala-version'")
     endif
 
     if l:ensime_scala_version != l:vimside_scala_version
@@ -478,7 +478,7 @@ function! vimside#options#manager#Load()
     let l:ensime_java_version = matchlist(l:tmp, '[a-zA-Z ]* "\(\d\+\.\d\+\)\(.*\)"')[1]
     let [found, l:vimside_java_version] = g:vimside.GetOption('vimside-java-version')
     if ! found
-      call add(l:errors, "Option not found: '". 'vimside-java-version' ."'")
+      call add(l:errors, "Option not found: 'vimside-java-version'")
     endif
     if l:ensime_java_version != l:vimside_java_version
       call add(l:errors, "Java versions do not match: vimside:'". l:vimside_java_version ."' and ensime:'". l:ensime_java_version ."'")
@@ -498,7 +498,7 @@ function! vimside#options#manager#Load()
 
   let [found, l:use_cwd] = g:vimside.GetOption('vimside-use-cwd-as-output-dir')
   if ! found
-    call add(l:errors, "Option not found: '". 'vimside-use-cwd-as-output-dir' ."'")
+    call add(l:errors, "Option not found: 'vimside-use-cwd-as-output-dir'")
   endif
 
 
@@ -507,7 +507,7 @@ function! vimside#options#manager#Load()
   if g:vimside.HasOption("ensime-port-file-path")
     let [found, l:pfilepath] = g:vimside.GetOption('ensime-port-file-path')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-port-file-path' ."'")
+      call add(l:errors, "Option not found: 'ensime-port-file-path'")
     endif
 
     if filewritable(l:pfilepath) != 1
@@ -534,7 +534,7 @@ function! vimside#options#manager#Load()
 
     let [found, l:pfilename] = g:vimside.GetOption('ensime-port-file-name')
     if ! found
-        call add(l:errors, "Option not found: '". 'ensime-port-file-name' ."'")
+        call add(l:errors, "Option not found: 'ensime-port-file-name'")
     endif
 
     let value = portdir . '/' . l:pfilename
@@ -544,7 +544,7 @@ function! vimside#options#manager#Load()
 
   let [found, hostname] = g:vimside.GetOption('ensime-host-name')
   if ! found
-    call add(l:errors, "Option not found: '". 'ensime-host-name' ."'")
+    call add(l:errors, "Option not found: 'ensime-host-name'")
   endif
 
   if ! vimproc#host_exists(hostname)
@@ -553,7 +553,7 @@ function! vimside#options#manager#Load()
 
   let [found, cnt] = g:vimside.GetOption('ensime-port-file-max-wait')
   if ! found
-    call add(l:errors, "Option not found: '". 'ensime-port-file-max-wait' ."'")
+    call add(l:errors, "Option not found: 'ensime-port-file-max-wait'")
   endif
 
   if cnt < 0
@@ -565,7 +565,7 @@ function! vimside#options#manager#Load()
   if g:vimside.HasOption("ensime-log-file-path")
     let [found, s:lfilepath] = g:vimside.GetOption('ensime-log-file-path')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-log-file-path' ."'")
+      call add(l:errors, "Option not found: 'ensime-log-file-path'")
     endif
 
     if filewritable(s:lfilepath) != 1
@@ -591,7 +591,7 @@ function! vimside#options#manager#Load()
     endif
     let [found, lfname] = g:vimside.GetOption('ensime-log-file-name')
     if ! found
-      call add(l:errors, "Option not found: '". 'ensime-log-file-name' ."'")
+      call add(l:errors, "Option not found: 'ensime-log-file-name'")
     endif
 
     let value = logdir . '/' . lfname
@@ -603,7 +603,7 @@ function! vimside#options#manager#Load()
   if g:vimside.HasOption("vimside-log-file-path")
     let [found, s:lfilepath] = g:vimside.GetOption('vimside-log_file-path')
     if ! found
-      call add(l:errors, "Option not found: '". 'vimside-log-file-path' ."'")
+      call add(l:errors, "Option not found: 'vimside-log-file-path'")
     endif
 
     if filewritable(s:lfilepath) != 1
@@ -629,7 +629,7 @@ function! vimside#options#manager#Load()
     endif
     let [found, lfname] = g:vimside.GetOption('vimside-log-file-name')
     if ! found
-      call add(l:errors, "Option not found: '". 'vimside-log-file-name' ."'")
+      call add(l:errors, "Option not found: 'vimside-log-file-name'")
     endif
 
     let value = logdir . '/' . lfname

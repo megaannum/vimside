@@ -117,6 +117,10 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("tailor-browser-unix-commands", ['firefox', 'xdg-open', 'opera'])
   "--------------
 
+  "--------------
+  " Typecheck file on write
+  " call owner.Set('tailor-type-check-file-on-write', 0)
+  "--------------
 
 
   " call owner.Set("tailor-symbol-at-point-location-same-file", "same_window.vim")

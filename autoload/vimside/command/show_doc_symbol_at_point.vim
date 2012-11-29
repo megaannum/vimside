@@ -209,7 +209,7 @@ call s:LOG("s:Init: key=". key)
 call s:LOG("s:Init: url_base_op=". url_base_op)
     let [found, url_base] = g:vimside.GetOption(url_base_op)
     if ! found
-      call s:LOG("Option not found: '". url_base_op ."'")
+      call s:LOG("Option not found: 'url_base_op'")
       continue
     endif
     let map['url_base'] = url_base

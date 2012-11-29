@@ -483,6 +483,80 @@ in a project file there might be:
   call owner.Update("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
   call owner.Update("ensime-config-file-name", "_ensime")
 
+An alternative approach is to also treat the 'data/vimside/' test code
+as also a project, in that, it has its own 'options_project.vim' file.
+To do this one must do the following:
+
+1) In the 'options_user.vim' file enable project local options files:
+
+    call owner.Set("vimside-project-options-enabled", 1)
+
+While one can also uncomment/add addition option value setting,
+if one wants all projects to share some behavior or to set some
+default behavior (which can be over-ridden on a project-by-project
+basis), but enabling the above Option is all that is need in this file.
+
+2) In the 'data/vimside' directory create a 'options_project.vim' such as:
+
+    " full path to this file
+    let s:full_path=expand('<sfile>:p')
+
+    " full path to this file's directory
+    let s:full_dir=fnamemodify(s:full_path, ':h')
+
+    function! g:VimsideOptionsProjectLoad(owner)
+      let owner = a:owner
+
+      "--------------
+      " Enable logging
+      call owner.Set("ensime-log-enabled", 1)
+      call owner.Set("vimside-log-enabled", 1)
+      "--------------
+
+      "--------------
+      " Defined Java versions: '1.5', '1.6', '1.7'
+      " Defined Scala versions: '2.9.2', '2.10.0'
+      " Minor version numbers not needed
+      " Scala version MUST match 'ensime-dist-dir' used.
+      call owner.Set("vimside-java-version", "1.6")
+      call owner.Set("vimside-scala-version", "2.9.2")
+      "--------------
+      
+      "--------------
+      " Which build version of Ensime to use. 
+      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+      "--------------
+
+      "--------------
+      " To run against ensime test project code
+      " Location of test directory
+      call owner.Set("test-ensime-file-dir", s:full_dir)
+      " Uncomment to run against demonstration test code
+      call owner.Set("test-ensime-file-use", 1)
+      " The Ensime Config information is in a file called 'ensime_config.vim'
+      call owner.Set("ensime-config-file-name", "ensime_config.vim")
+      "--------------
+
+      "--------------
+      " Vimside uses Forms library 
+      call owner.Set("forms-use", 1)
+      "--------------
+
+      "--------------
+      " Hover Options
+      call owner.Set("vimside-hover-balloon-enabled", 0)
+      call owner.Set("vimside-hover-term-balloon-enabled", 0)
+      "--------------
+    endfunction
+
+This will instruct Vimside to use the "test" source code and configuration
+files.
+
+3) In all your other projects on this machine, create their own 
+project-specific 'options_project.vim' files.
+
+This is a very flexible way of configuring Vimside.
+
 # Supported Platforms
 
 Ought to work most everywhere
@@ -495,7 +569,8 @@ None available yet.
 
 Daniel Spiewak has a JEdit binding to Ensime and a simply great video
 explaining why a true editor with Ensime is better than an Eclipse 
-Ide.
+Ide (https://www.youtube.com/watch?v=cd2LV0xy9G8 MUST SEE) 
+and usage examples (http://vimeo.com/28597033).
 
 Jeanluc Chasseriau who wrote the python-based Envim Vim binding
 to Ensime: https://github.com/jlc/envim.

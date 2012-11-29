@@ -102,6 +102,17 @@ function! vimside#command#Repl() range
   endif
 endfunction
 
+function! vimside#command#TypecheckFileOnWrite() range
+  let [found, check] = g:vimside.GetOption('tailor-type-check-file-on-write')
+  if found
+    if check
+      call vimside#command#TypecheckFile() 
+    endif
+  else
+    throw "Option not found: 'tailor-type-check-file-on-write'"
+  endif
+endfunction
+
 function! vimside#command#TypecheckFile() range
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#typecheck_file#Run()

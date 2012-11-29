@@ -289,4 +289,7 @@ function! vimside#options#default#Load(owner)
 
   call owner.Set("tailor-forms-sourcebrowser-open-in-tab", 1)
 
+  " Typecheck file on write
+  call owner.Set('tailor-type-check-file-on-write', 0)
+
 endfunction
