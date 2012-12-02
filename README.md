@@ -327,7 +327,7 @@ With pathogen, you just have to clone all required plugins into your ~/.vim/bund
         git clone $repo 
     done;
 
-Note that you also with pathogen have to run *make* on the appropriate make file inside the plugin.
+Note that you also with pathogen have to run *make* on the appropriate make file inside the vimproc plugin directory.
 
 ## Ensime Install
 
