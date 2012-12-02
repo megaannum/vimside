@@ -307,7 +307,27 @@ if you would like to download and install the plugins.
 
 ## Installing with pathogen
 
-I do not use pathogen. An example usage would be welcome.
+With pathogen, you just have to clone all required plugins into your ~/.vim/bundle directory. Running the following lines as a bash script will do exactly that.
+
+
+    #! /bin/bash
+
+    declare -a repos=( 
+      "git://github.com/megaannum/self.git" 
+      "git://github.com/megaannum/forms.git" 
+      "git://github.com/Shougo/vimproc.git"
+      "git://github.com/Shougo/vimshell.git"
+      "-b scala-2.9 git://github.com/aemoncannon/ensime.git"
+      "git://github.com/megaannum/vimside.git"
+    )
+
+    cd ~/.vim/bundle
+    
+    for repo in "${repos[@]}"; do
+        git clone $repo 
+    done;
+
+Note that you also with pathogen have to run *make* on the appropriate make file inside the plugin.
 
 ## Ensime Install
 
@@ -397,6 +417,14 @@ so you would set the Option accordingly:
 or
 
     call owner.Set("ensime-install-path", $HOME . "/vimfiles/vim-addons/ensime")
+
+If installed with pathogen, those paths are
+
+    $HOME/.vim/bundle/ensime
+
+or
+
+    $HOME/vimfiles/bundle/ensime
 
 Then depending upon the name of the build directory, which is under the
 'ensime-install-path' Option value directory location, you would
