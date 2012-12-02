@@ -22,9 +22,13 @@ let g:completions_results = []
 
 function! vimside#command#completions#Run(findstart, base)
 " call s:LOG("vimside#command#completions#Run( findstart=". a:findstart .", base=". a:base) 
+  if ! exists("g:vimside.started")
+    return
+  endif
   if ! g:vimside.started
     return
   endif
+
 " call s:LOG("vimside#command#completions#Run( completions_phase=". s:completions_phase) 
 
   if s:completions_phase == 0

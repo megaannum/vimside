@@ -44,6 +44,13 @@ endfunction
 
 call s:Init()
 
+" return [found, [file, start, end]]
+function!  vimside#command#selection#Get()
+call s:LOG("vimside#command#selection#Get") 
+  return (s:selection_index == -1)
+      \ ? [0, ["", -1, -1]] : [1, s:selections[s:selection_index] ]
+endfunction
+
 function!  vimside#command#selection#Clear()
 call s:LOG("vimside#command#selection#Clear TOP") 
   let s:selection_index = -1

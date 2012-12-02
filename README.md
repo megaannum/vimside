@@ -98,6 +98,17 @@ Current Supported Ensime Commands:
     Useful.
     Implementations: 1
 
+  Refactoring
+    Rename the symbol at point.
+    Organize imports.
+    Extract local.
+    Extract method.
+    Inline local.
+    Not supported yet: Add import for type at point.
+
+    Useful.
+    Implementations: 1
+
   Popup Menu
     Bring up Popup menu with all Vimside commands (requires Forms library).
     Useful for folks who have not yet learned the key mappings.
@@ -139,14 +150,6 @@ Ensime Capabilities to be Supported:
 
   Scalex
     Seems to be a dead project (see: http://scalex.org/)
-
-  Refactoring
-    Rename the symbol at point.
-    Organize imports.
-    Extract local.
-    Extract method.
-    Inline local.
-    Add import for type at point.
 
   Building
     Build the entire project.

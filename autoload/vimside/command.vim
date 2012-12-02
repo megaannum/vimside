@@ -123,7 +123,7 @@ endfunction
 
 function! vimside#command#TypecheckAll() range
   if exists("g:vimside.started") && g:vimside.started
-    call vimside#command#typecheck_all()
+    call vimside#command#typecheck_all#Run()
   else
     call s:ERROR("Ensime must be started first")
   endif
@@ -146,10 +146,150 @@ function! vimside#command#FormatSource() range
 endfunction
 
 
+"----------------------------------------------
+" Refactor functions
+"----------------------------------------------
 
+function! vimside#command#RefactorRename(mode) range
+  if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
+    call vimside#command#refactor#Rename()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#RefactorOrganizeImports() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#refactor#OrganizeImports()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#RefactorExtractLocal(mode) range
+  if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
+    call vimside#command#refactor#ExtractLocal()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#RefactorExtractMethod(mode) range
+  if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
+    call vimside#command#refactor#ExtractMethod()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#RefactorInlineLocal(mode) range
+  if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
+    call vimside#command#refactor#InlineLocal()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#RefactorAddImportTypeAtPoint() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#refactor#AddImportTypeAtPoint()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! s:ClearVisualSelection()
+  if exists("s:firstline")
+    unlet s:firstline
+    unlet s:firstcol
+    unlet s:lastline
+    unlet s:lastcol
+    unlet s:visualmode
+  endif
+endfunction
+
+" return [found, start, end]
+function! vimside#command#GetVisualSelection()
+  if exists("s:firstline")
+call s:LOG("vimside#command#GetVisualSelection: s:firstline=". s:firstline)
+call s:LOG("vimside#command#GetVisualSelection: s:firstcol=". s:firstcol)
+call s:LOG("vimside#command#GetVisualSelection: s:lastline=". s:lastline)
+call s:LOG("vimside#command#GetVisualSelection: s:lastcol=". s:lastcol)
+    let start = line2byte(s:firstline)+s:firstcol-1
+    let end = line2byte(s:lastline)+s:lastcol-1
+    return [1, start, end]
+  else
+    return [0, -1, -1]
+  endif
+endfunction
+
+
+"----------------------------------------------
+" Popup Menu functions
+"----------------------------------------------
 
 function! vimside#command#MakePopUp(mode) range
   if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
     call vimside#command#popup_menu#Run(a:mode)
   else
     call s:ERROR("Ensime must be started first")

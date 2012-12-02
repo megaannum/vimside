@@ -7,5 +7,5 @@ object IEvent {
 
 import IEvent._
 
-class IEvent {
+class IEvent[T] {
 }

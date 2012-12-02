@@ -15,10 +15,10 @@ object Foo {
     println(f.toString)
     val i = 5
     val j = 10
-    val m = Math.max(i, j)
-    println(Integer.toString(m, 8))
-    val i = max(2,5)
-    println(i)
+    val m1 = Math.max(i, j)
+    println(Integer.toString(m1, 8))
+    val m2 = max(2,5)
+    println(m2)
 
     val bi = BigInt("1000", 8)
     println(bi)

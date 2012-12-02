@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.8
+Version:     0.2.9
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -54,20 +54,20 @@ For Vim instructions on installing this 'txt' file, enter:
       7.1.12 Typecheck All Files
       7.1.13 Re-Show Errors/Warnings
       7.1.14 Format Source
-      7.1.15 Popup Menu
-      7.1.16 Browse Source Roots
-      7.1.17 Browse Reference Source Roots
-      7.1.18 Option Viewer/Editor
-      7.1.19 Completions
+      7.1.15 Refactoring
+      7.1.16 Popup Menu
+      7.1.17 Browse Source Roots
+      7.1.18 Browse Reference Source Roots
+      7.1.19 Option Viewer/Editor
+      7.1.20 Completions
     7.2 Ensime Capabilities to be Supported:
       7.2.1 Package Inspector
       7.2.2 Type Inspector
       7.2.3 SBT Command-Line
       7.2.4 Scalex
-      7.2.5 Refactoring
-      7.2.6 Building
-      7.2.7 Run Application
-      7.2.8 Debug Application
+      7.2.5 Building
+      7.2.6 Run Application
+      7.2.7 Debug Application
       7.2.9 And others
 
   8. Architecture                                |vimside-architecture|
@@ -1113,7 +1113,33 @@ Useful.
 
 Implementations: 1
 
-7.1.15 Popup Menu
+7.1.15 Refactoring
+
+Refactoring operations supported by the same Scala library that
+Scala Eclipse uses. Generally, use visual selection and then
+call refactoring command. 
+For some commands (Extract Local), using Expand selection also works. 
+For some commands (Rename), just having the cursor over the word
+also works.
+If Ensime can not figure out what to do, it will provide an error
+message which Vimside will display on the command line.
+For some commands, one must enter a name. This is done on the
+command line.
+Refer to http://scala-refactoring.org/ for additional information
+about the Scala refactoring library.
+
+Rename the symbol at point.
+Organize imports.
+Extract local.
+Extract method.
+Inline local.
+Not implemented yet: Add import for type at point.
+
+Useful.
+
+Implementations: 1
+
+7.1.16 Popup Menu
 
 Bring up Popup menu with all Vimside commands (requires Forms library).
 The Emacs-Ensime binding has just such a popup menu.
@@ -1122,7 +1148,7 @@ Useful for folks who have not yet learned the key mappings.
 
 Implementations: 1
 
-7.1.16 Browse Source Roots
+7.1.17 Browse Source Roots
 
 Directory browser of project sources (project code base).
 In the Ensime configuration file, the key ':source-roots' is a list
@@ -1135,7 +1161,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.17 Browse Reference Source Roots
+7.1.18 Browse Reference Source Roots
 
 Directory browser of project reference sources (Java and Scala libraries).
 In the Ensime configuration file, the key ':reference-source-roots' is a list
@@ -1148,7 +1174,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.18 Option Viewer/Editor
+7.1.19 Option Viewer/Editor
 
 Bring up the Option Viewer/Editor (requires Forms library). Lets one
 see all of the Vimside configurable Options and their current value.
@@ -1157,7 +1183,7 @@ some "dynamic" Options at runtime.
 
 Implementations: 1
 
-7.1.19 Completions
+7.1.20 Completions
 
 OmmiCompletions using <c-x><c-o>.
 
@@ -1187,23 +1213,14 @@ Switch to the sbt command-line (works for sbt projects only)
 
 Seems to be a dead project (see: http://scalex.org/)
 
-7.2.5 Refactoring
-
-Rename the symbol at point.
-Organize imports.
-Extract local.
-Extract method.
-Inline local.
-Add import for type at point.
-
-7.2.6 Building
+7.2.5 Building
 
 Build the entire project.
 Rebuild the project incrementally.
 
-7.2.7 Run Application
+7.2.6 Run Application
 
-7.2.8 Debug Application
+7.2.7 Debug Application
 
 Start and run the debugger.
 Start and run the debugger.
@@ -1217,7 +1234,7 @@ Kill the debug session.
 Inspect the local variable at cursor.
 Show backtrace.
 
-7.2.9 And others
+7.2.8 And others
 
 ==============================================================================
 8. Architecture                                        *vimside-architecture*
@@ -1388,6 +1405,10 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.9   - Fix: ~
+  Added refactoring commands.
+  Changed key mapping for vimside#command#SymbolAtPoint() and vimside#command#PreviousPosition().
+  Made the test source code so that there are no compile errors.
 0.2.8   - Fix: ~
   Add typecheck file on write Option.
   Some more documentation.

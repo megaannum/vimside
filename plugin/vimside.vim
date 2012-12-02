@@ -48,7 +48,7 @@ else
   if has("gui_running")
     autocmd FileType scala nmap <silent> <m-.> :call vimside#command#SymbolAtPoint()<CR>
   else
-    autocmd FileType scala nmap <silent> <Leader>vm. :call vimside#command#SymbolAtPoint()<CR>
+    autocmd FileType scala nmap <silent> <Leader>m. :call vimside#command#SymbolAtPoint()<CR>
   endif
 
   " M-, (comma)
@@ -56,7 +56,7 @@ else
   if has("gui_running")
     autocmd FileType scala nmap <silent> <m-,> :call vimside#command#PreviousPosition()<CR>
   else
-    autocmd FileType scala nmap <silent> <Leader>vm, :call vimside#command#PreviousPosition()<CR>
+    autocmd FileType scala nmap <silent> <Leader>m, :call vimside#command#PreviousPosition()<CR>
   endif
 
   " C-c C-v .
@@ -170,11 +170,26 @@ else
   " C-c C-r x
   "   Where x is one of:
   "     r Rename the symbol at point.
+  autocmd FileType scala nmap <silent> <Leader>rr :call vimside#command#RefactorRename('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>rr :call vimside#command#RefactorRename('v')<CR>
+
   "     o Organize imports.
+  autocmd FileType scala nmap <silent> <Leader>ro :call vimside#command#RefactorOrganizeImports()<CR>
+
   "     l Extract local.
+  autocmd FileType scala nmap <silent> <Leader>rl :call vimside#command#RefactorExtractLocal('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>rl :call vimside#command#RefactorExtractLocal('v')<CR>
+
   "     m Extract method.
+  autocmd FileType scala nmap <silent> <Leader>rm :call vimside#command#RefactorExtractMethod('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>rm :call vimside#command#RefactorExtractMethod('v')<CR>
+
   "     i Inline local.
+  autocmd FileType scala nmap <silent> <Leader>ri :call vimside#command#RefactorInlineLocal('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>ri :call vimside#command#RefactorInlineLocal('v')<CR>
+
   "     t Add import for type at point.
+  " autocmd FileType scala nmap <silent> <Leader>rt :call vimside#command#RefactorAddImportTypeAtPoint()<CR>
   " NOT IMPLEMENTED YET
   
   " C-c C-b x

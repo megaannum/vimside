@@ -90,4 +90,11 @@ call s:LOG("java_notes#Handle=". string(a:1))
     call add(g:vimside.project.java_notes, jnote)
   endfor
 
+  let no_java_notes = empty(g:vimside.project.java_notes) 
+  let no_scala_notes = empty(g:vimside.project.scala_notes)
+  if ! no_scala_notes || ! no_java_notes 
+    let msg = "Scala/Java errors and warnings"
+    call vimside#cmdline#Display(msg)
+  endif
+
 endfunction

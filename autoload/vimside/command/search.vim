@@ -148,7 +148,7 @@ function! s:DisplayText()
   redraw
 endfunction
 
-function!  vimside#command#search#Run()
+function! vimside#command#search#Run()
 call s:LOG("vimside#command#search#Run TOP") 
   call s:Init()
   let s:list_display_open = 0

@@ -7,5 +7,5 @@ object Component {
 
 import Component._
 
-class Component {
+class Component[T] {
 }

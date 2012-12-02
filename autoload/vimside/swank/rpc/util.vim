@@ -87,6 +87,7 @@ function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, infoLi
 
   elseif l:infoList_len == 1
     let l:info = l:infoList[0]
+call s:LOG("vimside#swank#rpc#util#MakeRPCEnds info=". string(l:info)) 
     call vimside#util#IsDictionary(l:info, 1)
 
     if has_key(l:info, 'caller') 
@@ -152,6 +153,17 @@ function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, infoLi
 
   if exists("l:info") && has_key(l:info, 'args') 
     let l:info_args = l:info['args']
+    let l:adic = deepcopy(l:args)
+
+    for key in keys(l:info_args)
+      if exists("l:adic[key]")
+        unlet l:adic[key] 
+      endif 
+      let l:adic[key] = l:info_args[key]
+    endfor
+    let l:rr['args'] = l:adic
+
+if 0
     let l:adic = {}
     for key in keys(l:args)
 
@@ -161,6 +173,7 @@ function! vimside#swank#rpc#util#MakeRPCEnds(StdCaller, args, StdHandler, infoLi
 
     endfor
     let l:rr['args'] = l:adic
+endif
 
   else
     let l:rr['args'] = l:args

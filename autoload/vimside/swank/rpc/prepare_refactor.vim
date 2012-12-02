@@ -51,6 +51,13 @@ let s:ERROR = function("vimside#log#error")
 
 
 " public API
+" a:1 = {
+"   'args': {
+"      'procedure_id': Int,
+"      'symbol': String,
+"      'params': [ sym val ...]
+"   }
+" }
 function! vimside#swank#rpc#prepare_refactor#Run(...)
 call s:LOG("prepare_refactor TOP") 
 
@@ -61,11 +68,8 @@ call s:LOG("prepare_refactor TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-prepare-refactor-handler'
-  call s:ERROR(msg)
-  echoerr msg
+call s:LOG("prepare_refactor rr=". string(rr)) 
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("prepare_refactor BOTTOM") 
 endfunction
@@ -76,9 +80,59 @@ endfunction
 "======================================================================
 
 function! g:PrepareRefactorCaller(args)
+"call s:LOG("g:PrepareRefactorCaller TOP") 
+  let args = a:args
   let cmd = "swank:prepare-refactor"
 
-  return '('. cmd .')'
+  if ! has_key(args, 'procedure_id')
+    throw "Badly formed Refactor arguments: no procedure_id"
+  endif
+  if ! has_key(args, 'symbol')
+    throw "Badly formed Refactor arguments: no symbol"
+  endif
+  if ! has_key(args, 'params')
+    throw "Badly formed Refactor arguments: no params"
+  endif
+
+  let procedure_id = args['procedure_id']
+  let symbol = args['symbol']
+  let params = args['params']
+
+  let params_len = len(params)
+
+  if (params_len/2) * 2 != params_len
+    throw "Badly formed Refactor params, must be sym/val pairs: ". string(params)
+  endif
+
+  let cmd_str = '('. cmd
+  let cmd_str .= ' ' . procedure_id
+  let cmd_str .= ' ' . symbol
+  let cmd_str .= ' ('
+
+  let cnt = 0
+  while cnt < params_len
+    if cnt > 0
+      let cmd_str .= ' '
+    endif
+    let sym = params[cnt]
+    let val = params[cnt+1]
+    let cmd_str .= sym
+    let cmd_str .= ' '
+    if type(val) == type("")
+      let cmd_str .= '"'. val . '"'
+    elseif type(val) == type(1)
+      let cmd_str .= val
+    else
+      throw "Bad Refactor param type: val=". val
+    endif
+    let cnt += 2
+  endwhile
+
+  let cmd_str .= ') t'
+  let cmd_str .= ')'
+
+"call s:LOG("PrepareRefactorCaller cmd_str=".  cmd_str) 
+  return cmd_str
 endfunction
 
 
@@ -95,8 +149,6 @@ function! g:PrepareRefactorHandler()
   function! g:PrepareRefactorHandler_Ok(dic, ...)
     let dic = a:dic
 call s:LOG("PrepareRefactorHandler_Ok dic=".  string(dic)) 
-
-    let l:pid = dic[':pid']
 
     return 1
   endfunction

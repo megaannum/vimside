@@ -17,6 +17,6 @@ object Bar {
 
 import Bar._
 
-class Bar(val foo: FOO) {
+class Bar(val foo: Foo) {
   val id = nextId
 }
