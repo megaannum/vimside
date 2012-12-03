@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.9
+Version:     0.2.10
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1405,6 +1405,8 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.10   - Fix: ~
+  Add pathogen install instructions.
 0.2.9   - Fix: ~
   Added refactoring commands.
   Changed key mapping for vimside#command#SymbolAtPoint() and vimside#command#PreviousPosition().

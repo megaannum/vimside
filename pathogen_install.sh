@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 declare -a repos=( 
 "git://github.com/megaannum/self.git" 

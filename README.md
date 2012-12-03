@@ -105,7 +105,6 @@ Current Supported Ensime Commands:
     Extract method.
     Inline local.
     Not supported yet: Add import for type at point.
-
     Useful.
     Implementations: 1
 
@@ -310,7 +309,7 @@ if you would like to download and install the plugins.
 With pathogen, you just have to clone all required plugins into your ~/.vim/bundle directory. Running the following lines as a bash script will do exactly that.
 
 
-    #! /bin/bash
+    #!/bin/bash
 
     declare -a repos=( 
       "git://github.com/megaannum/self.git" 
@@ -606,3 +605,4 @@ and usage examples (http://vimeo.com/28597033).
 Jeanluc Chasseriau who wrote the python-based Envim Vim binding
 to Ensime: https://github.com/jlc/envim.
 
+Sven Eigenbrodt provided the Pathogen installation information.
