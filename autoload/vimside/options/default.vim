@@ -292,4 +292,16 @@ function! vimside#options#default#Load(owner)
   " Typecheck file on write
   call owner.Set('tailor-type-check-file-on-write', 0)
 
+  " Refactor Rename
+  call owner.Set("tailor-refactor-rename-pattern-enable", 1)
+  call owner.Set("tailor-refactor-rename-pattern", '[^ =:;()[\]]\+')
+  
+  " Refactor Extract Local
+  call owner.Set("tailor-refactor-extract-local-pattern-enable", 1)
+  call owner.Set("tailor-refactor-extract-local-pattern", '[^ =:;()[\]]\+')
+  
+  " Refactor Extract Method
+  call owner.Set("tailor-refactor-extract-method-pattern-enable", 1)
+  call owner.Set("tailor-refactor-extract-method-pattern", '[^ =:;()[\]]\+')
+
 endfunction

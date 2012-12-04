@@ -417,30 +417,61 @@ call s:ERROR("vimside#command#refactor#Rename failed to get selection")
 
   let old_name = s:GetText(offset_start, offset_end)[0]
  
-  let newName = input("Rename: '". old_name . "' > ")
-  if newName != ''
-    let l:procedure_id = s:procedure_id
-    let s:procedure_id += 1
-
-    let args = {}
-    let args['procedure_id'] = procedure_id
-    let args['symbol'] = 'rename'
-    let args['params'] = [ 
-                    \ 'file', fn,
-                    \ 'start', offset_start, 
-                    \ 'end', offset_end, 
-                    \ 'newName', newName
-                    \ ]
-
-    let info = {
-          \ 'handler': {
-          \   'ok': function("vimside#command#refactor#Handler_Ok")
-          \ },
-          \ 'args': args
-          \ }
-
-    call vimside#swank#rpc#prepare_refactor#Run(info)
+  let [found, pattern_use] = g:vimside.GetOption('tailor-refactor-rename-pattern-enable')
+  if ! found
+    throw "Option not found: "'tailor-refactor-rename-pattern-enable'"
   endif
+  let [found, pattern] = g:vimside.GetOption('tailor-refactor-rename-pattern')
+  if ! found
+    throw "Option not found: "'tailor-refactor-rename-pattern'"
+  endif
+
+  if pattern_use
+    let got_name = 0
+    " let name_pattern = '[^ =:;()[\]]\+'
+    let name = input("Rename: '". old_name . "' > ")
+    while ! got_name
+      if name == ''
+        let got_name = 1
+      else
+        let mname = matchstr(name, pattern)
+        if mname == name
+          let got_name = 1
+        else
+          echo "\r"
+          let name = input("Bad name:'". name ."'\nPattern: '". pattern ."'\nRename: '". old_name . "' > ")
+        endif
+      endif
+    endwhile
+  else
+    let name = input("Rename: '". old_name . "' > ")
+  endif
+
+  if name == ''
+    return
+  endif
+
+  let l:procedure_id = s:procedure_id
+  let s:procedure_id += 1
+
+  let args = {}
+  let args['procedure_id'] = procedure_id
+  let args['symbol'] = 'rename'
+  let args['params'] = [ 
+                  \ 'file', fn,
+                  \ 'start', offset_start, 
+                  \ 'end', offset_end, 
+                  \ 'newName', name
+                  \ ]
+
+  let info = {
+        \ 'handler': {
+        \   'ok': function("vimside#command#refactor#Handler_Ok")
+        \ },
+        \ 'args': args
+        \ }
+
+  call vimside#swank#rpc#prepare_refactor#Run(info)
 
 call s:LOG("vimside#command#refactor#Rename BOTTOM") 
 endfunction
@@ -489,13 +520,6 @@ call s:LOG("vimside#command#refactor#ExtractLocal NO FILE")
     return
   endif
 
-  let name = input("Extract Local: > ")
-  if name == ''
-call s:LOG("vimside#command#refactor#ExtractLocal NO NAME") 
-    return
-  endif
-call s:LOG("vimside#command#refactor#ExtractLocal name=". name) 
-
   let [found, offset_start, offset_end] = vimside#command#GetVisualSelection()
   if ! found
     let [found, slist] = vimside#command#selection#Get()
@@ -512,6 +536,42 @@ call s:ERROR("vimside#command#refactor#ExtractMethod failed to get selection")
 call s:LOG("vimside#command#refactor#ExtractLocal offset_start=". offset_start)
 call s:LOG("vimside#command#refactor#ExtractLocal offset_end=". offset_end) 
   
+  let [found, pattern_use] = g:vimside.GetOption('tailor-refactor-extract-local-pattern-enable')
+  if ! found
+    throw "Option not found: "'tailor-refactor-extract-local-pattern-enable'"
+  endif
+  let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-local-pattern')
+  if ! found
+    throw "Option not found: "'tailor-refactor-extract-local-pattern'"
+  endif
+
+  if pattern_use
+    let got_name = 0
+    " let name_pattern = '[^ =:;()[\]]\+'
+    let name = input("Extract Local: > ")
+    while ! got_name
+      if name == ''
+        let got_name = 1
+      else
+        let mname = matchstr(name, pattern)
+        if mname == name
+          let got_name = 1
+        else
+          echo "\r"
+          let name = input("Bad name:'". name ."'\nPattern: '". pattern."'\nExtract Local: > ")
+        endif
+      endif
+    endwhile
+  else
+    let name = input("Extract Local: > ")
+  endif
+
+  if name == ''
+    return
+  endif
+
+call s:LOG("vimside#command#refactor#ExtractLocal name=". name) 
+
     let l:procedure_id = s:procedure_id
     let s:procedure_id += 1
 
@@ -546,9 +606,37 @@ call s:LOG("vimside#command#refactor#ExtractMethod NO FILE")
     return
   endif
 
-  let name = input("Extract Method: > ")
+  let [found, pattern_use] = g:vimside.GetOption('tailor-refactor-extract-method-pattern-enable')
+  if ! found
+    throw "Option not found: "'tailor-refactor-extract-method-pattern-enable'"
+  endif
+  let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-method-pattern')
+  if ! found
+    throw "Option not found: "'tailor-refactor-extract-method-pattern'"
+  endif
+
+  if pattern_use
+    let got_name = 0
+    " let name_pattern = '[^ =:;()[\]]\+'
+    let name = input("Extract Method: > ")
+    while ! got_name
+      if name == ''
+        let got_name = 1
+      else
+        let mname = matchstr(name, pattern)
+        if mname == name
+          let got_name = 1
+        else
+          echo "\r"
+          let name = input("Bad name:'". name ."'\nPattern: '". pattern ."'\nMethod Local: > ")
+        endif
+      endif
+    endwhile
+  else
+    let name = input("Extract Method: > ")
+  endif
+
   if name == ''
-call s:LOG("vimside#command#refactor#ExtractMethod NO NAME") 
     return
   endif
 call s:LOG("vimside#command#refactor#ExtractMethod name=". name) 

@@ -122,6 +122,16 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set('tailor-type-check-file-on-write', 0)
   "--------------
 
+  "--------------
+  " Refactor rename, extract local and extract metod
+  " call owner.Set('tailor-refactor-rename-pattern-enable', 1)
+  " call owner.Set('tailor-refactor-rename-pattern', '[^ =:;()[\]]\+')
+  " call owner.Set('tailor-refactor-extract-local-pattern-enable', 1)
+  " call owner.Set('tailor-refactor-extract-local-pattern', '[^ =:;()[\]]\+')
+  " call owner.Set('tailor-refactor-extract-method-pattern-enable', 1)
+  " call owner.Set('tailor-refactor-extract-method-pattern', '[^ =:;()[\]]\+')
+  "--------------
+
 
   " call owner.Set("tailor-symbol-at-point-location-same-file", "same_window.vim")
   " call owner.Set("tailor-symbol-at-point-location-same-file", "split_window.vim")

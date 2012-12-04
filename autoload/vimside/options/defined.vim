@@ -2170,6 +2170,60 @@ function! s:MakeOptions()
             \ "Typecheck a file when it is written."
         \ ]
       \ }
+  
+  " Refactor Rename
+  let l:options['tailor-refactor-rename-pattern-enable'] = {
+        \ 'name': 'tailor-refactor-rename-pattern-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor rename identifier matching pattern enable."
+        \ ]
+      \ }
+  let l:options['tailor-refactor-rename-pattern'] = {
+        \ 'name': 'tailor-refactor-rename-pattern',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor rename identifier matching pattern."
+        \ ]
+      \ }
+  
+  " Refactor Extract Local
+  let l:options['tailor-refactor-extract-local-pattern-enable'] = {
+        \ 'name': 'tailor-refactor-extract-local-pattern-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor extract local identifier matching pattern enable."
+        \ ]
+      \ }
+  let l:options['tailor-refactor-extract-local-pattern'] = {
+        \ 'name': 'tailor-refactor-extract-local-pattern',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor extract local identifier matching pattern."
+        \ ]
+      \ }
+  
+  " Refactor Extract Method
+  let l:options['tailor-refactor-extract-method-pattern-enable'] = {
+        \ 'name': 'tailor-refactor-extract-method-pattern-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor extract method identifier matching pattern enable."
+        \ ]
+      \ }
+  let l:options['tailor-refactor-extract-method-pattern'] = {
+        \ 'name': 'tailor-refactor-extract-method-pattern',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Refactor extract method identifier matching pattern."
+        \ ]
+      \ }
 
   return l:options
 endfunction
