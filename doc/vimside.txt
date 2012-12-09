@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.11
+Version:     0.2.12
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
