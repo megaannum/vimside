@@ -454,6 +454,12 @@ endif
               \ 'body': bg
               \ }
   let form = forms#newForm(attrs)
-  call form.run()
+
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    call form.run()
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
 endfunction
 

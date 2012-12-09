@@ -189,9 +189,11 @@ else
   autocmd FileType scala vmap <silent> <Leader>ri :call vimside#command#RefactorInlineLocal('v')<CR>
 
   "     t Add import for type at point.
-  " autocmd FileType scala nmap <silent> <Leader>rt :call vimside#command#RefactorAddImportTypeAtPoint()<CR>
-  " NOT IMPLEMENTED YET
+  autocmd FileType scala nmap <silent> <Leader>rt :call vimside#command#RefactorAddImport()<CR>
   
+  autocmd FileType scala nmap <silent> <Leader>vi :call vimside#command#ImportSuggestions('n')<CR>
+  autocmd FileType scala vmap <silent> <Leader>vi :call vimside#command#ImportSuggestions('v')<CR>
+
   " C-c C-b x
   "   Where x is one of:
   "     b Build the entire project.

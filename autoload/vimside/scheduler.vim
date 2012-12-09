@@ -26,6 +26,8 @@ let s:ERROR = function("vimside#log#error")
 "=============================================================================
 let s:jobs = []
 
+let s:outputfeedkeys = 1
+
 function! vimside#scheduler#ClearJobs()
   let s:jobs = []
 endfunction
@@ -184,12 +186,27 @@ function! vimside#scheduler#TimeTrigger()
   " One of the jobs might have added a job so we add to s:jobs
   let s:jobs += l:jobs
 
-  if mode() == 'i'
-    call feedkeys("a\<BS>", 'n') 
-  else
-    call feedkeys("f\e", 'n') 
-  endif
+  call vimside#scheduler#FeedKeys()
+endfunction
 
+function! vimside#scheduler#HaltFeedKeys()
+  let s:outputfeedkeys = 0
+endfunction
+function! vimside#scheduler#ResumeFeedKeys()
+  let s:outputfeedkeys = 1
+endfunction
+
+function! vimside#scheduler#FeedKeys()
+" call s:LOG("FeedKeys: mode=". mode())
+  if s:outputfeedkeys
+    if mode() == 'i'
+      call feedkeys("a\<BS>", 'n') 
+    elseif mode() == 'c'
+      call feedkeys("\<SPACE>\<BS>", 'n')
+    else
+      call feedkeys("f\e", 'n') 
+    endif
+  endif
 endfunction
 
 function! vimside#scheduler#GetRealTime() 

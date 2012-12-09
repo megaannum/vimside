@@ -50,7 +50,7 @@ function! g:VimsideOptionsUserLoad(owner)
   " Which build version of Ensime to use. 
   " Must be directory under 'ensime-install-path' directory
   " call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
-  " call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+  " call owner.Set("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
 
   " Or, full path to Ensime build version
   " call owner.Set("ensime-dist-path", "SOME_PATH_TO_ENSIME_BUILD_DIR")
@@ -110,6 +110,7 @@ function! g:VimsideOptionsUserLoad(owner)
   " Search options
   " call owner.Set("tailor-symbol-search-do-incremental", 0)
   " call owner.Set("tailor-symbol-search-close-empty-display", 1)
+  " call owner.Set("tailor-symbol-search-maximum-return", 50)
   "--------------
   
   "--------------

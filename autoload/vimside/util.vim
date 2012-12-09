@@ -46,15 +46,20 @@ function! vimside#util#GetLineColumnFromOffset(offset, ...)
     endif
   else
     let file = a:1
-    try
-      execute "sp ". file
-      let line = byte2line(a:offset)
-      let offline = line2byte(line)
-      let column = a:offset - offline
-      return [line, column]
-    finally
-      q
-    endtry
+    let extension = fnamemodify(file, ":e")
+    if extension != 'scala' && extension != 'java'
+        return [-1, -1]
+    else
+      try
+        execute "sp ". file
+        let line = byte2line(a:offset)
+        let offline = line2byte(line)
+        let column = a:offset - offline
+        return [line, column]
+      finally
+        q
+      endtry
+    endif
   endif
 endfunction
 
@@ -171,5 +176,13 @@ function! vimside#util#TypeNameFromTypeNumber(typeNum)
 endfunction
 
 
+function! vimside#util#Input(msg)
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    return input(a:msg)
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
+endfunction
 
 

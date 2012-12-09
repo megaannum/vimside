@@ -238,9 +238,30 @@ function! vimside#command#RefactorInlineLocal(mode) range
   endif
 endfunction
 
-function! vimside#command#RefactorAddImportTypeAtPoint() range
+function! vimside#command#RefactorAddImport() range
   if exists("g:vimside.started") && g:vimside.started
-    call vimside#command#refactor#AddImportTypeAtPoint()
+    call s:ClearVisualSelection()
+    call vimside#command#refactor#AddImport()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#ImportSuggestions(mode) range
+  if exists("g:vimside.started") && g:vimside.started
+    if a:mode == 'n'
+      call s:ClearVisualSelection()
+    elseif a:mode == 'v'
+      let s:firstline = a:firstline
+      let s:firstcol = col("'<")
+      let s:lastline = a:lastline
+      let s:lastcol = col("'>")
+      let s:visualmode = visualmode()
+    else
+      throw "s:DoMode unknown mode argument: ".  a:mode
+    endif
+
+    call vimside#command#refactor#ImportSuggestions()
   else
     call s:ERROR("Ensime must be started first")
   endif

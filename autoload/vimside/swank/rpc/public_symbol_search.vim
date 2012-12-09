@@ -111,6 +111,9 @@ function! g:PublicSymbolSearchHandler()
       return 0
     endif
 
+    call vimside#command#search#ProcessSymbolSearchResults(dic)
+
+if 0
     let records = []
     let cnt = 0
     for item in dic
@@ -118,7 +121,7 @@ function! g:PublicSymbolSearchHandler()
       let file = pos[':file']
       let offset = pos[':offset']
       let name = item[':name']
-"call s:LOG("PublicSymbolSearchHandler_Ok name=".  string(name)) 
+call s:LOG("PublicSymbolSearchHandler_Ok name=".  string(name)) 
       let decl_as = item[':decl-as']
       let local_name = item[':local-name']
       let [line, column] = vimside#util#GetLineColumnFromOffset(offset, file)
@@ -142,6 +145,7 @@ function! g:PublicSymbolSearchHandler()
     endfor
 
     call vimside#command#search#AddRecords(records)
+endif
 
     return 1
   endfunction

@@ -91,17 +91,17 @@ function! s:ProcessChange(change)
   let to = change[':to']
   let text = change[':text']
   let text = substitute(text, '\\"', '"', "g")
-call s:LOG("s:ProcessChange file=". file) 
-call s:LOG("s:ProcessChange from=". from) 
-call s:LOG("s:ProcessChange to=". to) 
-call s:LOG("s:ProcessChange text=". text) 
+"call s:LOG("s:ProcessChange file=". file) 
+"call s:LOG("s:ProcessChange from=". from) 
+"call s:LOG("s:ProcessChange to=". to) 
+"call s:LOG("s:ProcessChange text=". text) 
 
   let [found, cfile] = vimside#util#GetCurrentFilename()
   if ! found
     call s:LOG("s:ProcessChange: no current file") 
     return
   endif
-call s:LOG("s:ProcessChange cfile=". cfile) 
+"call s:LOG("s:ProcessChange cfile=". cfile) 
 
   if file == cfile
     let [fline, fcolumn] = vimside#util#GetLineColumnFromOffset(from)
@@ -110,15 +110,15 @@ call s:LOG("s:ProcessChange cfile=". cfile)
     let [fline, fcolumn] = vimside#util#GetLineColumnFromOffset(from, file)
     let [tline, tcolumn] = vimside#util#GetLineColumnFromOffset(to, file)
   endif
-call s:LOG("s:ProcessChange fline=". fline) 
-call s:LOG("s:ProcessChange fcolumn=". fcolumn) 
-call s:LOG("s:ProcessChange tline=". tline) 
-call s:LOG("s:ProcessChange tcolumn=". tcolumn) 
+"call s:LOG("s:ProcessChange fline=". fline) 
+"call s:LOG("s:ProcessChange fcolumn=". fcolumn) 
+"call s:LOG("s:ProcessChange tline=". tline) 
+"call s:LOG("s:ProcessChange tcolumn=". tcolumn) 
 
   let offset_diff = to - from
-call s:LOG("s:ProcessChange offset_diff=". offset_diff) 
+"call s:LOG("s:ProcessChange offset_diff=". offset_diff) 
   let line_diff = tline - fline
-call s:LOG("s:ProcessChange line_diff=". line_diff) 
+"call s:LOG("s:ProcessChange line_diff=". line_diff) 
 
   let ai_save = &ai
   let &ai = 0
@@ -134,13 +134,13 @@ call s:LOG("s:ProcessChange line_diff=". line_diff)
   try
     " Is the start offset at the end of a line. If so, goto next line
     let [fnline, fncolumn] = vimside#util#GetLineColumnFromOffset(from+1)
-call s:LOG("s:ProcessChange fnline=". fnline) 
-call s:LOG("s:ProcessChange fncolumn=". fncolumn) 
+"call s:LOG("s:ProcessChange fnline=". fnline) 
+"call s:LOG("s:ProcessChange fncolumn=". fncolumn) 
     if fnline == fline+1
       let fline = fnline
       let fcolumn = fncolumn
-call s:LOG("s:ProcessChange new fline=". fline) 
-call s:LOG("s:ProcessChange new fcolumn=". fcolumn) 
+"call s:LOG("s:ProcessChange new fline=". fline) 
+"call s:LOG("s:ProcessChange new fcolumn=". fcolumn) 
     endif
 
     if line_diff == 0
@@ -168,8 +168,8 @@ call s:LOG("s:ProcessChange new fcolumn=". fcolumn)
           if found
             let l:filetype = &filetype
             let current_bnumber = bufnr("%")
-call s:LOG("s:ProcessChange current_bnumber=". current_bnumber) 
-call s:LOG("s:ProcessChange bnumber=". bnumber) 
+"call s:LOG("s:ProcessChange current_bnumber=". current_bnumber) 
+"call s:LOG("s:ProcessChange bnumber=". bnumber) 
 
             " :execute "2b"
             execute ''. bnumber ."b"
@@ -206,8 +206,8 @@ call s:LOG("s:ProcessChange bnumber=". bnumber)
           if found
             let l:filetype = &filetype
             let current_bnumber = bufnr("%")
-call s:LOG("s:ProcessChange current_bnumber=". current_bnumber) 
-call s:LOG("s:ProcessChange bnumber=". bnumber) 
+"call s:LOG("s:ProcessChange current_bnumber=". current_bnumber) 
+"call s:LOG("s:ProcessChange bnumber=". bnumber) 
 
             execute ''. bnumber ."b"
 
@@ -305,6 +305,11 @@ call s:LOG("vimside#command#refactor#Handler_Ok dic=". string(dic))
       let changes = dic[':changes']
       call s:ProcessChanges(changes)
 
+    elseif refactor_type == 'addImport'
+      " list of changes
+      let changes = dic[':changes']
+      call s:ProcessChanges(changes)
+
     else
       call s:ERROR("vimside#command#refactor#Handler_Ok: Bad refactor-type : ". string(refactor_type))
     endif
@@ -315,13 +320,13 @@ endfunction
 
 " return [found, [file, start, end]]
 function! s:GetCWordSelection()
-call s:LOG("s:GetCWordSelection TOP") 
+" call s:LOG("s:GetCWordSelection TOP") 
   let old_name = expand("<cword>")
   let old_name_len = len(old_name)
-call s:LOG("s:GetCWordSelection old_name=". old_name) 
+" call s:LOG("s:GetCWordSelection old_name=". old_name) 
 
   let line = line(".")
-call s:LOG("s:GetCWordSelection line=". line) 
+" call s:LOG("s:GetCWordSelection line=". line) 
   let col = col(".")
   let start = 0
   let found = 0
@@ -329,7 +334,7 @@ call s:LOG("s:GetCWordSelection line=". line)
 
   while ! found
     let idx = stridx(line_str, old_name, start)
-call s:LOG("s:GetCWordSelection idx=". idx) 
+" call s:LOG("s:GetCWordSelection idx=". idx) 
     if idx == -1
       break
     elseif idx <= col && col <= idx+old_name_len
@@ -340,7 +345,7 @@ call s:LOG("s:GetCWordSelection idx=". idx)
     endif
   endwhile
   if idx == -1
-call s:LOG("s:GetCWordSelection idx=". idx) 
+" call s:LOG("s:GetCWordSelection idx=". idx) 
     return [0, ["", -1, -1]]
   endif
   let offset_line = line2byte(line)
@@ -349,10 +354,10 @@ call s:LOG("s:GetCWordSelection idx=". idx)
 
   let [found, fn] = vimside#util#GetCurrentFilename()
   if ! found
-call s:LOG("s:GetCWordSelection NO FILE NAME") 
+" call s:LOG("s:GetCWordSelection NO FILE NAME") 
     return [0, ["", -1, -1]]
   else
-call s:LOG("s:GetCWordSelection fn=". fn) 
+" call s:LOG("s:GetCWordSelection fn=". fn) 
     return [1, [fn, offset_start, offset_end]]
   endif
 endfunction
@@ -392,6 +397,40 @@ function! s:GetText(start, end)
   endif
 endfunction
 
+function! s:GetInput(prompt, ...)
+  let name = ''
+  let prompt = a:prompt .": > "
+
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    if a:0 == 1
+      let pattern = a:1
+"call s:LOG("s:GetInput: pattern=". pattern) 
+      let got_name = 0
+      let name = input(prompt)
+      while ! got_name
+        if name == ''
+          let got_name = 1
+        else
+          let mname = matchstr(name, pattern)
+          if mname == name
+            let got_name = 1
+          else
+            echo "\r"
+            let name = input("Bad name:'". name ."'\nPattern: '". pattern."'\n". prompt)
+          endif
+        endif
+      endwhile
+    else
+      let name = input(prompt)
+    endif
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
+
+  echo "\r". repeat(' ', len(prompt)+len(name)+1)
+  return name
+endfunction
 
 "=================================================
 function! vimside#command#refactor#Rename()
@@ -421,31 +460,18 @@ call s:ERROR("vimside#command#refactor#Rename failed to get selection")
   if ! found
     throw "Option not found: "'tailor-refactor-rename-pattern-enable'"
   endif
-  let [found, pattern] = g:vimside.GetOption('tailor-refactor-rename-pattern')
-  if ! found
-    throw "Option not found: "'tailor-refactor-rename-pattern'"
-  endif
 
+  let prompt = "Rename: '". old_name ."'"
   if pattern_use
-    let got_name = 0
-    " let name_pattern = '[^ =:;()[\]]\+'
-    let name = input("Rename: '". old_name . "' > ")
-    while ! got_name
-      if name == ''
-        let got_name = 1
-      else
-        let mname = matchstr(name, pattern)
-        if mname == name
-          let got_name = 1
-        else
-          echo "\r"
-          let name = input("Bad name:'". name ."'\nPattern: '". pattern ."'\nRename: '". old_name . "' > ")
-        endif
-      endif
-    endwhile
+    let [found, pattern] = g:vimside.GetOption('tailor-refactor-rename-pattern')
+    if ! found
+      throw "Option not found: "'tailor-refactor-rename-pattern'"
+    endif
+
+    let name = s:GetInput(prompt, pattern)
   else
-    let name = input("Rename: '". old_name . "' > ")
-  endif
+    let name = s:GetInput(prompt)
+  endif  
 
   if name == ''
     return
@@ -540,31 +566,18 @@ call s:LOG("vimside#command#refactor#ExtractLocal offset_end=". offset_end)
   if ! found
     throw "Option not found: "'tailor-refactor-extract-local-pattern-enable'"
   endif
-  let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-local-pattern')
-  if ! found
-    throw "Option not found: "'tailor-refactor-extract-local-pattern'"
-  endif
 
+  let prompt = "Extract Local"
   if pattern_use
-    let got_name = 0
-    " let name_pattern = '[^ =:;()[\]]\+'
-    let name = input("Extract Local: > ")
-    while ! got_name
-      if name == ''
-        let got_name = 1
-      else
-        let mname = matchstr(name, pattern)
-        if mname == name
-          let got_name = 1
-        else
-          echo "\r"
-          let name = input("Bad name:'". name ."'\nPattern: '". pattern."'\nExtract Local: > ")
-        endif
-      endif
-    endwhile
+    let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-local-pattern')
+    if ! found
+      throw "Option not found: "'tailor-refactor-extract-local-pattern'"
+    endif
+
+    let name = s:GetInput(prompt, pattern)
   else
-    let name = input("Extract Local: > ")
-  endif
+    let name = s:GetInput(prompt)
+  endif  
 
   if name == ''
     return
@@ -610,31 +623,18 @@ call s:LOG("vimside#command#refactor#ExtractMethod NO FILE")
   if ! found
     throw "Option not found: "'tailor-refactor-extract-method-pattern-enable'"
   endif
-  let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-method-pattern')
-  if ! found
-    throw "Option not found: "'tailor-refactor-extract-method-pattern'"
-  endif
 
+  let prompt = "Extract Method"
   if pattern_use
-    let got_name = 0
-    " let name_pattern = '[^ =:;()[\]]\+'
-    let name = input("Extract Method: > ")
-    while ! got_name
-      if name == ''
-        let got_name = 1
-      else
-        let mname = matchstr(name, pattern)
-        if mname == name
-          let got_name = 1
-        else
-          echo "\r"
-          let name = input("Bad name:'". name ."'\nPattern: '". pattern ."'\nMethod Local: > ")
-        endif
-      endif
-    endwhile
+    let [found, pattern] = g:vimside.GetOption('tailor-refactor-extract-method-pattern')
+    if ! found
+      throw "Option not found: "'tailor-refactor-extract-method-pattern'"
+    endif
+
+    let name = s:GetInput(prompt, pattern)
   else
-    let name = input("Extract Method: > ")
-  endif
+    let name = s:GetInput(prompt)
+  endif  
 
   if name == ''
     return
@@ -724,8 +724,188 @@ call s:LOG("vimside#command#refactor#InlineLocal offset_end=". offset_end)
 call s:LOG("vimside#command#refactor#InlineLocal BOTTOM") 
 endfunction
 
-function! vimside#command#refactor#AddImportTypeAtPoint()
-call s:LOG("vimside#command#refactor#AddImportTypeAtPoint TOP") 
-call s:LOG("vimside#command#refactor#AddImportTypeAtPoint BOTTOM") 
+function! vimside#command#refactor#AddImport()
+call s:LOG("vimside#command#refactor#AddImport: TOP") 
+
+  let name = s:GetInput("Enter Import")
+  if name != ''
+    call s:DoAddImport(name)
+  endif
+
+call s:LOG("vimside#command#refactor#AddImport: BOTTOM") 
 endfunction
 
+function! s:DoAddImport(name)
+
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+call s:LOG("vimside#command#refactor#AddImport NO FILE") 
+    return
+  endif
+
+
+  let l:procedure_id = s:procedure_id
+  let s:procedure_id += 1
+
+  let args = {}
+  let args['procedure_id'] = procedure_id
+  let args['symbol'] = 'addImport'
+  let args['params'] = [ 
+                  \ 'file', fn,
+                  \ 'start', 0, 
+                  \ 'end', 0, 
+                  \ 'qualifiedName', a:name
+                  \ ]
+
+  let info = {
+        \ 'handler': {
+        \   'ok': function("vimside#command#refactor#Handler_Ok")
+        \ },
+        \ 'args': args
+        \ }
+
+  call vimside#swank#rpc#prepare_refactor#Run(info)
+
+endfunction
+
+
+
+
+
+
+
+
+
+
+function! vimside#command#refactor#ImportSuggestionHandler_Ok(dic, ...)
+call s:LOG("vimside#command#refactor#ImportSuggestionHandler_Ok TOP") 
+  let dic = a:dic
+"call s:LOG("vimside#command#refactor#ImportSuggestionHandler_Ok dic=". string(dic)) 
+  if type(dic) != type([])
+      call s:ERROR("vimside#command#refactor#ImportSuggestionHandler_Ok: Result not list: ". string(dic))
+      return
+  endif
+  let name_list = dic[0]
+
+  if type(name_list) != type([])
+      call s:ERROR("vimside#command#refactor#ImportSuggestionHandler_Ok: Not list of Dictionaries: ". string(name_list))
+      return
+  endif
+
+  let echos = ''
+  let nlen = len(name_list)
+  let cnt = 1
+  while cnt <= nlen
+    if cnt > 1
+      let echos .= "\n"
+    endif
+    let entry = name_list[cnt-1]
+
+    let l = ''
+    if cnt < 10
+      let l .= ' '
+    endif
+    let l .= cnt
+    let l .= ' "'
+    if has_key(entry, ':name')
+      let l .= entry[':name']
+    else
+      let l .= 'ERROR'
+    endif
+    let l .= '"'
+
+" call s:LOG("vimside#command#refactor#ImportSuggestionHandler_Ok l=". l) 
+    " echo l
+    let echos .= l
+
+    let cnt += 1
+  endwhile
+
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    while 1
+      let rval = input(echos . "\nType number and <Enter> (empty cancels): ")
+      if rval == ''
+        break
+      endif
+      let n = 0 + rval
+      let s = '' . n
+      if s != rval
+        echo "Bad number: " . rval
+      else
+        if n < 1
+          echo "Number less than 1: " . rval
+        elseif n > nlen
+          echo "Number greater than: " . nlen
+        else
+          break
+        endif
+      endif
+      redraw
+    endwhile
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
+
+  if rval != ''
+    let entry = name_list[n-1]
+    let name = entry[':name']
+    call s:DoAddImport(name)
+  endif
+
+if 0
+  redraw
+  if rval == ''
+    echo "\r"
+  else
+    let entry = name_list[n-1]
+    echo "\rName: " . entry[':name']
+  endif
+endif
+endfunction
+
+function! vimside#command#refactor#ImportSuggestions()
+call s:LOG("vimside#command#refactor#ImportSuggestions: TOP") 
+
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+call s:LOG("vimside#command#refactor#ImportSuggestions NO FILE") 
+    return
+  endif
+
+  let [found, offset_start, offset_end] = vimside#command#GetVisualSelection()
+  if ! found
+    let [found, slist] = vimside#command#selection#Get()
+    if ! found 
+      let [found, slist] = s:GetCWordSelection()
+      if ! found 
+call s:ERROR("vimside#command#refactor#ImportSuggestions failed to get selection") 
+        return
+      endif
+    endif
+    let [fn, offset_start, offset_end] = slist
+  endif
+
+  let name = s:GetText(offset_start, offset_end)[0]
+call s:LOG("vimside#command#refactor#ImportSuggestions name=". name) 
+
+  let l:procedure_id = s:procedure_id
+  let s:procedure_id += 1
+
+  let args = {}
+  let args['filename'] = fn
+  let args['offset'] = offset_start
+  let args['names'] = [ name ]
+  let args['maximum'] = 10
+
+  let info = {
+        \ 'handler': {
+        \   'ok': function("vimside#command#refactor#ImportSuggestionHandler_Ok")
+        \ },
+        \ 'args': args
+        \ }
+
+  call vimside#swank#rpc#import_suggestions#Run(info)
+
+call s:LOG("vimside#command#refactor#ImportSuggestions: BOTTOM") 
+endfunction

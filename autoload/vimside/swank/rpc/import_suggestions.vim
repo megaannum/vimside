@@ -54,11 +54,7 @@ call s:LOG("import_suggestions TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-import-suggestions-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("import_suggestions BOTTOM") 
 endfunction
@@ -71,7 +67,27 @@ endfunction
 function! g:ImportSuggestionsCaller(args)
   let cmd = "swank:import-suggestions"
 
-  return '('. cmd .')'
+  let fn = a:args.filename
+  let offset = a:args.offset
+  let names = a:args.names
+  let max = a:args.maximum
+
+  let nlen = len(names)
+  let cnt = 0
+  let ns = '('
+  while cnt < nlen
+    let ns .= '"'
+    let ns .= names[cnt]
+    let ns .= '"'
+    if cnt+1 != nlen
+      let ns .= ' '
+    endif
+
+    let cnt += 1
+  endwhile
+  let ns .= ')'
+
+  return '('. cmd .' "'. fn .'" '. offset .' '. ns .' '. max .')'
 endfunction
 
 

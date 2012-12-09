@@ -190,7 +190,8 @@ function! vimside#options#default#Load(owner)
 
 
   call owner.Set("tailor-symbol-search-close-empty-display", 0)
-  call owner.Set("tailor-symbol-search-do-incremental", 1)
+  call owner.Set("tailor-symbol-search-do-incremental", 0)
+  call owner.Set("tailor-symbol-search-maximum-return", 50)
 
   call owner.Set("tailor-expand-selection-information", 'highlight')
   call owner.Set("tailor-expand-selection-highlight-color-dark", '5fffff')

@@ -227,7 +227,14 @@ call forms#log("NODE SELECT: ". a:node.name)
               \ 'body': bg
               \ }
   let form = forms#newForm(attrs)
-  let rval = form.run()
+
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    let rval = form.run()
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
+
 " call s:LOG("rval=". string(rval))
 
   if type(rval) == g:self#DICTIONARY_TYPE

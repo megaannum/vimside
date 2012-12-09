@@ -625,7 +625,12 @@ function! vimside#forms#menu#MakePopUp(mode) range
     let s:popupform = forms#newForm(attrsForm)
   endif
 
-  call s:popupform.run()
+  call vimside#scheduler#HaltFeedKeys()
+  try
+    call s:popupform.run()
+  finally
+    call vimside#scheduler#ResumeFeedKeys()
+  endtry
 endfunction
 
 

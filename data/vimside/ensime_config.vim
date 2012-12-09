@@ -41,7 +41,6 @@ let formatting_prefs = g:SExp(
               \ Key(":alignParameters"), g:Bool(1),
               \ Key(":alignSingleLineCaseStatements"), g:Bool(0),
               \ Key(":compactStringConcatenation"), g:Bool(1),
-              \ Key(":compactControlReadability"), g:Bool(1),
               \ Key(":doubleIndentClassDeclaration"), g:Bool(1),
               \ Key(":indentLocalDefs"), g:Bool(0),
               \ Key(":indentPackageBlocks"), g:Bool(0),
@@ -51,7 +50,6 @@ let formatting_prefs = g:SExp(
               \ )
 
 call vimside#sexp#AddTo_List(formatting_prefs,
-              \ Key(":placeScaladocAsterisksBeneathSecondAsterisk"), g:Bool(0),
               \ Key(":preserveDanglingCloseParenthesis"), g:Bool(1),
               \ Key(":preserveSpaceBeforeArguments"), g:Bool(0),
               \ Key(":rewriteArrowSymbols"), g:Bool(0),
@@ -61,6 +59,8 @@ call vimside#sexp#AddTo_List(formatting_prefs,
               \ Key(":spacesWithinPatternBinders"), g:Bool(1)
               \ )
 
+" Key(":disable-index-on-startup"), g:Bool(0),
+
 let g:ensime_config = g:SExp([ 
   \ Key(":root-dir"), g:Str(s:full_dir),
   \ Key(":name"), g:Str("test"),
@@ -68,7 +68,6 @@ let g:ensime_config = g:SExp([
   \ Key(":version"), g:Str("1.0"),
   \ Key(":compile-jars"), compile_jars,
   \ Key(":compiler-args"), compiler_args,
-  \ Key(":disable-index-on-startup"), g:Bool(0),
   \ Key(":source-roots"), source_roots, 
   \ Key(":reference-source-roots"), reference_source_roots, 
   \ Key(":target"), g:Str(s:full_dir . "/build/classes"),

@@ -2023,7 +2023,7 @@ function! s:FilePanel_mark_via_regexp(regexp) dict
   let fview = self
   if a:regexp == ''
     echohl Special
-    let regexp = input("Mark files (regexp): ")
+    let regexp = vimside#util#Input("Mark files (regexp): ")
     echohl None
   else
     let regexp = a:regexp
@@ -2057,7 +2057,7 @@ let s:FilePanel.markExecutable = function("s:FilePanel_mark_executable")
 function! s:FilePanel_new_file() dict
   let fview = self
   echohl Special
-  let filename = input("Create file : ", fview.path, "file")
+  let filename = vimside#util#Input("Create file : ", fview.path, "file")
   echohl None
   if filename == ''
     echo " "
@@ -2078,7 +2078,7 @@ function! s:FilePanel_new_directory() dict
     echoerr "mkdir feature not found!"
   endif
   echohl Special
-  let dirname = input("Create directory : ", fview.path, "file")
+  let dirname = vimside#util#Input("Create directory : ", fview.path, "file")
   echohl None
   if dirname == ''
     echo " "
@@ -2098,7 +2098,7 @@ function! s:FilePanel_rename(line) dict
   let path = fview.displayList[a:line][1]
   if path != ''
     echohl Special
-    let name = input("Rename to: ", path, "file")
+    let name = vimside#util#Input("Rename to: ", path, "file")
     echohl None
 
     if name == ''
@@ -2122,7 +2122,7 @@ let s:FilePanel.rename = function("s:FilePanel_rename")
 function! s:FilePanel_search() dict
   let fview = self
   echohl Special
-  let filename = input("Search : ")
+  let filename = vimside#util#Input("Search : ")
   echohl None
 
   if filename == ''
@@ -2495,7 +2495,7 @@ call s:LOG("VENew: path '". a:path ."', sourceRoots= ". string(a:sourceRoots))
 
   if a:path == ''
     echohl Special
-    let workPath = input("VimExplorer (directory): ", l:sourceRoots[0], "file")
+    let workPath = vimside#util#Input("VimExplorer (directory): ", l:sourceRoots[0], "file")
     echohl None
   else
     let workPath = a:path
@@ -2889,7 +2889,7 @@ endfunction
 function! VE_OpenPath()
 call s:LOG("VE_OpenPath:")
   echohl Special
-  let workPath = input("Change path to (directory): ", '', "file")
+  let workPath = vimside#util#Input("Change path to (directory): ", '', "file")
   echohl None
   if workPath == ''
     return

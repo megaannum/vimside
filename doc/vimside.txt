@@ -211,9 +211,9 @@ ensime_2.9.2-0.9.8.1 as an example:
     lib/                 
     README.md
 
-or ensime_2.10.0-SNAPSHOT-0.9.7:
+or ensime_2.10.0-RC3-0.9.8.2:
 
-  ensime_2.10.0-SNAPSHOT-0.9.7/
+  ensime_2.10.0-RC3-0.9.8.2/
     bin/  
     elisp/  
     lib/  
@@ -226,7 +226,7 @@ ensime_2.9.2-0.9.8.1 (the default value):
 
    call owner.Set("vimside-scala-version", "2.9.2")
 
-and for ensime_2.10.0-SNAPSHOT-0.9.7:
+and for ensime_2.10.0-RC3-0.9.8.2:
 
    call owner.Set("vimside-scala-version", "2.10.0")
 
@@ -271,7 +271,7 @@ For example:
 
     call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
 or
-    call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+    call owner.Set("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
 
 Alternatively, you can specify the full path to the ensime distribution
 using the Option 'ensime-dist-path'. As an example, if you installed
@@ -441,7 +441,7 @@ So, in the 'options_user.vim' one might have:
 in a project file there might be:
 
   call owner.Update("vimside-scala-version", "2.10.0")
-  call owner.Update("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+  call owner.Update("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
   call owner.Update("ensime-config-file-name", "_ensime")
 
 
@@ -1133,7 +1133,8 @@ Organize imports.
 Extract local.
 Extract method.
 Inline local.
-Not implemented yet: Add import for type at point.
+Add import for type at point.
+Import suggestions
 
 Useful.
 
@@ -1405,6 +1406,16 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.12   - Fix: ~
+  Added Imports (add/suggest) Refactoring command.
+  Fixed Search command interaction with Time-base scheduler.
+  Fixed Search display of entered text prior to calling Ensime.
+  Fixed Search command result sorting.
+  Search now non-incremental by default.
+  Add Search Option allowing the setting for number of results: 
+    'tailor-symbol-search-maximum-return'
+  Fixed Ensime config so that indexing is allowed on startup by default.
+  Upgraded doc and example configs for Ensime Scala 2.10-RC3 build.
 0.2.11   - Fix: ~
   Add Refactor Options to validate allowed/disallow identifier names: 
     "tailor-refactor-rename-pattern-enable"

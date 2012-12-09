@@ -135,13 +135,8 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_expecting")
 " XXXXXXXXXXXXX
 "   call vimside#ResetAutoCmds()
   call vimside#scheduler#ResetAuto()
-  if mode() == 'i'
-    call feedkeys("a\<BS>")
-  elseif mode() == 'c'
-    call feedkeys("\<SPACE>")
-  else
-    call feedkeys("f\e")
-  endif
+
+  call vimside#scheduler#FeedKeys()
 endfunction
 
 function! vimside#ensime#swank#ping_info_set_rpc_not_expecting()

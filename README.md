@@ -104,7 +104,8 @@ Current Supported Ensime Commands:
     Extract local.
     Extract method.
     Inline local.
-    Not supported yet: Add import for type at point.
+    Add import for type at point.
+    Import suggestions
     Useful.
     Implementations: 1
 
@@ -335,7 +336,7 @@ and its on-line manual is at: aemoncannon.github.com/ensime/index.html/.
 
 In addition, for ENSIME, there are pre-built releases available at:
 https://github.com/aemoncannon/ensime/downloads.
-I highly recommend getting these (Scala 2.9.2 and/or 2.10.0-SNAPSHOT)
+I highly recommend getting these (Scala 2.9.2 and/or 2.10.0-RC)
 rather than trying to build the Ensime Scala code yourself.
 
 Ensime is not a Vim plugin. It is a Scala program. It has to be installed
@@ -361,9 +362,9 @@ ensime_2.9.2-0.9.8.1 as an example:
         lib/                 
         README.md
 
-or ensime_2.10.0-SNAPSHOT-0.9.7:
+or ensime_2.10.0-RC3-0.9.8.2:
 
-    ensime_2.10.0-SNAPSHOT-0.9.7/
+    ensime_2.10.0-RC3-0.9.8.2/
         bin/  
         elisp/  
         lib/  
@@ -376,7 +377,7 @@ ensime_2.9.2-0.9.8.1 (the default value):
 
     call owner.Set("vimside-scala-version", "2.9.2")
 
-and for ensime_2.10.0-SNAPSHOT-0.9.7:
+and for ensime_2.10.0-RC3-0.9.8.2:
 
     call owner.Set("vimside-scala-version", "2.10.0")
 
@@ -434,7 +435,7 @@ For example:
 
 or
 
-    call owner.Set("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+    call owner.Set("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
 
 Alternatively, you can specify the full path to the ensime distribution
 using the Option 'ensime-dist-path'. As an example, if you installed
@@ -510,7 +511,7 @@ So, in the 'options_user.vim' one might have:
 in a project file there might be:
 
   call owner.Update("vimside-scala-version", "2.10.0")
-  call owner.Update("ensime-dist-dir", "ensime_2.10.0-SNAPSHOT-0.9.7")
+  call owner.Update("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
   call owner.Update("ensime-config-file-name", "_ensime")
 
 An alternative approach is to also treat the 'data/vimside/' test code

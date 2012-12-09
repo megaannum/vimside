@@ -49,7 +49,6 @@
 :formatting-prefs (:alignParameters t 
                    :alignSingleLineCaseStatements nil
                    ;; :alignSingleLineCaseStatements_maxArrowIndent 20
-                   :compactControlReadability t 
                    :compactStringConcatenation t 
                    :doubleIndentClassDeclaration t
                    :indentLocalDefs nil
@@ -58,7 +57,6 @@
                    :indentWithTabs nil
                    :multilineScaladocCommentsStartOnFirstLine nil
                    :preserveDanglingCloseParenthesis t 
-                   :placeScaladocAsterisksBeneathSecondAsterisk nil 
                    :preserveSpaceBeforeArguments nil
                    :rewriteArrowSymbols nil
                    :spaceBeforeColon nil

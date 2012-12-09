@@ -446,7 +446,7 @@ function! s:MakeOptions()
             \ 'Scala version Ensime was built with and possible the Ensime.',
             \ 'version. For example, ',
             \ '  "dist_2.9.2" or "ensime_2.9.2-0.9.8.1" or',
-            \ '  "ensime_2.10.0-SNAPSHOT-0.9.7"'
+            \ '  "ensime_2.10.0-RC3-0.9.8.2"'
           \ ]
       \ }
   let l:options['ensime-dist-path'] = {
@@ -1784,6 +1784,15 @@ function! s:MakeOptions()
         \ 'description': [
             \ "For 'swank:public-symbol-search' do incremental search.",
             \ "As search terms are entered, search results are displayed."
+          \ ]
+      \ }
+  let l:options['tailor-symbol-search-maximum-return'] = {
+        \ 'name': 'tailor-symbol-search-maximum-return',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "For 'swank:public-symbol-search' do incremental search.",
+            \ "Maximum search results returned by Ensime."
           \ ]
       \ }
 
