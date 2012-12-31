@@ -89,8 +89,8 @@ function! g:ReplConfigHandler()
           \ 'has_head_spaces' : 0,
           \ 'is_interactive' : 0,
           \ 'is_single_command' : 1,
-          \ 'fd' : { 'stdin' : '', 'stdout': '', 'stderr': ''},
-          \}
+          \ 'fd' : { 'stdin' : '', 'stdout': '', 'stderr': '' }
+          \ }
       call vimshell#set_context(context)
 
       call vimside#scheduler#StopAuto()
@@ -99,6 +99,7 @@ function! g:ReplConfigHandler()
       stopinsert
 
       let location = s:GetLocation()
+" call s:LOG("ReplConfigHandler_Ok location=".  string(location)) 
 
       if location == 'same_window'
         let g:vimshell_split_command = 'edit!'
@@ -110,6 +111,7 @@ function! g:ReplConfigHandler()
         let g:vimshell_split_command = 'tabnew!'
       endif
 
+" call s:LOG("ReplConfigHandler_Ok args=".  string(args)) 
       let s:filetype = &filetype
       call vimshell#execute_internal_command('iexe', args, context)
       call vimshell#hook#set('postexit', [ function("g:ReplConfigVimShellCallback") ])
@@ -121,8 +123,9 @@ function! g:ReplConfigHandler()
           \ v:exception : v:exception . ' ' . v:throwpoint
       call s:ERROR("ReplConfigHandler_Ok: ". printf('%s: %s', l:command_line, message))
       return 0
-  endtry
+    endtry
 
+" call s:LOG("ReplConfigHandler_Ok BOTTOM") 
     return 1
   endfunction
 
@@ -136,13 +139,13 @@ function! s:GetLocation()
   let [found, location] = g:vimside.GetOption('tailor-repl-config-location')
   if ! found
     call s:ERROR("Option not found 'tailor-repl-config-location'") 
-    let location = 'same_window'
+    let location = 'tab'
   elseif location != 'same_window' 
       \ && location != 'split_window'
       \ && location != 'vsplit_window'
       \ && location != 'tab'
     call s:ERROR("Option 'tailor-repl-config-location' has bad location value '". location ."'") 
-    let location = 'same_window'
+    let location = 'tab'
 
   endif
   return location
@@ -150,7 +153,7 @@ endfunction
 
 
 function! g:ReplConfigVimShellCallbackAction()
-call s:LOG("ReplConfigVimShellCallbackAction: filetype=". s:filetype) 
+" call s:LOG("ReplConfigVimShellCallbackAction: filetype=". s:filetype) 
   " let &filetype = 'scala'
 
   let &filetype = s:filetype
@@ -158,7 +161,7 @@ call s:LOG("ReplConfigVimShellCallbackAction: filetype=". s:filetype)
 endfunction
 
 function! g:ReplConfigVimShellCallback(context, cmdinfolist)
-call s:LOG("ReplConfigVimShellCallback") 
+" call s:LOG("ReplConfigVimShellCallback") 
 
 
   let l:Func = function("g:ReplConfigVimShellCallbackAction")

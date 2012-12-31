@@ -583,103 +583,145 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+
   " Swank RPC Event Ping Info
-  let l:options['scheduler-rpc-expecting-read-timeout'] = {
-        \ 'name': 'scheduler-rpc-expecting-read-timeout',
+  let l:options['scheduler-not-expecting-anything-read-time-out'] = {
+        \ 'name': 'scheduler-not-expecting-anything-read-time-out',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting response RPC socket read timeout."
+            \ "Not expecting anything RPC socket read timeout."
           \ ]
       \ }
-  let l:options['scheduler-rpc-expecting-updatetime'] = {
-        \ 'name': 'scheduler-rpc-expecting-updatetime',
+  let l:options['scheduler-not-expecting-anything-update-time'] = {
+        \ 'name': 'scheduler-not-expecting-anything-update-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting response CurosrHold updatetime before ping."
+            \ "Not expecting anything CursorHold updatetime before ping."
           \ ]
       \ }
-  let l:options['scheduler-rpc-expecting-char-count'] = {
-        \ 'name': 'scheduler-rpc-expecting-char-count',
+  let l:options['scheduler-not-expecting-anything-char-count'] = {
+        \ 'name': 'scheduler-not-expecting-anything-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting response CursorMoved number of characters before.",
-            \ "ping."
+            \ "Not expecting anything CursorMoved number of characters",
+            \ "before ping."
           \ ]
       \ }
-  let l:options['scheduler-rpc-not-expecting-read-timeout'] = {
-        \ 'name': 'scheduler-rpc-not-expecting-read-timeout',
+  let l:options['scheduler-expecting-rpc-response-read-time-out'] = {
+        \ 'name': 'scheduler-expecting-rpc-response-read-time-out',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Not expecting RPC socket read timeout."
+            \ "Expecting RPC response socket read timeout."
           \ ]
       \ }
-  let l:options['scheduler-rpc-not-expecting-updatetime'] = {
-        \ 'name': 'scheduler-rpc-not-expecting-updatetime',
+  let l:options['scheduler-expecting-rpc-response-update-time'] = {
+        \ 'name': 'scheduler-expecting-rpc-response-update-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Not expecting CurosrHold updatetime before ping."
+            \ "Expecting RPC response CursorHold updatetime before ping"
           \ ]
       \ }
-  let l:options['scheduler-rpc-not-expecting-char-count'] = {
-        \ 'name': 'scheduler-rpc-not-expecting-char-count',
+  let l:options['scheduler-expecting-rpc-response-char-count'] = {
+        \ 'name': 'scheduler-expecting-rpc-response-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Not expecting CursorMoved number of characters before ping."
+            \ "Expecting RPC response CursorMoved number of characters",
+            \ "before ping."
           \ ]
       \ }
-  let l:options['scheduler-event-expecting-one-updatetime'] = {
-        \ 'name': 'scheduler-event-expecting-one-updatetime',
+  let l:options['scheduler-expecting-events-read-time-out'] = {
+        \ 'name': 'scheduler-expecting-events-read-time-out',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting one event CurosrHold updatetime before ping."
+            \ "Expecting known number of events socket read timeout."
           \ ]
       \ }
-  let l:options['scheduler-event-expecting-one-char-count'] = {
-        \ 'name': 'scheduler-event-expecting-one-char-count',
-        \ 'type': g:OPTION_NUMBER_TYPE, 
-        \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
-        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
-        \ 'description': [
-            \ "Expecting one event CursorMoved number of characters before.",
-            \ "ping."
-          \ ]
-      \ }
-  let l:options['scheduler-event-expecting-many-updatetime'] = {
-        \ 'name': 'scheduler-event-expecting-many-updatetime',
+  let l:options['scheduler-expecting-events-update-time'] = {
+        \ 'name': 'scheduler-expecting-events-update-time',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting many events CurosrHold updatetime before ping."
+            \ "Expecting known number of events CursorHold updatetime",
+            \ "before ping."
           \ ]
       \ }
-  let l:options['scheduler-event-expecting-many-char-count'] = {
-        \ 'name': 'scheduler-event-expecting-many-char-count',
+  let l:options['scheduler-expecting-events-char-count'] = {
+        \ 'name': 'scheduler-expecting-events-char-count',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
-            \ "Expecting many events CursorMoved number of characters before",
-            \ "ping."
+            \ "Expecting known number of events CursorMoved number of",
+            \ "characters before ping."
           \ ]
       \ }
+  let l:options['scheduler-expecting-many-events-read-time-out'] = {
+        \ 'name': 'scheduler-expecting-many-events-read-time-out',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting many events socket read timeout."
+          \ ]
+      \ }
+  let l:options['scheduler-expecting-many-events-update-time'] = {
+        \ 'name': 'scheduler-expecting-many-events-update-time',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting many events CursorHold updatetime before ping"
+          \ ]
+      \ }
+  let l:options['scheduler-expecting-many-events-char-count'] = {
+        \ 'name': 'scheduler-expecting-many-events-char-count',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Expecting many events CursorMoved number of characters",
+            \ "before ping."
+          \ ]
+      \ }
+  let l:options['scheduler-many-max-count-no-events'] = {
+        \ 'name': 'scheduler-many-max-count-no-events',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ 'If events is set to many, how many ping occur without',
+            \ 'any events being received before events is set to 0.'
+          \ ]
+      \ }
+  let l:options['scheduler-events-max-count-no-events'] = {
+        \ 'name': 'scheduler-events-max-count-no-events',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ 'If events is set to number of events expected,',
+            \ 'how many pings occur without any events being',
+            \ 'received before events is set to 0.'
+          \ ]
+      \ }
+
   
   " Start Swank RPC
-  
   let l:options['swank-rpc-builder-add-files-handler'] = {
         \ 'name': 'swank-rpc-builder-add-files-handler',
         \ 'type': g:OPTION_STRING_TYPE, 
@@ -2045,7 +2087,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ "How long in milliseconds before Hover CurosrHold event called."
+            \ "How long in milliseconds before Hover CursorHold event called."
         \ ]
       \ }
   let l:options['tailor-hover-max-char-mcounter'] = {

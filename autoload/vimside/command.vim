@@ -160,7 +160,7 @@ function! vimside#command#RefactorRename(mode) range
       let s:lastline = a:lastline
       let s:lastcol = col("'>")
       let s:visualmode = visualmode()
-    else
+    elseif a:mode  != 'menu'
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
@@ -188,7 +188,7 @@ function! vimside#command#RefactorExtractLocal(mode) range
       let s:lastline = a:lastline
       let s:lastcol = col("'>")
       let s:visualmode = visualmode()
-    else
+    elseif a:mode  != 'menu'
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
@@ -208,7 +208,7 @@ function! vimside#command#RefactorExtractMethod(mode) range
       let s:lastline = a:lastline
       let s:lastcol = col("'>")
       let s:visualmode = visualmode()
-    else
+    elseif a:mode  != 'menu'
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
@@ -228,7 +228,7 @@ function! vimside#command#RefactorInlineLocal(mode) range
       let s:lastline = a:lastline
       let s:lastcol = col("'>")
       let s:visualmode = visualmode()
-    else
+    elseif a:mode  != 'menu'
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
@@ -257,7 +257,7 @@ function! vimside#command#ImportSuggestions(mode) range
       let s:lastline = a:lastline
       let s:lastcol = col("'>")
       let s:visualmode = visualmode()
-    else
+    elseif a:mode  != 'menu'
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
@@ -266,6 +266,31 @@ function! vimside#command#ImportSuggestions(mode) range
     call s:ERROR("Ensime must be started first")
   endif
 endfunction
+
+
+function! vimside#command#BuilderBuild()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#builder#Build()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#BuilderReBuild()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#builder#ReBuild()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#BuilderTrackFile()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#builder#AddTrackFile()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+
 
 function! s:ClearVisualSelection()
   if exists("s:firstline")
@@ -311,7 +336,7 @@ function! vimside#command#MakePopUp(mode) range
       throw "s:DoMode unknown mode argument: ".  a:mode
     endif
 
-    call vimside#command#popup_menu#Run(a:mode)
+    call vimside#command#popup_menu#Run()
   else
     call s:ERROR("Ensime must be started first")
   endif

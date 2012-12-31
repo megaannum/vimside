@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.12
+Version:     0.2.13
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -55,20 +55,20 @@ For Vim instructions on installing this 'txt' file, enter:
       7.1.13 Re-Show Errors/Warnings
       7.1.14 Format Source
       7.1.15 Refactoring
-      7.1.16 Popup Menu
-      7.1.17 Browse Source Roots
-      7.1.18 Browse Reference Source Roots
-      7.1.19 Option Viewer/Editor
-      7.1.20 Completions
+      7.1.16 Building
+      7.1.17 Popup Menu
+      7.1.18 Browse Source Roots
+      7.1.19 Browse Reference Source Roots
+      7.1.20 Option Viewer/Editor
+      7.1.21 Completions
     7.2 Ensime Capabilities to be Supported:
       7.2.1 Package Inspector
       7.2.2 Type Inspector
       7.2.3 SBT Command-Line
       7.2.4 Scalex
-      7.2.5 Building
-      7.2.6 Run Application
-      7.2.7 Debug Application
-      7.2.9 And others
+      7.2.5 Run Application
+      7.2.6 Debug Application
+      7.2.7 And others
 
   8. Architecture                                |vimside-architecture|
     8.1 Client and Server
@@ -1140,7 +1140,17 @@ Useful.
 
 Implementations: 1
 
-7.1.16 Popup Menu
+7.1.16 Building
+
+Build the entire project.
+Rebuild the project incrementally.
+
+Useful.
+
+Implementations: 1
+
+
+7.1.17 Popup Menu
 
 Bring up Popup menu with all Vimside commands (requires Forms library).
 The Emacs-Ensime binding has just such a popup menu.
@@ -1149,7 +1159,7 @@ Useful for folks who have not yet learned the key mappings.
 
 Implementations: 1
 
-7.1.17 Browse Source Roots
+7.1.18 Browse Source Roots
 
 Directory browser of project sources (project code base).
 In the Ensime configuration file, the key ':source-roots' is a list
@@ -1162,7 +1172,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.18 Browse Reference Source Roots
+7.1.19 Browse Reference Source Roots
 
 Directory browser of project reference sources (Java and Scala libraries).
 In the Ensime configuration file, the key ':reference-source-roots' is a list
@@ -1175,7 +1185,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.19 Option Viewer/Editor
+7.1.20 Option Viewer/Editor
 
 Bring up the Option Viewer/Editor (requires Forms library). Lets one
 see all of the Vimside configurable Options and their current value.
@@ -1184,7 +1194,7 @@ some "dynamic" Options at runtime.
 
 Implementations: 1
 
-7.1.20 Completions
+7.1.21 Completions
 
 OmmiCompletions using <c-x><c-o>.
 
@@ -1214,14 +1224,9 @@ Switch to the sbt command-line (works for sbt projects only)
 
 Seems to be a dead project (see: http://scalex.org/)
 
-7.2.5 Building
+7.2.5 Run Application
 
-Build the entire project.
-Rebuild the project incrementally.
-
-7.2.6 Run Application
-
-7.2.7 Debug Application
+7.2.6 Debug Application
 
 Start and run the debugger.
 Start and run the debugger.
@@ -1235,7 +1240,7 @@ Kill the debug session.
 Inspect the local variable at cursor.
 Show backtrace.
 
-7.2.8 And others
+7.2.7 And others
 
 ==============================================================================
 8. Architecture                                        *vimside-architecture*
@@ -1406,6 +1411,35 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.13   - Fix: ~
+  Added Build and Rebuild project commands.
+  Re-wrote how the swank dispatch and scheduling code handle events.
+  Replaced Options:
+      scheduler-rpc-expecting-read-timeout
+      scheduler-rpc-expecting-updatetime
+      scheduler-rpc-expecting-char-count
+      scheduler-rpc-not-expecting-read-timeout
+      scheduler-rpc-not-expecting-updatetime
+      scheduler-rpc-not-expecting-char-count
+      scheduler-event-expecting-one-updatetime
+      scheduler-event-expecting-one-char-count
+      scheduler-event-expecting-many-updatetime
+      scheduler-event-expecting-many-char-count
+  With Options:
+      scheduler-not-expecting-anything-read-time-out
+      scheduler-not-expecting-anything-update-time
+      scheduler-not-expecting-anything-char-count
+      scheduler-expecting-rpc-response-read-time-out
+      scheduler-expecting-rpc-response-update-time
+      scheduler-expecting-rpc-response-char-count
+      scheduler-expecting-events-read-time-out
+      scheduler-expecting-events-update-time
+      scheduler-expecting-events-char-count
+      scheduler-expecting-many-events-read-time-out
+      scheduler-expecting-many-events-update-time
+      scheduler-expecting-many-events-char-count
+      scheduler-many-max-count-no-events
+      scheduler-events-max-count-no-events
 0.2.12   - Fix: ~
   Added Imports (add/suggest) Refactoring command.
   Fixed Search command interaction with Time-base scheduler.

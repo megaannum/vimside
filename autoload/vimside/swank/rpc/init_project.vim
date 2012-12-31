@@ -61,7 +61,7 @@ call s:LOG("InitProject TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  let l:rr.events = 'many'
+  let l:rr.events = 3
   call vimside#ensime#swank#dispatch(l:rr)
 
   call vimside#scheduler#StartAuto()

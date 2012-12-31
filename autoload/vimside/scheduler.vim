@@ -82,6 +82,9 @@ function! vimside#scheduler#SetUpdateTime(value)
   endif
 call s:LOG("vimside#scheduler#SetUpdateTime: value=". a:value)
   let &updatetime = a:value
+
+  " TESTING 12/23/12
+  " call vimside#scheduler#FeedKeys()
 endfunction
 
 function! vimside#scheduler#GetMaxMotionCounter()

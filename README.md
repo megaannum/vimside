@@ -109,6 +109,12 @@ Current Supported Ensime Commands:
     Useful.
     Implementations: 1
 
+  Building
+    Build the entire project.
+    Rebuild the project incrementally.
+    Useful.
+    Implementations: 1
+
   Popup Menu
     Bring up Popup menu with all Vimside commands (requires Forms library).
     Useful for folks who have not yet learned the key mappings.
@@ -150,10 +156,6 @@ Ensime Capabilities to be Supported:
 
   Scalex
     Seems to be a dead project (see: http://scalex.org/)
-
-  Building
-    Build the entire project.
-    Rebuild the project incrementally.
 
   Run Application
 
@@ -598,6 +600,7 @@ None available yet.
 
 ## Acknowledgements and thanks
 
+Aemon Cannon for writing Ensime!
 Daniel Spiewak has a JEdit binding to Ensime and a simply great video
 explaining why a true editor with Ensime is better than an Eclipse 
 Ide (https://www.youtube.com/watch?v=cd2LV0xy9G8 MUST SEE) 

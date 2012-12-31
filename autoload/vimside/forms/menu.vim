@@ -28,20 +28,16 @@ endfunction
 function! vimside#forms#menu#MakeMenuBuild()
   let items = []
 
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Build project'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Build project',
-            \ 'action': action
+            \ 'command': ':call vimside#command#BuilderBuild()'
             \ })
 
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Rebuild project'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Rebuild project',
-            \ 'action': action
+            \ 'command': ':call vimside#command#BuilderReBuild()'
             \ })
 
 
@@ -141,57 +137,45 @@ function! vimside#forms#menu#MakeMenuRefactor()
   let items = []
 
 " ["Organize imports" ensime-refactor-organize-imports]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Organize imports'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Organize imports',
-            \ 'action': action
+            \ 'command': ':call vimside#command#RefactorOrganizeImports()'
             \ })
 
 " ["Import type at point" ensime-import-type-at-point]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Import type at point'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Import type at point',
-            \ 'action': action
+            \ 'command': ':call vimside#command#ImportSuggestions("menu")'
             \ })
 
 " ["Rename" ensime-refactor-rename]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Rename'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Rename',
-            \ 'action': action
+            \ 'command': ':call vimside#command#RefactorRename("menu")'
             \ })
 
 " ["Extract local val" ensime-refactor-extract-local]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Extract local val'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Extract local val',
-            \ 'action': action
+            \ 'command': ':call vimside#command#RefactorExtractLocal("menu")'
             \ })
 
 " ["Extract method" ensime-refactor-extract-method]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Extract method'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Extract method',
-            \ 'action': action
+            \ 'command': ':call vimside#command#RefactorExtractMethod("menu")'
             \ })
 
 " ["Inline local val" ensime-refactor-inline-local])
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Inline local val'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Inline local val',
-            \ 'action': action
+            \ 'command': ':call vimside#command#RefactorInlineLocal("menu")'
             \ })
 
   let attrs = { 'items': items }
@@ -256,6 +240,7 @@ function! vimside#forms#menu#MakeMenuNavidation()
             \ 'action': action
             \ })
 
+if 0
   function! VimsideExpandSelectionCommand()
     if exists("s:firstline")
       if ! vimside#ExpandSelection()
@@ -265,24 +250,23 @@ function! vimside#forms#menu#MakeMenuNavidation()
       call vimside#command#ExpandSelection('n')
     endif
   endfunction
+endif
 
 " ["Expand selection" ensime-expand-selection-command]
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Expand selection...',
-            \ 'command': ':call VimsideExpandSelectionCommand()'
+            \ 'command': ':call vimside#command#ExpandSelection()'
             \ })
 
 " ["Contract selection" ensime-contract-selection-command]
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Contract selection...',
-            \ 'command': ':call vimside#command#ContractSelection("n")'
+            \ 'command': ':call vimside#command#ContractSelection()'
             \ })
 
 " ["Search" ensime-search]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Search'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Search...',
@@ -475,9 +459,15 @@ endfunction
 "   Returns menu
 "
 " parameters: 
-"   mode : 'n' (normal) or 'v' (visual)
+"   REMOVE mode : 'n' (normal) or 'v' (visual)
 "---------------------------------------------------------------------------
+if 0
 function! vimside#forms#menu#MakePopUp(mode) range
+endfunction
+endif
+
+function! vimside#forms#menu#MakePopUp() range
+if 0
   if a:mode == 'n'
     if exists("s:firstline")
       unlet s:firstline
@@ -495,6 +485,7 @@ function! vimside#forms#menu#MakePopUp(mode) range
   else
     call s:LOG("vimside#forms#menu#MakePopUp: unknown mode argument: ".  a:mode)
   endif
+endif
 
   if ! exists("s:popupform")
     let items = []

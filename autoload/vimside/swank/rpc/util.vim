@@ -54,7 +54,7 @@ endfunction
 "           'abort': <Funcref for RPC abort reponse>,
 "           'ok': <Funcref for RPC ok reponse>
 "      }
-"      'events':   " optional events value ('0' '1', 'many')
+"      'events':   " optional events value (0, 1, ...N , 'many')
 "      'data':     " optional map of data to be passed to handler
 "   }
 "  parameters: 
@@ -183,7 +183,7 @@ endif
     let l:rr['events'] = l:info.events
   else
     " default, no events generated
-    let l:rr['events'] = '0'
+    let l:rr['events'] = 0
   endif
 
   if exists("l:info") && has_key(l:info, 'data') 

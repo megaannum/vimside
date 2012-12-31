@@ -124,12 +124,15 @@ call s:LOG("SymbolAtPointHandler_Ok ".  string(dic))
     call vimside#command#position#Set()
 
     let current_file = expand('%:p')
+" call s:LOG("SymbolAtPointHandler_Ok current_file=".  current_file) 
     if has_key(dic, ":decl-pos")
       let declpos = dic[':decl-pos']
       let file = declpos[':file']
+" call s:LOG("SymbolAtPointHandler_Ok file=".  file) 
       let offset = declpos[':offset']
 
       if current_file == file
+" call s:LOG("SymbolAtPointHandler_Ok same file") 
         let [found, location] = g:vimside.GetOption('tailor-symbol-at-point-location-same-file')
         if ! found
           call s:ERROR("Option not found 'tailor-symbol-at-point-location-same-file'") 
@@ -158,6 +161,7 @@ call s:LOG("SymbolAtPointHandler_Ok ".  string(dic))
         return 1
 
       else
+" call s:LOG("SymbolAtPointHandler_Ok diff file") 
         let [found, location] = g:vimside.GetOption('tailor-symbol-at-point-location-diff-file')
         if ! found
           call s:ERROR("Option not found 'tailor-symbol-at-point-location-diff-file'") 
@@ -172,7 +176,7 @@ call s:LOG("SymbolAtPointHandler_Ok ".  string(dic))
         endif
 
         if location == 'same_window'
-          " execute "edit ". file
+          execute "edit ". file
           let [line, column] = vimside#util#GetLineColumnFromOffset(offset)
           execute ":normal ". line  ."G". column ." "
         elseif location == 'split_window'

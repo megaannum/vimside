@@ -14,6 +14,6 @@ let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
 
-function! vimside#command#popup_menu#Run(mode)
-  call vimside#forms#menu#MakePopUp(a:mode)
+function! vimside#command#popup_menu#Run()
+  call vimside#forms#menu#MakePopUp()
 endfunction

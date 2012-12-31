@@ -43,12 +43,9 @@ call s:LOG("builder_update_files TOP")
   endif
 
   let l:args = { }
+  let l:args['files'] = []
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-builder-update-files-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("builder_update_files BOTTOM") 
 endfunction
@@ -60,8 +57,25 @@ endfunction
 
 function! g:BuilderUpdateFilesCaller(args)
   let cmd = "swank:builder-update-files"
+  let files = a:args.files
+call s:LOG("g:BuilderUpdateFilesCaller: files=". string(files)) 
 
-  return '('. cmd .')'
+  let flen = len(files)
+  let cnt = 0
+  let fs = '('
+  while cnt < flen
+    let fs .= '"'
+    let fs .= files[cnt]
+    let fs .= '"'
+    if cnt+1 != flen
+      let fs .= ' '
+    endif
+
+    let cnt += 1
+  endwhile
+  let fs .= ')'
+
+  return '('. cmd .' '. fs .')'
 endfunction
 
 
@@ -78,8 +92,6 @@ function! g:BuilderUpdateFilesHandler()
   function! g:BuilderUpdateFilesHandler_Ok(dic, ...)
     let dic = a:dic
 call s:LOG("BuilderUpdateFilesHandler_Ok dic=".  string(dic)) 
-
-    let l:pid = dic[':pid']
 
     return 1
   endfunction

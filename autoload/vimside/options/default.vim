@@ -64,17 +64,23 @@ function! vimside#options#default#Load(owner)
   call owner.Set("tailor-location-same-file", 'same_window')
   call owner.Set("tailor-location-diff-file", 'same_window')
 
-  " add default swank rpc and event ping info
-  call owner.Set('scheduler-rpc-expecting-read-timeout', 200)
-  call owner.Set('scheduler-rpc-expecting-updatetime', 100)
-  call owner.Set('scheduler-rpc-expecting-char-count', 10)
-  call owner.Set('scheduler-rpc-not-expecting-read-timeout', 0)
-  call owner.Set('scheduler-rpc-not-expecting-updatetime', 10000)
-  call owner.Set('scheduler-rpc-not-expecting-char-count', 50)
-  call owner.Set('scheduler-event-expecting-one-updatetime', 500)
-  call owner.Set('scheduler-event-expecting-one-char-count', 10)
-  call owner.Set('scheduler-event-expecting-many-updatetime', 2000)
-  call owner.Set('scheduler-event-expecting-many-char-count', 20)
+  " Swank RPC Event Ping Info
+  call owner.Set('scheduler-not-expecting-anything-read-time-out', 0)
+  call owner.Set('scheduler-not-expecting-anything-update-time', 10000)
+  call owner.Set('scheduler-not-expecting-anything-char-count', 100)
+  call owner.Set('scheduler-expecting-rpc-response-read-time-out', 200)
+  call owner.Set('scheduler-expecting-rpc-response-update-time', 100)
+  call owner.Set('scheduler-expecting-rpc-response-char-count', 10)
+  call owner.Set('scheduler-expecting-events-read-time-out', 0)
+  call owner.Set('scheduler-expecting-events-update-time', 500)
+  call owner.Set('scheduler-expecting-events-char-count', 10)
+  call owner.Set('scheduler-expecting-many-events-read-time-out', 0)
+  call owner.Set('scheduler-expecting-many-events-update-time', 2000)
+  call owner.Set('scheduler-expecting-many-events-char-count', 20)
+  call owner.Set('scheduler-many-max-count-no-events', 50)
+  call owner.Set('scheduler-events-max-count-no-events', 50)
+
+
 
   " Start of swank rpc caller/handlers
   call owner.Set('swank-rpc-builder-add-files-handler', 'g:BuilderAddFilesHandler')

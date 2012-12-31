@@ -125,10 +125,11 @@ else
   "   Typecheck the current file.
   autocmd FileType scala nmap <silent> <Leader>vc :call vimside#command#TypecheckFile()<CR>
 
-  augroup VIMSIDE_ON_WRITE
-    au!
-    autocmd BufWritePost scala call vimside#command#TypecheckFileOnWrite()
-  augroup END
+" Now use vimside#hooks BufferSaved
+"  augroup VIMSIDE_ON_WRITE
+"    au!
+"    autocmd BufWritePost scala call vimside#command#TypecheckFileOnWrite()
+"  augroup END
 
 
   " C-c C-v a
@@ -198,6 +199,9 @@ else
   "   Where x is one of:
   "     b Build the entire project.
   "     r Rebuild the project, incrementally.
+  autocmd FileType scala nmap <silent> <Leader>vbb :call vimside#command#BuilderBuild()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vbr :call vimside#command#BuilderReBuild()<CR>
+
   "
   "     s sbt switch
   "     c sbt do complete
@@ -217,10 +221,10 @@ else
 
 
   autocmd FileType scala nmap <silent> <Leader>vp :call vimside#command#MakePopUp('n')<CR>
-  autocmd FileType scala vmap <silent> <Leader>vp :call vimside#command#MapkeopUp('v')<CR>
+  autocmd FileType scala vmap <silent> <Leader>vp :call vimside#command#MakePopUp('v')<CR>
 
-  autocmd FileType scala nmap <silent> <Leader>vbs :call vimside#command#BrowseSourceRoots()<CR>
-  autocmd FileType scala nmap <silent> <Leader>vbr :call vimside#command#BrowseReferenceSourceRoots()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vBs :call vimside#command#BrowseSourceRoots()<CR>
+  autocmd FileType scala nmap <silent> <Leader>vBr :call vimside#command#BrowseReferenceSourceRoots()<CR>
 
   autocmd FileType scala nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
 

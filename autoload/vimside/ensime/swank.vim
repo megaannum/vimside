@@ -50,98 +50,136 @@ function! vimside#ensime#swank#load_handlers()
   let g:vimside['unknown_debug_handler'] = function("g:UnknownDebugHandler")
 endfunction
 
+
+
 function! vimside#ensime#swank#load_ping_info()
   let errors = g:vimside.errors
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-read-timeout')
-  if found
-    let s:rpc_expecting_read_timeout = l:value
-  else
-    call add(errors, ": Option not found: 'scheduler-rpc-expecting-read-timeout'"
-  endif
-
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-updatetime')
-  if found
-    let s:rpc_expecting_updatetime = l:value
-  else
-    call add(errors, ": Option not found: 'scheduler-rpc-expecting-updatetime'"
-  endif
-
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-expecting-char-count')
-  if found
-    let s:rpc_expecting_char_count = l:value
-  else
-    call add(errors, ": Option not found: 'scheduler-rpc-expecting-char-count'"
-  endif
-
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-read-timeout')
+  let [found, l:value] = g:vimside.GetOption('scheduler-not-expecting-anything-read-time-out')
   if found
     let s:rpc_not_expecting_read_timeout = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-read-timeout'"
+    call add(errors, ": Option not found: 'scheduler-not-expecting-anything-read-time-out'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-not-expecting-anything-update-time')
   if found
     let s:rpc_not_expecting_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-not-expecting-anything-update-time'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-rpc-not-expecting-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-not-expecting-anything-char-count')
   if found
     let s:rpc_not_expecting_char_count = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-rpc-not-expecting-char-count'"
+    call add(errors, ": Option not found: 'scheduler-not-expecting-anything-char-count'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-one-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-rpc-response-read-time-out')
   if found
-    let s:event_expecting_one_updatetime = l:value
+    let s:rpc_expecting_read_timeout = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-event-expecting-one-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-expecting-rpc-response-read-time-out'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-one-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-rpc-response-update-time')
   if found
-    let s:event_expecting_one_char_count = l:value
+    let s:rpc_expecting_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-event-expecting-one-char-count'"
+    call add(errors, ": Option not found: 'scheduler-expecting-rpc-response-update-time'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-many-updatetime')
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-rpc-response-char-count')
+  if found
+    let s:rpc_expecting_char_count = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-expecting-rpc-response-char-count'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-events-read-time-out')
+  if found
+    let s:expecting_events_read_timeout = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-expecting-events-read-time-out'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-events-update-time')
+  if found
+    let s:expecting_events_updatetime = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-expecting-events-update-time'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-events-char-count')
+  if found
+    let s:expecting_events_char_count = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-expecting-events-char-count'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-many-events-read-time-out')
+  if found
+    let s:event_expecting_many_read_timeout = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-expecting-many-events-read-time-out'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-many-events-update-time')
   if found
     let s:event_expecting_many_updatetime = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-event-expecting-many-updatetime'"
+    call add(errors, ": Option not found: 'scheduler-expecting-many-events-update-time'")
   endif
+  unlet l:value
 
-  let [found, l:value] = g:vimside.GetOption('scheduler-event-expecting-many-char-count')
+  let [found, l:value] = g:vimside.GetOption('scheduler-expecting-many-events-char-count')
   if found
     let s:event_expecting_many_char_count = l:value
   else
-    call add(errors, ": Option not found: 'scheduler-event-expecting-many-char-count'"
+    call add(errors, ": Option not found: 'scheduler-expecting-many-events-char-count '")
   endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-many-max-count-no-events')
+  if found
+    let s:many_max_count = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-many-max-count-no-events'")
+  endif
+  unlet l:value
+
+  let [found, l:value] = g:vimside.GetOption('scheduler-events-max-count-no-events')
+  if found
+    let s:event_max_count = l:value
+  else
+    call add(errors, ": Option not found: 'scheduler-events-max-count-no-events'")
+  endif
+  unlet l:value
+
+  let s:current_many_max_count = s:many_max_count
+  let s:current_event_max_count = s:event_max_count
+
 endfunction
 
-function! vimside#ensime#swank#ping_info_set_rpc_expecting()
-call s:LOG("vimside#ensime#swank#ping_info_set_rpc_expecting") 
-  let g:vimside.ping.info.read_timeout = s:rpc_expecting_read_timeout
-  let g:vimside.ping.info.updatetime = s:rpc_expecting_updatetime 
-  let g:vimside.ping.info.char_count = s:rpc_expecting_char_count 
-
-  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
-
-" XXXXXXXXXXXXX
-"   call vimside#ResetAutoCmds()
-  call vimside#scheduler#ResetAuto()
-
-  call vimside#scheduler#FeedKeys()
-endfunction
-
-function! vimside#ensime#swank#ping_info_set_rpc_not_expecting()
-call s:LOG("vimside#ensime#swank#ping_info_set_rpc_not_expecting") 
-  let g:vimside.swank.events = '0'
+function! vimside#ensime#swank#ping_info_set_not_expecting_anything()
+call s:LOG("vimside#ensime#swank#ping_info_set_not_expecting_anything") 
+  unlet g:vimside.swank.events
+  let g:vimside.swank.events = 0
+  
+  " reset many and events max counters
+  let s:current_many_max_count = s:many_max_count
+  let s:current_event_max_count = s:event_max_count
 
   let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
   let g:vimside.ping.info.updatetime = s:rpc_not_expecting_updatetime 
@@ -150,25 +188,52 @@ call s:LOG("vimside#ensime#swank#ping_info_set_rpc_not_expecting")
   call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
-function! vimside#ensime#swank#ping_info_set_event_expecting_one()
-call s:LOG("vimside#ensime#swank#ping_info_set_event_expecting_one") 
-  let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
-  let g:vimside.ping.info.updatetime = s:event_expecting_one_updatetime
-  let g:vimside.ping.info.char_count = s:event_expecting_one_char_count
+function! vimside#ensime#swank#ping_info_set_expecting_rpc_response()
+call s:LOG("vimside#ensime#swank#ping_info_set_expecting_rpc_response") 
+
+  let g:vimside.ping.info.read_timeout = s:rpc_expecting_read_timeout
+  let g:vimside.ping.info.updatetime = s:rpc_expecting_updatetime 
+  let g:vimside.ping.info.char_count = s:rpc_expecting_char_count 
+
+  call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
+
+  call vimside#scheduler#ResetAuto()
+  call vimside#scheduler#FeedKeys()
+endfunction
+
+function! vimside#ensime#swank#ping_info_set_expecting_events(nos_events)
+call s:LOG("vimside#ensime#swank#ping_info_set_expecting_events") 
+  unlet g:vimside.swank.events
+  let g:vimside.swank.events = a:nos_events
+
+  let g:vimside.ping.info.read_timeout = s:expecting_events_read_timeout
+  let g:vimside.ping.info.updatetime = s:expecting_events_updatetime
+  let g:vimside.ping.info.char_count = s:expecting_events_char_count
 
   call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
-function! vimside#ensime#swank#ping_info_set_event_expecting_many()
-call s:LOG("vimside#ensime#swank#ping_info_set_event_expecting_many") 
-  let g:vimside.ping.info.read_timeout = s:rpc_not_expecting_read_timeout
+function! vimside#ensime#swank#ping_info_set_expecting_many_events()
+call s:LOG("vimside#ensime#swank#ping_info_set_expecting_many_events") 
+  unlet g:vimside.swank.events
+  let g:vimside.swank.events = 'many'
+
+  let g:vimside.ping.info.read_timeout = s:event_expecting_many_read_timeout
   let g:vimside.ping.info.updatetime = s:event_expecting_many_updatetime
   let g:vimside.ping.info.char_count = s:event_expecting_many_char_count
 
   call vimside#scheduler#SetUpdateTime(g:vimside.ping.info.updatetime)
 endfunction
 
+
+
+
+
+
+
+
 function! vimside#ensime#swank#handle(response)
+call s:LOG("vimside#ensime#swank#handle response=". a:response) 
   let response = a:response
   let success = 0
   let got_event = 0
@@ -198,7 +263,7 @@ function! vimside#ensime#swank#handle(response)
 
     elseif len == 3
       " Call return or abort
-      let success = s:HandleResponse(children)
+      let [success, got_event] = s:HandleResponse(children)
     else
       call s:ERROR("vimside#ensime#swank#handle child SExp List length > 3: ". string(response)) 
       let success = 0
@@ -206,45 +271,124 @@ function! vimside#ensime#swank#handle(response)
     endif
   endif
 
-  call s:PostHandle(success, got_event)
+  call s:PostHandle(success, got_event, 0)
 
   return success
 endfunction
 
-function! s:PostHandle(success, got_event)
-  if a:success && empty(g:vimside.swank.rpc.waiting)
-    if empty(g:vimside.swank.ping_data)
-      let l:events = g:vimside.swank.events
-      if l:events == '0'
-        call vimside#ensime#swank#ping_info_set_rpc_not_expecting()
-      elseif l:events == 'many'
-        call vimside#ensime#swank#ping_info_set_event_expecting_many()
-      elseif a:got_event
-        if l:events == '1'
-          call vimside#ensime#swank#ping_info_set_rpc_not_expecting()
-        else
-          call vimside#ensime#swank#ping_info_set_event_expecting_many()
-        endif
-      endif
-    else
-      if has_key(g:vimside.swank.ping_data, 'read_timeout')
-        let g:vimside.ping.info.read_timeout = g:vimside.swank.ping_data.read_timeout
-      endif
-      if has_key(g:vimside.swank.ping_data, 'char_count')
-        let l:char_count = g:vimside.swank.ping_data.char_count
-        let g:vimside.ping.info.char_count = l:char_count
-        call vimside#scheduler#SetMaxMotionCounter(l:char_count)
-      endif
+function! s:PostHandle(success, got_event, nos_events)
+call s:LOG("s:PostHandle TOP") 
+call s:LOG("s:PostHandle a:success=" . a:success) 
+call s:LOG("s:PostHandle a:got_event=" . a:got_event) 
+call s:LOG("s:PostHandle a:nos_events=" . a:nos_events) 
+call s:LOG("s:PostHandle waiting=" . string(g:vimside.swank.rpc.waiting)) 
 
-      if has_key(g:vimside.swank.ping_data, 'updatetime')
-        let l:updatetime = g:vimside.swank.ping_data.updatetime
-        let g:vimside.ping.info.updatetime = l:updatetime
-        call vimside#scheduler#SetUpdateTime(l:updatetime)
+  if type(g:vimside.swank.events) == type(0)
+    " expecting number of events, add any new events
+    let l:events = g:vimside.swank.events + a:nos_events
+  else
+    " expecting 'many' events, so still expect 'many'
+    let l:events = g:vimside.swank.events
+  endif
+call s:LOG("s:PostHandle l:events=". l:events) 
+
+  " if nothing happened, check to see if we punt and set scheduler
+  " to a 'not expecting anything' state
+  if a:success == 0 && a:nos_events == 0
+    if l:events == 'many'
+      if s:current_many_max_count > 0
+        let s:current_many_max_count -= 1
+      else
+        call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        return
       endif
-      " clear rpc handler specific data
-      let g:vimside.swank.ping_data = {}
+    elseif l:events > 0
+      if s:current_event_max_count > 0
+        let s:current_event_max_count -= 1
+      else
+        call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        return
+      endif
     endif
   endif
+
+  if a:success 
+call s:LOG("s:PostHandle success") 
+    if empty(g:vimside.swank.rpc.waiting)
+call s:LOG("s:PostHandle not waiting") 
+      if empty(g:vimside.swank.ping_data)
+call s:LOG("s:PostHandle no ping data") 
+        if l:events == 0
+          call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        elseif l:events == 'many'
+          call vimside#ensime#swank#ping_info_set_expecting_many_events()
+        elseif a:got_event
+          if l:events == 1
+            call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+          else
+            let nos_events = l:events - 1
+            call vimside#ensime#swank#ping_info_set_expecting_events(nos_events)
+          endif
+        endif
+      else
+        if has_key(g:vimside.swank.ping_data, 'read_timeout')
+          let g:vimside.ping.info.read_timeout = g:vimside.swank.ping_data.read_timeout
+        endif
+        if has_key(g:vimside.swank.ping_data, 'char_count')
+          let l:char_count = g:vimside.swank.ping_data.char_count
+          let g:vimside.ping.info.char_count = l:char_count
+          call vimside#scheduler#SetMaxMotionCounter(l:char_count)
+        endif
+
+        if has_key(g:vimside.swank.ping_data, 'updatetime')
+          let l:updatetime = g:vimside.swank.ping_data.updatetime
+          let g:vimside.ping.info.updatetime = l:updatetime
+          call vimside#scheduler#SetUpdateTime(l:updatetime)
+        endif
+        " clear rpc handler specific data
+        let g:vimside.swank.ping_data = {}
+      endif
+    else
+call s:LOG("s:PostHandle waiting") 
+      if l:events == 'many'
+        call vimside#ensime#swank#ping_info_set_expecting_many_events()
+      elseif a:got_event
+        if l:events == 0
+          call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        else
+          let nos_events = l:events - 1
+          call vimside#ensime#swank#ping_info_set_expecting_events(nos_events)
+        endif
+      else
+        if l:events == 0
+          call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        else
+          call vimside#ensime#swank#ping_info_set_expecting_events(l:events)
+        endif
+      endif
+
+      if l:events == 0
+        call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+      elseif l:events == 'many'
+      elseif a:got_event
+        if l:events == 1
+          call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+        else
+          let nos_events = l:events - 1
+          call vimside#ensime#swank#ping_info_set_expecting_events(nos_events)
+        endif
+      endif
+    endif
+  else
+call s:LOG("s:PostHandle not success") 
+    " not success, see if there are any new events
+    if type(g:vimside.swank.events) == type(0)
+      " expecting number of events, add any new events
+      let g:vimside.swank.events += a:nos_events
+    endif
+  endif
+call s:LOG("s:PostHandle g:vimside.swank.events=". g:vimside.swank.events) 
+call s:LOG("s:PostHandle BOTTOM") 
 endfunction
 
 "
@@ -255,13 +399,12 @@ endfunction
 "     'ok': funcref,
 "     'abort': funcref
 "   }
-"   'events': '0','1','many'
+"   'events': 0,1,...N or 'many'
 " }
 "
 "
 function! vimside#ensime#swank#dispatch(rr)
   let rr = a:rr
-  let g:vimside.swank.events = rr.events
 
   let callmsg = rr.caller(rr.args)
 call s:LOG("vimside#ensime#swank#dispatch callmsg=".callmsg) 
@@ -281,7 +424,7 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
       let g:vimside.swank.rpc.waiting[rr.id] = rr
 
       " rpc expecting ping info 
-      call vimside#ensime#swank#ping_info_set_rpc_expecting()
+      call vimside#ensime#swank#ping_info_set_expecting_rpc_response()
       break
     else
       " Ought to be a SExp List
@@ -316,7 +459,7 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
         elseif len == 3
           " Call return or abort
           let g:vimside.swank.rpc.waiting[rr.id] = rr
-          let success = s:HandleResponse(children)
+          let [success, got_event] = s:HandleResponse(children)
 
         else
           call s:ERROR("vimside#ensime#swank#dispatch child SExp List length > 3: ". string(response)) 
@@ -328,7 +471,7 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
     endif
   endwhile
 
-  call s:PostHandle(success, got_event)
+  call s:PostHandle(success, got_event, rr.events)
 
 endfunction
 
@@ -394,11 +537,11 @@ endfunction
 " 
 " (:background-message 105 "Initializing Analyzer. Please wait...")
 "
-" return 0 or 1 if id matches rr.id
+" return [0, got_event] or [1, got_event] if id matches rr.id
 function! s:HandleResponse(children)
   let children = a:children
 
-" call s:LOG("HandleResponse ". string(children))
+"call s:LOG("HandleResponse ". string(children))
 
   " Note that the first child really ought to be the keyword
   let top_kw_sexp = children[0]
@@ -406,19 +549,19 @@ function! s:HandleResponse(children)
   let [found, top_kw] =  vimside#sexp#Get_KeywordValue(top_kw_sexp) 
   if ! found
     call s:ERROR("HandleResponse: Keyword not first sexp: ". string(children)) 
-    return 0
+    return [0, 0]
   endif
 
   if top_kw == ':background-message'
     let eventcode_sexp = children[1]
     let msg_sexp = children[2]
     call s:HandleBackgroundMessage(eventcode_sexp, msg_sexp)
-    return 1
+    return [1, 1]
   endif
 
   if top_kw != ':return'
     call s:ERROR("HandleResponse: Keyword not ':return': ". string(children)) 
-    return 0
+    return [0, 0]
   endif
 
   let content_sexp = children[1]
@@ -427,11 +570,11 @@ function! s:HandleResponse(children)
   let [found, id] =  vimside#sexp#Get_IntValue(id_sexp) 
   if ! found
     call s:ERROR("HandleResponse: Id not third sexp: ". string(children)) 
-    return 0
+    return [0, 0]
   endif
 
   if ! has_key(g:vimside.swank.rpc.waiting, id)
-    return 0
+    return [0, 0]
   endif
 
   let rr = g:vimside.swank.rpc.waiting[id]
@@ -441,14 +584,14 @@ function! s:HandleResponse(children)
   let [found, content] =  vimside#sexp#Get_ListValue(content_sexp) 
   if ! found
     call s:ERROR("HandleResponse: Protocol error second sexp not List: ". string(children)) 
-    return 1
+    return [1, 0]
   endif
 
   let len = len(content)
 
   if len < 2
     call s:ERROR("HandleResponse: Protocol error Content List less than 2: ". string(children)) 
-    return 1
+    return [1, 0]
   endif
 
   let kind_kw_sexp = content[0]
@@ -457,7 +600,7 @@ function! s:HandleResponse(children)
   let [found, kind_kw] =  vimside#sexp#Get_KeywordValue(kind_kw_sexp) 
   if ! found
     call s:ERROR("HandleResponse: Kind Keyword not first sexp: ". string(children)) 
-    return 1
+    return [1, 0]
   endif
   if kind_kw == ':ok'
     " maybe Dictionary or List of value(s)
@@ -465,7 +608,7 @@ function! s:HandleResponse(children)
     if ! found
       echoe "HandleResponse: Badly formed Response"
       call s:ERROR("HandleResponse: Badly formed Response: ". string(body_sexp))
-      return 1
+      return [1, 0]
     endif
 
     " return 0 or 1
@@ -479,7 +622,7 @@ function! s:HandleResponse(children)
     let [found, body_list] =  vimside#sexp#Get_ListValue(body_sexp) 
     if ! found
       call s:ERROR("HandleResponse: Body ':abort' not List: ". string(children)) 
-      return 1
+      return [1, 0]
     endif
 
     let code_sexp = body_list[0]
@@ -488,12 +631,12 @@ function! s:HandleResponse(children)
     let [found, code] =  vimside#sexp#Get_IntValue(code_sexp) 
     if ! found
       call s:ERROR("HandleResponse: Body ':abort' code not Int: ". string(children)) 
-      return 1
+      return [1, 0]
     endif
     let [found, detail] =  vimside#sexp#Get_StringValue(string_sexp) 
     if ! found
       call s:ERROR("HandleResponse: Body ':abort' detail not String: ". string(children)) 
-      return 1
+      return [1, 0]
     endif
 
     " ignore return value
@@ -501,7 +644,8 @@ function! s:HandleResponse(children)
   else
     call s:ERROR("HandleResponse: kind Keyword not ':ok' or ':abort': ". string(children)) 
   endif
-  return 1
+  
+  return [1, 0]
 endfunction
 
 
@@ -519,7 +663,6 @@ call s:LOG("HandleBackgroundMessage ". string(eventcode) ." ". msg)
     let bmsg = emsg .' ('. etype .'): '. msg
     call vimside#cmdline#Display(bmsg) 
   endif
-
 endfunction
 
 " ============================================================================

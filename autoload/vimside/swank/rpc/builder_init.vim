@@ -39,11 +39,7 @@ call s:LOG("builder_init TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-builder-init-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("builder_init BOTTOM") 
 endfunction
@@ -73,9 +69,6 @@ function! g:BuilderInitHandler()
   function! g:BuilderInitHandler_Ok(dic, ...)
     let dic = a:dic
 call s:LOG("BuilderInitHandler_Ok dic=".  string(dic)) 
-
-    let l:pid = dic[':pid']
-
     return 1
   endfunction
 

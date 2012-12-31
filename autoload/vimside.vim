@@ -40,8 +40,11 @@ let g:vimside.ping = {}
 " XXXXXXXXXXXXX
 " let g:vimside.ping.actions = []
 let g:vimside.ping.info = {}
+" how long to wait on an ensime server socket read (milliseconds)
 let g:vimside.ping.info.read_timeout = 0
+" how long after last character typed before scheduler is invoked (milliseconds)
 let g:vimside.ping.info.updatetime = 500
+" how many characters type before scheduler is invoked
 let g:vimside.ping.info.char_count = 10
 
 " will hold
@@ -66,7 +69,9 @@ let g:vimside.swank = {}
 let g:vimside.swank.rpc = {} 
 " waiting = { id: rr }
 let g:vimside.swank.rpc.waiting = {} 
-let g:vimside.swank.events = '0'
+" expected number of events from ensime server still not received
+" legal values are numbers 0 ... n and string 'many'
+let g:vimside.swank.events = 0
 " holds 'read_timeout', 'updatetime' and 'char_count'
 " set by command handler when it needs to override default
 " behavior in swank s:PostHandle
@@ -194,6 +199,9 @@ call s:LOG("vimside#StartEnsime call vimside#swank#rpc#connection_info#Run")
     call vimside#swank#rpc#connection_info#Run()
 call s:LOG("vimside#StartEnsime call vimside#swank#rpc#init_project#Run") 
     call vimside#swank#rpc#init_project#Run()
+
+call s:LOG("vimside#StartEnsime call vimside#hooks#StartAutoCmd") 
+    call vimside#hooks#StartAutoCmd()
   else
     let msg = "Ensime Engine Already Running ..."
     call vimside#cmdline#Display(msg)
@@ -204,6 +212,8 @@ endfunction
 function! vimside#StopEnsime()
   if g:vimside.started
 " XXXXXXXXXXXXX
+    call vimside#hooks#StopAutoCmd()
+
     " call vimside#RemoveAutoCmds()
     vimside#scheduler#ClearAuto()
     call vimside#swank#rpc#shutdown_server#Run()
