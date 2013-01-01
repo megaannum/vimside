@@ -54,6 +54,8 @@ endif " XXXXXXXXXXXXXX
   if response != ''
 " call s:LOG("vimside#ensime#io#ping: response=". response) 
     let success = vimside#ensime#swank#handle(response)
+  else
+    call vimside#ensime#swank#handle_no_response()
   endif
 
   return success

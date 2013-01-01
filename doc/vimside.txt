@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.13
+Version:     0.2.14
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -842,16 +842,20 @@ Vimside session.
 
 5.7 Scheduler
 
-  'scheduler-rpc-expecting-read-timeout'
-  'scheduler-rpc-expecting-updatetime'
-  'scheduler-rpc-expecting-char-count'
-  'scheduler-rpc-not-expecting-read-timeout'
-  'scheduler-rpc-not-expecting-updatetime'
-  'scheduler-rpc-not-expecting-char-count'
-  'scheduler-event-expecting-one-updatetime'
-  'scheduler-event-expecting-one-char-count'
-  'scheduler-event-expecting-many-updatetime'
-  'scheduler-event-expecting-many-char-count'
+  'scheduler-not-expecting-anything-read-time-out'
+  'scheduler-not-expecting-anything-update-time'
+  'scheduler-not-expecting-anything-char-count'
+  'scheduler-expecting-rpc-response-read-time-out'
+  'scheduler-expecting-rpc-response-update-time'
+  'scheduler-expecting-rpc-response-char-count'
+  'scheduler-expecting-events-read-time-out'
+  'scheduler-expecting-events-update-time'
+  'scheduler-expecting-events-char-count'
+  'scheduler-expecting-many-events-read-time-out'
+  'scheduler-expecting-many-events-update-time'
+  'scheduler-expecting-many-events-char-count'
+  'scheduler-many-max-count-no-events'
+  'scheduler-events-max-count-no-events'
 
 
 ==============================================================================
@@ -1256,7 +1260,7 @@ with another process, the Ensime server via a socket.
 Vim is single threaded. 
 
 So, how to get a response from the Ensime server
-or how to recieve an asynchronous event from the server? The solution
+or how to receive an asynchronous event from the server? The solution
 used by Vimside is 'dynamic' polling of the Ensime socket; the time between 
 a poll depends upon if a response or event(s) are expected.
 
@@ -1268,7 +1272,7 @@ CursorMoved(I).
 The CursorHold autocmd is triggered by the user not having press a key for
 a while (the time period is the value of the 'updatetime' option).
 Vimside set the value of 'updatetime' depending upon whether or not a
-rpc response or event is expected. The that time period ends without
+rpc response or event is expected. If that time period ends without
 a user key press, then Vimside polls to see if anything is ready to
 be read from the Ensime server socket. If something is available,
 the appropriate handler is called and, possibly, the value of the
@@ -1305,6 +1309,31 @@ Currently, its an art rather than a science to figure out what
 commands results and event(s). There are some general ranges with
 values and on a per-command-basis a means of explicitly setting the values.
 All of these are adjustable using appropriate Options.
+
+Now, when an RPC command is issued to the Ensime server, associated with
+the command is a response and zero or more events. When such a command
+is issued by Vimside to the Ensime server, Vimside does a socket read for
+a couple hundred milliseconds (value of Option 
+scheduler-expecting-rpc-response-read-time-out) because for many commands, 
+the Ensime server can respond quickly. If a response is not received
+when the commands is first sent to the server or the response is received
+but associated with the command are one or more events, then the
+job that pings the server is set to ping more frequently (that the
+steady-state ping rate). This more frequent ping rate is maintained 
+until the command's response and expected number of events are 
+received. At that point, the ping rate is returned to the slower,
+steady-state rate; i.e., dynamic polling
+
+It is the responsibility of the code that issues a command to the Ensime
+server to specify how many events it expect with a numeric value 0 (default),
+1, 2, ...; or with the string 'many' when more than 0 events are expected
+but the exact number can not be predicted.
+
+Lastly, Vimside has a mechanism to return the ping rate to the steady-state
+value if, for whatever reason, a command's response or the expected number
+of events for the command are not received by Vimside - we don't want
+Vimside to madly be ping the server (due to some bug or error) for the
+rest of an editing session.
 
 8.3 Swank Protocol
 
@@ -1411,6 +1440,16 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.14   - Fix: ~
+  Implemented method vimside#ensime#swank#handle_no_response() which is call
+  by vimside#ensime#io#ping(timeout) when the response from the Ensime server
+  is empty which uses the previous checkin's Options
+      scheduler-many-max-count-no-events (default 50)
+      scheduler-events-max-count-no-events (default 50)
+  to ultimately restore the schedule to a "not expecting anything/steady" state
+  (a long time between pings). This simply assures that if there is some
+  bug in handling responses from the server, a fast ping rate will 
+  ultimately stop and the system returned to steady-state.
 0.2.13   - Fix: ~
   Added Build and Rebuild project commands.
   Re-wrote how the swank dispatch and scheduling code handle events.

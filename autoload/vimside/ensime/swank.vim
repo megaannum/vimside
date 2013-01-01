@@ -276,6 +276,28 @@ call s:LOG("vimside#ensime#swank#handle response=". a:response)
   return success
 endfunction
 
+function! vimside#ensime#swank#handle_no_response()
+"call s:LOG("vimside#ensime#swank#handle_no_response") 
+
+  let l:events = g:vimside.swank.events
+"call s:LOG("vimside#ensime#swank#handle_no_response l:events=" . l:events) 
+
+  if l:events == 'many'
+    if s:current_many_max_count > 0
+      let s:current_many_max_count -= 1
+    else
+      call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+    endif
+  elseif l:events > 0
+    if s:current_event_max_count > 0
+      let s:current_event_max_count -= 1
+    else
+      call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+    endif
+  endif
+
+endfunction
+
 function! s:PostHandle(success, got_event, nos_events)
 call s:LOG("s:PostHandle TOP") 
 call s:LOG("s:PostHandle a:success=" . a:success) 
