@@ -112,7 +112,7 @@ elseif !has("win32unix") && has("unix") && !has("macunix")
 elseif has('win16') || has('win32') || has('win64') || has('dos32')
   let g:vimside.os.kind = "mswin"
   let g:vimside.os.is_mswin = 1
-elseif has('macunix'
+elseif has('macunix')
   let g:vimside.os.kind = "macunix"
   let g:vimside.os.is_macunix = 1
 else
