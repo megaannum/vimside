@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.14
+Version:     0.2.15
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1440,6 +1440,10 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.15   - Fix: ~
+  Fixed type: vimside-log-file-path instead of vimside-log_file-path.
+  Commented out check of ensime config file in 
+    vimside/swank/rpc/init_project.vim
 0.2.14   - Fix: ~
   Implemented method vimside#ensime#swank#handle_no_response() which is call
   by vimside#ensime#io#ping(timeout) when the response from the Ensime server

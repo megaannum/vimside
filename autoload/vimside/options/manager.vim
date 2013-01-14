@@ -601,7 +601,7 @@ function! vimside#options#manager#Load()
 
   " Log for output of Vimside
   if g:vimside.HasOption("vimside-log-file-path")
-    let [found, s:lfilepath] = g:vimside.GetOption('vimside-log_file-path')
+    let [found, s:lfilepath] = g:vimside.GetOption('vimside-log-file-path')
     if ! found
       call add(l:errors, "Option not found: 'vimside-log-file-path'")
     endif
