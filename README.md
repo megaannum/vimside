@@ -136,7 +136,7 @@ For more information about vim-addon-manager, see
 [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) and 
 [Vim-addon-manager getting started](https://github.com/MarcWeber/vim-addon-manager/blob/master/doc/vim-addon-manager-getting-started.txt)
 
-In your .vimrc, add self as shown below:
+In your `.vimrc`, add self as shown below:
 
     fun SetupVAM()
 
@@ -221,7 +221,7 @@ Vundle does not provide specific branch checkout yet. Thus after adding:
 
 You need to check out appropriate ensime branch by hand by running ie.
 
-    > git checkout -b scala-2.10
+    > git checkout scala-2.10
     
 in ensime plugin directory managed by vundle (probably `~/.vim/bundle/ensime`).
 Also you'll need to run `make` in vimproc directory.
