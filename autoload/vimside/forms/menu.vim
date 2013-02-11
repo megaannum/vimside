@@ -305,39 +305,38 @@ function! vimside#forms#menu#MakeMenuSBT()
   let items = []
 
 " ["Start or switch to" ensime-sbt-switch]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Start or switch to'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Start or switch to',
-            \ 'action': action
+            \ 'command': ':call vimside#command#SbtSwitch()'
             \ })
 
 " ["Compile" ensime-sbt-do-compile]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Compile'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Compile',
-            \ 'action': action
+            \ 'command': ':call vimside#command#SbtCompile()'
             \ })
 
 " ["Clean" ensime-sbt-do-clean]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Clear'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Clean',
-            \ 'action': action
+            \ 'command': ':call vimside#command#SbtClean()'
             \ })
 
 " ["Package" ensime-sbt-do-package])
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Package'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Package',
-            \ 'action': action
+            \ 'command': ':call vimside#command#SbtPackage()'
+            \ })
+
+" ["Exit" ])
+  call add(items, {
+            \ 'type': 'button',
+            \ 'label': '&Exit',
+            \ 'command': ':call vimside#command#SbtExit()'
             \ })
 
   let attrs = { 'items': items }

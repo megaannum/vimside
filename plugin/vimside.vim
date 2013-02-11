@@ -31,7 +31,25 @@ else
   " imap <tab> <c-r>=feedkeys("\<c-x>\<c-o>")<CR>
   " imap <tab> <c-x><c-o>
 
+"  function! TabToOmni()
+"    return "\<c-x>\<c-o>"
+"  endfunction
+  " see http://vim.wikia.com/wiki/Smart_mapping_for_tab_completion
   function! TabToOmni()
+    " current line
+    let line = getline('.')
+  
+    " from the start of the current line to one character right 
+    " of the cursor 
+    let substr = strpart(line, -1, col('.')+1)      
+    let substr = strpart(line, -1, col('.'))
+    " word till cursor 
+    let substr = matchstr(substr, "[^ \t]*$")
+    if (strlen(substr)==0)
+    " nothing to match on empty string 
+    return "\<tab>"
+    endif
+  
     return "\<c-x>\<c-o>"
   endfunction
   autocmd FileType scala inoremap <tab> <c-r>=TabToOmni()<CR>
@@ -115,7 +133,11 @@ else
 
   " C-c C-v s
   "   Switch to the sbt command-line (works for sbt projects only)
-  " NOT IMPLEMENTED YET
+  autocmd FileType scala nmap <silent> <Leader>ss :call vimside#command#SbtSwitch()<CR>
+  autocmd FileType scala nmap <silent> <Leader>sc :call vimside#command#SbtCompile()<CR>
+  autocmd FileType scala nmap <silent> <Leader>sn :call vimside#command#SbtClean()<CR>
+  autocmd FileType scala nmap <silent> <Leader>sp :call vimside#command#SbtPackage()<CR>
+  autocmd FileType scala nmap <silent> <Leader>se :call vimside#command#SbtExit()<CR>
 
   " C-c C-v z
   "   Switch to the scala interpreter, with project classes in the classpath.

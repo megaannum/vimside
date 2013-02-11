@@ -94,6 +94,42 @@ function! vimside#command#UsesOfSymbolAtPoint() range
   endif
 endfunction
 
+function! vimside#command#SbtSwitch() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Switch()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#SbtCompile() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Compile()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#SbtClean() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Clean()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#SbtPackage() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Package()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+function! vimside#command#SbtExit() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Exit()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
 function! vimside#command#Repl() range
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#repl_config#Run()

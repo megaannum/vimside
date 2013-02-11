@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.15
+Version:     0.2.16
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1440,6 +1440,9 @@ rr = {
 
 ==============================================================================
 10. Release notes                                       *vimside-release-notes*
+0.2.16   - Fix: ~
+  Added initial support for SBT. This includes adding a new 
+    data/vimside/tests directory where there is a simple SBT project.
 0.2.15   - Fix: ~
   Fixed type: vimside-log-file-path instead of vimside-log_file-path.
   Commented out check of ensime config file in 

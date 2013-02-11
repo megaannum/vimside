@@ -11,6 +11,12 @@ Only a small number of all of the ENSIME capabilities have
 been implemented and it has only been tested against the
 very small Scala/Java test source project bundled with it.
 
+There is now included initial support for SBT (simple build tool).
+The test project is in the data/tests/sbt directory. The
+plugin/vimside.vim file has key mappings for functions that
+start, compile, clean, package and exit from the SBT.
+More support will be added in future weeks (Sun Feb 10 2013).
+
 I have checked the source into github primarily so that
 the source is somewhere other than on my local machines.
 I expect to continue to update the sources on github

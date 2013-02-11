@@ -26,7 +26,7 @@ function! vimside#cmdline#Display(msg)
   endif
 
 
-  call s:Clear()
+  " call s:Clear()
   call s:Write(a:msg)
 
   let s:is_open = 1
@@ -34,6 +34,10 @@ endfunction
 
 function!  vimside#cmdline#Close()
   if s:is_open
+    call s:Clear()
+    let s:is_open = 0
+  endif
+  let s:is_init = 0
 endfunction
 
 function! vimside#cmdline#DOIT()
