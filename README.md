@@ -34,6 +34,7 @@ frequently, flushing out the features.
 |Hover To Symbol|Place cursor (or mouse) over a variable and its Symbol will be displayed. Cute but requires frequent server polling.|3|
 |Open Browser Info|With cursor over Scala/Java variable, type, etc. invoke the associated on-line web api documentation (if it exists). Useful.|1|
 |Use of Symbol At Point|List all references to the symbol under the cursor. Very useful.|1|
+|Simple Build Tool|Switch to the sbt command-line (works for sbt projects only)|2|
 |Launch Repl|Switch to the Scala interpreter, with project classes in the classpath. TBD: cut/paste code fragments into Repl.|1|
 |Typecheck Current File|Typecheck the current file and display errors and warnings. Very useful.|1|
 |Typecheck All Files|Typecheck the all files and display errors and warnings. Very useful.|1|
@@ -52,7 +53,6 @@ frequently, flushing out the features.
 |---|---|
 |Package Inspector|Inspect imported package, current file's package and the package specified in the ensime configuration `:package`.|
 |Type Inspector|Click on type and see information, Click on information and see its information. Move about Inspector history.
-|SBT Command-Line|Switch to the sbt command-line (works for sbt projects only)|
 |Scalex|Seems to be a dead project (see: http://scalex.org/)|
 |Run Application||
 |Debug Application|Start and run the debugger. Start and run the debugger. Set a breakpoint. Clear a breakpoint. Step. Step over. Step out. Continue from a breakpoint. Kill the debug session. Inspect the local variable at cursor. Show backtrace.|

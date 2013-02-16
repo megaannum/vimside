@@ -129,6 +129,13 @@ function! vimside#command#SbtExit() range
     call s:ERROR("Ensime must be started first")
   endif
 endfunction
+function! vimside#command#SbtInvoke() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#sbt#Invoke()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
 
 function! vimside#command#Repl() range
   if exists("g:vimside.started") && g:vimside.started

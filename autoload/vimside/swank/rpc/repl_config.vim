@@ -67,6 +67,12 @@ function! g:ReplConfigHandler()
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+  " The code in this function is basically a copy of the code
+  "   found in the plugin/vimshell.vim function
+  "   s:vimshell_interactive(args) with the addition of 
+  "   window placement code and a postexit hook.
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
   function! g:ReplConfigHandler_Ok(dic, ...)
     let dic = a:dic
 
@@ -80,7 +86,7 @@ function! g:ReplConfigHandler()
     " either works
     " let l:command_line = '/home/emberson/scala/scala-2.9.2/bin/scala'
     "let l:command_line = 'scala -i Test.scala'
-    let l:command_line = 'scala -classpath '. classpath
+    let l:command_line = 'scala -usejavacp -classpath '. classpath
     let &winwidth = 50
 
     try
@@ -89,6 +95,7 @@ function! g:ReplConfigHandler()
           \ 'has_head_spaces' : 0,
           \ 'is_interactive' : 0,
           \ 'is_single_command' : 1,
+          \ 'is_close_immediately' : 1,
           \ 'fd' : { 'stdin' : '', 'stdout': '', 'stderr': '' }
           \ }
       call vimshell#set_context(context)
@@ -115,8 +122,6 @@ function! g:ReplConfigHandler()
       let s:filetype = &filetype
       call vimshell#execute_internal_command('iexe', args, context)
       call vimshell#hook#set('postexit', [ function("g:ReplConfigVimShellCallback") ])
-
-      let b:interactive.is_close_immediately = 1
 
     catch
       let message = (v:exception !~# '^Vim:')?
@@ -154,7 +159,15 @@ endfunction
 
 function! g:ReplConfigVimShellCallbackAction()
 " call s:LOG("ReplConfigVimShellCallbackAction: filetype=". s:filetype) 
-  " let &filetype = 'scala'
+"
+  let location = s:GetLocation()
+  if location == 'split_window'
+    quit
+  elseif location == 'vsplit_window'
+    quit
+  elseif location == 'tab'
+    quit
+  endif
 
   let &filetype = s:filetype
   syntax on
@@ -172,14 +185,5 @@ function! g:ReplConfigVimShellCallback(context, cmdinfolist)
   call vimside#scheduler#AddJob('repl_callback', l:Func, l:sec, l:msec, l:charcnt, l:repeat)
 
   call vimside#scheduler#StartAuto()
-
-  let location = s:GetLocation()
-  if location == 'split_window'
-    quit
-  elseif location == 'vsplit_window'
-    quit
-  elseif location == 'tab'
-    quit
-  endif
 
 endfunction

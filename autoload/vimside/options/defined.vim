@@ -1883,6 +1883,18 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+  let l:options['tailor-sbt-config-location'] = {
+        \ 'name': 'tailor-sbt-config-location',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'parent': 'tailor-location-diff-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ 'How to display Scala Simple Build Tool (SBT).'
+          \ ]
+      \ }
+
 
   let l:options['tailor-symbol-at-point-information'] = {
         \ 'name': 'tailor-symbol-at-point-information',

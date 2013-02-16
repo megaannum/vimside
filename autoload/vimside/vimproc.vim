@@ -16,7 +16,7 @@ let s:ERROR = function("vimside#log#error")
 
 " return [1, path] or [0, err_msg]
 function! vimside#vimproc#ExistsExecutable(cmd)
-  let [status, out, err]i = vimside#vimproc#execute_which(a:cmd)
+  let [status, out, err] = vimside#vimproc#execute_which(a:cmd)
 " call s:LOG("vimside#vimproc#ExistsExecutable: status=". status .", out=". out .", err=". err)
   return (status == 0) ? [1, out] : [0, err]
 endfunction

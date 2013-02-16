@@ -139,6 +139,11 @@ else
   autocmd FileType scala nmap <silent> <Leader>sp :call vimside#command#SbtPackage()<CR>
   autocmd FileType scala nmap <silent> <Leader>se :call vimside#command#SbtExit()<CR>
 
+  " invoke the sbt command interpreter
+  "
+  autocmd FileType scala nmap <silent> <Leader>si :call vimside#command#SbtInvoke()<CR>
+
+
   " C-c C-v z
   "   Switch to the scala interpreter, with project classes in the classpath.
   autocmd FileType scala nmap <silent> <Leader>vz :call vimside#command#Repl()<CR>

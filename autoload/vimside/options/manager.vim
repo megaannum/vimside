@@ -321,7 +321,7 @@ function! vimside#options#manager#LoadProject(errors)
           let dir = fnamemodify(dir, ":h")
         endwhile
 
-        if dir != '/' && g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
+        if dir != '/' && dir != l:vimside_dir && g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
           let l:option_file = dir . "/" . l:file_name
           execute ":source " . l:option_file
           call g:VimsideOptionsProjectLoad(g:vimside.options.user)

@@ -95,31 +95,44 @@ endfunction
 "   If already there but the process is dead, restart the SBT process.
 function! vimside#command#sbt#Switch()
 call s:LOG("vimside#command#sbt#Switch: TOP")
-  if ! has_key(s:subproc, 'pid')
-    let [status, out] = vimside#vimproc#ExistsExecutable('sbt')
-    if status == 1
-call s:LOG("sbt:" . out)
-      let l:Func = function("g:SbtSwitchCB")
-      let l:sec = 1
-      let l:msec = 0
-      let l:charcnt = 10
-      let l:repeat = 1
-      call vimside#scheduler#AddJob(s:sbt_switch, l:Func, l:sec, l:msec, l:charcnt, l:repeat) 
+  if has_key(s:subproc, 'pid')
+call s:LOG("sbt already running")
+    return
+  endif
 
-      let s:subproc = vimproc#popen3('sbt -Dsbt.log.noformat=true')
-      let s:state = 'starting'
+  let cwd = getcwd()
+  let [status, path] = s:find_sbt_project_path(cwd)
+  if ! status
+call s:ERROR("sbt project directory NOT FOUND")
+    return
+  endif
+call s:LOG("sbt: path=" . path)
+
+  let [status, out] = vimside#vimproc#ExistsExecutable('sbt')
+  if ! status
+call s:ERROR("sbt NOT FOUND")
+    return
+  endif
+
+call s:LOG("sbt: out-" . out)
+  let l:Func = function("g:SbtSwitchCB")
+  let l:sec = 1
+  let l:msec = 0
+  let l:charcnt = 10
+  let l:repeat = 1
+  call vimside#scheduler#AddJob(s:sbt_switch, l:Func, l:sec, l:msec, l:charcnt, l:repeat) 
+
+exec "lcd ". path
+  let s:subproc = vimproc#popen3('sbt -Dsbt.log.noformat=true')
+exec "lcd ". cwd 
+
+  let s:state = 'starting'
 if has_key(s:subproc, 'pid')
 call s:LOG("sbt: pid=" . s:subproc.pid)
 endif
 
-call vimside#scheduler#SetUpdateTime(100)
-call vimside#scheduler#ResetAuto()
-    else
-call s:LOG("sbt NOT FOUND")
-    endif
-  else
-call s:LOG("sbt already running")
-  endif
+  call vimside#scheduler#SetUpdateTime(100)
+  call vimside#scheduler#ResetAuto()
 
 call s:LOG("vimside#command#sbt#Switch: BOTTOM")
 endfunction
@@ -180,7 +193,7 @@ endfunction
 
 function! g:SbtCompileCB()
 call s:LOG("g:SbtCompileCB: TOP")
-  call s:HandleCompilePackageCB()
+  call s:HandleCompilePackageCB(s:sbt_compile)
 call s:LOG("g:SbtCompileCB: BOTTOM")
 endfunction
 
@@ -256,11 +269,11 @@ endfunction
 
 function! g:SbtPackageCB()
 call s:LOG("g:SbtPackageCB: TOP")
-  call s:HandleCompilePackageCB()
+  call s:HandleCompilePackageCB(s:sbt_package)
 call s:LOG("g:SbtPackageCB: BOTTOM")
 endfunction
 
-function! s:HandleCompilePackageCB()
+function! s:HandleCompilePackageCB(cb_name)
   if s:got_error()
     return
   endif
@@ -279,7 +292,7 @@ call s:LOG("s:HandleCompilePackageCB: lines=" . string(lines))
     let echolines=[]
 
     for line in lines
-call s:LOG("s:SHandleCompilePackageCB: line=" . line)
+call s:LOG("s:HandleCompilePackageCB: line=" . line)
       let mlist=[ 
             \ [s:match_info, 'info'], 
             \ [s:match_warn, 'warn'], 
@@ -293,7 +306,7 @@ call s:LOG("s:SHandleCompilePackageCB: line=" . line)
       if status
 call s:LOG("s:HandleCompilePackageCB: tag=" . tag)
         if tag == 'prompt'
-          call vimside#scheduler#RemoveJob(s:sbt_compile)
+          call vimside#scheduler#RemoveJob(a:cb_name)
 call vimside#ensime#swank#ping_info_set_not_expecting_anything()
         elseif tag == 'warn'
 let severity = "warn"
@@ -363,6 +376,102 @@ call s:LOG("vimside#command#sbt#Exit: TOP")
 call s:LOG("vimside#command#sbt#Exit: BOTTOM")
 endfunction
 
+function! vimside#command#sbt#Invoke()
+call s:LOG("vimside#command#sbt#Invoke: TOP")
+  let cwd = getcwd()
+  let [status, path] = s:find_sbt_project_path(cwd)
+  if ! status
+call s:ERROR("sbt project directory NOT FOUND")
+    return
+  endif
+call s:LOG("sbt: path=" . path)
+
+  let [status, out] = vimside#vimproc#ExistsExecutable('sbt')
+  if ! status
+call s:ERROR("sbt NOT FOUND")
+    return
+  endif
+
+  let l:command_line = 'sbt'
+  let &winwidth = 50
+
+  try
+    let args = vimproc#parser#split_args(command_line)
+    let context = {
+        \ 'has_head_spaces' : 0,
+        \ 'is_interactive' : 0,
+        \ 'is_single_command' : 1,
+        \ 'is_close_immediately' : 1,
+        \ 'fd' : { 'stdin' : '', 'stdout': '', 'stderr': '' }
+        \ }
+    call vimshell#set_context(context)
+
+    call vimside#scheduler#StopAuto()
+
+    startinsert
+    stopinsert
+
+    let location = s:GetLocation()
+" call s:LOG("SbtInvoke location=".  string(location)) 
+
+    if location == 'same_window'
+      let g:vimshell_split_command = 'edit!'
+    elseif location == 'split_window'
+      let g:vimshell_split_command = 'split!'
+    elseif location == 'vsplit_window'
+      let g:vimshell_split_command = 'vsplit!'
+    elseif location == 'tab'
+      let g:vimshell_split_command = 'tabnew!'
+    endif
+
+" call s:LOG("SbtInvoke args=".  string(args)) 
+    let s:filetype = &filetype
+    call vimshell#execute_internal_command('iexe', args, context)
+    call vimshell#hook#set('postexit', [ function("g:SbtInvokeCallback") ])
+
+    " let b:interactive.is_close_immediately = 1
+
+  catch
+    let message = (v:exception !~# '^Vim:')?
+        \ v:exception : v:exception . ' ' . v:throwpoint
+    call s:ERROR("SbtInvoke: ". printf('%s: %s', l:command_line, message))
+    return 0
+  endtry
+
+
+call s:LOG("vimside#command#sbt#Invoke: BOTTOM")
+endfunction
+
+function! g:SbtInvokeCallbackAction()
+" call s:LOG("SbtInvokeCallbackAction: filetype=". s:filetype) 
+
+  let location = s:GetLocation()
+  if location == 'split_window'
+    quit
+  elseif location == 'vsplit_window'
+    quit
+  elseif location == 'tab'
+    quit
+  endif
+
+  let &filetype = s:filetype
+  syntax on
+endfunction
+
+function! g:SbtInvokeCallback(context, cmdinfolist)
+" call s:LOG("SbtInvokeCallback") 
+
+  let l:Func = function("g:SbtInvokeCallbackAction")
+  let l:sec = 0
+  let l:msec = 100
+  let l:charcnt = 2
+  let l:repeat = 0
+  call vimside#scheduler#AddJob('sbt_callback', l:Func, l:sec, l:msec, l:charcnt, l:repeat)
+
+  call vimside#scheduler#StartAuto()
+
+endfunction
+
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -429,4 +538,71 @@ call s:LOG("s:got_error: tag=" . tag)
   else
     return 0
   endif
+endfunction
+
+" path related functions
+function! s:is_sbt_project_directory(path)
+  let path=a:path
+
+  let list = split(globpath(path, "*.sbt"), "\n")
+  if ! empty(list)
+    return 1
+  elseif filereadable(path . "/project/Build.scala")
+    return 1
+  elseif filereadable(path . "/project/boot")
+    return 1
+  elseif filereadable(path . "/project/build.properties")
+    return 1
+  else
+    return 0
+  endif
+endfunction
+
+function! s:get_parent_directory(path)
+  return resolve(a:path . "/..")
+endfunction
+
+function! s:is_root_directory(path)
+  return a:path == resolve(a:path . "/..")
+endfunction
+
+" return [status, path]
+function! s:find_sbt_project_path(path)
+  let path = a:path
+  while ! s:is_root_directory(path)
+    if s:is_sbt_project_directory(path)
+      return [1, path]
+    endif
+    let path = s:get_parent_directory(path)
+  endwhile
+  return [0, '']
+endfunction
+
+" return [status, path]
+function! s:find_sbt_parent_project_path(path)
+  let [status, path] = s:find_sbt_project_path(a:path)
+  if status
+    let path = s:get_parent_directory(path)
+    " assumes current path is not the root path
+    if s:is_sbt_project_directory(path)
+      return [1, path]
+    endif
+  endif
+  return [0, '']
+endfunction
+
+function! s:GetLocation()
+  let [found, location] = g:vimside.GetOption('tailor-repl-config-location')
+  if ! found
+    call s:ERROR("Option not found 'tailor-repl-config-location'") 
+    let location = 'tab'
+  elseif location != 'same_window' 
+      \ && location != 'split_window'
+      \ && location != 'vsplit_window'
+      \ && location != 'tab'
+    call s:ERROR("Option 'tailor-repl-config-location' has bad location value '". location ."'") 
+    let location = 'tab'
+
+  endif
+  return location
 endfunction

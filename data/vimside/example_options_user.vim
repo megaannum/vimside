@@ -153,5 +153,10 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("tailor-repl-config-location", "split_window")
   " call owner.Set("tailor-repl-config-location", "vsplit_window")
   " call owner.Set("tailor-repl-config-location", "tab")
+  "
+  " call owner.Set("tailor-sbt-config-location", "same_window")
+  " call owner.Set("tailor-sbt-config-location", "split_window")
+  " call owner.Set("tailor-sbt-config-location", "vsplit_window")
+  " call owner.Set("tailor-sbt-config-location", "tab")
 endfunction
 

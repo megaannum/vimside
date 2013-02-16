@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.16
+Version:     0.2.17
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -49,41 +49,45 @@ For Vim instructions on installing this 'txt' file, enter:
       7.1.7 Open Browser Info
       7.1.8 Hover To Symbol
       7.1.9 Use of Symbol At Point
-      7.1.10 Launch Repl
-      7.1.11 Typecheck Current File
-      7.1.12 Typecheck All Files
-      7.1.13 Re-Show Errors/Warnings
-      7.1.14 Format Source
-      7.1.15 Refactoring
-      7.1.16 Building
-      7.1.17 Popup Menu
-      7.1.18 Browse Source Roots
-      7.1.19 Browse Reference Source Roots
-      7.1.20 Option Viewer/Editor
-      7.1.21 Completions
+      7.1.10 SBT Command-Line
+      7.1.11 Launch Repl
+      7.1.12 Typecheck Current File
+      7.1.13 Typecheck All Files
+      7.1.14 Re-Show Errors/Warnings
+      7.1.15 Format Source
+      7.1.16 Refactoring
+      7.1.17 Building
+      7.1.18 Popup Menu
+      7.1.19 Browse Source Roots
+      7.1.20 Browse Reference Source Roots
+      7.1.21 Option Viewer/Editor
+      7.1.22 Completions
     7.2 Ensime Capabilities to be Supported:
       7.2.1 Package Inspector
       7.2.2 Type Inspector
-      7.2.3 SBT Command-Line
-      7.2.4 Scalex
-      7.2.5 Run Application
-      7.2.6 Debug Application
-      7.2.7 And others
+      7.2.3 Scalex
+      7.2.4 Run Application
+      7.2.5 Debug Application
+      7.2.8 And others
 
-  8. Architecture                                |vimside-architecture|
-    8.1 Client and Server
-    8.2 Polling, Jobs and Scheduler
-    8.3 Swank Protocol
-    8.4 RPC
-    8.5 Events
-    8.6 Options
-    8.7 Implementations
-  9. FAQ                                         |vimside-faq|
-    9.1 User                                   |vimside-faq-user|
-    9.2 Developer                              |vimside-faq-developer|
-  10. Release notes                              |vimside-release-notes|
-  11. Todo List                                  |vimside-todo|
-  12. Questions                                  |vimside-questions|
+  8. Third-party code                            |vimside-third-party|
+    8.1 Ensime
+    8.2 VimProc
+    8.3 VimShell
+  9. Architecture                                |vimside-architecture|
+    9.1 Client and Server
+    9.2 Polling, Jobs and Scheduler
+    9.3 Swank Protocol
+    9.4 RPC
+    9.5 Events
+    9.6 Options
+    9.7 Implementations
+  10. FAQ                                        |vimside-faq|
+    10.1 User                                    |vimside-faq-user|
+    10.2 Developer                               |vimside-faq-developer|
+  11. Release notes                              |vimside-release-notes|
+  12. Todo List                                  |vimside-todo|
+  13. Questions                                  |vimside-questions|
 
 ==============================================================================
 1. Introduction                                               *vimside-intro*
@@ -808,6 +812,8 @@ Vimside session.
 
   'tailor-repl-config-location'
 
+  'tailor-sbt-config-location'
+
   'tailor-uses-of-symbol-at-point-location'
 
   'tailor-browser-keys-platform'
@@ -1066,7 +1072,15 @@ Very useful.
 
 Implementations: 1
 
-7.1.10 Launch Repl
+7.1.10 SBT Command-Line
+
+Switch to the sbt command-line (works for sbt projects only)
+
+Very useful if you are working with SBT.
+
+Implementations: 2
+
+7.1.11 Launch Repl
 
 Switch to the Scala interpreter, with project classes in the classpath.
 There is an Option that controls if the Scala Repl appears in 
@@ -1079,20 +1093,20 @@ TBD: cut/paste code fragments into Repl.
 Implementations: 1
 
 
-7.1.11 Typecheck Current File
+7.1.12 Typecheck Current File
 
 Typecheck the current file and display errors and warnings.
 Very useful.
 
 Implementations: 1
 
-7.1.12 Typecheck All Files
+7.1.13 Typecheck All Files
 
 Typecheck the all files and display errors and warnings.
 
 Very useful.
 
-7.1.13 Re-Show Errors/Warnings
+7.1.14 Re-Show Errors/Warnings
 
 Show all errors and warnings in the project.
 
@@ -1102,7 +1116,7 @@ Implementations: 1
 
 Implementations: 1
 
-7.1.14 Format Source
+7.1.15 Format Source
 
 Format the current Scala source file.
 With this command, it is the Ensime server which formats the file using
@@ -1117,7 +1131,7 @@ Useful.
 
 Implementations: 1
 
-7.1.15 Refactoring
+7.1.16 Refactoring
 
 Refactoring operations supported by the same Scala library that
 Scala Eclipse uses. Generally, use visual selection and then
@@ -1144,7 +1158,7 @@ Useful.
 
 Implementations: 1
 
-7.1.16 Building
+7.1.17 Building
 
 Build the entire project.
 Rebuild the project incrementally.
@@ -1154,7 +1168,7 @@ Useful.
 Implementations: 1
 
 
-7.1.17 Popup Menu
+7.1.18 Popup Menu
 
 Bring up Popup menu with all Vimside commands (requires Forms library).
 The Emacs-Ensime binding has just such a popup menu.
@@ -1163,7 +1177,7 @@ Useful for folks who have not yet learned the key mappings.
 
 Implementations: 1
 
-7.1.18 Browse Source Roots
+7.1.19 Browse Source Roots
 
 Directory browser of project sources (project code base).
 In the Ensime configuration file, the key ':source-roots' is a list
@@ -1176,7 +1190,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.19 Browse Reference Source Roots
+7.1.20 Browse Reference Source Roots
 
 Directory browser of project reference sources (Java and Scala libraries).
 In the Ensime configuration file, the key ':reference-source-roots' is a list
@@ -1189,7 +1203,7 @@ used the Forms library hierarchy and node viewers.
 
 Implementations: 2
 
-7.1.20 Option Viewer/Editor
+7.1.21 Option Viewer/Editor
 
 Bring up the Option Viewer/Editor (requires Forms library). Lets one
 see all of the Vimside configurable Options and their current value.
@@ -1198,7 +1212,7 @@ some "dynamic" Options at runtime.
 
 Implementations: 1
 
-7.1.21 Completions
+7.1.22 Completions
 
 OmmiCompletions using <c-x><c-o>.
 
@@ -1220,17 +1234,13 @@ specified in the ensime configuration ':package'.
 Click on type and see information, Click on information and see its 
 information. Move about Inspector history.
 
-7.2.3 SBT Command-Line
-
-Switch to the sbt command-line (works for sbt projects only)
-
-7.2.4 Scalex
+7.2.3 Scalex
 
 Seems to be a dead project (see: http://scalex.org/)
 
-7.2.5 Run Application
+7.2.4 Run Application
 
-7.2.6 Debug Application
+7.2.5 Debug Application
 
 Start and run the debugger.
 Start and run the debugger.
@@ -1244,18 +1254,111 @@ Kill the debug session.
 Inspect the local variable at cursor.
 Show backtrace.
 
-7.2.7 And others
+7.2.6 And others
 
 ==============================================================================
-8. Architecture                                        *vimside-architecture*
+8. Third-party code                                     *vimside-third-party*
+
+Vimside uses some of third-party code. Their use is manditory
+for Vimside to work.
+
+8.1 Ensime
+
+The Ensime code is the Vimside backend compilation server.
+Communication with the backend Ensime server takes place via
+a socket call from the Vimside code to the running Ensime
+server.
+
+It is speculated that multiple Vimside sessions, multiple
+Vim sessions running Vimside, could connect to and function
+with just a single Ensime server but this has not been tested
+and the current Vimside code does not support it. To support
+it the Vimside code would first look for an Ensime port file
+and if one was located, try to communication with an Ensime
+at the other end. Of course, the port file might have been 
+left over from an earlier completed session and simply 
+not "cleaned up" for some reason and, so, there may not
+be an ensime server at the other end. 
+
+It is also unknown if a single Ensime server can handle two different
+Vimside session which, themselves, are tied to different Scala
+projects; certainly, at minimum the Scala compiler version must be the
+the same.
+
+8.2 VimProc
+
+VimProc is a Vim plugin that enable the launching of sub-processes
+and using its framework, communication with each sub-process 
+using its stdin and stdout. One of the implementations of the
+Simple Build Tool interfaces uses VimProc to launch SBT via a pipe
+and communicate uses stdin and stdout.
+
+8.3 VimShell
+
+For two features, VimShell is used to launch an interactive application.
+In both, the applications have there own "shell" with prompt, command
+execution and responses. They are launched using slightly modified
+versions of the VimShell code found in the VimShell plugin function
+s:vimshell_interactive(args). In both cases the code modification
+deals with stopping the Vimside scheduler prior to entering
+the interactive sub-process; determining the placement of the
+window which will hold the application (same window, split vertical
+or horizontal, or new tab), and registering a "postexit" callback
+with VimShell allowing for cleanup and restarting the Vimside
+scheduler after leaving the sub-application.
+
+When VimShell spawns an interactive sub-process, it creates some
+key mappings allowing the user to perform some meta actions.
+Normally, the interactive sup-applcation will absorb all of the
+keystroke a user types, but not the <ESC> key. When communicating 
+with the sup-application and one enters <ESC>, the user is now
+able to communicate with Vim. The following is a list of actions
+that have been tested and work:
+
+  Exit sub-application and close its window:      <ESC>:q<CR>
+  Exit sub-application and go to another window:  <ESC><C-w><C-w>
+  Exit sub-application and go to previous tab:    <ESC>:tabprev
+
+If one wishes to return to the window hosting the VimShell
+interactive sub-application one can simple switch to 
+the window or tab. For instance:
+
+  Goto sub-application window: <C-w><C-w>
+  Goto sub-application tab: :tabnext
+
+But that only gets one to the window in "Vim" mode, one is not
+yet communicating with the sub-application. To do that one
+must use one of the VimShell key mappings. The two that seem
+to (consistently) work are:
+
+  Execute command: <CR>
+  Move to next prompt: <C-n>
+
+While VimShell has a bunch of key mappings, the above two seem to
+be all that is needed to return to the Scala Repl and SBT 
+command interpreters.
+
+The available VimShell buffer key mappings can be found at:
+  https://github.com/Shougo/vimshell/blob/master/doc/vimshell.txt
+under the heading:
+  Normal mode default key mappings.
+
+Miss application of the key mappings can result in errors
+bubbling out of the VimShell code. In such cases, you are
+on your own. You can try to understand what happened and
+communicate with the author of VimShell but I, as the author of
+Vimside, do not want to undertake the debugging of VimShell.
+
+==============================================================================
+9. Architecture                                        *vimside-architecture*
 
 This is a brief overview of some of the features of the Vimside architecture.
 It differs from most Vim plugins in that it launches and then communicates
 with another process, the Ensime server via a socket.
 
-8.1 Client and Server
+9.1 Client and Server
 
-8.2 Polling, Jobs and Scheduler
+9.2 Polling, Jobs and Scheduler
 
 Vim is single threaded. 
 
@@ -1335,7 +1438,7 @@ of events for the command are not received by Vimside - we don't want
 Vimside to madly be ping the server (due to some bug or error) for the
 rest of an editing session.
 
-8.3 Swank Protocol
+9.3 Swank Protocol
 
 Communication between Vimside Client and the Ensime server using the Swank 
 Protocol. Vimside sends Swank encoded messages to Ensime and Ensime
@@ -1343,7 +1446,7 @@ responds with an ':ok' or ':abort' response and, possibly, some events.
 
 todo: example request/response and example events
 
-8.4 RPC
+9.4 RPC
 
 todo: structure of RPC Dictionary
 
@@ -1372,16 +1475,16 @@ rr = {
   }
 }
 
-8.5 Events
+9.5 Events
 
-8.6 Options
+9.6 Options
 
-8.7 Implementations
+9.7 Implementations
 
 ==============================================================================
-9. FAQ                                                           *vimside-faq*
+10. FAQ                                                          *vimside-faq*
 
-9.1 User                                                     *vimside-faq-user*
+10.1 User                                                    *vimside-faq-user*
     Q: Why is it call 'Vimside'?
     A: I thought about calling it 'Yasvide' but 'Vimside' is eaier to say.
 
@@ -1420,7 +1523,7 @@ rr = {
     A: Well, yea. You have to ask Vimside (Ensime) to re-compile the file
        so that it knows 1) where everything is and 2) what everything is.
 
-9.2 Developer                                           *vimside-faq-developer*
+10.2 Developer                                          *vimside-faq-developer*
     Q: What if I find a bug?
     A: Fix it and submit a patch or go to 
        https://github.com/megaannum/vimside and enter an "Issue".
@@ -1439,7 +1542,12 @@ rr = {
        So, is some additional license needed?
 
 ==============================================================================
-10. Release notes                                       *vimside-release-notes*
+11. Release notes                                       *vimside-release-notes*
+0.2.17   - Fix: ~
+  Added a second implementation of the interaction of Vimside and the SBT.
+  Added 'tailor-sbt-config-location' Option
+  Added additional documentation concerning using VimShell with the
+    Scala Repl and SBT interactive applications.
 0.2.16   - Fix: ~
   Added initial support for SBT. This includes adding a new 
     data/vimside/tests directory where there is a simple SBT project.
@@ -1587,12 +1695,12 @@ rr = {
     Forms Label checks that 'text' is String or Number.
 
 ==============================================================================
-11. Todo List                                                    *vimside-todo*
+12. Todo List                                                    *vimside-todo*
 
     * Implement remaining Emacs-Ensime commands.
 
 ==============================================================================
-12. Questions                                               *vimside-questions*
+13. Questions                                               *vimside-questions*
 
     Q: Don't seem to be able to get <S-Tab> to work with Vim-linux.
 
