@@ -326,10 +326,24 @@ the Option as:
 If you set the `ensime-dist-path`, it is checked first and if it exists it
 is used rather than the `ensime-install-path` and `ensime-dist-dir` combination.
 
-Currently, Vimside does not support the Ensime SBT commands (yet to be
-implemented). When such support is created, there is an additional
-library, an SBT Plugin that supports integration with the ENSIME IDE:
+With SBT support, there is a SBT Plugin that supports integration with 
+the ENSIME IDE:
 https://github.com/aemoncannon/ensime-sbt-cmd
+Follow the directions there and add
+
+    addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "VERSION")
+
+to your ~/.sbt/plugins/plugins.sbt file
+Where "VERSION" it the version of Ensime supported which, as 
+the ensime-sbt-cmd README.md states, is 0.1.1. So, the above 
+should be:
+
+    addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.1")
+
+Entering "ensime generate" while running sbt does indeed
+generate a ".ensime" file. I have not tested whether or not
+that generated file can actually be used by Vimside and
+passed to the backend Ensime server.
 
 ----
 

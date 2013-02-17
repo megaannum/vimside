@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.17
+Version:     0.2.18
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -165,8 +165,7 @@ Vimside depends upon Vimproc (https://github.com/Shougo/vimproc) for a
 C-language binding to sockets (and, thus to the Ensime server).
 
 Vimshell (https://github.com/Shougo/vimshell) is needed for launching and 
-managing communications with the Scala Repl (and, very possibly, the 
-launching of the SBT command line in the future).
+managing communications with the Scala Repl the SBT.
 
 It is recommended that you get the latest releases of these since they both 
 were modified to add some support for capabilities identified while creating 
@@ -1543,6 +1542,8 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.2.18   - Fix: ~
+  Added a note about the ENSIME-sbt-cmd plugin and how to use it.
 0.2.17   - Fix: ~
   Added a second implementation of the interaction of Vimside and the SBT.
   Added 'tailor-sbt-config-location' Option
