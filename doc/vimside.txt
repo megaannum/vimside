@@ -1569,7 +1569,7 @@ rr = {
 11. Release notes                                       *vimside-release-notes*
 0.2.19   - Fix: ~
   Added initial checkin of type and package inspecter code. Its
-    sure to have bugs. Don't now if the project package inspector
+    sure to have bugs. Don't know if the project package inspector
     code works or not.
 0.2.18   - Fix: ~
   Added a note about the ENSIME-sbt-cmd plugin and how to use it.
