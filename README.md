@@ -18,19 +18,23 @@ For package, place cursor over package path and enter <Leader>tp.
 Do not know if the project package inspector works yet.
 
 Inspector keymaps:
-        <Leader>ti   inspect type (cursor over type)
-        <Leader>tp   inspect package (cursor over package path at top of file)
-        <Leader>to   inspect project package (may not work)
+
+    <Leader>ti   inspect type (cursor over type)
+    <Leader>tp   inspect package (cursor over package path at top of file)
+    <Leader>to   inspect project package (may not work)
+
 Inspector control:
-        In inspector pressing <F1> gets help.
-        <Leader> q      : quit
-        <Leader> <CR>   : inspect type at point
-        <Leader> <TAB>  : next type
-        <Leader> <C-n>  : next type
-        <Leader> <S-TAB>: previous type  (S-TAB may not work)
-        <Leader> <C-p>  : previous type
-        <Leader> n      : next history
-        <Leader> p      : previous history
+
+    In inspector pressing <F1> gets help.
+    <Leader> q      : quit
+    <Leader> <CR>   : inspect type at point
+    <Leader> <TAB>  : next type
+    <Leader> <C-n>  : next type
+    <Leader> <S-TAB>: previous type  (S-TAB may not work)
+    <Leader> <C-p>  : previous type
+    <Leader> n      : next history
+    <Leader> p      : previous history
+
 Entering and leaving Type Inspector multiple times has not been
 tested very much.
 
