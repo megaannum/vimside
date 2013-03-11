@@ -44,12 +44,9 @@ call s:LOG("inspect_type_by_id TOP")
   endif
 
   let l:args = { }
+  let l:args['type_id'] = 0
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-inspect-type-by-id-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("inspect_type_by_id BOTTOM") 
 endfunction
@@ -61,8 +58,10 @@ endfunction
 
 function! g:InspectTypeByIdCaller(args)
   let cmd = "swank:inspect-type-by-id"
+  let type_id = a:args.type_id
 
-  return '('. cmd .')'
+
+  return '('. cmd .' '. type_id .')'
 endfunction
 
 

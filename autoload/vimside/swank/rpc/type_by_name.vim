@@ -44,11 +44,7 @@ call s:LOG("type_by_name TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-type-by-name-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("type_by_name BOTTOM") 
 endfunction
@@ -60,8 +56,9 @@ endfunction
 
 function! g:TypeByNameCaller(args)
   let cmd = "swank:type-by-name"
+  let name = a:args.name
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. name .'")'
 endfunction
 
 

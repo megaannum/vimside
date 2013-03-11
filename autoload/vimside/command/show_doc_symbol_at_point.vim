@@ -315,6 +315,18 @@ endfunction
 
 " type member_symbol
 function! s:LaunchBrowser(tpe, ...)
+  let [found, url] = (a:0 == 0) 
+        \ ? vimside#command#show_doc_symbol_at_point#MakeUrl(tpe)
+        \ : vimside#command#show_doc_symbol_at_point#MakeUrl(tpe, a:1)
+
+  " If not found, then maybe its not a java/scala/android type
+  if found
+call s:LOG("s:LaunchBrowser found url=". url) 
+    call vimside#browser#Open(url)
+  endif
+endfunction
+
+function! vimside#command#show_doc_symbol_at_point#MakeUrl(tpe, ...)
   let tpe = a:tpe
 
   if has_key(tpe, ':arrow-type')
@@ -322,18 +334,18 @@ function! s:LaunchBrowser(tpe, ...)
   else
     let full_name = tpe[':full-name']
   endif
-call s:LOG("s:LaunchBrowser full_name=". full_name) 
+call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl full_name=". full_name) 
 
   let found = 0
   for key in keys(s:show_doc_map)
-call s:LOG("s:LaunchBrowser key='". key ."'") 
+call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl key='". key ."'") 
     let map = s:show_doc_map[key]
     let re = map.regex
-call s:LOG("s:LaunchBrowser re='". re ."'") 
+call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl re='". re ."'") 
     if full_name =~# re
       let url_base = map.url_base
       let Func_ref = map.funcref
-call s:LOG("s:LaunchBrowser url_base=". url_base) 
+call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl url_base=". url_base) 
       if a:0 == 0
         let url = Func_ref(url_base, tpe)
       elseif a:0 == 1
@@ -345,10 +357,5 @@ call s:LOG("s:LaunchBrowser url_base=". url_base)
       break
     endif
   endfor
-
-  " If not found, then maybe its not a java/scala/android type
-  if found
-call s:LOG("s:LaunchBrowser found url=". url) 
-    call vimside#browser#Open(url)
-  endif
+  return [found, url]
 endfunction

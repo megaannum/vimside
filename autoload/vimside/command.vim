@@ -24,6 +24,30 @@ function! vimside#command#StopEnsime() range
   endif
 endfunction
 
+function! vimside#command#InspectTypeAtPoint() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#inspector#type_at_point()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#InspectPackageAtPoint() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#inspector#package_at_point()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+function! vimside#command#InspectProjectPackage() range
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#inspector#project_package()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
 function! vimside#command#SymbolAtPoint() range
   if exists("g:vimside.started") && g:vimside.started
     call vimside#command#symbol_at_point#Run()

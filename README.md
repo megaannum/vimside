@@ -11,6 +11,23 @@ Only a small number of all of the ENSIME capabilities have
 been implemented and it has only been tested against the
 very small Scala/Java test source project bundled with it.
 
+With lastest checkin, there is the first cut of the Type and 
+Package Inspector. There will certainly be bugs. 
+For types, place cursor over type and enter <Leader>ti.
+For package, place cursor over package path and enter <Leader>tp.
+Do not know if the project package inspector works yet.
+In inspector pressing <F1> gets help.
+<Leader> q      : quit
+<Leader> <CR>   : inspect type at point
+<Leader> <TAB>  : next type
+<Leader> <C-n>  : next type
+<Leader> <S-TAB>: previous type  (S-TAB may not work)
+<Leader> <C-p>  : previous type
+<Leader> n      : next history
+<Leader> p      : previous history
+Entering and leaving Type Inspector multiple times has not been
+tested very much.
+
 There is now included support for SBT (simple build tool).
 The test project is in the data/tests/sbt directory. The
 plugin/vimside.vim file has key mappings for functions that
@@ -46,12 +63,12 @@ frequently, flushing out the features.
 |Browse Reference Source Roots|Directory browser of project reference sources (Java and Scala libraries).|2|
 |Option Viewer/Editor|Bring up the Option Viewer/Editor (requires Forms library). Lets one see all of the Vimside configurable Options and their current value. To be implemented will be an Editor allowing for the modification of some "dynamic" Options at runtime.|1|
 |Completions|OmmiCompletions using `<c-x><c-o>`.Very Useful.|1|
+|Package Inspector|Inspect imported package, current file's package and the package specified in the ensime configuration `:package`. Very Useful|1|
+|Type Inspector|Click on type and see information, Click on information and see its information. Move about Inspector history. In Inspector help <F1>. Very Useful|1|
 
 ###Ensime Capabilities to be Supported:
 |feature|description|
 |---|---|
-|Package Inspector|Inspect imported package, current file's package and the package specified in the ensime configuration `:package`.|
-|Type Inspector|Click on type and see information, Click on information and see its information. Move about Inspector history.
 |Scalex|Seems to be a dead project (see: http://scalex.org/)|
 |Run Application||
 |Debug Application|Start and run the debugger. Start and run the debugger. Set a breakpoint. Clear a breakpoint. Step. Step over. Step out. Continue from a breakpoint. Kill the debug session. Inspect the local variable at cursor. Show backtrace.|

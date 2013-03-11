@@ -54,10 +54,17 @@ else
   endfunction
   autocmd FileType scala inoremap <tab> <c-r>=TabToOmni()<CR>
 
-
   " C-c C-v i or Control+Right-Click
-  "   Inspect the type of the expression under the cursor.
+  " Inspect the type of the expression under the cursor.
+  autocmd FileType scala map <silent> <Leader>ti :call vimside#command#InspectTypeAtPoint()<CR>
+  " C-c C-v p
+  " Inspect package at point
+  autocmd FileType scala map <silent> <Leader>tp :call vimside#command#InspectPackageAtPoint()<CR>
+  " C-c C-v o
+  " Inspect the project package if set in envime configure file.
+  autocmd FileType scala map <silent> <Leader>to :call vimside#command#InspectProjectPackage()<CR>
 
+  
   " M-. (dot) or Control+Left-Click 
   "   Jump to definition of symbol under cursor.
   "   Note that the Meta/Alt keys, while easy to use with GVim, are,
@@ -133,10 +140,15 @@ else
 
   " C-c C-v s
   "   Switch to the sbt command-line (works for sbt projects only)
+  "     s sbt switch
   autocmd FileType scala nmap <silent> <Leader>ss :call vimside#command#SbtSwitch()<CR>
+  "     c sbt do complete
   autocmd FileType scala nmap <silent> <Leader>sc :call vimside#command#SbtCompile()<CR>
+  "     n sbt do clean
   autocmd FileType scala nmap <silent> <Leader>sn :call vimside#command#SbtClean()<CR>
+  "     p sbt do package
   autocmd FileType scala nmap <silent> <Leader>sp :call vimside#command#SbtPackage()<CR>
+  "     e sbt do exit
   autocmd FileType scala nmap <silent> <Leader>se :call vimside#command#SbtExit()<CR>
 
   " invoke the sbt command interpreter
@@ -221,13 +233,6 @@ else
   "     r Rebuild the project, incrementally.
   autocmd FileType scala nmap <silent> <Leader>vbb :call vimside#command#BuilderBuild()<CR>
   autocmd FileType scala nmap <silent> <Leader>vbr :call vimside#command#BuilderReBuild()<CR>
-
-  "
-  "     s sbt switch
-  "     c sbt do complete
-  "     n sbt do clean
-  "     p sbt do package
-  " NOT IMPLEMENTED YET
 
   " M-x ensime-reload
   "   Reload the .ensime file and recompile the project. Useful if you hit 

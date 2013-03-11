@@ -44,13 +44,20 @@ call s:LOG("type_by_name_at_point TOP")
     let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-type-by-name_at_point-caller')
   endif
 
-  let l:args = { }
-  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+    " TODO better error message display and logging
+    echoerr fn
+    return
+  endif
+  
+  let offset = vimside#util#GetCurrentOffset()
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-type-by-name_at_point-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  let l:args = { }
+  let l:args['filename'] = fn
+  let l:args['offset'] = offset
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("type_by_name_at_point BOTTOM") 
 endfunction
@@ -61,9 +68,12 @@ endfunction
 "======================================================================
 
 function! g:TypeByNameAtPointCaller(args)
-  let cmd = "swank:type-by-name_at_point"
+  let cmd = "swank:type-by-name-at-point"
+  let type_name = a:args.type_name
+  let fn = a:args.filename
+  let offset = a:args.offset
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. type_name .'" "'. fn .'" '. offset .')'
 endfunction
 
 

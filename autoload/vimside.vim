@@ -26,6 +26,7 @@ let s:ERROR = function("vimside#log#error")
 
 
 let g:vimside = {} 
+let g:vimside.pre_started = 0
 let g:vimside.started = 0
 let g:vimside.errors = []
 let g:vimside.warns = []
@@ -139,14 +140,8 @@ let g:vimside.IndexerReady = function('g:IndexerReady')
 
 
 
-
-
-function! vimside#StartEnsime()
-  if ! g:vimside.started 
-    let msg = "Starting Ensime Engine ..."
-    call vimside#cmdline#Display(msg)
-
-
+function! vimside#PreStart()
+  if ! g:vimside.pre_started 
     " Ok, are all of the plugins we need avaiable
     call vimside#vimplugins#Check()
 
@@ -175,6 +170,17 @@ function! vimside#StartEnsime()
     if len(g:vimside.errors) != 0
       throw "Load Ping Info Errors: ". string(g:vimside.errors)
     endif
+
+    let g:vimside.pre_started = 1
+  endif
+endfunction
+
+function! vimside#StartEnsime()
+  if ! g:vimside.started 
+    let msg = "Starting Ensime Engine ..."
+    call vimside#cmdline#Display(msg)
+
+    call vimside#PreStart()
 
     call vimside#StartEnsimeServer()
     let g:vimside.started = 1

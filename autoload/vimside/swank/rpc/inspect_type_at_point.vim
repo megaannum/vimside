@@ -44,13 +44,20 @@ call s:LOG("inspect_type_at_point TOP")
     let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-inspect-type-at-point-caller')
   endif
 
-  let l:args = { }
-  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  let [found, fn] = vimside#util#GetCurrentFilename()
+  if ! found
+    " TODO better error message display and logging
+    echoerr fn
+    return
+  endif
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-inspect-type-at_point-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  let offset = vimside#util#GetCurrentOffset()
+
+  let l:args = { }
+  let l:args['filename'] = fn
+  let l:args['offset'] = offset
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("inspect_type_at_point BOTTOM") 
 endfunction
@@ -61,9 +68,11 @@ endfunction
 "======================================================================
 
 function! g:InspectTypeAtPointCaller(args)
-  let cmd = "swank:inspect-type-at_point"
+  let cmd = "swank:inspect-type-at-point"
+  let fn = a:args.filename
+  let offset = a:args.offset
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. fn .'" '. offset .')'
 endfunction
 
 
@@ -81,7 +90,7 @@ function! g:InspectTypeAtPointHandler()
     let dic = a:dic
 call s:LOG("InspectTypeAtPointHandler_Ok dic=".  string(dic)) 
 
-    let l:pid = dic[':pid']
+    " let l:pid = dic[':pid']
 
     return 1
   endfunction

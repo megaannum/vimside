@@ -45,12 +45,9 @@ call s:LOG("inspect_package_by_path TOP")
   endif
 
   let l:args = { }
+  let l:args.path = ''
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-inspect-package-by-path-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("inspect_package_by_path BOTTOM") 
 endfunction
@@ -62,8 +59,9 @@ endfunction
 
 function! g:InspectPackageByPathCaller(args)
   let cmd = "swank:inspect-package-by-path"
+  let path = a:args.path
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. path .'")'
 endfunction
 
 
