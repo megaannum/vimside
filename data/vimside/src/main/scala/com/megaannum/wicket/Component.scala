@@ -1,4 +1,4 @@
-package com.megaanum.wicket
+package com.megaannum.wicket
 
 object Component {
   def main(args: Array[String]): Unit = {

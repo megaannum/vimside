@@ -1,4 +1,4 @@
-package com.megaanum.wicket;
+package com.megaannum.wicket;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.megaanum
+package com.megaannum
 
 import java.lang.Float
 import java.lang.Math

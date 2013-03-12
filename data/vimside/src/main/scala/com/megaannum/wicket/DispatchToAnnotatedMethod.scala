@@ -1,4 +1,4 @@
-package com.megaanum.wicket
+package com.megaannum.wicket
 
 object DispatchToAnnotatedMethod {
   def main(args: Array[String]): Unit = {

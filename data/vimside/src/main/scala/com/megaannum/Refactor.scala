@@ -1,4 +1,4 @@
-package com.megaanum
+package com.megaannum
 
 // see http://scala-refactoring.org/organize-imports/
 

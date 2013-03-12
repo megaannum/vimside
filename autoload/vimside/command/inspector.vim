@@ -311,11 +311,15 @@ endfunction
 function! s:inspect_project_package()
 call s:LOG("s:inspect_project_package: TOP")
   let dic = g:vimside.ensime.config
-  if has_key(dic, ":project-package")
+call s:LOG("s:inspect_project_package: dic=". string(dic))
+  if has_key(dic, ":package")
+    let package = dic[":package"]
+    call s:inspect_by_path(package)
+  elseif has_key(dic, ":project-package")
     let project_package = dic[":project-package"]
     call s:inspect_by_path(project_package)
   else
-call s:LOG("s:inspect_project_package: no procjet-package in ensime config")
+call s:LOG("s:inspect_project_package: no project package in ensime config")
   endif
 endfunction
 
@@ -580,7 +584,7 @@ call s:LOG("s:inspector_insert_linked_type: TOP")
       let full_name = ti[":full-name"]
       let [path, outer, name] = Name_parts(full_name)
       if path != ''
-        call s:inspector_insert_linked_package_path(path)
+        call s:inspector_insert_linked_package_path(path, 1)
       endif
       if outer != '' && has_key(ti, ":outer-type-id")
         let outer_type_id = ti[":outer-type-id"]
@@ -658,7 +662,7 @@ call s:LOG("s:inspector_insert_linked_arrow_type: TOP")
   call s:inspector_insert_linked_type(result_type, 0, 1)
 endfunction
 
-function! s:inspector_insert_linked_package_path(path)
+function! s:inspector_insert_linked_package_path(path, last_dot)
 call s:LOG("s:inspector_insert_linked_package_path: path=". a:path)
   let parts = split(a:path, '\.')
 " call s:LOG("s:inspector_insert_linked_package_path: parts=". string(parts))
@@ -675,7 +679,9 @@ call s:LOG("s:inspector_insert_linked_package_path: path=". a:path)
 " call s:LOG("s:inspector_insert_linked_package_path: part=". part)
     call s:page.add_text(part, s:make_inspect_pakage_by_path_action(accum))
   endfor
-  call s:page.add_text('.')
+  if a:last_dot
+    call s:page.add_text('.')
+  endif
 endfunction
 
 function! s:inspector_insert_linked_member(owner_type, member)
@@ -878,23 +884,25 @@ call s:LOG("PackageInspector_init: TOP")
   let self.full_name = pii[":full-name"]
   let self.name = pii[":name"]
 
-  let members = pii[":members"]
-  for member in members
-    if has_key(member, ":members")
-      let interface = s:PackageInspector_constructor(member)
-      call add(self.members, interface)
-    else
-      let interface_info = { ":type": member }
-      let interface = s:Interface_constructor(interface_info)
-      call add(self.members, interface)
-    endif
-  endfor
+  if has_key(pii, ":members")
+    let members = pii[":members"]
+    for member in members
+      if has_key(member, ":members")
+        let interface = s:PackageInspector_constructor(member)
+        call add(self.members, interface)
+      else
+        let interface_info = { ":type": member }
+        let interface = s:Interface_constructor(interface_info)
+        call add(self.members, interface)
+      endif
+    endfor
+  endif
 endfunction
 let s:PackageInspector.init = function("s:PackageInspector_init")
 
 function! s:PackageInspector_render() dict
 call s:LOG("PackageInspector_render: TOP")
-  call s:inspector_insert_linked_package_path(self.full_name)
+  call s:inspector_insert_linked_package_path(self.full_name, 0)
 
   try 
     call s:page.increment_indent()

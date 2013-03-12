@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.19
+Version:     0.2.20
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1567,6 +1567,9 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.2.20   - Fix: ~
+  Inspecting the project package now works. Also, re-arranged the
+    package names. And trimmed the '.' at end of a package path.
 0.2.19   - Fix: ~
   Added initial checkin of type and package inspecter code. Its
     sure to have bugs. Don't know if the project package inspector

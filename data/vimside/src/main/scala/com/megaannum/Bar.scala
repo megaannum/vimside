@@ -1,4 +1,4 @@
-package com.megaanum
+package com.megaannum
 
 object Bar {
   def main(args: Array[String]): Unit = {

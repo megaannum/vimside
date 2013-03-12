@@ -13,15 +13,15 @@ very small Scala/Java test source project bundled with it.
 
 With lastest checkin, there is the first cut of the Type and 
 Package Inspector. There will certainly be bugs. 
-For types, place cursor over type and enter <Leader>ti.
-For package, place cursor over package path and enter <Leader>tp.
+For types, place cursor over type and enter \<Leader>ti.
+For package, place cursor over package path and enter \<Leader>tp.
 Do not know if the project package inspector works yet.
 
 Inspector keymaps:
 
     <Leader>ti   inspect type (cursor over type)
     <Leader>tp   inspect package (cursor over package path at top of file)
-    <Leader>to   inspect project package (may not work)
+    <Leader>to   inspect project package 
 
 Inspector control:
 
