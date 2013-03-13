@@ -26,8 +26,6 @@ let s:history_pos = -1
 let s:history_list = []
 
 let g:type_inspector_config = {}
-let g:type_inspector_config.clickNode      = '<CR>'
-let g:type_inspector_config.clickNodeMouse = '<2-LeftMouse>'
 
 let s:split_mode = "new"
 let s:current_buffer = ""
@@ -48,29 +46,38 @@ let s:running = 0
 " call by s:loadDisplay()
 function! s:SetupSyntax()
   if has("syntax")
-    syn keyword TI_Def def nextgroup=TI_DefName skipwhite
-    syn keyword TI_Def method nextgroup=TI_DefName skipwhite
-    syn keyword TI_Def def nextgroup=TI_DefName skipwhite
-    syn keyword TI_Val val nextgroup=TI_ValName skipwhite
-    syn keyword TI_Var var nextgroup=TI_VarName skipwhite
+    " entitieswords with different colors:
+    "   class & object & trait 
+    "   package path 
+    "   class name at end of package path & class name 
+    "   doc
+    "   method names
 
-    syn keyword TI_Class class nextgroup=TI_ClassName skipwhite
-    syn keyword TI_Object object nextgroup=TI_ClassName skipwhite
-    syn keyword TI_Trait trait nextgroup=TI_ClassName skipwhite
+    syn match TI_Name0 " [^ \.]\+$"
+
+    syn keyword TI_COMPANION companion
+    syn keyword TI_DOC doc 
+    " syn keyword TI_Object object nextgroup=TI_ClassName skipwhite
+    "syn keyword TI_Trait trait nextgroup=TI_ClassName skipwhite
+
+    syn match TI_MethodName "^\s\+[^ \.]\+" nextgroup=TI_DOC1 skipwhite
+    syn match TI_DOC1 "doc" contained
+    syn match TI_Class "^\s*class" nextgroup=TI_PackagePath skipwhite
+    syn match TI_Object "^\s*object" nextgroup=TI_PackagePath skipwhite
+    syn match TI_Trait "^\s*trait" nextgroup=TI_PackagePath skipwhite
 
 
-    syn match TI_DefName "[^ ]\+" contained 
-    syn match TI_ValName "[^ =:;([]\+" contained
-    syn match TI_VarName "[^ =:;([]\+" contained
-    syn match TI_ClassName "[^ =:;(\[]\+" contained
+    syn match TI_PackagePath "\([a-zA-Z0-9_\$\[\]]\+\.\)\+" contained nextgroup=TI_Name
+    syn match TI_Name "[^ \.]\+" contained
 
-if 0
-    syn match TI_ClassName "[a-zA-Z0-9_\.\$\[\]]\+"
-    syn match TI_DOC "[^ ]\+ doc"
-    syn match TI_DOC "doc"
+    syn match TI_PackagePath1 "\([a-z0-9_\$\[\]]\+\.\)\+" nextgroup=TI_Name1
+    " syn match TI_PackagePath1 "\([a-zA-Z0-9_\$\[\]]\+\.\)\+" nextgroup=TI_Name1
+    syn match TI_Name1 "[^ \.]\+" contained
 
-    syn match TI_NodeStatus "\[(+\|-)\]"
-endif
+
+"    syn match TI_ClassName "[^ =:;(\[]\+" contained
+"    syn match TI_ClassName "[a-zA-Z0-9_\.\$\[\]]\+"
+
 
     syn match TI_COMMENT "(via implicit [a-zA-Z0-9_]\+)"
     syn match TI_COMMENT "Press .*"
@@ -86,21 +93,24 @@ endif
     syn match TI_COMMENT "q .*"
 
 
-    hi link TI_Def Keyword
-    hi link TI_Var Keyword
-    hi link TI_Val Keyword
-    hi link TI_DefName Function
+    hi link TI_MethodName PreProc
     hi link TI_Class Keyword
     hi link TI_Object Keyword
     hi link TI_Trait Keyword
     hi link TI_NodeStatus Operator
+
     hi link TI_DOC Special
+    hi link TI_DOC1 Special
 
     hi link TI_ClassName Type
+    hi link TI_COMPANION PreProc
 
-if 0
-    hi link TI_IMPLICIT Comment
-endif
+    hi link TI_Name0 Type
+    hi link TI_Name Type
+    hi link TI_Name1 Type
+    hi link TI_PackagePath Comment
+    hi link TI_PackagePath1 Comment
+
     hi link TI_COMMENT Comment
 
   endif
@@ -110,21 +120,20 @@ function! s:KeyMappings()
 call s:LOG("KeyMappings: TOP")
 
   if s:done_key_mappings == 0
-  exec "nnoremap <silent> <buffer> " . g:type_inspector_config.clickNode . " :call <SID>OnNodeClick()<CR>"
-  exec "nnoremap <silent> <buffer> " . g:type_inspector_config.clickNodeMouse . " :call <SID>OnNodeClick()<CR>"
-  nnoremap <script> <silent> <buffer> q :call <SID>Close()<CR>
-
-map <script> <silent> <Leader>t1         :call TypeInspector1()<CR>
-map <script> <silent> <Leader>t2         :call TypeInspector2()<CR>
-nnoremap <script> <silent> <buffer> <F1> :call <SID>ToggleHelp()<CR>
-nnoremap <script> <silent> <buffer> <TAB> :call <SID>ForwardAtion()<CR>
-nnoremap <script> <silent> <buffer> <C-n> :call <SID>ForwardAtion()<CR>
-nnoremap <script> <silent> <buffer> <S-TAB> :call <SID>BackwardAtion()<CR>
-nnoremap <script> <silent> <buffer> <C-p> :call <SID>BackwardAtion()<CR>
-nnoremap <script> <silent> <buffer> p :call <SID>PreviousHistory()<CR>
-nnoremap <script> <silent> <buffer> n :call <SID>NextHistory()<CR>
+    nnoremap <script> <silent> <buffer> <CR> :call <SID>OnNodeClick()<CR>
+    nnoremap <script> <silent> <buffer> <2-LeftMouse> :call <SID>OnNodeClick()<CR>
+    nnoremap <script> <silent> <buffer> <F1> :call <SID>ToggleHelp()<CR>
+    nnoremap <script> <silent> <buffer> <TAB> :call <SID>ForwardAtion()<CR>
+    nnoremap <script> <silent> <buffer> <C-n> :call <SID>ForwardAtion()<CR>
+    nnoremap <script> <silent> <buffer> <S-TAB> :call <SID>BackwardAtion()<CR>
+    nnoremap <script> <silent> <buffer> <C-p> :call <SID>BackwardAtion()<CR>
+    nnoremap <script> <silent> <buffer> p :call <SID>PreviousHistory()<CR>
+    nnoremap <script> <silent> <buffer> n :call <SID>NextHistory()<CR>
+    nnoremap <script> <silent> <buffer> q :call <SID>Close()<CR>
 
 
+"    map <script> <silent> <Leader>t1         :call TypeInspector1()<CR>
+"    map <script> <silent> <Leader>t2         :call TypeInspector2()<CR>
 if 0
 noremap <script> <silent> <unique> <Leader>ti :TypeInspector<CR>
 noremap <script> <silent> <unique> <Leader>tt :TypeInspectorTab<CR>
@@ -462,24 +471,7 @@ call s:LOG("g:type_inspector_by_name_at_point_callback: dic=". string(a:dic))
 
   let s:page = s:Page_constructor()
   let s:current_inspector = s:PackageInspector_constructor(a:dic)
-
-call s:LOG("g:type_inspector_by_name_at_point_callback: s:history_pos=". s:history_pos)
-  if s:history_pos >= 0
-    let history = s:history_list[s:history_pos]
-    let history.pos = getpos('.')
-  endif
-
-  let history = s:History_constructor(s:current_inspector, s:page)
-
-call s:LOG("g:type_inspector_by_name_at_point_callback: len(s:history_list)=". len(s:history_list))
-  if s:history_pos < len(s:history_list)-1
-    let s:history_list[s:history_list] = history
-  else
-    call add(s:history_list, history)
-  endif
-  let s:history_pos += 1
-
-  call s:DoTypeInspector()
+  call g:history_and_do(s:page, s:current_inspector)
 endfunction
 
 " TypeInspectInfo
@@ -489,18 +481,31 @@ function! g:type_inspector_show(type_inspector_info)
 call s:LOG("g:type_inspector_show: TOP")
   let s:page = s:Page_constructor()
   let s:current_inspector = s:TypeInspector_constructor(a:type_inspector_info)
+  call g:history_and_do(s:page, s:current_inspector)
+endfunction
 
-call s:LOG("g:type_inspector_show: s:history_pos=". s:history_pos)
+
+function! g:history_and_do(page, inspector)
+call s:LOG("g:history_and_do: TOP")
+
+call s:LOG("g:history_and_do: s:history_pos=". s:history_pos)
+  " save current position
   if s:history_pos >= 0
     let history = s:history_list[s:history_pos]
     let history.pos = getpos('.')
   endif
 
-  let history = s:History_constructor(s:current_inspector, s:page)
+  " make new history
+  let history = s:History_constructor(a:inspector, a:page)
 
-call s:LOG("g:type_inspector_show: len(s:history_list)=". len(s:history_list))
+call s:LOG("g:history_and_do: len(s:history_list)=". len(s:history_list))
   if s:history_pos < len(s:history_list)-1
-    let s:history_list[s:history_list] = history
+    let s:history_list[s:history_pos+1] = history
+
+    " clear all histories "later" than this new one
+    if s:history_pos < len(s:history_list)-1
+      let s:history_list = s:history_list[0:s:history_pos+1]
+    endif
   else
     call add(s:history_list, history)
   endif
@@ -508,6 +513,8 @@ call s:LOG("g:type_inspector_show: len(s:history_list)=". len(s:history_list))
 
   call s:DoTypeInspector()
 endfunction
+
+
 
 
 " Input: point
@@ -970,7 +977,9 @@ call s:LOG("TypeInspector_init: TOP")
   let tii = a:type_inspector_info
   let self.type_info = tii[":type"]
 
-  let self.companion_id = tii[":companion-id"]
+  if has_key(tii, ":companion-id")
+    let self.companion_id = tii[":companion-id"]
+  endif
 
   let self.type_id = self.type_info[":type-id"]
   if has_key(self.type_info, ":outer-type-id")
@@ -999,7 +1008,7 @@ call s:LOG("TypeInspector_render: TOP")
     call s:page.add_text(' ')
 
     " companion
-    if self.decl_as != 'object'
+    if self.decl_as != 'object' && self.companion_id >= 0
       let companion_id = self.companion_id
       let companion_text = '(companion)'
       call s:page.add_text(companion_text, s:make_inspector_insert_link_to_type_id_action(companion_id))
@@ -1598,13 +1607,8 @@ endfunction
 
 function!  vimside#command#inspector#project_package()
 call s:LOG("vimside#command#inspector#project_package TOP")
-  let [success, _] = vimside#util#GetCurrentFilename()
-  if success
-    echo "Starting Type Inspector..."
-    call s:inspect_project_package()
-  elseif s:running == 1
-    call s:OnNodeClick()
-  endif
+  echo "Starting Type Inspector..."
+  call s:inspect_project_package()
 call s:LOG("vimside#command#inspector#project_package BOTTOM")
 endfunction
 
