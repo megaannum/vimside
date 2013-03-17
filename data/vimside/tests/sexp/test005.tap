@@ -1,0 +1,11 @@
+1..10
+ok 1 - KeywordAtom ToString
+ok 2 - KeywordAtom ToReadableString
+ok 3 - KeywordAtom ToWireString
+ok 4 - KeywordAtom ToVim
+ok 5 - KeywordAtom ToString
+ok 6 - KeywordAtom ToReadableString
+ok 7 - KeywordAtom ToWireString
+ok 8 - KeywordAtom ToVim
+ok 9 - KeywordAtom ToWireString
+ok 10 - KeywordAtom ToWireString

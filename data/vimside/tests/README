@@ -1,0 +1,13 @@
+
+To run these test you have to have two Vim packages installed:
+    runVimTests-1.22.zip 
+        http://www.vim.org/scripts/script.php?script_id=2565
+    vimtap-0.4.0.zip.
+        http://www.vim.org/scripts/script.php?script_id=2213
+
+
+To execute tests run:
+
+    runVimTests.sh <test_file>.vim
+
+where <test_file> is the name of a test file.

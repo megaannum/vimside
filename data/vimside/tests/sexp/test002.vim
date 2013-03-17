@@ -2,8 +2,6 @@
 " test int
 "---------------------------
 
-source ../autoload/vimside/sexp.vim
-
 call vimtap#SetOutputFile('test002.tap')
 call vimtap#Plan(19)
 

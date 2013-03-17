@@ -102,10 +102,6 @@ else
   "   Show (web api) documentation for symbol at point
   autocmd FileType scala map <silent> <Leader>vt :call vimside#command#ShowDocSymbolAtPoint()<CR>
 
-  " Control+Right-Click(on an imported package)
-  "   Inspect the package under cursor.
-  " NOT IMPLEMENTED YET
-
   " Mouse Hover
   "   Echo the type of the expression under the cursor.
   autocmd FileType scala nmap <silent> <Leader>vh :call vimside#command#HoverToSymbol()<CR>
@@ -114,35 +110,15 @@ else
   "   Inspect the package of the current source file.
   " NOT IMPLEMENTED YET
 
-  " C-c C-v o
-  "   Inspect the package specified in .ensime as :package.
-  " NOT IMPLEMENTED YET
-
   " C-c C-v r
   "   List all references to the symbol under the cursor.
   autocmd FileType scala nmap <silent> <Leader>vr :call vimside#command#UsesOfSymbolAtPoint()<CR>
-
-  " .
-  "   Forward one page in the inspector history.
-  " NOT IMPLEMENTED YET
-
-  " ,
-  "   Backward one page in the inspector history.
-  " NOT IMPLEMENTED YET
-
-  " C-n or TAB
-  "   Forward one link in the inspector.
-  " NOT IMPLEMENTED YET
-
-  " C-p
-  "   Backward one link in the inspector.
-  " NOT IMPLEMENTED YET
 
   " C-c C-v s
   "   Switch to the sbt command-line (works for sbt projects only)
   "     s sbt switch
   autocmd FileType scala nmap <silent> <Leader>ss :call vimside#command#SbtSwitch()<CR>
-  "     c sbt do complete
+  "     c sbt do compile
   autocmd FileType scala nmap <silent> <Leader>sc :call vimside#command#SbtCompile()<CR>
   "     n sbt do clean
   autocmd FileType scala nmap <silent> <Leader>sn :call vimside#command#SbtClean()<CR>
@@ -259,3 +235,20 @@ else
     " autocmd VimLeave scala call vimside#StopEnsime()
   augroup END
 endif
+
+" --------------------------------------------------------------------------
+" Set the following to true (1), if you want to generate log output during
+" Vimside initialization, prior to the reading and validation of
+" all of the Options. This is useful for debugging problems with
+" locating and loading the files:
+"   options_user.vim
+"   options_project.vim
+"   ensime_config.vim
+let g:Vimside_Enable_Pre_Initialization_Logging = 0
+
+" Directory for the pre-init logging
+let g:Vimside_Enable_Pre_Initialization_Logging_Dir = getcwd()
+
+" Filename for the pre-init logging
+let g:Vimside_Enable_Pre_Initialization_Logging_File = 'VIMSIDE_LOG'
+" --------------------------------------------------------------------------

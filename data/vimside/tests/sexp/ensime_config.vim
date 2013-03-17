@@ -13,13 +13,13 @@ if s:scala_home == ''
 endif
 
 let s:compile_jars = g:SExp(
-                     \ g:Str(s:scala_home . "/lib/scala-library.jar"),
-                     \ g:Str(s:scala_home . "/lib/scala-compiler.jar"), 
+                     \ g:Str(s:scala_home . "lib/scala-library.jar"),
+                     \ g:Str(s:scala_home . "lib/scala-compiler.jar"), 
                      \ g:Str(s:full_dir . "/build/classes")
                      \ )
 let s:sources = g:SExp(
-                \ g:Str(s:full_dir . "src/main/java"),
-                \ g:Str(s:full_dir . "src/main/scala")
+                \ g:Str(s:full_dir . "/src/main/java"),
+                \ g:Str(s:full_dir . "/src/main/scala")
                 \ )
 let s:include_index = g:SExp(
                       \ g:Str("com\\.megaannum\\.\*")

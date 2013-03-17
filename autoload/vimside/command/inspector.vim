@@ -294,7 +294,7 @@ call s:LOG("s:inspect_type_at_point: TOP")
   if s:is_java_file()
     call s:inspect_java_type_at_point()
   else
-    let [success, pack] = Package_path_at_point()
+    let [success, path] = Package_path_at_point()
     if success
       call s:inspect_package_by_path(path)
     else
@@ -332,6 +332,7 @@ call s:LOG("s:inspect_project_package: no project package in ensime config")
   endif
 endfunction
 
+" TODO: should be using vimside#command#inspector#with_path_and_name
 function! s:inspect_by_path(path)
 call s:LOG("s:inspect_by_path: TOP path=". a:path)
   let rindex = strridx(a:path, '.')
@@ -469,9 +470,14 @@ function! g:type_inspector_by_name_at_point_callback(dic)
 call s:LOG("g:type_inspector_by_name_at_point_callback: TOP")
 call s:LOG("g:type_inspector_by_name_at_point_callback: dic=". string(a:dic))
 
+  if has_key(a:dic, ":name") && a:dic[":name"] == "NA"
+    return
+  endif
+
   let s:page = s:Page_constructor()
   let s:current_inspector = s:PackageInspector_constructor(a:dic)
   call g:history_and_do(s:page, s:current_inspector)
+  echo
 endfunction
 
 " TypeInspectInfo
@@ -482,6 +488,7 @@ call s:LOG("g:type_inspector_show: TOP")
   let s:page = s:Page_constructor()
   let s:current_inspector = s:TypeInspector_constructor(a:type_inspector_info)
   call g:history_and_do(s:page, s:current_inspector)
+  echo
 endfunction
 
 
@@ -589,7 +596,7 @@ call s:LOG("s:inspector_insert_linked_type: TOP")
     if q == 1
       " fullname
       let full_name = ti[":full-name"]
-      let [path, outer, name] = Name_parts(full_name)
+      let [path, outer, name] = vimside#command#inspector#with_name_parts(full_name)
       if path != ''
         call s:inspector_insert_linked_package_path(path, 1)
       endif
@@ -726,31 +733,91 @@ function! Package_parts(full_name)
   endif
 endfunction
 
-"  :call Name_parts('aa.bb.Cc')
-"  :call Name_parts('pack.pack1.pack2.Types$Type')
-"  :call Name_parts('pack.pack1.pack2.Type')
+"  :call vimside#command#inspector#with_name_parts('aa.bb.Cc')
+"  :call vimside#command#inspector#with_name_parts('pack.pack1.pack2.Types$Type')
+"  :call vimside#command#inspector#with_name_parts('pack.pack1.pack2.Type')
 "  return [pack.pack1.pack2,  Types, type]
-function! Name_parts(full_name)
-call s:LOG("s:name_parts: full_name=X". a:full_name . 'X')
-  let rindex = strridx(a:full_name, '.')
-  if rindex == -1
-    return ['', '', a:full_name ]
-  else
-    let path = strpart(a:full_name, 0, rindex)
-call s:LOG("s:name_parts: path=". path)
-    let name = strpart(a:full_name, rindex+1)
-    let rindex = strridx(path, '$')
-    if rindex == -1
-call s:LOG("s:name_parts: name=". name)
-      return [path, '', name ]
+function! vimside#command#inspector#with_name_parts(str)
+" call s:LOG("s:name_parts: str=X". a:str . 'X')
+
+  let path = ''
+  let other = ''
+  let name = ''
+
+  let str = a:str
+  let index = stridx(str, '.')
+  if index != -1
+    let part = strpart(str, 0, index)
+    let str = strpart(str, index+1)
+
+    let index = stridx(part, '$')
+    if part[index-1] == '$'
+      let other = part
     else
-      let outer = strpart(name, 0, rindex)
-      let name = strpart(name, rindex+1)
-call s:LOG("s:name_parts: outer=". outer)
-call s:LOG("s:name_parts: name=". name)
-      return [path, outer, name ]
+      let path = part
     endif
+
+    let index = stridx(str, '.')
+    while index != -1
+      let part = strpart(str, 0, index)
+      let str = strpart(str, index+1)
+
+      let index = stridx(part, '$')
+      if part[index-1] == '$'
+        if other == ''
+          let other = part
+        else
+          let other .= '$'
+          let other .= part
+        endif
+      else
+        if path == ''
+          let path = part
+        else
+          let path .= '.'
+          let path .= part
+        endif
+      endif
+
+      let index = stridx(str, '.')
+    endwhile
+
   endif
+
+  let index = stridx(str, '$')
+  while index != -1 && len(str)-1 != index
+    let part = strpart(str, 0, index)
+    let str = strpart(str, index+1)
+    if other == ''
+      let other = part
+    else
+      let other .= '$'
+      let other .= part
+    endif
+
+    let index = stridx(str, '$')
+  endwhile
+  return [path, other, str]
+endfunction
+
+" ensime-with-path-and-name
+" used in inspect_by_path
+" return [path, name]
+function! vimside#command#inspector#with_path_and_name(str)
+  let str = a:str
+  let path = ''
+  let index = stridx(str, '.')
+  while index != -1
+    let part = strpart(str, 0, index)
+    if path == ''
+      let path = part
+    else
+      let path .= '.'. part
+    endif
+    let str = strpart(str, index+1)
+    let index = stridx(str, '.')
+  endwhile
+  return [path, str]
 endfunction
 
 function! CallUrl() dict
@@ -989,11 +1056,13 @@ call s:LOG("TypeInspector_init: TOP")
   let self.name = self.type_info[":name"]
   let self.fullname = self.type_info[":full-name"]
 
+  if has_key(tii, ":interfaces")
   let interfaces = tii[":interfaces"]
-  for interface_info in interfaces
-    let interface = s:Interface_constructor(interface_info)
-    call add(self.interfaces, interface)
-  endfor
+    for interface_info in interfaces
+      let interface = s:Interface_constructor(interface_info)
+      call add(self.interfaces, interface)
+    endfor
+  endif
 endfunction
 let s:TypeInspector.init = function("s:TypeInspector_init")
 

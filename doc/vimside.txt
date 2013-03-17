@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.21
+Version:     0.2.22
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -205,9 +205,9 @@ One for Scala 2.9 and another for Scala 10.0. These can be found at:
     https://github.com/aemoncannon/ensime/downloads
 
 The Ensime build directory has the following layout using
-ensime_2.9.2-0.9.8.1 as an example:
+ensime_2.9.2-0.9.8.9 as an example:
 
-  ensime_2.9.2-0.9.8.1/
+  ensime_2.9.2-0.9.8.9/
     bin/                 
     LICENSE
     elisp/
@@ -225,7 +225,7 @@ or ensime_2.10.0-RC3-0.9.8.2:
 
 It is important that the value of the 'vimside-scala-version'
 Option agrees with the Ensime build version. For
-ensime_2.9.2-0.9.8.1 (the default value):
+ensime_2.9.2-0.9.8.9 (the default value):
 
    call owner.Set("vimside-scala-version", "2.9.2")
 
@@ -272,7 +272,7 @@ Then depending upon the name of the build directory, which is under the
 set the value of the Option 'ensime-dist-dir' to that directory name.
 For example:
 
-    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
 or
     call owner.Set("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
 
@@ -281,7 +281,7 @@ using the Option 'ensime-dist-path'. As an example, if you installed
 an Ensime build package in some Scala directory, you might set
 the Option as:
 
-    call owner.Set("ensime-dist-path", $HOME .  "/scala/ensime/ensime_2.9.2-0.9.8.1")
+    call owner.Set("ensime-dist-path", $HOME .  "/scala/ensime/ensime_2.9.2-0.9.8.9")
 
 If you set the 'ensime-dist-path', it is checked first and if it exists it
 is used rather than the 'ensime-install-path' and 'ensime-dist-dir' combination.
@@ -438,7 +438,7 @@ can be called any number of times).
 So, in the 'options_user.vim' one might have:
 
   call owner.Set("vimside-scala-version", "2.9.2")
-  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
   call owner.Set("ensime-config-file-name", "ensime_config.vim")
 
 in a project file there might be:
@@ -490,7 +490,7 @@ basis), but enabling the above Option is all that is need in this file.
       
       "--------------
       " Which build version of Ensime to use. 
-      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
       "--------------
 
       "--------------
@@ -1567,6 +1567,16 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.2.22   - Fix: ~
+  Updated where one could download the pre-build images of Ensime.
+  Fixed example to use the latest pre-build Ensime version numbers:
+  ensime_2.9.2-0.9.8.9 and ensime_2.10.0-0.9.8.9
+  Communications with the server is now both asynchronous and synchronous.
+  Generally, asynchronous will still be used for standard communication
+  while synchronous is used for unit tests. Maybe, in time, some of the
+  commands will be synchronous - maybe configurable via Options.
+  Added unit tests.
+  Tests require runVimTests-1.22.zip and vimtap-0.4.0.zip.
 0.2.21   - Fix: ~
   Fixed history so doing previous and then adding removes deeper history.
   Cleaned up keymapping code.

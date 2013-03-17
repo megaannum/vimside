@@ -2,8 +2,6 @@
 " test symbol
 "---------------------------
 
-source ../autoload/vimside/sexp.vim
-
 call vimtap#SetOutputFile('test004.tap')
 call vimtap#Plan(11)
 

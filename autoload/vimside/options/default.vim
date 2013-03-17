@@ -42,7 +42,7 @@ function! vimside#options#default#Load(owner)
   call owner.Set("vimside-use-cwd-as-output-dir", 0)
 
   " call owner.Set("ensime-dist-dir", "dist_2.9.2")
-  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+  call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
   
   call owner.Set("ensime-log-enabled", 0)
   call owner.Set("ensime-log-file-name", "ENSIME_LOG")
@@ -54,7 +54,7 @@ function! vimside#options#default#Load(owner)
   call owner.Set("vimside-java-version", "1.6")
   call owner.Set("vimside-scala-version", "2.9.2")
 
-  call owner.Set("vimside-project-options-enabled", 0)
+  call owner.Set("vimside-project-options-enabled", 1)
   call owner.Set("vimside-project-options-file-name", "options_project.vim")
 
   call owner.Set("vimside-log-enabled", 0)

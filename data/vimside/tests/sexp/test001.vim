@@ -2,8 +2,6 @@
 " test boolean
 "---------------------------
 
-source ../autoload/vimside/sexp.vim
-
 call vimtap#SetOutputFile('test001.tap')
 call vimtap#Plan(12)
 

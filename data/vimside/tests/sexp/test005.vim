@@ -2,8 +2,6 @@
 " test keyword
 "---------------------------
 
-source ../autoload/vimside/sexp.vim
-
 call vimtap#SetOutputFile('test005.tap')
 call vimtap#Plan(10)
 

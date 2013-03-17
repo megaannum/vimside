@@ -71,6 +71,7 @@ let g:ensime_config = g:SExp([
   \ Key(":source-roots"), source_roots, 
   \ Key(":reference-source-roots"), reference_source_roots, 
   \ Key(":target"), g:Str(s:full_dir . "/build/classes"),
+  \ Key(":test-target"), g:Str(s:full_dir . "/build/test/classes"),
   \ Key(":only-include-in-index"), include_index,
   \ Key(":exclude-from-index"), exclude_index,
   \ Key(":formatting-prefs"), formatting_prefs

@@ -1,12 +1,20 @@
 " ============================================================================
 " This file, example_options_project.vim will NOT be read by the Vimside 
 " code. 
-" To adjust option values, copy this file to a project directory,
-" call the file the value of the Option:
-" 'vimside-project-options-user-file-name'
-" and add Option setter calls, e.g.:
+"
+" This is a mechanism for having project-specific Vimside Option values.
+" By default, the Option: 'vimside-project-options-enabled' is 1 (true).
+"   This controls if Vimside attempts to locate and load a project-
+"   specific Optiosn file.
+"
+" To adjust option values on a per-project basis: 
+"   copy this file to a project directory, 
+"   call the file the value of the Option:
+"     'vimside-project-options-file-name'
+"   which, by default, has the value: 'options_project.vim'
+"   and add Option setter calls, e.g.:
 "    call owner.Set("vimside-scala-version", "2.10.0")
-"    call owner.Set("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
+"    call owner.Set("ensime-dist-dir", "ensime_2.10.0-0.9.8.9")
 "    call owner.Set("ensime-config-file-name", "_ensime")
 " These Option values will be used to configure Vimside and can be
 " project specific
@@ -25,7 +33,7 @@ function! g:VimsideOptionsProjectLoad(owner)
   " call owner.Set("vimside-log-enabled", 1)
 
   " call owner.Update("vimside-scala-version", "2.10.0")
-  " call owner.Update("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
+  " call owner.Update("ensime-dist-dir", "ensime_2.10.0-0.9.8.9")
   " call owner.Update("ensime-config-file-name", "_ensime")
 
   " call owner.Set("forms-use", 1)

@@ -232,6 +232,7 @@ endfunction
 
 
 
+" Called from a Ping
 function! vimside#ensime#swank#handle(response)
 call s:LOG("vimside#ensime#swank#handle response=". a:response) 
   let response = a:response
@@ -422,9 +423,14 @@ endfunction
 "     'abort': funcref
 "   }
 "   'events': 0,1,...N or 'many'
+"   'is_sync': {}
 " }
 "
 "
+
+" return status = {
+"   'caller': funcref
+" }
 function! vimside#ensime#swank#dispatch(rr)
   let rr = a:rr
 
@@ -432,16 +438,126 @@ function! vimside#ensime#swank#dispatch(rr)
 call s:LOG("vimside#ensime#swank#dispatch callmsg=".callmsg) 
   let rr.id = vimside#ensime#io#write(callmsg)
 
+  return has_key(rr, "is_sync") 
+    \ ? vimside#ensime#swank#synchronous(rr)
+    \ : vimside#ensime#swank#asynchronous(rr)
+
+endfunction
+
+function! vimside#ensime#swank#synchronous(rr)
+  let rr = a:rr
+
+  let timeout = 5000
+  let rval = {}
+
+  let success = 0
+  let finished = 0
+  let got_event = 0
+
+  while ! finished
+
+    let response = vimside#ensime#io#read(timeout)
+
+call s:LOG("vimside#ensime#swank#synchronous response=".response) 
+    if response == ''
+      " read returned nothing 
+call s:LOG("vimside#ensime#swank#synchronous failed for id=". rr.id) 
+      " failed = { id: rr }
+      let g:vimside.swank.rpc.failed[rr.id] = rr
+
+      " rpc expecting ping info 
+      call vimside#ensime#swank#ping_info_set_expecting_rpc_response()
+      let rval.status = 0
+      let rval.msg = 'response empty'
+      let rval.value = {}
+      let finished = 1
+
+    else
+
+      let sexp = vimside#sexp#Parse(response)
+     
+      let [found, children] =  vimside#sexp#Get_ListValue(sexp) 
+      if ! found
+        let rval.status = 0
+        let rval.msg = 'response: not list'
+        let rval.value = response
+        let finished = 1
+
+      else
+
+        " It is a SExp List
+        let len = len(children)
+        
+        if len == 0
+          let rval.status = 0
+          let rval.msg = 'response: child list length == 0'
+          let rval.value = response
+          let finished = 1
+
+        elseif len == 1
+          " It is a simple event
+          call s:HandleSimpleEvent(children[0])
+          let got_event = 1
+
+        elseif len == 2
+          " It is a complex event
+          call s:HandleComplexEvent(children)
+          let got_event = 1
+
+        elseif len == 3
+          " Call return or abort
+          let g:vimside.swank.rpc.waiting[rr.id] = rr
+          let [success, got_event, msg, dic] = s:ValidateResponse(children)
+          if success
+            if got_event
+              continue
+            else
+              let rval.status = 1
+              let rval.msg = msg
+              let rval.value = dic
+              let finished = 1
+
+            endif
+          else
+            let rval.status = 0
+            let rval.msg = msg
+            let rval.value = dic
+            let finished = 1
+          endif
+
+        else
+
+          let rval.status = 0
+          let rval.msg = 'response: child list length > 3'
+          let rval.value = response
+          let finished = 1
+        endif
+
+      endif
+
+    endif
+  endwhile
+
+  call s:PostHandle(success, got_event, rr.events)
+
+  return rval
+
+endfunction
+
+
+function! vimside#ensime#swank#asynchronous(rr)
+  let rr = a:rr
+
   let success = 0
   let got_event = 0
 
   while ! success
     let response = vimside#ensime#io#read()
 
-call s:LOG("vimside#ensime#swank#dispatch response=".response) 
+call s:LOG("vimside#ensime#swank#asynchronous response=".response) 
     if response == ''
       " read returned nothing 
-call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id) 
+call s:LOG("vimside#ensime#swank#asynchronous waiting for id=". rr.id) 
       " waiting = { id: rr }
       let g:vimside.swank.rpc.waiting[rr.id] = rr
 
@@ -461,13 +577,13 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
      
       let [found, children] =  vimside#sexp#Get_ListValue(sexp) 
       if ! found
-        call s:ERROR("vimside#ensime#swank#dispatch Not List: ". string(response)) 
+        call s:ERROR("vimside#ensime#swank#asynchronous Not List: ". string(response)) 
       else
         " It is a SExp List
         let len = len(children)
         
         if len == 0
-          call s:ERROR("vimside#ensime#swank#dispatch child SExp List length 0: ". string(response)) 
+          call s:ERROR("vimside#ensime#swank#asynchronous child SExp List length 0: ". string(response)) 
         elseif len == 1
           " It is a simple event
           call s:HandleSimpleEvent(children[0])
@@ -481,10 +597,34 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
         elseif len == 3
           " Call return or abort
           let g:vimside.swank.rpc.waiting[rr.id] = rr
-          let [success, got_event] = s:HandleResponse(children)
+          let [success, got_event, msg, result] = s:ValidateResponse(children)
+          if success
+            if got_event
+              continue
+            else
+" call s:LOG("vimside#ensime#swank#asynchronous msg=". msg) 
+              if msg == 'ok'
+                if has_key(rr, 'data')
+                  call rr.handler.ok(result.dic, rr.data)
+                else
+                  call rr.handler.ok(result.dic)
+                endif
+              elseif msg == 'abort'
+                call rr.handler.abort(result.code, result.details, result.rest)
+              else
+                let rval.status = 1
+                let rval.msg = msg
+                let rval.value = result.dic
+                let finished = 1
+              endif
+
+            endif
+          else
+            call s:ERROR(msg . string(dic)) 
+          endif
 
         else
-          call s:ERROR("vimside#ensime#swank#dispatch child SExp List length > 3: ". string(response)) 
+          call s:ERROR("vimside#ensime#swank#asynchronous child SExp List length > 3: ". string(response)) 
 
         endif
 
@@ -494,6 +634,8 @@ call s:LOG("vimside#ensime#swank#dispatch waiting for id=". rr.id)
   endwhile
 
   call s:PostHandle(success, got_event, rr.events)
+
+  return {}
 
 endfunction
 
@@ -544,6 +686,113 @@ call s:LOG("HandleComplexEvent ".string(children))
     endif
   endif
 
+endfunction
+
+" returns 
+"   on error:        [0, 0, msg, data_dic]
+"   on event:        [1, 1, _, _]
+"   on return abort: [1, 0, 'abort', {'code': code, 
+"                                     'details': details, 
+"                                     'rest': rest}]"
+"   on return ok:    [1, 0, 'ok', {'dic': dic, 'data': rr.data}]
+"   on return ok:    [1, 0, 'ok', {'dic': dic}]
+"
+function! s:ValidateResponse(children)
+  let children = a:children
+"call s:LOG("ValidateResponse ". string(children))
+
+  " Note that the first child really ought to be the keyword
+  let top_kw_sexp = children[0]
+
+  let [found, top_kw] =  vimside#sexp#Get_KeywordValue(top_kw_sexp) 
+  if ! found
+    return [0, 0, "Keyword not first sexp:", children]
+  endif
+
+  if top_kw == ':background-message'
+    let eventcode_sexp = children[1]
+    let msg_sexp = children[2]
+    call s:HandleBackgroundMessage(eventcode_sexp, msg_sexp)
+    return [1, 1, "" , {}]
+  endif
+
+  if top_kw != ':return'
+    return [0, 0, "Keyword not ':return':", children]
+  endif
+
+  let content_sexp = children[1]
+  let id_sexp = children[2]
+
+  let [found, id] =  vimside#sexp#Get_IntValue(id_sexp) 
+  if ! found
+    return [0, 0, "Id not third sexp", children]
+  endif
+
+  if ! has_key(g:vimside.swank.rpc.waiting, id)
+    return [0, 0, "Not a valid Id", children]
+  endif
+
+  let rr = g:vimside.swank.rpc.waiting[id]
+  " remove response waiting data
+  unlet  g:vimside.swank.rpc.waiting[id]
+
+  let [found, content] =  vimside#sexp#Get_ListValue(content_sexp) 
+  if ! found
+    return [0, 0, "Protocol error second sexp not List", children]
+  endif
+
+  let len = len(content)
+
+  if len < 2
+    return [0, 0, "Protocol error Content List length < 2", children]
+  endif
+
+  let kind_kw_sexp = content[0]
+  let body_sexp = content[1]
+
+  let [found, kind_kw] =  vimside#sexp#Get_KeywordValue(kind_kw_sexp) 
+  if ! found
+    return [0, 0, "Kind Keyword not first sexp", children]
+  endif
+
+  if kind_kw == ':ok'
+    " maybe Dictionary or List of value(s)
+    let [found, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(body_sexp)
+    if ! found
+      return [0, 0, "Badly formed Response", body_sexp]
+    endif
+
+    " return 0 or 1
+    if has_key(rr, 'data')
+      return [1, 0, "ok", {'dic': dic, 'data': rr.data}]
+    else
+      return [1, 0, "ok", {'dic': dic}]
+    endif
+
+  elseif kind_kw == ':abort'
+    let [found, body_list] =  vimside#sexp#Get_ListValue(body_sexp) 
+    if ! found
+      return [0, 0, "Badly ':abort' not List", children]
+    endif
+
+    let code_sexp = body_list[0]
+    let detail_sexp = body_list[1]
+    let rest = body_list[2:]
+    let [found, code] =  vimside#sexp#Get_IntValue(code_sexp) 
+    if ! found
+      return [0, 0, "Body ':abort' code not Int", children]
+    endif
+    let [found, detail] =  vimside#sexp#Get_StringValue(string_sexp) 
+    if ! found
+      return [0, 0, "Body ':abort' detail not String", children]
+    endif
+
+    " on return abort: [1, 0, 'abort', ]
+    return [1, 0, "abort", {'code': code, 'details': details, 'rest': rest}]
+
+  else
+    return [0, 0, "Kind Keyword not ':ok' or ':abort'", children]
+  endif
 endfunction
 
 "

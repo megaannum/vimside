@@ -445,8 +445,8 @@ function! s:MakeOptions()
             \ 'values, This Directory name will generally indicate which',
             \ 'Scala version Ensime was built with and possible the Ensime.',
             \ 'version. For example, ',
-            \ '  "dist_2.9.2" or "ensime_2.9.2-0.9.8.1" or',
-            \ '  "ensime_2.10.0-RC3-0.9.8.2"'
+            \ '  "dist_2.9.2" or "ensime_2.9.2-0.9.8.9" or',
+            \ '  "ensime_2.10.0-0.9.8.9"'
           \ ]
       \ }
   let l:options['ensime-dist-path'] = {

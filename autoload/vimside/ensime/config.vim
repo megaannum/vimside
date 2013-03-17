@@ -272,6 +272,18 @@ function! vimside#ensime#config#Check(sexp)
   endif
   unlet value
 
+  let key = ":test-target"
+  let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
+  if found
+    if ! isdirectory(value)
+      call add(l:errmsg, "Not Directory key(" . key . ") value:" . string(value))
+      let l:rval = 0
+    else
+      let g:vimside.project.info['test-target'] = value
+    endif
+  endif
+  unlet value
+
   let key = ":disable-index-on-startup"
   let [found, value] = vimside#sexp#ValueOfKey(a:sexp, key) 
   if found

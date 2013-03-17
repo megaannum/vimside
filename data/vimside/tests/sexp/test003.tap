@@ -1,0 +1,13 @@
+1..12
+ok 1 - StringAtom ToString
+ok 2 - StringAtom ToReadableString
+ok 3 - StringAtom ToWireString
+ok 4 - StringAtom ToVim
+ok 5 - StringAtom ToString
+ok 6 - StringAtom ToReadableString
+ok 7 - StringAtom ToWireString
+ok 8 - StringAtom ToVim
+ok 9 - string ("hi") ToWireString
+ok 10 - string ("hi") ToWireString
+ok 11 - string ("hi") ToWireString
+ok 12 - string ("hi") ToWireString

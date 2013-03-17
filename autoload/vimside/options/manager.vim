@@ -70,13 +70,39 @@ let g:vimside_options_loaded = 'v1.0'
 let s:keepcpo = &cpo
 set cpo&vim
 
+" ----------------------------------------------------------------------
+" See bottom of the plugin/vimside.vim file for the usage of these.
+let s:enable_logging = exists("g:Vimside_Enable_Pre_Initialization_Logging")
+  \ && g:Vimside_Enable_Pre_Initialization_Logging
+
+if s:enable_logging
+  let s:LOG_DIR = g:Vimside_Enable_Pre_Initialization_Logging_Dir
+  if ! isdirectory(s:LOG_DIR)
+    throw "Not a directory for pre-init logging: ". s:LOG_DIR
+  endif
+  let s:LOG_FILE = s:LOG_DIR .'/'. g:Vimside_Enable_Pre_Initialization_Logging_File
+endif
+
+function! s:LOG(msg)
+  if s:enable_logging
+    execute "redir >> ". s:LOG_FILE
+    silent echo "INFO: ". a:msg
+    execute "redir END"
+  endif
+endfunction
+" ----------------------------------------------------------------------
+
 
 " full path to this file
 let s:full_path=expand('<sfile>:p')
+call s:LOG("vimside#options#manager: s:full_path=". s:full_path)
 
 " full path to this file's directory
 let s:full_dir=fnamemodify(s:full_path, ':h')
+call s:LOG("vimside#options#manager: s:full_dir=". s:full_dir)
 
+let s:vimside_dir = resolve(s:full_dir . '/../../../data/vimside/')
+call s:LOG("vimside#options#manager: s:vimside_dir=". s:vimside_dir)
 
 if ! exists("g.vimside.options")
   let g:vimside['options'] = {}
@@ -262,6 +288,7 @@ endfunction
 
 " Global user overrides of default values
 function! vimside#options#manager#LoadUser()
+call s:LOG("vimside#options#manager#LoadUser: TOP")
 
   function! s:CheckDefinedFunc(key, value) dict
     let defined = g:vimside.options.defined
@@ -281,11 +308,25 @@ function! vimside#options#manager#LoadUser()
 
   " Source "options_user.vim" file if it exists
   let l:option_file_name = "options_user.vim"
-  let l:tmpfile = s:full_dir . '/../../../data/vimside/' . l:option_file_name
+  let l:tmpfile = s:vimside_dir .'/'. l:option_file_name
+call s:LOG("vimside#options#manager#LoadUser: l:tmpfile=". l:tmpfile)
   if filereadable(l:tmpfile)
+call s:LOG("vimside#options#manager#LoadUser: sourcing=". l:tmpfile)
     execute ":source " . l:tmpfile
     call g:VimsideOptionsUserLoad(g:vimside.options.user)
+  else
+    let files = globpath(&rtp, 'data/vimside/options_user.vim')
+call s:LOG("vimside#options#manager#LoadUser: files=". string(files))
+    for file in files
+      if file != l:tmpfil &&e filereadable(file)
+call s:LOG("vimside#options#manager#LoadUser: sourcing=". file)
+        execute ":source " . file
+        call g:VimsideOptionsUserLoad(g:vimside.options.user)
+        break
+      endif
+    endfor
   endif
+call s:LOG("vimside#options#manager#LoadUser: BOTTOM")
 endfunction
 
 " ---------------------------------------------------------------------
@@ -294,35 +335,41 @@ endfunction
 " This can be used as a project specific override
 " ---------------------------------------------------------------------
 function! vimside#options#manager#LoadProject(errors)
+call s:LOG("vimside#options#manager#LoadProject: TOP")
   let l:errors = a:errors
 
   let [found, l:look_local] = g:vimside.GetOption('vimside-project-options-enabled')
   if found
     if l:look_local
+call s:LOG("vimside#options#manager#LoadProject: look_local")
       let [found, l:file_name] = g:vimside.GetOption('vimside-project-options-file-name')
       if found
+call s:LOG("vimside#options#manager#LoadProject: l:file_name=". l:file_name)
         let l:option_file_name = "options_user.vim"
-        let l:vimside_dir = s:full_dir . '/../../../data/vimside/'
-        let l:vimside_dir = fnamemodify(l:vimside_dir, ":p")
 
         " Now look in current directory and walk up directories until ensime
         let dir = getcwd()
+call s:LOG("vimside#options#manager#LoadProject: dir=". dir)
 
-        " Do not want to re-source the data/vimside.options_user.vim file
-        if dir == l:vimside_dir && l:option_file_name == l:file_name
+        " Do not want to re-source the data/vimside/options_user.vim file
+        if dir == s:vimside_dir && l:option_file_name == l:file_name
           let dir = fnamemodify(dir, ":h")
+call s:LOG("vimside#options#manager#LoadProject: up one dir=". dir)
         endif
 
         while dir != '/'
           let l:tmp_file = dir . '/' . l:file_name
+call s:LOG("vimside#options#manager#LoadProject: l:tmp_file=". l:tmp_file)
           if filereadable(l:tmp_file)
             break
           endif
           let dir = fnamemodify(dir, ":h")
+call s:LOG("vimside#options#manager#LoadProject: up one dir=". dir)
         endwhile
 
-        if dir != '/' && dir != l:vimside_dir && g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
+        if dir != '/' && dir != s:vimside_dir && g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
           let l:option_file = dir . "/" . l:file_name
+call s:LOG("vimside#options#manager#LoadProject: l:option_file=". l:option_file)
           execute ":source " . l:option_file
           call g:VimsideOptionsProjectLoad(g:vimside.options.user)
         endif
@@ -334,6 +381,7 @@ function! vimside#options#manager#LoadProject(errors)
   else
     call add(l:errors, "Option not found: 'vimside-local-options-user-enabled'")
   endif
+call s:LOG("vimside#options#manager#LoadProject: BOTTOM")
 endfunction
 
 " ===========================================================================
@@ -341,6 +389,7 @@ endfunction
 "
 " ===========================================================================
 function! vimside#options#manager#Load()
+call s:LOG("vimside#options#manager#Load: TOP")
 
   " Loads option definitions at g:vimside.options.defined
   " Must be called before loading default values.
@@ -373,13 +422,16 @@ function! vimside#options#manager#Load()
 
   let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
   if found
+call s:LOG("vimside#options#manager#Load: ensime-config-file-name=". l:efname)
     let [found, l:use_test_efile] = g:vimside.GetOption('test-ensime-file-use')
     if found
       if l:use_test_efile
         let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
         if found
+call s:LOG("vimside#options#manager#Load: test-ensime-file-dir=". l:test_dir)
           if g:VimsideCheckDirectoryExists(l:test_dir, "r-x", l:errors)
             let l:ensime_config_file = l:test_dir . "/" . l:efname
+call s:LOG("vimside#options#manager#Load: test l:ensime_config_file=". l:ensime_config_file)
           endif
 
         else
@@ -391,12 +443,15 @@ function! vimside#options#manager#Load()
         " look in current directory and walk up directories until ensime
         " config file is found.
         let dir = getcwd()
+call s:LOG("vimside#options#manager#Load: dir=". dir)
         while dir != '/'
           let l:tmp_config_file = dir . '/' . l:efname
+call s:LOG("vimside#options#manager#Load: l:tmp_config_file=". l:tmp_config_file)
           if filereadable(l:tmp_config_file)
             break
           endif
           let dir = fnamemodify(dir, ":h")
+call s:LOG("vimside#options#manager#Load: dir=". dir)
         endwhile
 
         if dir == '/'
@@ -404,6 +459,7 @@ function! vimside#options#manager#Load()
         else
           if g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
             let l:ensime_config_file = dir . "/" . l:efname
+call s:LOG("vimside#options#manager#Load: l:ensime_config_file=". l:ensime_config_file)
           endif
         endif
 
@@ -424,6 +480,7 @@ function! vimside#options#manager#Load()
     endif
 
     let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
+call s:LOG("vimside#options#manager#Load: l:ensime_config_dir=". l:ensime_config_dir)
     call g:vimside.SetOption("ensime-config-dir", l:ensime_config_dir)
     call g:vimside.SetOption("ensime-config-file", l:ensime_config_file)
   else
@@ -444,6 +501,7 @@ function! vimside#options#manager#Load()
 
     let got_ensime_dir = g:VimsideCheckDirectoryExists(l:distdirpath, "r-x", l:errors)
   endif
+call s:LOG("vimside#options#manager#Load: got_ensime_dir=". got_ensime_dir)
 
   if ! got_ensime_dir && g:vimside.HasOption("ensime-install-path")
     let [found, l:path] = g:vimside.GetOption('ensime-install-path')
@@ -451,7 +509,10 @@ function! vimside#options#manager#Load()
       call add(l:errors, "Option not found: 'ensime-install-path'")
     endif
 
-    call g:VimsideCheckDirectoryExists(l:path, "r-x", l:errors)
+    if ! g:VimsideCheckDirectoryExists(l:path, "r-x", l:errors)
+      return
+    endif
+call s:LOG("vimside#options#manager#Load: ensime-install-path=". l:path)
 
     " envim uses: ensime-common/src/main/python/Helper.py findLastDist
     "   to look for latest distribution directory
@@ -460,28 +521,39 @@ function! vimside#options#manager#Load()
     let [found, l:distdir] = g:vimside.GetOption('ensime-dist-dir')
     if ! found
       call add(l:errors, "Option not found: 'ensime-dist-dir'")
+      return
     endif
+call s:LOG("vimside#options#manager#Load: ensime-dist-dir=". l:distdir)
 
     " Check that Java and Scala versions agree with Option values
     " Get Scala version from ensime distribution directory name
     let l:ensime_scala_version = matchlist(l:distdir, '[a-zA-Z]*_\(\d\+\.\d\+\.\d\+\)-\(.*\)')[1]
+call s:LOG("vimside#options#manager#Load: l:ensime_scala_version=". l:ensime_scala_version)
     let [found, l:vimside_scala_version] = g:vimside.GetOption('vimside-scala-version')
     if ! found
       call add(l:errors, "Option not found: 'vimside-scala-version'")
+      return
     endif
+call s:LOG("vimside#options#manager#Load: l:vimside_scala_version=". l:vimside_scala_version)
 
     if l:ensime_scala_version != l:vimside_scala_version
       call add(l:errors, "Scala versions do not match: vimside:'". l:vimside_scala_version ."' and ensime:'". l:ensime_scala_version ."'")
+      return
     endif
 
     let l:tmp = split(system("java -version"), "\n")[0]
     let l:ensime_java_version = matchlist(l:tmp, '[a-zA-Z ]* "\(\d\+\.\d\+\)\(.*\)"')[1]
+call s:LOG("vimside#options#manager#Load: l:ensime_java_version=". l:ensime_java_version)
     let [found, l:vimside_java_version] = g:vimside.GetOption('vimside-java-version')
     if ! found
       call add(l:errors, "Option not found: 'vimside-java-version'")
+      return
     endif
+call s:LOG("vimside#options#manager#Load: l:vimside_java_version=". l:vimside_java_version)
+
     if l:ensime_java_version != l:vimside_java_version
       call add(l:errors, "Java versions do not match: vimside:'". l:vimside_java_version ."' and ensime:'". l:ensime_java_version ."'")
+      return
     endif
 
     let l:distdirpath = l:path  . '/' . l:distdir
@@ -494,11 +566,13 @@ function! vimside#options#manager#Load()
 
   if ! got_ensime_dir
     call add(l:errors, "No Ensime Distribution path, set options 'ensime-install-path' or 'ensime-dist-path'")
+    return
   endif
 
   let [found, l:use_cwd] = g:vimside.GetOption('vimside-use-cwd-as-output-dir')
   if ! found
     call add(l:errors, "Option not found: 'vimside-use-cwd-as-output-dir'")
+    return
   endif
 
 
@@ -508,14 +582,17 @@ function! vimside#options#manager#Load()
     let [found, l:pfilepath] = g:vimside.GetOption('ensime-port-file-path')
     if ! found
       call add(l:errors, "Option not found: 'ensime-port-file-path'")
+      return
     endif
 
     if filewritable(l:pfilepath) != 1
-      let s:pfiledir=fnamemodify(l:pfilepath, ':h')
-      if filewritable(s:pfiledir) != 2
-        call add(l:errors, "Can not create Ensime port file in directory: '". s:pfiledir ."'")
+      let l:pfiledir=fnamemodify(l:pfilepath, ':h')
+      if filewritable(l:pfiledir) != 2
+        call add(l:errors, "Can not create Ensime port file in directory: '". l:pfiledir ."'")
+        return
       endif
     endif
+call s:LOG("vimside#options#manager#Load: ensime-port-file-path=". l:pfiledir)
   else
     if l:use_cwd
       let cwd = getcwd()
@@ -534,46 +611,56 @@ function! vimside#options#manager#Load()
 
     let [found, l:pfilename] = g:vimside.GetOption('ensime-port-file-name')
     if ! found
-        call add(l:errors, "Option not found: 'ensime-port-file-name'")
+      call add(l:errors, "Option not found: 'ensime-port-file-name'")
+      return
     endif
 
     let value = portdir . '/' . l:pfilename
     call g:vimside.SetOption('ensime-port-file-path', value)
+call s:LOG("vimside#options#manager#Load: ensime-port-file-path=". value)
 
   endif
 
   let [found, hostname] = g:vimside.GetOption('ensime-host-name')
   if ! found
     call add(l:errors, "Option not found: 'ensime-host-name'")
+    return
   endif
 
   if ! vimproc#host_exists(hostname)
     call add(l:errors, "Can not find hostname: '". hostname ."'")
+    return
   endif
+call s:LOG("vimside#options#manager#Load: ensime-host-name=". hostname)
 
   let [found, cnt] = g:vimside.GetOption('ensime-port-file-max-wait')
   if ! found
     call add(l:errors, "Option not found: 'ensime-port-file-max-wait'")
+    return
   endif
 
   if cnt < 0
     call add(l:errors, "Max port file creationg wait must be positive number: '". cnt ."'")
+    return
   endif
 
 
   " Log for output of the Ensime Server
   if g:vimside.HasOption("ensime-log-file-path")
-    let [found, s:lfilepath] = g:vimside.GetOption('ensime-log-file-path')
+    let [found, l:lfilepath] = g:vimside.GetOption('ensime-log-file-path')
     if ! found
       call add(l:errors, "Option not found: 'ensime-log-file-path'")
+      return
     endif
 
-    if filewritable(s:lfilepath) != 1
-      let s:lfiledir=fnamemodify(s:lfilepath, ':h')
-      if filewritable(s:lfiledir) != 2
-        call add(l:errors, "Can not create Ensime log file in directory: '". s:lfiledir ."'")
+    if filewritable(l:lfilepath) != 1
+      let l:lfiledir=fnamemodify(l:lfilepath, ':h')
+      if filewritable(l:lfiledir) != 2
+        call add(l:errors, "Can not create Ensime log file in directory: '". l:lfiledir ."'")
+        return
       endif
     endif
+call s:LOG("vimside#options#manager#Load: ensime-log-file-path=". l:lfilepath)
   else
     if l:use_cwd
       let cwd = getcwd()
@@ -592,26 +679,31 @@ function! vimside#options#manager#Load()
     let [found, lfname] = g:vimside.GetOption('ensime-log-file-name')
     if ! found
       call add(l:errors, "Option not found: 'ensime-log-file-name'")
+      return
     endif
 
     let value = logdir . '/' . lfname
 
+call s:LOG("vimside#options#manager#Load: ensime-log-file-path=". value)
     call g:vimside.SetOption('ensime-log-file-path', value)
   endif
 
   " Log for output of Vimside
   if g:vimside.HasOption("vimside-log-file-path")
-    let [found, s:lfilepath] = g:vimside.GetOption('vimside-log-file-path')
+    let [found, l:lfilepath] = g:vimside.GetOption('vimside-log-file-path')
     if ! found
       call add(l:errors, "Option not found: 'vimside-log-file-path'")
+      return
     endif
 
-    if filewritable(s:lfilepath) != 1
-      let s:lfiledir=fnamemodify(s:lfilepath, ':h')
-      if filewritable(s:lfiledir) != 2
-        call add(l:errors, "Can not create Vimside log file in directory: '". s:lfiledir ."'")
+    if filewritable(l:lfilepath) != 1
+      let l:lfiledir=fnamemodify(l:lfilepath, ':h')
+      if filewritable(l:lfiledir) != 2
+        call add(l:errors, "Can not create Vimside log file in directory: '". l:lfiledir ."'")
+        return
       endif
     endif
+call s:LOG("vimside#options#manager#Load: vimside-log-file-path=". l:lfiledir)
   else
     if l:use_cwd
       let cwd = getcwd()
@@ -630,13 +722,16 @@ function! vimside#options#manager#Load()
     let [found, lfname] = g:vimside.GetOption('vimside-log-file-name')
     if ! found
       call add(l:errors, "Option not found: 'vimside-log-file-name'")
+      return
     endif
 
     let value = logdir . '/' . lfname
+call s:LOG("vimside#options#manager#Load: vimside-log-file-path=". value)
 
     call g:vimside.SetOption('vimside-log-file-path', value)
   endif
 
+call s:LOG("vimside#options#manager#Load: BOTTOM")
 endfunction
 
 

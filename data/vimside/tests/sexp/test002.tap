@@ -1,0 +1,20 @@
+1..19
+ok 1 - int 0 ToString
+ok 2 - int 0 ToReadableString
+ok 3 - int 0 ToWireString
+ok 4 - int 0 ToVim
+ok 5 - int 1 ToString
+ok 6 - int 1 ToReadableString
+ok 7 - int 1 ToWireString
+ok 8 - int 1 ToVim
+ok 9 - int 7 ToString
+ok 10 - int 7 ToReadableString
+ok 11 - int 7 ToWireString
+ok 12 - int 7 ToVim
+ok 13 - int -11 ToString
+ok 14 - int -11 ToReadableString
+ok 15 - int -11 ToWireString
+ok 16 - int -11 ToVim
+ok 17 - int 7 ToWireString
+ok 18 - int 7 ToWireString
+ok 19 - int 7 ToWireString

@@ -96,6 +96,9 @@ function! g:InitProjectCaller(args)
 
 call s:LOG("InitProject ensime_config_file=". string(ensime_config_file)) 
   
+  let [ok, sexp, dic] = vimside#EnsimeConfigLoad(ensime_config_file)
+
+if 0
   let sexp = vimside#sexp#LoadFile(ensime_config_file)
 
   " save for other uses
@@ -111,8 +114,9 @@ call s:LOG("InitProject ensime_config_file=". string(ensime_config_file))
 "    throw "ERROR: Ensime Config: " . string(errmsgs)
 "  endif
 
-  let ensime_config = vimside#sexp#ToWireString(sexp)
+endif " 0
 
+  let ensime_config = vimside#sexp#ToWireString(sexp)
   return '('. cmd .' '. ensime_config .')'
 endfunction
 

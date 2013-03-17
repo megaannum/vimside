@@ -2,8 +2,6 @@
 " test swank protocol
 "---------------------------
 
-source ../autoload/vimside/sexp.vim
-
 call vimtap#SetOutputFile('test007.tap')
 call vimtap#Plan(112)
 

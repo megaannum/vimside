@@ -11,6 +11,20 @@ Only a small number of all of the ENSIME capabilities have
 been implemented and it has only been tested against the
 very small Scala/Java test source project bundled with it.
 
+I added variable at bottom of the plugin/vimside.vim file
+which allows one to turn on logging during Vimside Option
+loading. For the Vimside logger, Options must first be loaded 
+in order to configure it. Thus, no logging when loading Options.
+So, I added a non-configurable logger that only logs in the
+vimside#options#manager.vim file. Hopefully, this will help
+users figure out whats happening during option loading.
+
+Also, the example project code has been moved under the directory
+data/vimside/projects - since there are now two example projects
+and will be a couple more in the future. Additionally, the tests
+have been moved under data/vimside/tests. I will be adding more
+unit/regression tests in the future.
+
 With lastest checkin, there is the first cut of the Type and 
 Package Inspector. There will certainly be bugs. 
 For types, place cursor over type and enter \<Leader>ti.
@@ -265,29 +279,31 @@ Also you'll need to run `make` in vimproc directory.
 ###[Download](https://github.com/aemoncannon/ensime)  
 ###[Manual](http://aemoncannon.github.com/ensime/index.html/)
 
-In addition, for ENSIME, there are pre-built releases available at: https://github.com/aemoncannon/ensime/downloads.
+In addition, for ENSIME, there are pre-built releases available at: 
+https://www.dropbox.com/sh/ryd981hq08swyqr/V9o9rDvxkS/ENSIME%20Releases
 I highly recommend getting these (Scala 2.9.2 and/or 2.10.0)
 rather than trying to build the Ensime Scala code yourself.
 
-Ensime is not a Vim plugin. It is a Scala program. It has to be installed and built or a pre-build version has to be used. It can be downloaded from: https://github.com/aemoncannon/ensime
+Ensime is not a Vim plugin. It is a Scala program. It has to be installed and built or a pre-build version has to be used. Its source can be downloaded from: https://github.com/aemoncannon/ensime
 
 One can the follow the instructions there and build it. 
 
-I have never done this. Rather, I have downloaded a pre-build bundle. One for Scala 2.9 and another for Scala 2.10.0. These can be found at: https://github.com/aemoncannon/ensime/downloads
+I have never done this. Rather, I have downloaded a pre-build bundle. One for Scala 2.9 and another for Scala 2.10.0. These can be found at:
+https://www.dropbox.com/sh/ryd981hq08swyqr/V9o9rDvxkS/ENSIME%20Releases
 
 The Ensime build directory has the following layout using
-`ensime_2.9.2-0.9.8.1` as an example:
+`ensime_2.9.2-0.9.8.9` as an example:
 
-    ensime_2.9.2-0.9.8.1/
+    ensime_2.9.2-0.9.8.9/
         bin/                 
         LICENSE
         elisp/
         lib/                 
         README.md
 
-or `ensime_2.10.0-0.9.8.5`:
+or `ensime_2.10.0-0.9.8.9`:
 
-    ensime_2.10.0-0.9.8.5/
+    ensime_2.10.0-0.9.8.9/
         bin/  
         elisp/  
         lib/  
@@ -296,9 +312,9 @@ or `ensime_2.10.0-0.9.8.5`:
 
 It is important that the value of the `vimside-scala-version`
 Option agrees with the Ensime build version. For
-`ensime_2.9.2-0.9.8.1` (the default value):
+`ensime_2.9.2-0.9.8.9` (the default value):
     call owner.Set("vimside-scala-version", "2.9.2")
-and for `ensime_2.10.0-0.9.8.5`:
+and for `ensime_2.10.0-0.9.8.9`:
     call owner.Set("vimside-scala-version", "2.10.0")
 
 These values can be set in `data/vimside/options_user.vim`.
@@ -337,17 +353,17 @@ Then depending upon the name of the build directory, which is under the
 set the value of the Option `ensime-dist-dir` to that directory name.
 For example:
 
-    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
     
 or 
-    call owner.Set("ensime-dist-dir", "ensime_2.10.0-0.9.8.5")
+    call owner.Set("ensime-dist-dir", "ensime_2.10.0-0.9.8.9")
 
 Alternatively, you can specify the full path to the ensime distribution
 using the Option `ensime-dist-path`. As an example, if you installed
 an Ensime build package in some Scala directory, you might set
 the Option as: 
 
-    call owner.Set("ensime-dist-path", $HOME . "/scala/ensime/ensime_2.9.2-0.9.8.1")`
+    call owner.Set("ensime-dist-path", $HOME . "/scala/ensime/ensime_2.9.2-0.9.8.9")`
 
 If you set the `ensime-dist-path`, it is checked first and if it exists it
 is used rather than the `ensime-install-path` and `ensime-dist-dir` combination.
@@ -426,13 +442,13 @@ can be called any number of times).
 So, in the `options_user.vim` one might have:
 
     call owner.Set("vimside-scala-version", "2.9.2")
-    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+    call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
     call owner.Set("ensime-config-file-name", "ensime_config.vim")
 
 in a project file there might be:
 
     call owner.Update("vimside-scala-version", "2.10.0")
-    call owner.Update("ensime-dist-dir", "ensime_2.10.0-0.9.8.5")
+    call owner.Update("ensime-dist-dir", "ensime_2.10.0-0.9.8.9")
     call owner.Update("ensime-config-file-name", "_ensime")
 
 An alternative approach is to also treat the `data/vimside/` test code
@@ -476,7 +492,7 @@ basis), but enabling the above Option is all that is need in this file.
       
       "--------------
       " Which build version of Ensime to use. 
-      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
+      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
       "--------------
 
       "--------------

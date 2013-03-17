@@ -25,8 +25,8 @@ function! g:VimsideOptionsProjectLoad(owner)
   
   "--------------
   " Which build version of Ensime to use. 
-  " call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.1")
-  call owner.Set("ensime-dist-dir", "ensime_2.10.0-0.9.8.5")
+  " call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
+  call owner.Set("ensime-dist-dir", "ensime_2.10.0-0.9.8.9")
   "--------------
 
   "--------------

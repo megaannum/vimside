@@ -18,7 +18,7 @@
 ;; :compile-deps (list strings)
 ;; :compile-deps 
 
-:compile-jars ("/home/emberson/scala/scala-2.10.0-M7/lib/scala-library.jar" "/home/emberson/scala/scala-2.10.0-M7/lib/scala-compiler.jar" "/home/emberson/MEGAANNUM/scala/core/build/classes")
+:compile-jars ("/home/emberson/MEGAANNUM/scala/core/build/classes")
 
 ;; :runtime-deps (list strings)
 
@@ -33,6 +33,7 @@
 ;; :source-roots (list strings)
 
 :target "/home/emberson/MEGAANNUM/scala/core/build/classes"
+:test-target "/home/emberson/MEGAANNUM/scala/core/build/test/classes"
 
 :disable-index-on-startup nil
 
