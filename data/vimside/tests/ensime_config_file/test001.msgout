@@ -3,3 +3,9 @@
 :server-cmd "bin/server.sh"
 :dependendency-dirs ("hello" "world")
 )
+(
+adf sdafdfsdasfd
+)
+Error detected while processing function vimside#EnsimeConfigLoad:
+line   10:
+Warning: bad config file: /tmp/vyUgU1o/1 content

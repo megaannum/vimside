@@ -146,7 +146,12 @@ function! vimside#EnsimeConfigLoad(filename)
   let [ok, dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(sexp)
   if ! ok
     echoe "Warning: bad config file: ". a:filename
-    return [0, {}, {}]
+    return [0, sexp, dic]
+  endif
+
+  if type(dic) != type({})
+    echoe "Warning: bad config file: ". a:filename . " content"
+    return [0, sexp, dic]
   endif
 
   if ! has_key(dic, ":root-dir")

@@ -1,5 +1,6 @@
-1..4
+1..5
 ok 1 - load ensime config file
 ok 2 - load ensime config file
 ok 3 - load ensime config file
 ok 4 - load ensime config file
+ok 5 - load ensime config file

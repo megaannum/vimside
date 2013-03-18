@@ -3,7 +3,7 @@
 "---------------------------
 
 call vimtap#SetOutputFile('test001.tap')
-call vimtap#Plan(4)
+call vimtap#Plan(5)
 
 function! Write_to_file(file, lines)
   execute "redir >> " . a:file
@@ -53,6 +53,29 @@ let exp = tempdir
 let qgot = ""
 let description = "load ensime config file"
 call vimtap#Is(got, exp, qgot, description)
+
+
+unlet dic
+unlet sexp
+
+
+let tempfile = tempname()
+let tempdir = fnamemodify(tempfile, ":p:h")
+
+let lines = [
+      \ 'adf sdafdfsdasfd'
+    \ ]
+
+call Write_to_file(tempfile, lines)
+let [ok, sexp, dic] = vimside#EnsimeConfigLoad(tempfile)
+
+let got = ok
+let exp = "0"
+let qgot = ""
+let description = "load ensime config file"
+call vimtap#Is(got, exp, qgot, description)
+
+
 
 call vimtap#FlushOutput()
 quit!
