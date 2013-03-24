@@ -61,11 +61,6 @@ function! g:VimsideOptionsUserLoad(owner)
 
 
   "--------------
-  " To run against ensime test project code
-  " Location of test directory
-  " call owner.Set("test-ensime-file-dir", s:full_dir)
-  " Uncomment to run against demonstration test code
-  " call owner.Set("test-ensime-file-use", 1)
   " The Ensime Config information is in a file called 'ensime_config.vim'
   " call owner.Set("ensime-config-file-name", "ensime_config.vim")
   "--------------

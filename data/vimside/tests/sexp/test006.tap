@@ -1,9 +1,0 @@
-1..8
-ok 1 - list [5] ToString
-ok 2 - list [5] ToReadableString
-ok 3 - list [5] ToWireString
-ok 4 - list [5] ToVim
-ok 5 - list [5, "Hi there"] ToString
-ok 6 - list [5, "Hi there"] ToReadableString
-ok 7 - list [5, "Hi there"] ToWireString
-ok 8 - list [5, "Hi there"] ToVim

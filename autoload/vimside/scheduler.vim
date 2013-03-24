@@ -34,13 +34,43 @@ let s:outputfeedkeys = 1
 "   recorded if they are simply added-to/removed-from the s:jobs list.
 let s:handling_jobs=0
 let s:remove_jobs=[]
+let s:add_jobs=[]
 
+" Must only be called when s:handling_jobs == 0
+" Outside of code that is processing Time/Motion jobs
+function! s:do_queued_add_job()
+call s:LOG("s:do_queued_add_job: TOP")
+  if ! empty(s:add_jobs)
+    for job in s:add_jobs
+      call s:add_job(job)
+    endfor
+    let s:add_jobs=[]
+  endif
+endfunction
 function! s:add_job(job)
-" call s:LOG("s:add_job: TOP job=". string(a:job))
-  call add(s:jobs, a:job)
+call s:LOG("s:add_job: TOP job=". string(a:job))
+  if s:handling_jobs
+    call add(s:add_jobs, a:job)
+  else
+    call add(s:jobs, a:job)
+  endif
+call s:LOG("s:add_job: BOTTOM len(s:jobs)=". len(s:jobs))
+endfunction
+
+" Must only be called when s:handling_jobs == 0
+" Outside of code that is processing Time/Motion jobs
+function! s:do_queued_remove_jobs()
+call s:LOG("s:do_queued_remove_jobs: TOP ")
+  if ! empty(s:remove_jobs)
+    for name in s:remove_jobs
+      call s:remove_job(name)
+    endfor
+    let s:remove_jobs=[]
+  endif
 endfunction
 
 function! s:remove_job(name)
+call s:LOG("s:remove_job: TOP name=". a:name)
   if s:handling_jobs
     call add(s:remove_jobs, a:name)
   else
@@ -52,6 +82,7 @@ function! s:remove_job(name)
     endfor
     let s:jobs = l:jobs
   endif
+call s:LOG("s:remove_job: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#ClearJobs()
@@ -72,9 +103,10 @@ function! vimside#scheduler#AddJob(name, func, sec, msec, charcnt, repeat)
 endfunction
 
 function! vimside#scheduler#RemoveJob(name)
-" call s:LOG("vimside#scheduler#RemoveJob: TOP name=". a:name)
+call s:LOG("vimside#scheduler#RemoveJob: TOP name=". a:name)
+call s:LOG("vimside#scheduler#RemoveJob: MID len(s:jobs)=". len(s:jobs))
   call s:remove_job(a:name)
-" call s:LOG("vimside#scheduler#RemoveJob: BOTTOM s:jobs=". string(s:jobs))
+call s:LOG("vimside#scheduler#RemoveJob: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#StartAuto() 
@@ -140,6 +172,7 @@ function! vimside#scheduler#ClearTimeJob()
 endfunction
 
 function! vimside#scheduler#AddTimeJob(name, func, sec, msec, repeat) 
+call s:LOG("AddTimeJob: TOP name=". a:name .", sec=". a:sec .", msec=". a:msec .", repeat=". a:repeat)
   let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
   let l:tsec = a:sec + l:sec
   let l:tmsec = a:msec + l:msec
@@ -148,7 +181,8 @@ function! vimside#scheduler#AddTimeJob(name, func, sec, msec, repeat)
           \ ? [a:name, a:func, l:tsec, l:tmsec, a:sec, a:msec, -1, -1]
           \ : [a:name, a:func, l:tsec, l:tmsec, 0,     0,      -1, -1]
 
-  call add(s:jobs, l:job)
+  " call add(s:jobs, l:job)
+  call s:add_job(l:job)
 endfunction
 
 
@@ -159,7 +193,8 @@ endfunction
 
 function! vimside#scheduler#TimeTrigger()
   let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
-" call s:LOG("TimeTrigger: TOP [sec,msec]=[". l:sec .",". l:msec ."]")
+call s:LOG("TimeTrigger: TOP [sec,msec]=[". l:sec .",". l:msec ."]")
+call s:LOG("TimeTrigger: TOP2 len(s:jobs)=". len(s:jobs))
   let l:js = s:jobs
   let s:jobs = []
   let l:jobs = []
@@ -183,7 +218,7 @@ function! vimside#scheduler#TimeTrigger()
         let l:jrsec = l:job[4]
         let l:jrmsec = l:job[5]
         if l:jrsec != 0 || l:jrmsec != 0
-" call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
+call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
           let m = msec + l:jrmsec
           if m >= 1000
             let l:job[2] = sec + l:jrsec + m/1000
@@ -216,14 +251,11 @@ function! vimside#scheduler#TimeTrigger()
   " One of the jobs might have added a job so we add to s:jobs
   let s:jobs += l:jobs
 
-  if ! empty(s:remove_jobs)
-    for name in s:remove_jobs
-      call s:remove_job(name)
-    endfor
-    let s:remove_jobs=[]
-  endif
+  call s:do_queued_remove_jobs()
+  call s:do_queued_add_job()
 
   call vimside#scheduler#FeedKeys()
+call s:LOG("TimeTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#HaltFeedKeys()
@@ -309,12 +341,13 @@ function! vimside#scheduler#ClearMotionJob()
 endfunction
 
 function! vimside#scheduler#AddMotionJob(name, func, charcnt, repeat) 
-" call s:LOG("AddMotionJob: TOP name=". a:name .", charcnt=". a:charcnt)
+call s:LOG("AddMotionJob: TOP name=". a:name .", charcnt=". a:charcnt .", repeat=". a:repeat)
   let l:mcnt = a:charcnt + s:total_mcounter
   let l:job = a:repeat
           \ ? [a:name, a:func, -1, 0, 0, 0, l:mcnt,  a:charcnt]
           \ : [a:name, a:func, -1, 0, 0, 0, l:mcnt,  0]
   call s:add_job(l:job)
+call s:LOG("AddMotionJob: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#ReplaceMotionJob(name, func, charcnt, repeat)
@@ -323,24 +356,28 @@ function! vimside#scheduler#ReplaceMotionJob(name, func, charcnt, repeat)
 endfunction
 
 function! vimside#scheduler#MotionTrigger()
-" call s:LOG("MotionTrigger: TOP s:total_mcounter=". s:total_mcounter .", s:mcounter=". s:mcounter)
+call s:LOG("MotionTrigger: TOP s:total_mcounter=". s:total_mcounter .", s:mcounter=". s:mcounter)
   let s:total_mcounter += 1
   if s:mcounter <= 0
     let l:sec = -1
     let l:ccc = s:total_mcounter
+call s:LOG("MotionTrigger: l:ccc=". l:ccc)
     let l:js = s:jobs
-" call s:LOG("MotionTrigger: len(jobs)=". len(l:js))
+call s:LOG("MotionTrigger: len(jobs)=". len(l:js))
     let s:jobs = []
     let l:jobs = []
 
     let s:handling_jobs=1
     try
     for l:job in l:js
+call s:LOG("MotionTrigger: for l:job=". string(l:job))
       let l:cc = l:job[6]
+      " is it a motion job
       if l:cc != -1
         if l:cc <= l:ccc
 " call s:LOG("MotionTrigger: job=". string(job))
           try
+call s:LOG("MotionTrigger: calling job")
             call l:job[1]()
           catch /.*/
             call s:ERROR("MotionTrigger: ". v:exception ." at ". v:throwpoint)
@@ -387,15 +424,12 @@ function! vimside#scheduler#MotionTrigger()
     " One of the jobs might have added a job so we add to s:jobs
     let s:jobs += l:jobs
 
-    if ! empty(s:remove_jobs)
-      for name in s:remove_jobs
-        call s:remove_job(name)
-      endfor
-      let s:remove_jobs=[]
-    endif
+    call s:do_queued_remove_jobs()
+    call s:do_queued_add_job()
   else
     let s:mcounter -= 1
   endif
+call s:LOG("MotionTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#StartAutoMotion() 

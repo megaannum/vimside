@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.22
+Version:     0.2.23
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -494,11 +494,6 @@ basis), but enabling the above Option is all that is need in this file.
       "--------------
 
       "--------------
-      " To run against ensime test project code
-      " Location of test directory
-      call owner.Set("test-ensime-file-dir", s:full_dir)
-      " Uncomment to run against demonstration test code
-      call owner.Set("test-ensime-file-use", 1)
       " The Ensime Config information is in a file called 'ensime_config.vim'
       call owner.Set("ensime-config-file-name", "ensime_config.vim")
       "--------------
@@ -628,8 +623,6 @@ Vimside session.
 
 5.2 Test Configuration
 
-  'test-ensime-file-use'
-  'test-ensime-file-dir'
 
 5.3 Ensime Configuration
 
@@ -1567,6 +1560,42 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.2.23   - Fix: ~
+  With this release, variable at bottom of the plugin/vimside.vim file
+  have been added which allows one to turn on logging during Vimside Option
+  loading. For the Vimside logger, Options must first be loaded 
+  in order to configure it. Thus, no logging when loading Options.
+  So, I added a non-configurable logger that only logs in the
+  vimside#options#manager.vim file. Hopefully, this will help
+  users figure out whats happening during option loading.
+  Also, two Options have been removed, test-ensime-file-use and 
+  test-ensime-file-dir; they might have been useful when there was only
+  one "test" project under data/vimside not not now.
+  I knew that the SExp parser was a "quick and dirty" implementation, what
+  I had not realized was that it was really "slow and dirty"; with the 
+  type inspector feature, getting the symbol-at-point info for String
+  took 65 seconds to parse. So, the SExp parse was re-written so that now
+  it takes a little over 8 seconds - still long but much better.
+  Modified the ensime/scheduler.vim Job adding code so that while processing 
+  the current Jobs list, any add is saved in a separate list (like any remove)
+  and only at the end of processing are the adds, if any, are done. This
+  fixed a bug in the hover code. Also in scheduler.vim, because the result for 
+  symbol-at-point for String was so large (a String of length 110K), all of
+  it was not read from the socket during a single read. This was fixed so 
+  that partial reads resulted in a second (and third) read to get the
+  rest of the protocol message.
+  In the type-inspector window, a ":q" now does what "q" does, it closes
+  the window. Also, changed current page name from "s:page" to "s:current_page"
+  to mirror the current inspector's name. Also, the current_page is now
+  only generated if it does not exist (speeding up history previous/next
+  operations).
+  For certain symbols, symbol-at-point requests to the Ensime server backend
+  would cause it to generate scala-notes event messages and the reception of
+  these events would cause the between server polling times to be increase -
+  which was bad since one is still waiting for the rpc response. This was
+  fixed by check if there are any outstanding rpc's prior to adjusting
+  polling time.
+  Added a couple of newly implemented features to the Forms popup menu.
 0.2.22   - Fix: ~
   Updated where one could download the pre-build images of Ensime.
   Fixed example to use the latest pre-build Ensime version numbers:

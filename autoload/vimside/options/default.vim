@@ -20,7 +20,9 @@
 " default location of Ensime files/directories
 function! vimside#options#default#Load(owner)
   let owner = a:owner
+if 0 " XXXX
   call owner.Set("test-ensime-file-use", 0)
+endif "0 XXXX
 
   " TODO remove
   " if  has("win32") || has("win95") || has("win64") || has("win16") || has("dos32")
@@ -69,12 +71,12 @@ function! vimside#options#default#Load(owner)
   call owner.Set('scheduler-not-expecting-anything-update-time', 10000)
   call owner.Set('scheduler-not-expecting-anything-char-count', 100)
   call owner.Set('scheduler-expecting-rpc-response-read-time-out', 200)
-  call owner.Set('scheduler-expecting-rpc-response-update-time', 100)
-  call owner.Set('scheduler-expecting-rpc-response-char-count', 10)
-  call owner.Set('scheduler-expecting-events-read-time-out', 0)
+  call owner.Set('scheduler-expecting-rpc-response-update-time', 200)
+  call owner.Set('scheduler-expecting-rpc-response-char-count', 100)
+  call owner.Set('scheduler-expecting-events-read-time-out', 50)
   call owner.Set('scheduler-expecting-events-update-time', 500)
   call owner.Set('scheduler-expecting-events-char-count', 10)
-  call owner.Set('scheduler-expecting-many-events-read-time-out', 0)
+  call owner.Set('scheduler-expecting-many-events-read-time-out', 100)
   call owner.Set('scheduler-expecting-many-events-update-time', 2000)
   call owner.Set('scheduler-expecting-many-events-char-count', 20)
   call owner.Set('scheduler-many-max-count-no-events', 50)

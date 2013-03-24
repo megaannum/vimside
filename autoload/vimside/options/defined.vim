@@ -378,6 +378,7 @@ function! s:MakeOptions()
             \ 'is ignored.'
           \ ]
       \ }
+if 0 " XXXX
   let l:options['test-ensime-file-use'] = {
         \ 'name': 'test-ensime-file-use',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
@@ -393,10 +394,11 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
-            \ 'The Directory of the test Ensime Config File, generally, in',
-          \  'the "data/vimside" Directory.'
+            \ 'The Directory of the test Ensime Config File. If not set then',
+          \  'value used is the "data/vimside" Directory.'
           \ ]
       \ }
+endif "0 XXXX
   let l:options['vimside-use-cwd-as-output-dir'] = {
         \ 'name': 'vimside-use-cwd-as-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 

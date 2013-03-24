@@ -14,6 +14,8 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let s:read_count_default_time_out = 100
+let s:read_content_time_out = 2000
 
 " ------------------------------------------------------------ 
 " vimside#ensime#io#open {{{2
@@ -70,7 +72,7 @@ endfunction
 " ------------------------------------------------------------ 
 function! vimside#ensime#io#read(...)
   let l:socket = g:vimside['socket']
-  let timeout = (a:0 > 0) ? a:1 : 100
+  let timeout = (a:0 > 0) ? a:1 : s:read_count_default_time_out
 " if timeout != 0
 " call s:LOG("vimside#ensime#io#read Not 0 timeout=".timeout) 
 " endif
@@ -84,9 +86,25 @@ function! vimside#ensime#io#read(...)
     " its a swank message, read body
     let nr = str2nr(nrStr, 16)
 " call s:LOG("Read nr=".nr) 
-   let msg = l:socket.read(nr, 100)
+    let msg = l:socket.read(nr, s:read_content_time_out)
+    if (len(msg) < nr)
+" call s:INFO("vimside#ensime#io#read partial message: nr=".nr. ", len(msg)=". len(msg)) 
+      let nr1 = nr - len(msg)
+      let msg1 = l:socket.read(nr1, s:read_content_time_out)
+      let msg .= msg1
+      if (len(msg1) < nr1)
+" call s:INFO("vimside#ensime#io#read partial message: nr1=".nr1. ", len(msg1)=". len(msg1)) 
+        let nr2 = nr1 - len(msg1)
+        let msg2 = l:socket.read(nr2, s:read_content_time_out)
+        let msg .= msg2
+        if (len(msg) < nr)
+" call s:INFO("vimside#ensime#io#read partial message: nr2=".nr2. ", len(msg2)=". len(msg2)) 
+call s:ERROR("vimside#ensime#io#read partial message: nr=".nr. ", len(msg)=". len(msg)) 
+        endif
+      endif
+    endif
 " call s:LOG("Read msg=".msg) 
-   return msg
+    return msg
   endif
 endfunction
 

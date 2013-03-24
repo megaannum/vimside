@@ -420,11 +420,13 @@ call s:LOG("vimside#options#manager#Load: TOP")
   " Locate the dot ensime file and directory
   " ---------------------------------------------
 
+if 0 " XXXX
   let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
   if found
 call s:LOG("vimside#options#manager#Load: ensime-config-file-name=". l:efname)
     let [found, l:use_test_efile] = g:vimside.GetOption('test-ensime-file-use')
     if found
+call s:LOG("vimside#options#manager#Load: l:use_test_efile=". l:use_test_efile)
       if l:use_test_efile
         let [found, l:test_dir] = g:vimside.GetOption('test-ensime-file-dir')
         if found
@@ -435,7 +437,7 @@ call s:LOG("vimside#options#manager#Load: test l:ensime_config_file=". l:ensime_
           endif
 
         else
-          call add(l:errors, "Option not found: 'test-ensime-file-dir'")
+          let l:ensime_config_file = s:vimside_dir . "/" . l:efname
         endif
 
       else
@@ -456,6 +458,7 @@ call s:LOG("vimside#options#manager#Load: dir=". dir)
 
         if dir == '/'
           call add(l:errors, "Can find ensime config file: '" . l:efname ."'")
+          return
         else
           if g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
             let l:ensime_config_file = dir . "/" . l:efname
@@ -472,20 +475,54 @@ call s:LOG("vimside#options#manager#Load: l:ensime_config_file=". l:ensime_confi
   else
     call add(l:errors, "Option not found: 'ensime-config-file-name'")
   endif
+endif " 0 XXXX
 
-  if exists("l:ensime_config_file")
-
-    if ! filereadable(l:ensime_config_file)
-      call add(l:errors, "Can not read ensime config file: '". l:ensime_config_file ."'")
-    endif
-
-    let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
-call s:LOG("vimside#options#manager#Load: l:ensime_config_dir=". l:ensime_config_dir)
-    call g:vimside.SetOption("ensime-config-dir", l:ensime_config_dir)
-    call g:vimside.SetOption("ensime-config-file", l:ensime_config_file)
+  let [found, l:efname] = g:vimside.GetOption('ensime-config-file-name')
+  if found
+call s:LOG("vimside#options#manager#Load: ensime-config-file-name=". l:efname)
   else
-    call add(l:errors, "Could not load ensime config file: '". l:efname ."'")
+    let l:efname = ".ensime"
   endif
+
+  " look in current directory and walk up directories until ensime
+  " config file is found.
+  let dir = getcwd()
+call s:LOG("vimside#options#manager#Load: dir=". dir)
+  while dir != '/'
+    let l:tmp_config_file = dir . '/' . l:efname
+call s:LOG("vimside#options#manager#Load: l:tmp_config_file=". l:tmp_config_file)
+    if filereadable(l:tmp_config_file)
+      break
+    endif
+    let dir = fnamemodify(dir, ":h")
+call s:LOG("vimside#options#manager#Load: dir=". dir)
+  endwhile
+
+  if dir == '/'
+    call add(l:errors, "Can find ensime config file: '" . l:efname ."'")
+    return
+  else
+    if g:VimsideCheckDirectoryExists(dir, "r-x", l:errors)
+      let l:ensime_config_file = dir . "/" . l:efname
+call s:LOG("vimside#options#manager#Load: l:ensime_config_file=". l:ensime_config_file)
+    else
+      call add(l:errors, "Could not find ensime config file: '". l:efname ."'")
+      return
+    endif
+  endif
+
+
+
+
+  if ! filereadable(l:ensime_config_file)
+    call add(l:errors, "Can not read ensime config file: '". l:ensime_config_file ."'")
+    return
+  endif
+
+  let l:ensime_config_dir = fnamemodify(l:ensime_config_file, ':h')
+call s:LOG("vimside#options#manager#Load: l:ensime_config_dir=". l:ensime_config_dir)
+  call g:vimside.SetOption("ensime-config-dir", l:ensime_config_dir)
+  call g:vimside.SetOption("ensime-config-file", l:ensime_config_file)
 
 
 

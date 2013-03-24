@@ -250,5 +250,5 @@ let g:Vimside_Enable_Pre_Initialization_Logging = 0
 let g:Vimside_Enable_Pre_Initialization_Logging_Dir = getcwd()
 
 " Filename for the pre-init logging
-let g:Vimside_Enable_Pre_Initialization_Logging_File = 'VIMSIDE_LOG'
+let g:Vimside_Enable_Pre_Initialization_Logging_File = 'VIMSIDE_EARLY_LOG'
 " --------------------------------------------------------------------------

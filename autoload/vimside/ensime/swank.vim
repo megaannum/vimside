@@ -239,7 +239,10 @@ call s:LOG("vimside#ensime#swank#handle response=". a:response)
   let success = 0
   let got_event = 0
 
+let l:start_time = reltime()
   let sexp = vimside#sexp#Parse(response)
+call s:LOG("vimside#ensime#swank#handle time=". reltimestr(reltime(l:start_time)))
+
    
   let [found, children] =  vimside#sexp#Get_ListValue(sexp) 
   if ! found
@@ -300,11 +303,11 @@ function! vimside#ensime#swank#handle_no_response()
 endfunction
 
 function! s:PostHandle(success, got_event, nos_events)
-call s:LOG("s:PostHandle TOP") 
-call s:LOG("s:PostHandle a:success=" . a:success) 
-call s:LOG("s:PostHandle a:got_event=" . a:got_event) 
-call s:LOG("s:PostHandle a:nos_events=" . a:nos_events) 
-call s:LOG("s:PostHandle waiting=" . string(g:vimside.swank.rpc.waiting)) 
+" call s:LOG("s:PostHandle TOP") 
+" call s:LOG("s:PostHandle a:success=" . a:success) 
+" call s:LOG("s:PostHandle a:got_event=" . a:got_event) 
+" call s:LOG("s:PostHandle a:nos_events=" . a:nos_events) 
+" call s:LOG("s:PostHandle waiting=" . string(g:vimside.swank.rpc.waiting)) 
 
   if type(g:vimside.swank.events) == type(0)
     " expecting number of events, add any new events
@@ -313,7 +316,19 @@ call s:LOG("s:PostHandle waiting=" . string(g:vimside.swank.rpc.waiting))
     " expecting 'many' events, so still expect 'many'
     let l:events = g:vimside.swank.events
   endif
-call s:LOG("s:PostHandle l:events=". l:events) 
+" call s:LOG("s:PostHandle l:events=". l:events) 
+
+  " If we are waiting for a response and there is still an
+  " outstanding response id, we are still waiting for a response,
+  " then record event info and set ping timing for response expecting.
+  if ! empty(g:vimside.swank.rpc.waiting)
+    if l:events > 0 && s:current_event_max_count > 0
+      let s:current_event_max_count -= 1
+    endif
+
+    call vimside#ensime#swank#ping_info_set_expecting_rpc_response()
+    return
+  endif
 
   " if nothing happened, check to see if we punt and set scheduler
   " to a 'not expecting anything' state
@@ -336,11 +351,11 @@ call s:LOG("s:PostHandle l:events=". l:events)
   endif
 
   if a:success 
-call s:LOG("s:PostHandle success") 
+" call s:LOG("s:PostHandle success") 
     if empty(g:vimside.swank.rpc.waiting)
-call s:LOG("s:PostHandle not waiting") 
+" call s:LOG("s:PostHandle not waiting") 
       if empty(g:vimside.swank.ping_data)
-call s:LOG("s:PostHandle no ping data") 
+" call s:LOG("s:PostHandle no ping data") 
         if l:events == 0
           call vimside#ensime#swank#ping_info_set_not_expecting_anything()
         elseif l:events == 'many'
@@ -372,7 +387,7 @@ call s:LOG("s:PostHandle no ping data")
         let g:vimside.swank.ping_data = {}
       endif
     else
-call s:LOG("s:PostHandle waiting") 
+" call s:LOG("s:PostHandle waiting") 
       if l:events == 'many'
         call vimside#ensime#swank#ping_info_set_expecting_many_events()
       elseif a:got_event
@@ -403,15 +418,15 @@ call s:LOG("s:PostHandle waiting")
       endif
     endif
   else
-call s:LOG("s:PostHandle not success") 
+" call s:LOG("s:PostHandle not success") 
     " not success, see if there are any new events
     if type(g:vimside.swank.events) == type(0)
       " expecting number of events, add any new events
       let g:vimside.swank.events += a:nos_events
     endif
   endif
-call s:LOG("s:PostHandle g:vimside.swank.events=". g:vimside.swank.events) 
-call s:LOG("s:PostHandle BOTTOM") 
+" call s:LOG("s:PostHandle g:vimside.swank.events=". g:vimside.swank.events) 
+" call s:LOG("s:PostHandle BOTTOM") 
 endfunction
 
 "

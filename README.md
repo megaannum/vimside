@@ -6,10 +6,13 @@ Vim Scala IDE (VimSIde) built upon ENSIME
 
 # Introduction
 
-This is a pre-alpha release of Vimside, a Vim Scala IDE.
-Only a small number of all of the ENSIME capabilities have
-been implemented and it has only been tested against the
+This is an alpha release of Vimside, a Vim Scala IDE.
+Most of the ENSIME capabilities have been implemented and 
+but it has only been tested against the
 very small Scala/Java test source project bundled with it.
+
+Two outstanding Ensime features to be implemented are more
+regression tests and debugging.
 
 I added variable at bottom of the plugin/vimside.vim file
 which allows one to turn on logging during Vimside Option

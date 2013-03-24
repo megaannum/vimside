@@ -15,6 +15,8 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let s:start_time = []
+
 " Options
 " let s:open_close_indicator = 0
 " let s:member_single_line = 1
@@ -130,6 +132,7 @@ call s:LOG("KeyMappings: TOP")
     nnoremap <script> <silent> <buffer> p :call <SID>PreviousHistory()<CR>
     nnoremap <script> <silent> <buffer> n :call <SID>NextHistory()<CR>
     nnoremap <script> <silent> <buffer> q :call <SID>Close()<CR>
+    nnoremap <script> <silent> <buffer> :q :call <SID>Close()<CR>
 
 
 "    map <script> <silent> <Leader>t1         :call TypeInspector1()<CR>
@@ -253,7 +256,12 @@ call s:LOG("Cleanup: TOP")
   let s:history_pos = -1
   let s:history_list = []
   let s:done_key_mappings = 0
-  " let s:current_inspector = {}
+  if exists("s:current_page")
+    unlet s:current_page
+  endif
+  if exists("s:current_inspector")
+    unlet s:current_inspector
+  endif
 
   " delmarks!
 endfunction
@@ -355,6 +363,7 @@ call s:LOG("s:inspect_by_path: is type name")
             \   'name': a:path
             \ }
             \ }
+let s:start_time = reltime()
       call vimside#swank#rpc#type_by_name#Run(dic)
     endif
   else
@@ -438,6 +447,7 @@ call s:LOG("s:inspect_package_by_path: 2 path=". path)
         \   'path': path
         \ }
         \ }
+let s:start_time = reltime()
   call vimside#swank#rpc#inspect_package_by_path#Run(dic)
 endfunction
 
@@ -454,6 +464,7 @@ call s:LOG("s:type_inspect_info_at_point: TOP")
           \   'type_name': import_type_path
           \ }
           \ }
+let s:start_time = reltime()
     call vimside#swank#rpc#type_by_name_at_point#Run(dic)
   else
     let dic = {
@@ -461,6 +472,7 @@ call s:LOG("s:type_inspect_info_at_point: TOP")
           \   'ok': function("g:type_inspector_show")
           \ }
           \ }
+let s:start_time = reltime()
     call vimside#swank#rpc#inspect_type_at_point#Run(dic)
   endif
 call s:LOG("s:type_inspect_info_at_point: BOTTOM")
@@ -469,14 +481,16 @@ endfunction
 function! g:type_inspector_by_name_at_point_callback(dic)
 call s:LOG("g:type_inspector_by_name_at_point_callback: TOP")
 call s:LOG("g:type_inspector_by_name_at_point_callback: dic=". string(a:dic))
+call s:LOG("g:type_inspector_by_name_at_point_callback time=". reltimestr(reltime(s:start_time)))
 
   if has_key(a:dic, ":name") && a:dic[":name"] == "NA"
     return
   endif
 
-  let s:page = s:Page_constructor()
+let s:start_time = reltime()
+  let s:current_page = s:Page_constructor()
   let s:current_inspector = s:PackageInspector_constructor(a:dic)
-  call g:history_and_do(s:page, s:current_inspector)
+  call g:history_and_do(s:current_page, s:current_inspector)
   echo
 endfunction
 
@@ -485,9 +499,12 @@ endfunction
 " ensime-type-inspector-show
 function! g:type_inspector_show(type_inspector_info)
 call s:LOG("g:type_inspector_show: TOP")
-  let s:page = s:Page_constructor()
+call s:LOG("g:type_inspector_show time=". reltimestr(reltime(s:start_time)))
+
+let s:start_time = reltime()
+  let s:current_page = s:Page_constructor()
   let s:current_inspector = s:TypeInspector_constructor(a:type_inspector_info)
-  call g:history_and_do(s:page, s:current_inspector)
+  call g:history_and_do(s:current_page, s:current_inspector)
   echo
 endfunction
 
@@ -602,32 +619,32 @@ call s:LOG("s:inspector_insert_linked_type: TOP")
       endif
       if outer != '' && has_key(ti, ":outer-type-id")
         let outer_type_id = ti[":outer-type-id"]
-        call s:page.add_text(outer, s:make_inspector_insert_link_to_type_id_action(outer_type_id))
-        call s:page.add_text('$')
+        call s:current_page.add_text(outer, s:make_inspector_insert_link_to_type_id_action(outer_type_id))
+        call s:current_page.add_text('$')
       endif
       " TODO use differ highlight if is_object
-      call s:page.add_text(name, s:make_inspector_insert_link_to_type_id_action(type_id))
+      call s:current_page.add_text(name, s:make_inspector_insert_link_to_type_id_action(type_id))
     else
       " short name
       let name = ti[":name"]
       " TODO use differ highlight if is_object
-      call s:page.add_text(name, s:make_inspector_insert_link_to_type_id_action(type_id))
+      call s:current_page.add_text(name, s:make_inspector_insert_link_to_type_id_action(type_id))
     endif
 
     if has_key(ti, ":type-args")
       " List of TypeInfo
       let type_args = ti[":type-args"]
-      call s:page.add_text('[')
+      call s:current_page.add_text('[')
       let first_time = 1
       for targ in type_args
         if first_time
           let first_time = 0
         else
-          call s:page.add_text(', ')
+          call s:current_page.add_text(', ')
         endif
         call s:inspector_insert_linked_type(targ, 0 , 0)
       endfor
-      call s:page.add_text(']')
+      call s:current_page.add_text(']')
     endif
   endif
   if wdl == 1
@@ -637,7 +654,7 @@ call s:LOG("s:inspector_insert_linked_type: TOP")
     else
       let [found, url] = vimside#command#show_doc_symbol_at_point#MakeUrl(ti)
     endif
-    call s:page.add_text(' doc', s:make_browser_action(url))
+    call s:current_page.add_text(' doc', s:make_browser_action(url))
   endif
 endfunction
 
@@ -652,7 +669,7 @@ call s:LOG("s:inspector_insert_linked_arrow_type: TOP")
 
     for param_section in param_sections
   " call s:LOG("s:inspector_insert_linked_arrow_type: param_section=". string(param_section))
-      call s:page.add_text('(')
+      call s:current_page.add_text('(')
 
       if has_key(param_section, ":params")
         let params = param_section[":params"]
@@ -664,13 +681,13 @@ call s:LOG("s:inspector_insert_linked_arrow_type: TOP")
           if first_time
             let first_time = 0
           else
-            call s:page.add_text('. ')
+            call s:current_page.add_text('. ')
           endif
           call s:inspector_insert_linked_type(pti, 0, 1)
         endfor
 
       endif
-      call s:page.add_text(') => ')
+      call s:current_page.add_text(') => ')
     endfor
   endif
   call s:inspector_insert_linked_type(result_type, 0, 1)
@@ -687,14 +704,14 @@ call s:LOG("s:inspector_insert_linked_package_path: path=". a:path)
       let first_time = 0
     else
       let accum .= '.'
-      call s:page.add_text('.')
+      call s:current_page.add_text('.')
     endif
     let accum .= part
 " call s:LOG("s:inspector_insert_linked_package_path: part=". part)
-    call s:page.add_text(part, s:make_inspect_pakage_by_path_action(accum))
+    call s:current_page.add_text(part, s:make_inspect_pakage_by_path_action(accum))
   endfor
   if a:last_dot
-    call s:page.add_text('.')
+    call s:current_page.add_text('.')
   endif
 endfunction
 
@@ -708,11 +725,11 @@ call s:LOG("s:inspector_insert_linked_member: TOP")
   let decl_as = member.decl_as
 
   if decl_as == 'method' || decl_as == 'field'
-    call s:page.add_text(name . ' doc ', s:make_browser_action(url))
+    call s:current_page.add_text(name . ' doc ', s:make_browser_action(url))
     call s:inspector_insert_linked_type(type_info, 0, 0)
   else
     " nested type
-    call s:page.add_text(decl_as .' ')
+    call s:current_page.add_text(decl_as .' ')
     call s:inspector_insert_linked_type(type_info, 0, 0)
   endif
 endfunction
@@ -855,6 +872,7 @@ call s:LOG("InspectTypeId: type_id=". self.type_id)
         \   "type_id": self.type_id
         \ }
         \ }
+let s:start_time = reltime()
   call vimside#swank#rpc#inspect_type_by_id#Run(dic)
 endfunction
 function! s:make_inspector_insert_link_to_type_id_action(type_id)
@@ -979,33 +997,33 @@ call s:LOG("PackageInspector_render: TOP")
   call s:inspector_insert_linked_package_path(self.full_name, 0)
 
   try 
-    call s:page.increment_indent()
-    call s:page.new_line()
+    call s:current_page.increment_indent()
+    call s:current_page.new_line()
     let needs_new_line = 0
 
     " members
     for member in self.members
       if needs_new_line == 1
-        call s:page.new_line()
+        call s:current_page.new_line()
         let needs_new_line = 0
       endif
       if has_key(member, "decl_as")
         let if_text = member.decl_as
         let if_text .= ' '
-        call s:page.add_text(if_text)
+        call s:current_page.add_text(if_text)
 
         let owner_type = member.type_info
         call s:inspector_insert_linked_type(owner_type, 1, 1)
       elseif has_key(member, "render")
         call member.render()
       else
-        call s:page.add_text("OTHER")
+        call s:current_page.add_text("OTHER")
       endif
 
       let needs_new_line = 1
     endfor
   finally
-    call s:page.decrement_indent()
+    call s:current_page.decrement_indent()
   endtry 
 
 endfunction
@@ -1068,27 +1086,27 @@ let s:TypeInspector.init = function("s:TypeInspector_init")
 
 function! s:TypeInspector_render() dict
 call s:LOG("TypeInspector_render: TOP")
-  call s:page.add_text(self.decl_as)
-  call s:page.add_text(' ')
+  call s:current_page.add_text(self.decl_as)
+  call s:current_page.add_text(' ')
   
   try 
-    call s:page.increment_indent()
+    call s:current_page.increment_indent()
     call s:inspector_insert_linked_type(self.type_info, 1, 1)
-    call s:page.add_text(' ')
+    call s:current_page.add_text(' ')
 
     " companion
     if self.decl_as != 'object' && self.companion_id >= 0
       let companion_id = self.companion_id
       let companion_text = '(companion)'
-      call s:page.add_text(companion_text, s:make_inspector_insert_link_to_type_id_action(companion_id))
+      call s:current_page.add_text(companion_text, s:make_inspector_insert_link_to_type_id_action(companion_id))
     endif
-    call s:page.new_line()
+    call s:current_page.new_line()
     let needs_new_line = 0
 
     " interface members
     for interface in self.interfaces
       if needs_new_line == 1
-        call s:page.new_line()
+        call s:current_page.new_line()
       endif
       let owner_type = interface.type_info
       let if_text = interface.decl_as
@@ -1096,23 +1114,23 @@ call s:LOG("TypeInspector_render: TOP")
         let if_text .= ' (via implicit '. interface.via_view .')'
       endif
       let if_text .= ' '
-      call s:page.add_text(if_text)
-      " call s:page.add_text(if_text, s:make_inspector_insert_link_to_type_id_action(interface.type_id))
+      call s:current_page.add_text(if_text)
+      " call s:current_page.add_text(if_text, s:make_inspector_insert_link_to_type_id_action(interface.type_id))
 
       call s:inspector_insert_linked_type(owner_type, 1, 1)
       try 
-        call s:page.increment_indent()
+        call s:current_page.increment_indent()
         for member in interface.members
-          call s:page.new_line()
+          call s:current_page.new_line()
           call s:inspector_insert_linked_member(owner_type, member)
         endfor
       finally
-        call s:page.decrement_indent()
+        call s:current_page.decrement_indent()
       endtry 
       let needs_new_line = 1
     endfor
   finally
-    call s:page.decrement_indent()
+    call s:current_page.decrement_indent()
   endtry 
 
 endfunction
@@ -1491,12 +1509,12 @@ endfunction
 
 function! s:ForwardAtion()
 call s:LOG("ForwardAtion TOP")
-  call s:page.next_type_id_position()
+  call s:current_page.next_type_id_position()
 endfunction
 
 function! s:BackwardAtion()
 call s:LOG("BackwardAtion TOP")
-  call s:page.previous_type_id_position()
+  call s:current_page.previous_type_id_position()
 endfunction
 
 
@@ -1507,10 +1525,11 @@ function! s:OnNodeClick()
   let line = line(".")-s:first_buffer_line
 call s:LOG("OnNodeClick: col=". col . ", line=". line)
   if line > 0
-    let amap = s:page.line_col_map[line]
+    let amap = s:current_page.line_col_map[line]
     if has_key(amap, col)
       let action = amap[col]
 call s:LOG("OnNodeClick: action=". string(action))
+      echo "Getting Type Info...."
       call action.execute()
     else
 call s:LOG("OnNodeClick: no action")
@@ -1526,9 +1545,9 @@ call s:LOG("NextHistory history_pos=". s:history_pos)
     let s:history_pos += 1
     let history = s:history_list[s:history_pos]
     let s:current_inspector = history.inspector
-    let s:page = history.page
+    let s:current_page = history.page
+    call s:loadDisplay(1)
     call setpos('.', history.pos)
-    call s:loadDisplay()
   endif
 endfunction
 function! s:PreviousHistory()
@@ -1537,9 +1556,9 @@ call s:LOG("PreviousHistory history_pos=". s:history_pos)
     let s:history_pos -= 1
     let history = s:history_list[s:history_pos]
     let s:current_inspector = history.inspector
-    let s:page = history.page
+    let s:current_page = history.page
+    call s:loadDisplay(1)
     call setpos('.', history.pos)
-    call s:loadDisplay()
   endif
 endfunction
 
@@ -1549,23 +1568,32 @@ call s:LOG("ReBuildDisplay TOP")
   let curPos = getpos('.')
 
   exec "keepjumps ".s:first_buffer_line.',$d "_'
-  call setline(1, s:CreateHelp())
-  call s:BuildDisplay()
+  call s:BuildDisplay(0)
 
   call setpos('.', curPos)
   setlocal nomodifiable
 call s:LOG("ReBuildDisplay BOTTOM")
 endfunction
 
-function! s:BuildDisplay()
+" called by ReBuildDisplay
+" called by loadDisplay
+function! s:BuildDisplay(use_current_page)
 call s:LOG("BuildDisplay TOP")
 
   call setline(1, s:CreateHelp())
 
+if 1
+  if ! a:use_current_page
+    call s:current_inspector.render()
+  endif
+else
   call s:current_inspector.render()
-  let lines = s:page.lines
-call s:LOG("BuildDisplay lines=". string(lines))
+endif
+  let lines = s:current_page.lines
   call setline(s:first_buffer_line, lines)
+
+" call s:LOG("BuildDisplay lines=". string(lines))
+call s:LOG("BuildDisplay time=". reltimestr(reltime(s:start_time)))
 
 call s:LOG("BuildDisplay BOTTOM")
 endfunction
@@ -1601,7 +1629,10 @@ endfunction
 function! s:MakeMapKeys()
 endfunction
 
-function! s:loadDisplay()
+" called by s:DoTypeInspector()
+" called by s:PreviousHistory()
+" called by s:NextHistory()
+function! s:loadDisplay(use_current_page)
 call s:LOG("loadDisplay TOP")
   setlocal buftype=nofile
   setlocal modifiable
@@ -1613,34 +1644,37 @@ call s:LOG("loadDisplay TOP")
 
   call s:SetupSyntax()
   call s:MakeMapKeys()
-  call setline(1, s:CreateHelp())
-  call s:BuildDisplay()
+  call s:BuildDisplay(a:use_current_page)
   call cursor(s:first_buffer_line, 1)
 
+if 0
   if !g:bufExplorerResize
-      normal! zz
+    normal! zz
   endif
+endif
 
   setlocal nomodifiable
 call s:LOG("loadDisplay BOTTOM")
 endfunction
 
+" only called by g:history_and_do(page, inspector)
 function! s:DoTypeInspector()
 call s:LOG("DoTypeInspector TOP")
 
-  let s:current_buffer = bufname("%")
-
   if s:running == 0
+    let s:current_buffer = bufname("%")
+
     " do split mode
     if s:split_mode != ""
       " exe 'keepalt '. s:split_mode
-      execute s:split_mode
+      execute s:split_mode .' '. 'Inspector'
     endif
   endif
 
+  " only does something it s:running == 0
   call s:Initialize()
 
-  call s:loadDisplay()
+  call s:loadDisplay(0)
 
 call s:LOG("DoTypeInspector BOTTOM")
 endfunction

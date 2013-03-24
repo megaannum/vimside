@@ -63,12 +63,10 @@ function! vimside#forms#menu#MakeMenuSource()
             \ })
   
 " ["Inspect type" ensime-inspect-type-at-point]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Inspect type'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Inspect type',
-            \ 'action': action
+            \ 'command': ':call vimside#command#InspectTypeAtPoint()'
             \ })
   
 " ["Inspect type in another frame" ensime-inspect-type-at-point-other-frame]
@@ -81,21 +79,17 @@ function! vimside#forms#menu#MakeMenuSource()
             \ })
   
 " ["Inspect enclosing package" ensime-inspect-package-at-point]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Inspect enclosing package'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Inspect enclosing package',
-            \ 'action': action
+            \ 'command': ':call vimside#command#InspectPackageAtPoint()'
             \ })
   
 " ["Inspect project package" ensime-inspect-project-package]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Inspect project package'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Inspect project package',
-            \ 'action': action
+            \ 'command': ':call vimside#command#InspectProjectPackage()'
             \ })
   
 " ["Typecheck file" ensime-typecheck-current-file]
@@ -572,12 +566,10 @@ endif
             \ })
 
 " ["Go to SBT console" ensime-sbt-switch]
-  let action = forms#newAction({ 'execute': function("VimsideInfoMenuAction")})
-  let action.msg = 'Go to SBT console'
   call add(items, {
             \ 'type': 'button',
             \ 'label': '&Goto SBT console',
-            \ 'action': action
+            \ 'command': ':call vimside#command#SbtSwitch()'
             \ })
 
 " ["Go to Scala REPL" ensime-inf-switch]
