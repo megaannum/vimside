@@ -104,25 +104,25 @@ call s:LOG("vimside#options#manager: s:full_dir=". s:full_dir)
 let s:vimside_dir = resolve(s:full_dir . '/../../../data/vimside/')
 call s:LOG("vimside#options#manager: s:vimside_dir=". s:vimside_dir)
 
-if ! exists("g.vimside.options")
+if ! exists("g:vimside.options")
   let g:vimside['options'] = {}
 endif
-if ! exists("g.vimside.options.keyvals")
+if ! exists("g:vimside.options.keyvals")
   let g:vimside.options['keyvals'] = {}
 endif
-if ! exists("g.vimside.options.defined")
+if ! exists("g:vimside.options.defined")
   let g:vimside.options['defined'] = {}
 endif
-if ! exists("g.vimside.options.user")
+if ! exists("g:vimside.options.user")
   let g:vimside.options['user'] = {}
 endif
-if ! exists("g.vimside.options.user.keyvals")
+if ! exists("g:vimside.options.user.keyvals")
   let g:vimside.options.user['keyvals'] = {}
 endif
-if ! exists("g.vimside.options.default")
+if ! exists("g:vimside.options.default")
   let g:vimside.options['default'] = {}
 endif
-if ! exists("g.vimside.options.default.keyvals")
+if ! exists("g:vimside.options.default.keyvals")
   let g:vimside.options.default['keyvals'] = {}
 endif
 

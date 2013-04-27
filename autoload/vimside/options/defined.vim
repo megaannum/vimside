@@ -112,10 +112,9 @@ function! vimside#options#defined#CheckValue(def, value, errors)
 
   " first check type
   if type(value) != def.type
-    if def.type == g:OPTION_BOOLEAN_TYPE
-      call add(errors, "Option '". def.name ."' not Bool type: '". string(value) ."'")
-    elseif def.type == g:OPTION_NUMBER_TYPE
-      call add(errors, "Option '". def.name ."' not Int type: '". string(value) ."'")
+    " change Issue 19
+    if def.type == g:OPTION_BOOLEAN_TYPE || def.type == g:OPTION_NUMBER_TYPE
+      call add(errors, "Option '". def.name ."' not Bool/Int type: '". string(value) ."'")
     elseif def.type == g:OPTION_STRING_TYPE
       call add(errors, "Option '". def.name ."' not String type: '". string(value) ."'")
     elseif def.type == g:OPTION_FLOAT_TYPE
@@ -128,11 +127,14 @@ function! vimside#options#defined#CheckValue(def, value, errors)
       call add(errors, "Option '". def.name ."' has bad type: '". def.type ."'")
     endif
   else
+
+if 0 " remove Issue 19
     if def.type == g:OPTION_BOOLEAN_TYPE
       if value != 0 && value != 1
         call add(errors, "Option '". def.name ."' has bad Bool value: '". string(value) ."'")
       endif
     endif
+endif " remove Issue 19
 
     if has_key(def, "kind")
       if def.kind == g:OPTION_FILE_NAME_KIND

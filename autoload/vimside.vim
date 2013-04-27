@@ -371,6 +371,41 @@ call s:LOG("vimside#PingEnsimeServer")
   endwhile
 endfunction
 
+
+
+" ============================================================================
+" Signal an event. Send to testing harness if it exists.
+" Used to drive asynchronous regression tests.
+" event optional value
+" ============================================================================
+function! vimside#EventSignal(event, ...)
+  if exists("g:vimside.test.signal")
+    if if a:0 == 1
+    call g:vimside.test.signal(a:event, a:1)
+    else
+    call g:vimside.test.signal(a:event)
+    endif
+  endif
+endfunction
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if 0 " YYYYYYYYYYYYYYY
 " ============================================================================
 " Completion code

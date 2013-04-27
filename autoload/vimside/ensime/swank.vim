@@ -663,12 +663,13 @@ function! s:HandleSimpleEvent(sexp)
   let sexp = a:sexp
 call s:LOG("HandleSimpleEvent ".string(sexp)) 
 
-  let [found, kword] = vimside#sexp#Get_KeywordValue(sexp) 
+  let [found, event] = vimside#sexp#Get_KeywordValue(sexp) 
   if found
-    let Ehandler = get(g:vimside.event_handlers, kword, g:vimside.unknown_event_handler)
-    call Ehandler(kword)
+    let Ehandler = get(g:vimside.event_handlers, event, g:vimside.unknown_event_handler)
+    call Ehandler(event)
+    call vimside#EventSignal(event)
   else
-    call s:ERROR("HandleSimpleEvent: ". kword) 
+    call s:ERROR("HandleSimpleEvent: ". event) 
   endif
 endfunction
 
@@ -691,11 +692,13 @@ call s:LOG("HandleComplexEvent ".string(children))
   if found
     let Ehandler = get(g:vimside.event_handlers, value1, g:vimside.unknown_event_handler)
     call Ehandler(value1, child2)
+    call vimside#EventSignal(value1, child2)
   else
     let [found, value2] =  vimside#sexp#Get_KeywordValue(child2) 
     if found
       let Ehandler = get(g:vimside.event_handlers, value2, g:vimside.unknown_event_handler)
       call Ehandler(value2, child1)
+      call vimside#EventSignal(value2, child1)
     else
       call s:ERROR("HandleComplexEvent: No Keyword: ". string(children)) 
     endif
