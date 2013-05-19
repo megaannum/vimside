@@ -21,6 +21,12 @@ let s:sbt_compile = 'sbt_compile'
 let s:sbt_clean = 'sbt_clean'
 let s:sbt_package = 'sbt_package'
 
+let [found, longline] = g:vimside.GetOption('tailor-sbt-compile-error-long-line-quickfix')
+if found
+  let s:sbt_longline = longline
+else
+  let s:sbt_longline = 0
+endif
 
 let s:match_prompt = '^\(>\|scala>\|\[project_name\] \$\) $'
 let s:match_info = '^\[info\]\([^\n]*\)$'
@@ -33,6 +39,7 @@ let s:match_compile = '^compile$'
 let s:match_error_file = '^\[error\] \(.\+\)\.\(scala\|java\):\([0-9]\+\): \(.*\)$'
 " [error]      ^
 let s:match_error_column = '^\[error\] \( \+\)\^$'
+let s:match_error_msg = '^\[error\] \([^\n]*\)$'
 
 let s:max_counter = 0
 
@@ -186,6 +193,9 @@ call vimside#scheduler#SetUpdateTime(100)
 
   let g:vimside.project.scala_notes = []
   let g:vimside.project.java_notes = []
+
+  " closes quickfix window (if its open, otherwise nothing)
+  cclose
 
   call s:send("compile")
 call s:LOG("vimside#command#sbt#Compile: BOTTOM")
@@ -344,6 +354,13 @@ call s:LOG("s:HandleCompilePackageCB: MATCH COLUMN: " . colnum)
               else
                 call add(g:vimside.project.scala_notes, snote)
               endif
+            else
+              if s:sbt_longline 
+                let extra_msg = matchlist(line, s:match_error_msg)
+                if ! empty(extra_msg)
+                  let msg = msg . extra_msg[1]
+                endif
+              endif
             endif
           endif
         elseif tag == 'compile'
@@ -480,7 +497,7 @@ endfunction
 "    [0, '']
 function! s:read_stdout()
   if has_key(s:subproc, 'stdout') && !s:subproc.stdout.eof
-    let output = s:subproc.stdout.read(1000, 10)
+    let output = s:subproc.stdout.read(10000, 10)
 call s:LOG("sbt: read_stdout output=" . output)
     if output == ''
       return [0, '']

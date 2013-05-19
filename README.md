@@ -404,9 +404,8 @@ copy `example_options_user.vim` to `options_user.vim`.
     > cd $HOME/.vim/data/vimside
     > /bin/cp example_options_user.vim options_user.vim
 
-Then, in `options_user.vim` uncomment the following two lines:
+Then, in `options_user.vim` uncomment the following line:
 
-    call a:option.Set("test-ensime-file-use", 1)
     call a:option.Set("ensime-config-file-name", "ensime_config.vim")
 
 This tells Vimside to use the test project code and to use the
@@ -502,8 +501,6 @@ basis), but enabling the above Option is all that is need in this file.
       " To run against ensime test project code
       " Location of test directory
       call owner.Set("test-ensime-file-dir", s:full_dir)
-      " Uncomment to run against demonstration test code
-      call owner.Set("test-ensime-file-use", 1)
       " The Ensime Config information is in a file called 'ensime_config.vim'
       call owner.Set("ensime-config-file-name", "ensime_config.vim")
       "--------------

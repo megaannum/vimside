@@ -380,27 +380,6 @@ function! s:MakeOptions()
             \ 'is ignored.'
           \ ]
       \ }
-if 0 " XXXX
-  let l:options['test-ensime-file-use'] = {
-        \ 'name': 'test-ensime-file-use',
-        \ 'type': g:OPTION_BOOLEAN_TYPE, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ 'If true, then the test Ensime Config File located, generally',
-            \ 'in the "data/vimside" Directory is used to initialize Ensime.'
-          \ ]
-      \ }
-  let l:options['test-ensime-file-dir'] = {
-        \ 'name': 'test-ensime-file-dir',
-        \ 'type': g:OPTION_STRING_TYPE, 
-        \ 'kind': g:OPTION_DIR_PATH_KIND, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'description': [
-            \ 'The Directory of the test Ensime Config File. If not set then',
-          \  'value used is the "data/vimside" Directory.'
-          \ ]
-      \ }
-endif "0 XXXX
   let l:options['vimside-use-cwd-as-output-dir'] = {
         \ 'name': 'vimside-use-cwd-as-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
@@ -1898,6 +1877,16 @@ endif "0 XXXX
             \ 'How to display Scala Simple Build Tool (SBT).'
           \ ]
       \ }
+  let l:options['tailor-sbt-compile-error-long-line-quickfix'] = {
+        \ 'name': 'tailor-sbt-compile-error-multiline-quickfix',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ "Display all of the compiler error messages in quickfix window",
+            \ "if set to true. If false, then for each error, only first",
+            \ "line of the compiler error message is shown."
+          \ ]
+      \ }
 
 
   let l:options['tailor-symbol-at-point-information'] = {
@@ -2291,6 +2280,7 @@ endif "0 XXXX
             \ "Refactor extract method identifier matching pattern."
         \ ]
       \ }
+  
 
   return l:options
 endfunction

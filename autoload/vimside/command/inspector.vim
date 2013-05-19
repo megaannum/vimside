@@ -1070,7 +1070,9 @@ call s:LOG("TypeInspector_init: TOP")
   if has_key(self.type_info, ":outer-type-id")
     let self.outer_type_id = self.type_info[":outer-type-id"]
   endif
-  let self.decl_as = self.type_info[":decl-as"]
+  if has_key(self.type_info, ":decl-as")
+    let self.decl_as = self.type_info[":decl-as"]
+  endif
   let self.name = self.type_info[":name"]
   let self.fullname = self.type_info[":full-name"]
 

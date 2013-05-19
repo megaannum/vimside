@@ -20,9 +20,6 @@
 " default location of Ensime files/directories
 function! vimside#options#default#Load(owner)
   let owner = a:owner
-if 0 " XXXX
-  call owner.Set("test-ensime-file-use", 0)
-endif "0 XXXX
 
   " TODO remove
   " if  has("win32") || has("win95") || has("win64") || has("win16") || has("dos32")
@@ -300,6 +297,8 @@ endif "0 XXXX
 
   " Typecheck file on write
   call owner.Set('tailor-type-check-file-on-write', 0)
+
+  call owner.Set('tailor-sbt-compile-error-long-line-quickfix', 1)
 
   " Refactor Rename
   call owner.Set("tailor-refactor-rename-pattern-enable", 1)
