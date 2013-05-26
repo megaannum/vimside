@@ -39,15 +39,18 @@ Vim editor (not window, but another Vim process) in the same
 project is asked to start the Ensime server ('\<Leader> vs'), it will find the
 Ensime port file and simply connect to the already running server.
 This seems to work with the caveats: 
+
     - If the configuration is to stop the server when Vim is exited,
     then when the Vim editor that started the server exits, then
     the server is stopped even if other Vim editor are still connected
     to it. Have to implement some kind of Vim connection counter if
     this becomes an issue.
+
     - If the Ensime configuration file is changed between starting the
     first and second Vim, things might not work (since the Ensime 
     server will only know about the configuration that the first
     Vim process passed to it).
+
 If the configuration is that the Ensime server is not stopped when
 the launching Vim process is exited, then any Vim process that
 connects to the server can explicitly generate the stop server
