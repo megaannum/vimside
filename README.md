@@ -36,7 +36,7 @@ multiple Vim processes connected to the same Ensime Server.
 Vimside has been tested with multiple Vim processes. One Vim
 can start the Ensime Server (normal start command) and a second
 Vim editor (not window, but another Vim process) in the same
-project is asked to start the Ensime server ('<Leader> vs'), it will find the
+project is asked to start the Ensime server ('\<Leader> vs'), it will find the
 Ensime port file and simply connect to the already running server.
 This seems to work with the caveats: 
     - If the configuration is to stop the server when Vim is exited,
@@ -51,7 +51,7 @@ This seems to work with the caveats:
 If the configuration is that the Ensime server is not stopped when
 the launching Vim process is exited, then any Vim process that
 connects to the server can explicitly generate the stop server
-command ('<Leader> vS')to kill the server (or using 'ps' and 'kill -9').
+command ('\<Leader> vS')to kill the server (or using 'ps' and 'kill -9').
 
 Previously, when Vim stopped, the Ensime server was stopped 
 (with a call to shut it down). Now, this is optional.
@@ -61,7 +61,7 @@ is shutdown when the Vim editor is exited. But, now if the
 Option is false (0), then when Vim stops, the Ensime server
 is not stopped. To stop the server one must explicitly issue the 
 command:
-  nmap <silent> <Leader>vS :call vimside#command#StopEnsime()<CR>
+  nmap <silent> \<Leader>vS :call vimside#command#StopEnsime()<CR>
 This lets one save the running server between Vim sessions and, in
 addition, allows one to use multiple Vim processes to edit the
 same project's files. To enable this, Vimside was also changed so
