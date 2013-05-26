@@ -17,6 +17,14 @@ if exists("g:vimside")
   if ! s:found
     echoerr "Option not found: " . 'vimside-log-file-path'
   endif
+  let [s:found, s:log_file_use_pid] = g:vimside.GetOption('vimside-log-file-use-pid')
+  if s:found
+    if s:log_file_use_pid
+      let s:log_file .= "_". getpid()
+    endif
+  else
+    echoerr "Option not found: " . 'vimside-log-file-use-pid'
+  endif
 
   let [s:found, s:log_enabled] = g:vimside.GetOption('vimside-log-enabled')
   if ! s:found

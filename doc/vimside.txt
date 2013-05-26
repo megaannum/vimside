@@ -618,6 +618,7 @@ Vimside session.
   'vimside-log-enabled'
   'vimside-log-file-path'
   'vimside-log-file-name'
+  'vimside-log-file-use-pid'
   'vimside-use-cwd-as-output-dir'
 
 5.2 Test Configuration
@@ -636,6 +637,8 @@ Vimside session.
   'ensime-log-enabled'
   'ensime-log-file-path'
   'ensime-log-file-name'
+  'ensime-log-file-use-pid'
+  'ensime-shutdown-on-vim-exit'
 
 5.4 Swank Caller, Handler and Event
 
@@ -805,6 +808,7 @@ Vimside session.
 
   'tailor-sbt-config-location'
   'tailor-sbt-compile-error-long-line-quickfix'
+  'tailor-sbt-error-read-size'
 
   'tailor-uses-of-symbol-at-point-location'
 

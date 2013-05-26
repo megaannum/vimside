@@ -380,6 +380,25 @@ function! s:MakeOptions()
             \ 'is ignored.'
           \ ]
       \ }
+  let l:options['vimside-log-file-use-pid'] = {
+        \ 'name': 'vimside-log-file-use-pid',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'The Vim log file has the current process id (pid) as a prefix.'
+          \ ]
+      \ }
+  let l:options['vimside-port-file-wait-time'] = {
+        \ 'name': 'vimside-port-file-wait-time',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_TIME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ "How long to wait after starting the Ensime Server before",
+            \ "attempting to read the file containing the port number."
+          \ ]
+      \ }
+
   let l:options['vimside-use-cwd-as-output-dir'] = {
         \ 'name': 'vimside-use-cwd-as-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
@@ -478,6 +497,17 @@ function! s:MakeOptions()
             \ 'running. The default value is "localhost".'
           \ ]
       \ }
+  let l:options['ensime-shutdown-on-vim-exit'] = {
+        \ 'name': 'ensime-shutdown-on-vim-exit',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'If set to true (1), then when Vim stops, a call is made',
+            \ 'to shutdown its associated Ensime Server. If set to false (0),',
+            \ 'the default, then the Ensime Server is not shutdown when',
+            \ 'Vim exits.'
+          \ ]
+      \ }
   let l:options['ensime-port-file-max-wait'] = {
         \ 'name': 'ensime-port-file-max-wait',
         \ 'type': g:OPTION_NUMBER_TYPE, 
@@ -505,6 +535,15 @@ function! s:MakeOptions()
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Full path to Ensime Server log file.'
+          \ ]
+      \ }
+  let l:options['ensime-log-file-use-pid'] = {
+        \ 'name': 'ensime-log-file-use-pid',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'The Ensime log file has the process id (pid) as a prefix',
+            \ 'of the Vim process that started it.'
           \ ]
       \ }
   let l:options['ensime-log-file-name'] = {
@@ -1885,6 +1924,18 @@ function! s:MakeOptions()
             \ "Display all of the compiler error messages in quickfix window",
             \ "if set to true. If false, then for each error, only first",
             \ "line of the compiler error message is shown."
+          \ ]
+      \ }
+  let l:options['tailor-sbt-error-read-size'] = {
+        \ 'name': 'tailor-sbt-error-read-size',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Size of Ensime socket read buffer when getting the results',
+            \ 'of an SBT compiliation. This should be large because there',
+            \ 'might be a lot of errors and a partial read may fail when',
+            \ 'when converting errors to Quickfix window entries.'
           \ ]
       \ }
 

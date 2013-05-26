@@ -45,9 +45,11 @@ function! vimside#options#default#Load(owner)
   
   call owner.Set("ensime-log-enabled", 0)
   call owner.Set("ensime-log-file-name", "ENSIME_LOG")
+  call owner.Set("ensime-log-file-use-pid", 0)
   call owner.Set("ensime-port-file-max-wait", 5)
   call owner.Set("ensime-port-file-name", '_ensime_port')
   call owner.Set("ensime-host-name", "localhost")
+  call owner.Set("ensime-shutdown-on-vim-exit", 1)
 
   " supported java and scala versions
   call owner.Set("vimside-java-version", "1.6")
@@ -58,6 +60,9 @@ function! vimside#options#default#Load(owner)
 
   call owner.Set("vimside-log-enabled", 0)
   call owner.Set("vimside-log-file-name", "VIMSIDE_LOG")
+  call owner.Set("vimside-log-file-use-pid", 0)
+
+  call owner.Set("vimside-port-file-wait-time", 4)
 
   call owner.Set("tailor-information", 'preview')
   call owner.Set("tailor-location-same-file", 'same_window')
@@ -299,6 +304,7 @@ function! vimside#options#default#Load(owner)
   call owner.Set('tailor-type-check-file-on-write', 0)
 
   call owner.Set('tailor-sbt-compile-error-long-line-quickfix', 1)
+  call owner.Set('tailor-sbt-error-read-size', 10000)
 
   " Refactor Rename
   call owner.Set("tailor-refactor-rename-pattern-enable", 1)

@@ -202,14 +202,69 @@ function! vimside#StartEnsime()
     call vimside#cmdline#Display(msg)
 
     call vimside#PreStart()
+call s:LOG("vimside#StartEnsime after vimside#PreStart") 
 
-    call vimside#StartEnsimeServer()
-    let g:vimside.started = 1
+    " How long to sleep after starting Ensime Server before 
+    " trying to read ther port file (written by server)
+    " 2 to 4 seconds is about right
+    let [found, wtime] = g:vimside.GetOption('vimside-port-file-wait-time')
+    if found
+      let l:wait_time = wtime
+    else
+      let l:wait_time = 4
+    endif
 
-sleep 4
+    let l:try_again_attempts = 2
+    let l:try_again = 1
+    while l:try_again
 
-    call vimside#GetPortEnsime()
+      let l:try_again = 0
 
+      let l:had_to_start = vimside#StartEnsimeServer()
+call s:LOG("vimside#StartEnsime had_to_start=". l:had_to_start) 
+      let g:vimside.started = 1
+
+      execute "sleep ". l:wait_time
+
+      call vimside#GetPortEnsime()
+
+if 0 " XXXXXX
+      let l:name = "ping_ensime_server"
+      let l:Func = function("vimside#PingEnsimeServer")
+      let l:sec = 1
+      let l:msec = 0
+      let l:charcnt = 200
+      let l:repeat = 1
+      call vimside#scheduler#AddJob(l:name, l:Func, l:sec, l:msec, l:charcnt, l:repeat)
+sleep 2
+endif " XXXXXX
+
+call s:LOG("vimside#StartEnsime get connection") 
+      try 
+        let [found, socket] = vimside#GetConnectionSocketEnsime()
+        if found
+" call s:LOG("vimside#StartEnsime set vimside socket") 
+          let g:vimside['socket'] = socket
+        endif
+      catch /.*/
+        call s:ERROR("vimside#StartEnsime socket connect:". v:exception) 
+        if  ! l:had_to_start
+          " maybe a bad port file
+          let [found, portfile] = g:vimside.GetOption('ensime-port-file-path')
+          if found
+            call delete(portfile)
+            if l:try_again_attempts > 0
+              let l:try_again_attempts -= 1
+              let l:try_again = 1
+            endif
+          endif
+        endif
+      endtry
+
+    endwhile
+
+
+call s:LOG("vimside#StartEnsime register pinger") 
     let l:name = "ping_ensime_server"
     let l:Func = function("vimside#PingEnsimeServer")
     let l:sec = 1
@@ -217,22 +272,24 @@ sleep 4
     let l:charcnt = 200
     let l:repeat = 1
     call vimside#scheduler#AddJob(l:name, l:Func, l:sec, l:msec, l:charcnt, l:repeat)
+" sleep 2
 
-sleep 2
-call s:LOG("vimside#StartEnsime get connection") 
-    let g:vimside['socket'] = vimside#GetConnectionSocketEnsime()
 
 call s:LOG("vimside#StartEnsime call vimside#swank#rpc#connection_info#Run") 
     call vimside#swank#rpc#connection_info#Run()
+    if l:had_to_start
 call s:LOG("vimside#StartEnsime call vimside#swank#rpc#init_project#Run") 
-    call vimside#swank#rpc#init_project#Run()
+      call vimside#swank#rpc#init_project#Run()
+    endif
 
 call s:LOG("vimside#StartEnsime call vimside#hooks#StartAutoCmd") 
     call vimside#hooks#StartAutoCmd()
   else
+call s:LOG("vimside#StartEnsime Ensime Engine Already Running") 
     let msg = "Ensime Engine Already Running ..."
     call vimside#cmdline#Display(msg)
   endif
+call s:LOG("vimside#StartEnsime BOTTOM") 
 endfunction
 
 
@@ -240,9 +297,10 @@ function! vimside#StopEnsime()
   if g:vimside.started
 " XXXXXXXXXXXXX
     call vimside#hooks#StopAutoCmd()
+    call vimside#scheduler#StopAuto() 
 
     " call vimside#RemoveAutoCmds()
-    vimside#scheduler#ClearAuto()
+    " vimside#scheduler#ClearAuto()
     call vimside#swank#rpc#shutdown_server#Run()
 
     call vimside#ensime#io#close()
@@ -250,55 +308,94 @@ function! vimside#StopEnsime()
   endif
 endfunction
 
+" return 0 port file already exists, so Ensime server already running
+" return 1 port file does not exist, so start Ensime server 
 function! vimside#StartEnsimeServer()
   let [found, portfile] = g:vimside.GetOption('ensime-port-file-path')
   if ! found
     echoerr "Option not found: "'ensime-port-file-path'"
+    return 0
   endif
 
 call s:LOG("vimside#StartEnsimeServer portfile=" . portfile) 
   let [found, dpath] = g:vimside.GetOption('ensime-dist-path')
   if ! found
     echoerr "Option not found: "'ensime-dist-path'"
+    return0
   endif
 
-  let cmd = 'cd ' . dpath . ' && ./bin/server ' . shellescape(portfile)
+  let portFileExists = filereadable(portfile)
+call s:LOG("vimside#StartEnsimeServer portFileExists=". portFileExists) 
 
-  let [s:found, l:log_enabled] = g:vimside.GetOption('ensime-log-enabled')
-  if ! s:found
-    echoerr "Option not found: "'ensime-log-enabled'"
-  endif
-
-" echo "StartEnsimeServer: log_enabled=" . l:log_enabled
-  if l:log_enabled
-    let lines = [
-      \ "##################################################################",
-      \ "Title: Ensime Server log file",
-      \ "Date: " . strftime("%Y%m%d %T"),
-      \ "##################################################################"
-      \ ]
-
-    let [found, l:logfile] = g:vimside.GetOption('ensime-log-file-path')
-    if ! found
-      echoerr "Option not found: "'ensime-log-file-path'"
-    endif
-
-    call writefile(lines, l:logfile)
-
-    execute "silent !" . cmd . " &>> " . l:logfile . " &"
-
+  if portFileExists
+    return 0
   else
-    " TODO remove
-    " if has('win16') || has('win32') || has('win64')
-    
-    if g:vimside.os.is_mswin 
-      " Note: do not know if this is correct
-      let l:logfile = "NUL"
-    else
-      let l:logfile = "/dev/null"
+
+    let cmd = 'cd ' . dpath . ' && ./bin/server ' . shellescape(portfile)
+
+    let [s:found, l:log_enabled] = g:vimside.GetOption('ensime-log-enabled')
+    if ! s:found
+      echoerr "Option not found: "'ensime-log-enabled'"
     endif
 
-    execute "silent !" . cmd . " &> " . l:logfile . " &"
+  " echo "StartEnsimeServer: log_enabled=" . l:log_enabled
+    if l:log_enabled
+      let [found, l:logfile] = g:vimside.GetOption('ensime-log-file-path')
+      if ! found
+        echoerr "Option not found: "'ensime-log-file-path'"
+      else
+        let [s:found, s:use_pid] = g:vimside.GetOption('ensime-log-file-use-pid')
+        if s:found 
+          if s:use_pid
+            let l:logfile .= "_". getpid()
+          endif
+        else
+          echoerr "Option not found: " . 'ensime-log-file-use-pid'
+        endif
+      endif
+
+
+      let separator = repeat("-", 80)
+      let l:lines = [
+        \ separator,
+        \ 'Title: Ensime Server log file',
+        \ 'Date: ' . strftime("%Y%m%d %T"),
+        \ separator
+        \ ]
+
+      for line in l:lines
+        execute "silent !echo \"". line . "\" >> ". l:logfile 
+      endfor
+
+      execute "silent !" . cmd . " &>> " . l:logfile . " &"
+
+    else
+      " TODO remove
+      " if has('win16') || has('win32') || has('win64')
+      
+      if g:vimside.os.is_mswin 
+        " Note: do not know if this is correct
+        let l:logfile = "NUL"
+      else
+        let l:logfile = "/dev/null"
+      endif
+
+      execute "silent !" . cmd . " &> " . l:logfile . " &"
+    endif
+
+    " Test to see if we shutdown Ensime when we exit Vim
+    let [s:found, l:auto_shutdown] = g:vimside.GetOption('ensime-shutdown-on-vim-exit')
+    if ! s:found
+      echoerr "Option not found: "'ensime-shutdown-on-vim-exit'"
+    elseif l:auto_shutdown
+      augroup VIMSIDE_STOP
+        au!
+        autocmd VimLeave * call vimside#StopEnsime()
+      augroup END
+    endif
+
+call s:LOG("vimside#StartEnsimeServer Ensime launched") 
+    return 1
   endif
 
 endfunction
@@ -307,14 +404,18 @@ function! vimside#GetPortEnsime()
 call s:LOG("vimside#GetPortEnsime TOP") 
   let [found, portfile] = g:vimside.GetOption('ensime-port-file-path')
   if ! found
-    echoerr "Option not found: "'ensime-port-file-path'"
+    let msg = "Option not found: "'ensime-port-file-path'"
+    echoerr msg
+    throw msg
   endif
 
   " wait for port file to be created and written to
   let cnt = 0
   let [found, max_cnt] = g:vimside.GetOption('ensime-port-file-max-wait')
   if ! found
-    echoerr "Option not found: "'ensime-port-file-max-wait'"
+    let msg = "Option not found: "'ensime-port-file-max-wait'"
+    echoerr msg
+    throw msg
   endif
 
 call s:LOG("vimside#GetPortEnsime max_cnt=" . max_cnt) 
@@ -324,18 +425,22 @@ call s:LOG("vimside#GetPortEnsime max_cnt=" . max_cnt)
   endwhile
 
   if ! filereadable(portfile)
-    echoerr "Vimside Failed to start Ensime Server port file does not exists"
+    let msg = "Vimside Failed to start Ensime Server port file does not exists"
+    echoerr msg
+    throw msg
   endif
 
   let portfile_lines = readfile(portfile)
   if len(portfile_lines) != 1
-    echoerr "Vimside Ensime Server port file not single line: " . string(portfile_lines)
+    let msg = "Vimside Ensime Server port file not single line: " . string(portfile_lines)
+    echoerr msg
+    throw msg
   endif
 
   let portstr = portfile_lines[0]
   let port = 0 + portstr
-  call g:vimside.SetOption('ensime_port_number', port)
-call s:LOG("vimside#GetPortEnsime BOTTOM") 
+call s:LOG("vimside#GetPortEnsime port=". port) 
+  call g:vimside.UpdateOption('ensime_port_number', port)
 endfunction
 
 function! vimside#GetConnectionSocketEnsime()
@@ -344,18 +449,20 @@ call s:LOG("vimside#GetConnectionSocketEnsime TOP")
   let [found, port] = g:vimside.GetOption('ensime_port_number')
   if ! found
     echoerr "Option not found: "'ensime_port_number'"
+    return [0, ""]
   endif
 
   let [found, host] = g:vimside.GetOption('ensime-host-name')
   if ! found
     echoerr "Option not found: "'ensime-host-name'"
+    return [0, ""]
   endif
 
-call s:LOG("host:port=" . host .":". port) 
+call s:LOG("vimside#GetConnectionSocketEnsime host:port=" . host .":". port) 
 
   let l:socket = vimside#ensime#io#open(host, port)
-" call s:LOG("socket=" . string(l:socket)) 
-  return l:socket
+call s:LOG("socket=" . string(l:socket)) 
+  return [1, l:socket]
 endfunction
 
 " ============================================================================
@@ -365,6 +472,7 @@ endfunction
 function! vimside#PingEnsimeServer()
 call s:LOG("vimside#PingEnsimeServer") 
   let timeout = g:vimside.ping.info.read_timeout
+call s:LOG("vimside#PingEnsimeServer: timeout=". timeout) 
   let success = vimside#ensime#io#ping(timeout)
   while success
     let success = vimside#ensime#io#ping(timeout)

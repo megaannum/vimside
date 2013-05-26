@@ -229,11 +229,13 @@ else
 
   autocmd FileType scala nmap <silent> <Leader>voe :call vimside#command#OptionEditor()<CR>
 
+if 0 " XXXX
   augroup VIMSIDE_STOP
     au!
     autocmd VimLeave * call vimside#StopEnsime()
     " autocmd VimLeave scala call vimside#StopEnsime()
   augroup END
+endif " XXXX
 endif
 
 " --------------------------------------------------------------------------

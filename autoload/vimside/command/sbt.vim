@@ -27,6 +27,12 @@ if found
 else
   let s:sbt_longline = 0
 endif
+let [found, read_size] = g:vimside.GetOption('tailor-sbt-error-read-size')
+if found
+  let s:sbt_read_size = read_size
+else
+  let s:sbt_read_size = 10000
+endif
 
 let s:match_prompt = '^\(>\|scala>\|\[project_name\] \$\) $'
 let s:match_info = '^\[info\]\([^\n]*\)$'
@@ -497,7 +503,7 @@ endfunction
 "    [0, '']
 function! s:read_stdout()
   if has_key(s:subproc, 'stdout') && !s:subproc.stdout.eof
-    let output = s:subproc.stdout.read(10000, 10)
+    let output = s:subproc.stdout.read(s:sbt_read_size, 10)
 call s:LOG("sbt: read_stdout output=" . output)
     if output == ''
       return [0, '']
