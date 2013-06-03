@@ -61,8 +61,10 @@ endfunction
 
 function! g:DebugLocateNameCaller(args)
   let cmd = "swank:debug-locate-name"
+  let thread_id = a:args.thread_id
+  let name = a:args.name
 
-  return '('. cmd .')'
+  return '('. cmd '"'. thread_id .'" "'.name.'")'
 endfunction
 
 

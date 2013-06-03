@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.2.24
+Version:     0.3.00
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1564,6 +1564,60 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.3.00   - Fix: ~
+  Change the new window option 'tab' to 'tab_window' so that it is similar
+   to all the other options values ('same_window', 'split_window',
+   'vsplit_window').
+  Unified the GetLocation code in function vimside#util#GetLocation.
+  Unified all new window code in the function vimside#util#GotoSourceLocation(dic). 
+  Added the function vimside#util#GotoExistingSourceLocation(line, file)
+   that lets one go to an existing window if the file is already open there.
+   This copies some of the code found in VIMRUNTIME/macros/editexisting.vim.
+  Removed the vimside/swank/evnet debug event handlers.
+  Added initial debug code - its not tested so I am sure it does not work.
+  Added sign.vim that allows one to create Vim signs. This unifies the use
+    of signs by quickfix window, location window and debugging.
+  Added locationlist.vim which lets one create window specific location list
+   windows.
+  When checking Vimside versus Ensime Scala versions, Vimside now ignores
+  the trailing part of the version numbers when comparing for equality
+  (i.e., Scala 2.10.0 now equals 2.10.1 ).
+  Added a number of Options that allow the user to control if signs are used
+  and, if so, how they are displayed:
+        'sign-quickfix-error-linehl'
+        'sign-quickfix-error-text'
+        'sign-quickfix-error-texthl'
+        'sign-quickfix-warn-linehl'
+        'sign-quickfix-warn-text' 
+        'sign-quickfix-warn-texthl'
+        'sign-quickfix-info-linehl'
+        'sign-quickfix-info-text' 
+        'sign-quickfix-info-texthl'
+        'sign-quickfix-marker-linehl'
+        'sign-quickfix-marker-text'
+        'sign-quickfix-marker-texthl'
+        'sign-locationlist-info-linehl'
+        'sign-locationlist-info-text'
+        'sign-locationlist-info-texthl'
+        'sign-locationlist-marker-linehl'
+        'sign-locationlist-marker-text'
+        'sign-locationlist-marker-texthl'
+        'sign-debug-active-linehl'
+        'sign-debug-active-text'
+        'sign-debug-active-texthl'
+        'sign-debug-pending-linehl'
+        'sign-debug-pending-text'
+        'sign-debug-pending-texthl'
+        'sign-debug-marker-linehl'
+        'sign-debug-marker-text'
+        'sign-debug-marker-texthl'
+        'tailor-sbt-use-signs' 
+        'tailor-show-errors-and-warnings-use-signs'
+        'tailor-full-typecheck-finished-use-signs'
+        'tailor-uses-of-symbol-at-point-use-signs'
+        'tailor-uses-of-symbol-at-point-use-sign-kind-marker'
+        'tailor-uses-of-symbol-at-point-window'
+
 0.2.24   - Fix: ~
   Added Option 'tailor-sbt-compile-error-long-line-quickfix' that allows
   multi-line compiler error output to be displayed on a long quickfix 

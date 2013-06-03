@@ -151,6 +151,7 @@ endfunction
 function! vimside#ensime#io#close()
   let l:socket = g:vimside['socket']
   call l:socket.close()
+  unlet g:vimside['socket']
 endfunction
 
 

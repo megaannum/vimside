@@ -156,5 +156,54 @@ function! g:VimsideOptionsUserLoad(owner)
   " call owner.Set("tailor-sbt-config-location", "split_window")
   " call owner.Set("tailor-sbt-config-location", "vsplit_window")
   " call owner.Set("tailor-sbt-config-location", "tab")
+  "
+  " call owner.Set("tailor-sbt-use-signs", "0")
+
+  " call owner.Set("tailor-show-errors-and-warnings-use-signs", '0')
+  " call owner.Set("tailor-full-typecheck-finished-use-signs", '0')
+  " call owner.Set("tailor-uses-of-symbol-at-point-use-signs", '0')
+
+  "--------------
+  " Sign Option tailoring
+  "
+  " call owner.Set('sign-quickfix-error-linehl', 'Error')
+  " call owner.Set('sign-quickfix-error-text', 'E>')
+  " call owner.Set('sign-quickfix-error-texthl', 'Todo')
+  " call owner.Set('sign-quickfix-warn-linehl', 'StatusLine')
+  " call owner.Set('sign-quickfix-warn-text', 'W>')
+  " call owner.Set('sign-quickfix-warn-texthl', 'Todo')
+  " 
+  " call owner.Set('sign-quickfix-info-linehl', 'DiffAdd')
+  " call owner.Set('sign-quickfix-info-text', 'I>')
+  " call owner.Set('sign-quickfix-info-texthl', 'TODO')
+  " 
+  " call owner.Set('sign-quickfix-marker-linehl', 'Search')
+  " call owner.Set('sign-quickfix-marker-text', 'M>')
+  " call owner.Set('sign-quickfix-marker-texthl', 'Ignore')
+  " 
+  " call owner.Set('sign-locationlist-info-linehl', 'DiffAdd')
+  " call owner.Set('sign-locationlist-info-text', 'I>')
+  " call owner.Set('sign-locationlist-info-texthl', 'TODO')
+  " 
+  " call owner.Set('sign-locationlist-marker-linehl', 'Search')
+  " call owner.Set('sign-locationlist-marker-text', 'M>')
+  " call owner.Set('sign-locationlist-marker-texthl', 'Ignore')
+  " 
+  " call owner.Set('sign-debug-active-linehl', 'DiffText')
+  " call owner.Set('sign-debug-active-text', 'A>')
+  " call owner.Set('sign-debug-active-texthl', 'SpellCap')
+  " 
+  " call owner.Set('sign-debug-pending-linehl', 'DiffAdd')
+  " call owner.Set('sign-debug-pending-text', 'P>')
+  " call owner.Set('sign-debug-pending-texthl', 'DiffDelete')
+  " 
+  " call owner.Set('sign-debug-marker-linehl', 'Search')
+  " call owner.Set('sign-debug-marker-text', 'M>')
+  " call owner.Set('sign-debug-marker-texthl', 'Ignore')
+  "--------------
+
+
+
+
 endfunction
 

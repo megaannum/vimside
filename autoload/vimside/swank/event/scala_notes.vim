@@ -37,6 +37,7 @@ call s:LOG("scala_notes#Handle=". string(a:1))
   "   'pattern' : not needed if lnum is present
   "   'col': 4      optional
   "   'text': line      optional
+  "   'kind': severity
   "   'vcol': 1      optional
   "   'type': 'a'      optional 'a' add, 'r' replace
   "   'nr': 1      optional
@@ -54,6 +55,7 @@ call s:LOG("scala_notes#Handle=". string(a:1))
       \ 'lnum': line,
       \ 'col': col,
       \ 'text': severity .": ". msg,
+      \ 'kind': severity,
       \ 'vcol': 1,
       \ 'type': 'a',
       \ 'nr': nr,

@@ -337,6 +337,7 @@ function! vimside#command#show_doc_symbol_at_point#MakeUrl(tpe, ...)
 call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl full_name=". full_name) 
 
   let found = 0
+  let url = ""
   for key in keys(s:show_doc_map)
 call s:LOG("vimside#command#show_doc_symbol_at_point#MakeUrl key='". key ."'") 
     let map = s:show_doc_map[key]

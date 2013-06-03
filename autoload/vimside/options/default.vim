@@ -208,6 +208,46 @@ function! vimside#options#default#Load(owner)
   call owner.Set("tailor-expand-selection-highlight-color-light", '5fffff')
 
 
+  call owner.Set("tailor-uses-of-symbol-at-point-window", 'quickfix')
+  call owner.Set("tailor-uses-of-symbol-at-point-use-signs", '1')
+  call owner.Set("tailor-uses-of-symbol-at-point-use-sign-kind-marker", '1')
+
+  call owner.Set('sign-quickfix-error-linehl', 'Error')
+  call owner.Set('sign-quickfix-error-text', 'E>')
+  call owner.Set('sign-quickfix-error-texthl', 'Todo')
+
+  call owner.Set('sign-quickfix-warn-linehl', 'StatusLine')
+  call owner.Set('sign-quickfix-warn-text', 'W>')
+  call owner.Set('sign-quickfix-warn-texthl', 'Todo')
+
+  call owner.Set('sign-quickfix-info-linehl', 'DiffAdd')
+  call owner.Set('sign-quickfix-info-text', 'I>')
+  call owner.Set('sign-quickfix-info-texthl', 'TODO')
+
+  call owner.Set('sign-quickfix-marker-linehl', 'Search')
+  call owner.Set('sign-quickfix-marker-text', 'M>')
+  call owner.Set('sign-quickfix-marker-texthl', 'Ignore')
+
+  call owner.Set('sign-locationlist-info-linehl', 'DiffAdd')
+  call owner.Set('sign-locationlist-info-text', 'I>')
+  call owner.Set('sign-locationlist-info-texthl', 'TODO')
+
+  call owner.Set('sign-locationlist-marker-linehl', 'Search')
+  call owner.Set('sign-locationlist-marker-text', 'M>')
+  call owner.Set('sign-locationlist-marker-texthl', 'Ignore')
+
+  call owner.Set('sign-debug-active-linehl', 'DiffText')
+  call owner.Set('sign-debug-active-text', 'A>')
+  call owner.Set('sign-debug-active-texthl', 'SpellCap')
+
+  call owner.Set('sign-debug-pending-linehl', 'DiffAdd')
+  call owner.Set('sign-debug-pending-text', 'P>')
+  call owner.Set('sign-debug-pending-texthl', 'DiffDelete')
+
+  call owner.Set('sign-debug-marker-linehl', 'Search')
+  call owner.Set('sign-debug-marker-text', 'M>')
+  call owner.Set('sign-debug-marker-texthl', 'Ignore')
+
 
   " add default swank event triggers
 
@@ -220,15 +260,15 @@ function! vimside#options#default#Load(owner)
   call owner.Set("swank-event-trigger-clear-all-java-notes", 'vimside#swank#event#clear_all_java_notes#Handle')
 
   " add default swank debug triggers
-  call owner.Set("swank-debug-trigger-output", 'vimside#swank#event#debug_output#Handle')
-  call owner.Set("swank-debug-trigger-stop", 'vimside#swank#event#debug_stop#Handle')
-  call owner.Set("swank-debug-trigger-breakpoint", 'vimside#swank#event#debug_breakpoint#Handle')
-  call owner.Set("swank-debug-trigger-death", 'vimside#swank#event#debug_death#Handle')
-  call owner.Set("swank-debug-trigger-start", 'vimside#swank#event#debug_start#Handle')
-  call owner.Set("swank-debug-trigger-disconnect", 'vimside#swank#event#debug_disconnect#Handle')
-  call owner.Set("swank-debug-trigger-exception", 'vimside#swank#event#debug_exception#Handle')
-  call owner.Set("swank-debug-trigger-thread-start", 'vimside#swank#event#debug_thread_start#Handle')
-  call owner.Set("swank-debug-trigger-thread-death", 'vimside#swank#event#debug_thread_death#Handle')
+  call owner.Set("swank-debug-trigger-output", 'vimside#command#debug#OutputEvent')
+  call owner.Set("swank-debug-trigger-stop", 'vimside#command#debug#StopEvent')
+  call owner.Set("swank-debug-trigger-breakpoint", 'vimside#command#debug#BreakPointEvent')
+  call owner.Set("swank-debug-trigger-death", 'vimside#command#debug#DeathEvent')
+  call owner.Set("swank-debug-trigger-start", 'vimside#command#debug#StartEvent')
+  call owner.Set("swank-debug-trigger-disconnect", 'vimside#command#debug#DisconnectEvent')
+  call owner.Set("swank-debug-trigger-exception", 'vimside#command#debug#ExceptionEvent')
+  call owner.Set("swank-debug-trigger-thread-start", 'vimside#command#debug#ThreadStartEvent')
+  call owner.Set("swank-debug-trigger-thread-death", 'vimside#command#debug#ThreadDeathEvent')
 
 
   " Hover
@@ -305,6 +345,10 @@ function! vimside#options#default#Load(owner)
 
   call owner.Set('tailor-sbt-compile-error-long-line-quickfix', 1)
   call owner.Set('tailor-sbt-error-read-size', 10000)
+  call owner.Set('tailor-sbt-use-signs', 1)
+
+  call owner.Set('tailor-show-errors-and-warnings-use-signs', 1)
+  call owner.Set('tailor-full-typecheck-finished-use-signs', 1)
 
   " Refactor Rename
   call owner.Set("tailor-refactor-rename-pattern-enable", 1)

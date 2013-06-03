@@ -323,7 +323,7 @@ function! s:MakeOptions()
         \ 'name': 'vimside-scala-version', 
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['2.9.2', '2.10.0'],
+        \ 'enum': ['2.9.2', '2.10.0', '2.10.1'],
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Supported Scala versions.'
@@ -563,7 +563,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
+        \ 'enum': ['cmdline', 'preview', 'tab_window', 'form' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'If an Ensime RPC call returns values than can be displayed',
@@ -592,7 +592,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'If an Ensime RPC call returns values with file/position values',
@@ -1897,7 +1897,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-repl-config-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -1909,7 +1909,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-sbt-config-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -1938,13 +1938,38 @@ function! s:MakeOptions()
             \ 'when converting errors to Quickfix window entries.'
           \ ]
       \ }
+  let l:options['tailor-sbt-error-use-signs'] = {
+        \ 'name': 'tailor-sbt-error-use-signs',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether or not to use signs when SBT is displaying compile errors.'
+          \ ]
+      \ }
+  
+  let l:options['tailor-show-errors-and-warnings-use-signs'] = {
+        \ 'name': 'tailor-show-errors-and-warnings-use-signs',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether or not to use signs when compiler is displaying compile errors.'
+          \ ]
+      \ }
+  let l:options['tailor-full-typecheck-finished-use-signs'] = {
+        \ 'name': 'tailor-full-typecheck-finished-use-signs',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether or not to use signs when type check finished is displaying compile errors.'
+          \ ]
+      \ }
 
 
   let l:options['tailor-symbol-at-point-information'] = {
         \ 'name': 'tailor-symbol-at-point-information',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['cmdline', 'preview', 'tab', 'form' ],
+        \ 'enum': ['cmdline', 'preview', 'tab_window', 'form' ],
         \ 'parent': 'tailor-information',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -1966,7 +1991,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-symbol-at-point-location-diff-file',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
@@ -1980,13 +2005,286 @@ function! s:MakeOptions()
         \ 'name': 'tailor-uses-of-symbol-at-point-location',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab' ],
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'parent': 'tailor-location-diff-file',
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
         \ 'description': [
             \ 'How to jump to uses-of-symbol-at-point file and pos.'
           \ ]
       \ }
+  let l:options['tailor-uses-of-symbol-at-point-window'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-window',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['quickfix', 'mixed' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether to use the quickfix window to display uses or if all',
+            \ 'of the uses are in the same window use the locationlist ',
+            \ 'window.',
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-signs'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-signs',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether or not to use signs when displaying uses.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-sign-kind-marker'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-sign-kind-marker',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Whether or not to use sign kind "marker" for current line.'
+          \ ]
+      \ }
+  
+  " Sign
+  let l:options['sign-quickfix-error-linehl'] = {
+        \ 'name': 'sign-quickfix-error-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Error linehl.'
+          \ ]
+      \ }
+  
+  let l:options['sign-quickfix-error-text'] = {
+        \ 'name': 'sign-quickfix-error-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Error text'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-error-texthl'] = {
+        \ 'name': 'sign-quickfix-error-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Error texthl.'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-warn-linehl'] = {
+        \ 'name': 'sign-quickfix-warn-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Warn linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-warn-text'] = {
+        \ 'name': 'sign-quickfix-warn-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Warn text'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-warn-texthl'] = {
+        \ 'name': 'sign-quickfix-warn-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Warn texthl'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-info-linehl'] = {
+        \ 'name': 'sign-quickfix-info-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Info linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-info-text'] = {
+        \ 'name': 'sign-quickfix-info-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Info text'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-info-texthl'] = {
+        \ 'name': 'sign-quickfix-info-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Info texthl.'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-marker-linehl'] = {
+        \ 'name': 'sign-quickfix-marker-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Marker linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-marker-text'] = {
+        \ 'name': 'sign-quickfix-marker-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Marker text'
+          \ ]
+      \ }
+
+  let l:options['sign-quickfix-marker-texthl'] = {
+        \ 'name': 'sign-quickfix-marker-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Quickfix Marker texthl.'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-info-linehl'] = {
+        \ 'name': 'sign-locationlist-info-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Info linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-info-text'] = {
+        \ 'name': 'sign-locationlist-info-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Info text'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-info-texthl'] = {
+        \ 'name': 'sign-locationlist-info-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Info texthl.'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-marker-linehl'] = {
+        \ 'name': 'sign-locationlist-marker-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Marker linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-marker-text'] = {
+        \ 'name': 'sign-locationlist-marker-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Marker text'
+          \ ]
+      \ }
+
+  let l:options['sign-locationlist-marker-texthl'] = {
+        \ 'name': 'sign-locationlist-marker-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'LocationList Marker texthl'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-active-linehl'] = {
+        \ 'name': 'sign-debug-active-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Active linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-active-text'] = {
+        \ 'name': 'sign-debug-active-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Active text'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-active-texthl'] = {
+        \ 'name': 'sign-debug-active-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Active texthl'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-pending-linehl'] = {
+        \ 'name': 'sign-debug-pending-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Pending linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-pending-text'] = {
+        \ 'name': 'sign-debug-pending-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Pending text'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-pending-texthl'] = {
+        \ 'name': 'sign-debug-pending-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Pending texthl'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-marker-linehl'] = {
+        \ 'name': 'sign-debug-marker-linehl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Marker linehl.'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-marker-text'] = {
+        \ 'name': 'sign-debug-marker-text',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Marker text'
+          \ ]
+      \ }
+
+  let l:options['sign-debug-marker-texthl'] = {
+        \ 'name': 'sign-debug-marker-texthl',
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Debug Marker texthl'
+          \ ]
+      \ }
+
 
   " Event Trigger
   let l:options['swank-event-trigger-compiler-ready'] = {

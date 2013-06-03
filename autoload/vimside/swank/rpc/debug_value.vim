@@ -35,7 +35,7 @@ let s:ERROR = function("vimside#log#error")
 
 
 " public API
-function! vimside#swank#rpc#debug_value#Value()
+function! vimside#swank#rpc#debug_value#Run(...)
 call s:LOG("debug_value TOP") 
 
   if ! exists("s:Handler")
@@ -61,8 +61,27 @@ endfunction
 
 function! g:DebugValueCaller(args)
   let cmd = "swank:debug-value"
+  let type = a:args.type
 
-  return '('. cmd .')'
+  if type == 'reference'
+    let object_id = a:args.object_id
+    return '('. cmd .' :type '. type .' :object-id '. object_id .')'
+  elseif type == 'field'
+    let object_id = a:args.object_id
+    let field = a:args.field
+    return '('. cmd .' :type '. type .' :object-id '. object_id .' :field "'. field .'")'
+  elseif type == 'element'
+    let object_id = a:args.object_id
+    let index = a:args.index
+    return '('. cmd .' :type '. type .' :object-id '. object_id .' :index '. index .')'
+  elseif type == 'slot'
+    let thread_id = a:args.thread_id
+    let frame = a:args.frame
+    let offset = a:args.offset
+    return '('. cmd .' :type '. type .' :thread-id "'. thread_id .'" :frame '. frame .' :offset '. offset .')'
+  else
+    throw "Bad DebugValue type: ". type
+  endif
 endfunction
 
 

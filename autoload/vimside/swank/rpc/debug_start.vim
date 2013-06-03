@@ -42,11 +42,7 @@ call s:LOG("debug_start TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-debug-start-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("debug_start BOTTOM") 
 endfunction
@@ -58,8 +54,9 @@ endfunction
 
 function! g:DebugStartCaller(args)
   let cmd = "swank:debug-start"
+  let cmd_line = a:args.cmd_line
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. cmd_line .'")'
 endfunction
 
 

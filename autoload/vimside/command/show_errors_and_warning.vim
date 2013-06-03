@@ -13,12 +13,19 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let [found, use_signs] = g:vimside.GetOption('tailor-show-errors-and-warnings-use-signs')
+if found
+  let s:show_errors_and_warnings_use_signs = use_signs
+else
+  let s:show_errors_and_warnings_use_signs = 0
+endif
+
 function!  vimside#command#show_errors_and_warning#Run()
 " call s:LOG("vimside#command#show_errors_and_warning#Run TOP") 
 
   let entries = g:vimside.project.java_notes + g:vimside.project.scala_notes
   if len(entries) > 0
-    call vimside#quickfix#Display(entries)
+    call vimside#quickfix#Display(entries, s:show_errors_and_warnings_use_signs)
   else
     let msg = "No Errors or Warnings"
     call vimside#cmdline#Display(msg) 

@@ -163,18 +163,29 @@ else
   " C-c C-d x
   "   Where x is one of:
   "     d Start and run the debugger.
+  autocmd FileType scala nmap <silent> <Leader>dd :call vimside#command#DebugStart()<CR>
   "     r Start and run the debugger.
+  autocmd FileType scala nmap <silent> <Leader>dr :call vimside#command#DebugRun()<CR>
   "     b Set a breakpoint.
+  autocmd FileType scala nmap <silent> <Leader>db :call vimside#command#DebugSetBreakpoint()<CR>
   "     u Clear a breakpoint.
+  autocmd FileType scala nmap <silent> <Leader>du :call vimside#command#DebugClearBreakpoint()<CR>
   "     s Step.
+  autocmd FileType scala nmap <silent> <Leader>ds :call vimside#command#DebugStep()<CR>
   "     n Step over.
+  autocmd FileType scala nmap <silent> <Leader>dn :call vimside#command#DebugNext()<CR>
   "     o Step out.
+  autocmd FileType scala nmap <silent> <Leader>do :call vimside#command#DebugStepOut()<CR>
   "     c Continue from a breakpoint.
+  autocmd FileType scala nmap <silent> <Leader>dc :call vimside#command#DebugContinue()<CR>
   "     q Kill the debug session.
+  autocmd FileType scala nmap <silent> <Leader>dq :call vimside#command#DebugQuit()<CR>
   "     i Inspect the local variable at cursor.
+  autocmd FileType scala nmap <silent> <Leader>di :call vimside#command#DebugInspectVariable()<CR>
   "     t Show backtrace.
-  "     a Clear all breakes
-  " NOT IMPLEMENTED YET
+  autocmd FileType scala nmap <silent> <Leader>dt :call vimside#command#DebugShowBacktrace()<CR>
+  "     a Clear all breaks
+  autocmd FileType scala nmap <silent> <Leader>da :call vimside#command#DebugClearAllBreaks()<CR>
 
   " C-c C-r x
   "   Where x is one of:

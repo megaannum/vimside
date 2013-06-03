@@ -33,6 +33,12 @@ if found
 else
   let s:sbt_read_size = 10000
 endif
+let [found, use_signs] = g:vimside.GetOption('tailor-sbt-use-signs')
+if found
+  let s:sbt_use_signs = use_signs
+else
+  let s:sbt_use_signs = 0
+endif
 
 let s:match_prompt = '^\(>\|scala>\|\[project_name\] \$\) $'
 let s:match_info = '^\[info\]\([^\n]*\)$'
@@ -199,6 +205,8 @@ call vimside#scheduler#SetUpdateTime(100)
 
   let g:vimside.project.scala_notes = []
   let g:vimside.project.java_notes = []
+  call vimside#quickfix#Close()
+
 
   " closes quickfix window (if its open, otherwise nothing)
   cclose
@@ -351,6 +359,7 @@ call s:LOG("s:HandleCompilePackageCB: MATCH COLUMN: " . colnum)
                 \ 'lnum': linenum,
                 \ 'col': colnum,
                 \ 'text': severity .": ". msg,
+                \ 'kind': severity,
                 \ 'vcol': 1,
                 \ 'type': 'a',
                 \ 'nr': nr,
@@ -384,7 +393,7 @@ call s:ERROR("s:HandleCompilePackageCB: unknown line=" . line)
 
     let entries = g:vimside.project.java_notes + g:vimside.project.scala_notes
     if len(entries) > 0
-      call vimside#quickfix#Display(entries)
+      call vimside#quickfix#Display(entries, s:sbt_use_signs)
     endif
 
   endif
@@ -443,7 +452,7 @@ call s:ERROR("sbt NOT FOUND")
       let g:vimshell_split_command = 'split!'
     elseif location == 'vsplit_window'
       let g:vimshell_split_command = 'vsplit!'
-    elseif location == 'tab'
+    elseif location == 'tab_window'
       let g:vimshell_split_command = 'tabnew!'
     endif
 
@@ -473,7 +482,7 @@ function! g:SbtInvokeCallbackAction()
     quit
   elseif location == 'vsplit_window'
     quit
-  elseif location == 'tab'
+  elseif location == 'tab_window'
     quit
   endif
 
@@ -615,17 +624,7 @@ function! s:find_sbt_parent_project_path(path)
 endfunction
 
 function! s:GetLocation()
-  let [found, location] = g:vimside.GetOption('tailor-repl-config-location')
-  if ! found
-    call s:ERROR("Option not found 'tailor-repl-config-location'") 
-    let location = 'tab'
-  elseif location != 'same_window' 
-      \ && location != 'split_window'
-      \ && location != 'vsplit_window'
-      \ && location != 'tab'
-    call s:ERROR("Option 'tailor-repl-config-location' has bad location value '". location ."'") 
-    let location = 'tab'
-
-  endif
-  return location
+  let l:option_name = 'tailor-sbt-config-location'
+  let l:default_location = 'tab_window'
+  return vimside#util#GetLocation(l:option_name, l:default_location)
 endfunction

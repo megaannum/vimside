@@ -33,6 +33,18 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let [found, use_signs] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-use-signs')
+if found
+  let s:use_signs = use_signs
+else
+  let s:use_signs = 0
+endif
+let [found, use_sign_kind_marker] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-use-sign-kind-marker')
+if found
+  let s:use_sign_kind_marker = use_sign_kind_marker
+else
+  let s:use_sign_kind_marker = 0
+endif
 
 " public API
 function! vimside#swank#rpc#uses_of_symbol_at_point#Run(...)
@@ -56,6 +68,9 @@ function! vimside#swank#rpc#uses_of_symbol_at_point#Run(...)
   let l:args['filename'] = fn
   let l:args['offset'] = offset
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  let [line, column] = vimside#util#GetLineColumnFromOffset(offset)
+  let l:rr['data'] = line
+call s:LOG("UsesOfSymbolAtPoint line=". line) 
   call vimside#ensime#swank#dispatch(l:rr)
 
 " call s:LOG("UsesOfSymbolAtPoint BOTTOM") 
@@ -88,7 +103,14 @@ function! g:UsesOfSymbolAtPointHandler()
   function! g:UsesOfSymbolAtPointHandler_Ok(diclist, ...)
     let diclist = a:diclist
 " call s:LOG("UsesOfSymbolAtPointHandler_Ok dic=list".  string(diclist)) 
+    if a:0 == 0
+      let l:start_line = -1
+    else
+      let l:start_line = a:1
+    endif
+call s:LOG("UsesOfSymbolAtPointHandler_Ok start_line=".  l:start_line) 
     let entries = []
+    let l:same_file = 1
 
     let current_file = expand('%:p')
     let len = len(diclist)
@@ -101,9 +123,17 @@ function! g:UsesOfSymbolAtPointHandler()
 
       if current_file == file
         let [lnum, column, text] = vimside#util#GetLineColumnTextFromOffset(offset)
+        if lnum == l:start_line && s:use_sign_kind_marker
+          let l:kind = 'marker'
+        else
+          let l:kind = 'info'
+        endif
       else
+        let l:same_file = 0
         let [lnum, column, text] = vimside#util#GetLineColumnTextFromOffset(offset, file)
+        let l:kind = 'info'
       endif
+call s:LOG("UsesOfSymbolAtPointHandler_Ok kind=".  l:kind) 
 
       let entry = {
         \ 'filename': file,
@@ -111,6 +141,7 @@ function! g:UsesOfSymbolAtPointHandler()
         \ 'col': column,
         \ 'vcol': 1,
         \ 'text': text,
+        \ 'kind': l:kind,
         \ 'type': 'r',
         \  'nr': (cnt + 1)
         \ }
@@ -122,10 +153,11 @@ function! g:UsesOfSymbolAtPointHandler()
     endwhile
 
     let location = s:GetLocation()
+call s:LOG("UsesOfSymbolAtPointHandler_Ok location=".  location) 
 
     let g:switchbuf_save = &switchbuf
 
-    if location == 'tab'
+    if location == 'tab_window'
       let &switchbuf = "usetab,newtab"
     elseif location == 'split_window'
       let &switchbuf = "useopen,split"
@@ -136,16 +168,33 @@ function! g:UsesOfSymbolAtPointHandler()
       let &switchbuf = ""
     endif
 
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok call s:use_signs=". s:use_signs) 
+     let [found, l:window] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-window')
+     if found
+       if l:window == 'quickfix'
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok call quickfix Display") 
+        call vimside#quickfix#Display(entries, s:use_signs) 
+       else " mixed
+        if l:same_file
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok call locationlist Display") 
+          call vimside#locationlist#Display(entries, s:use_signs) 
+        else
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok call quickfix Display") 
+          call vimside#quickfix#Display(entries, s:use_signs) 
+        endif
+       endif
+     else " default
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok call quickfix Display") 
+        call vimside#quickfix#Display(entries, s:use_signs) 
+     endif
 
-
-    call vimside#quickfix#Display(entries)
 
     let bn = bufnr("$")
-"call s:LOG("UsesOfSymbolAtPointHandler_Ok bn=".  bn) 
+" call s:LOG("UsesOfSymbolAtPointHandler_Ok bn=".  bn) 
     if bn != -1
       augroup VIMSIDE_USAP
         autocmd!
-        execute "autocmd BufWinLeave <buffer=" . bn . "> call s:QuickFixClose()"
+        execute "autocmd BufWinLeave <buffer=" . bn . "> call s:CloseWindow()"
       augroup END
     endif
 
@@ -159,25 +208,13 @@ function! g:UsesOfSymbolAtPointHandler()
 endfunction
 
 function! s:GetLocation()
-  let [found, location] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-location')
-  if ! found
-    call s:ERROR("Option not found 'tailor-uses-of-symbol-at-point-location'") 
-    let location = 'same_window'
-
-  elseif location != 'tab'
-    \ && location != 'split_window'
-    \ && location != 'vsplit_window'
-    \ && location != 'same_window'
-    call s:ERROR("Option 'tailor-uses-of-symbol-at-point-location' has bad location value '". location ."'") 
-
-    let location = 'same_window'
-  endif
-
-  return location
+  let l:option_name = 'tailor-uses-of-symbol-at-point-location'
+  let l:default_location = 'same_window'
+  return vimside#util#GetLocation(l:option_name, l:default_location)
 endfunction
 
-function! s:QuickFixClose()
-" call s:LOG("QuickFixClose:") 
+function! s:CloseWindow()
+call s:LOG("CloseWindow:") 
 
   augroup VIMSIDE_USAP
    autocmd!

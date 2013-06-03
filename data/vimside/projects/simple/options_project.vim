@@ -19,7 +19,7 @@ function! g:VimsideOptionsProjectLoad(owner)
   " Defined Scala versions: '2.9.2', '2.10.0'
   " Minor version numbers not needed
   " Scala version MUST match 'ensime-dist-dir' used.
-  call owner.Set("vimside-java-version", "1.6")
+  call owner.Set("vimside-java-version", "1.7")
   call owner.Set("vimside-scala-version", "2.10.0")
   "--------------
   

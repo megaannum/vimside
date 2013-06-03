@@ -42,11 +42,7 @@ call s:LOG("debug_step TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-debug-step-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("debug_step BOTTOM") 
 endfunction
@@ -56,10 +52,11 @@ endfunction
 " Vimside Callers
 "======================================================================
 
-function! g:DebugStepOutCaller(args)
+function! g:DebugStepCaller(args)
   let cmd = "swank:debug-step"
+  let active_thread_id = a:args.active_thread_id
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. active_thread_id .'")'
 endfunction
 
 
@@ -67,15 +64,15 @@ endfunction
 " Vimside Handlers
 "======================================================================
 
-function! g:DebugStepOutHandler()
+function! g:DebugStepHandler()
 
-  function! g:DebugStepOutHandler_Abort(code, details, ...)
+  function! g:DebugStepHandler_Abort(code, details, ...)
     call call('vimside#swank#rpc#util#Abort', [a:code, a:details] + a:000)
   endfunction
 
-  function! g:DebugStepOutHandler_Ok(dic, ...)
+  function! g:DebugStepHandler_Ok(dic, ...)
     let dic = a:dic
-call s:LOG("DebugStepOutHandler_Ok dic=".  string(dic)) 
+call s:LOG("DebugStepHandler_Ok dic=".  string(dic)) 
 
     let l:pid = dic[':pid']
 
@@ -83,7 +80,7 @@ call s:LOG("DebugStepOutHandler_Ok dic=".  string(dic))
   endfunction
 
   return { 
-    \ 'abort': function("g:DebugStepOutHandler_Abort"),
-    \ 'ok': function("g:DebugStepOutHandler_Ok") 
+    \ 'abort': function("g:DebugStepHandler_Abort"),
+    \ 'ok': function("g:DebugStepHandler_Ok") 
     \ }
 endfunction

@@ -32,7 +32,7 @@ let s:ERROR = function("vimside#log#error")
 
 
 " public API
-function! vimside#swank#rpc#debug_next#Next()
+function! vimside#swank#rpc#debug_next#Run(...)
 call s:LOG("debug_next TOP") 
 
   if ! exists("s:Handler")
@@ -42,11 +42,7 @@ call s:LOG("debug_next TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
-
-  let msg = "Not Implemented Yet:" . 'swank-rpc-debug-next-handler'
-  call s:ERROR(msg)
-  echoerr msg
+  call vimside#ensime#swank#dispatch(l:rr)
 
 call s:LOG("debug_next BOTTOM") 
 endfunction
@@ -58,8 +54,9 @@ endfunction
 
 function! g:DebugNextCaller(args)
   let cmd = "swank:debug-next"
+  let active_thread_id = a:args.active_thread_id
 
-  return '('. cmd .')'
+  return '('. cmd .' "'. active_thread_id .'")'
 endfunction
 
 

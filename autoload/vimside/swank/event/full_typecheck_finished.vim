@@ -14,6 +14,12 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let [found, use_signs] = g:vimside.GetOption('tailor-full-typecheck-finished-use-signs')
+if found
+  let s:full_typecheck_finished_use_signs = use_signs
+else
+  let s:full_typecheck_finished_use_signs = 0
+endif
 
 function! vimside#swank#event#full_typecheck_finished#Handle(...)
   if a:0 != 0
@@ -23,7 +29,7 @@ function! vimside#swank#event#full_typecheck_finished#Handle(...)
 
   let entries = g:vimside.project.java_notes + g:vimside.project.scala_notes
   if len(entries) > 0
-    call vimside#quickfix#Display(entries)
+    call vimside#quickfix#Display(entries, s:full_typecheck_finished_use_signs) 
   else
     let msg = "Full Typecheck Finished..."
     call vimside#cmdline#Display(msg) 

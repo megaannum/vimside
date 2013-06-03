@@ -212,6 +212,118 @@ function! vimside#command#FormatSource() range
   endif
 endfunction
 
+"----------------------------------------------
+" Debug functions
+"----------------------------------------------
+
+" Start and run the debugger.
+function! vimside#command#DebugStart()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Start()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+ " Start and run the debugger.
+function! vimside#command#DebugRun()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Run()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Set a breakpoint.
+function! vimside#command#DebugSetBreakpoint()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#SetBreakpoint()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Clear a breakpoint.
+function! vimside#command#DebugClearBreakpoint()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#ClearBreakpoint()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Step.
+function! vimside#command#DebugStep()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Step()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+"  Step over.
+function! vimside#command#DebugStepOver()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#StepOver()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Step out.
+function! vimside#command#DebugNext()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Next()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+"  Continue from a breakpoint.
+function! vimside#command#DebugContinue()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Continue()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Kill the debug session.
+function! vimside#command#DebugQuit()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#Quit()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Inspect the local variable at cursor.
+function! vimside#command#DebugInspectVariable()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#InspectVariable()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Show backtrace.
+function! vimside#command#DebugShowBacktrace()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#ShowBacktrace()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
+" Clear all breaks
+function! vimside#command#DebugClearAllBreaks()
+  if exists("g:vimside.started") && g:vimside.started
+    call vimside#command#debug#ClearAllBreaks()
+  else
+    call s:ERROR("Ensime must be started first")
+  endif
+endfunction
+
 
 "----------------------------------------------
 " Refactor functions

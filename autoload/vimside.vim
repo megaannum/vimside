@@ -370,8 +370,6 @@ call s:LOG("vimside#StartEnsimeServer portFileExists=". portFileExists)
       execute "silent !" . cmd . " &>> " . l:logfile . " &"
 
     else
-      " TODO remove
-      " if has('win16') || has('win32') || has('win64')
       
       if g:vimside.os.is_mswin 
         " Note: do not know if this is correct

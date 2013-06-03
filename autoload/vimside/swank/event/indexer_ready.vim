@@ -23,6 +23,5 @@ function! vimside#swank#event#indexer_ready#Handle(...)
 
   let msg = "Indexer Ready..."
   call vimside#cmdline#Display(msg) 
-
-  " OLD let g:vimside.swank.events = 0
+  " TODO record event info?
 endfunction

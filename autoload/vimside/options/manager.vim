@@ -516,7 +516,12 @@ call s:LOG("vimside#options#manager#Load: l:ensime_scala_version=". l:ensime_sca
     endif
 call s:LOG("vimside#options#manager#Load: l:vimside_scala_version=". l:vimside_scala_version)
 
-    if l:ensime_scala_version != l:vimside_scala_version
+    " Only check major versions
+    " Need to strip off trailing ".0" or ".1", etc.
+    let l:esv = strpart(l:ensime_scala_version, 0, 4)
+    let l:vsv = strpart(l:vimside_scala_version, 0, 4)
+
+    if l:esv != l:vsv
       call add(l:errors, "Scala versions do not match: vimside:'". l:vimside_scala_version ."' and ensime:'". l:ensime_scala_version ."'")
       return
     endif

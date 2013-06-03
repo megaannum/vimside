@@ -169,7 +169,7 @@ call s:LOG("SymbolAtPointHandler_Ok ".  string(dic))
         elseif location != 'same_window' 
             \ && location != 'split_window'
             \ && location != 'vsplit_window'
-            \ && location != 'tab'
+            \ && location != 'tab_window'
           call s:ERROR("Option 'tailor-symbol-at-point-location-diff-file' has bad location value '". location ."'") 
 
           let location = 'same_window'
@@ -187,7 +187,7 @@ call s:LOG("SymbolAtPointHandler_Ok ".  string(dic))
           execute "vsplit ". file
           let [line, column] = vimside#util#GetLineColumnFromOffset(offset)
           execute ":normal ". line  ."G". column ." "
-        else  " location == 'tab'
+        else  " location == 'tab_window'
           execute "tabnew ". file
           let [line, column] = vimside#util#GetLineColumnFromOffset(offset)
           execute ":normal ". line  ."G". column ." "

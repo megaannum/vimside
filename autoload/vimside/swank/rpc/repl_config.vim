@@ -114,7 +114,7 @@ function! g:ReplConfigHandler()
         let g:vimshell_split_command = 'split!'
       elseif location == 'vsplit_window'
         let g:vimshell_split_command = 'vsplit!'
-      elseif location == 'tab'
+      elseif location == 'tab_window'
         let g:vimshell_split_command = 'tabnew!'
       endif
 
@@ -141,19 +141,9 @@ function! g:ReplConfigHandler()
 endfunction
 
 function! s:GetLocation()
-  let [found, location] = g:vimside.GetOption('tailor-repl-config-location')
-  if ! found
-    call s:ERROR("Option not found 'tailor-repl-config-location'") 
-    let location = 'tab'
-  elseif location != 'same_window' 
-      \ && location != 'split_window'
-      \ && location != 'vsplit_window'
-      \ && location != 'tab'
-    call s:ERROR("Option 'tailor-repl-config-location' has bad location value '". location ."'") 
-    let location = 'tab'
-
-  endif
-  return location
+  let l:option_name = 'tailor-repl-config-location'
+  let l:default_location = 'tab_window'
+  return vimside#util#GetLocation(l:option_name, l:default_location)
 endfunction
 
 
@@ -165,7 +155,7 @@ function! g:ReplConfigVimShellCallbackAction()
     quit
   elseif location == 'vsplit_window'
     quit
-  elseif location == 'tab'
+  elseif location == 'tab_window'
     quit
   endif
 

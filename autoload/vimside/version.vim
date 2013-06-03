@@ -11,8 +11,8 @@
 " ============================================================================
 
 let s:version_major = 0
-let s:version_minor = 2
-let s:version_patch = 23
+let s:version_minor = 3
+let s:version_patch = 00
 let s:version_pre_release = ''
 " build version is not applicable
 

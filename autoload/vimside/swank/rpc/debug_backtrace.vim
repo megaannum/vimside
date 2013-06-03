@@ -37,7 +37,7 @@ let s:ERROR = function("vimside#log#error")
 
 
 " public API
-function! vimside#swank#rpc#debug_backtrace#Backtrace()
+function! vimside#swank#rpc#debug_backtrace#Run(....)
 call s:LOG("debug_backtrace TOP") 
 
   if ! exists("s:Handler")
@@ -63,8 +63,12 @@ endfunction
 
 function! g:DebugBacktraceCaller(args)
   let cmd = "swank:debug-backtrace"
+  let active_thread_id = a:args.active_thread_id
+  let index = a:args.index
+  let number_to_return = a:args.number_to_return
 
-  return '('. cmd .')'
+" (:swank-rpc (swank:debug-backtrace "23" 0 2) 42)
+  return '('. cmd .' "'. active_thread_id .'" '.index.' '.number_to_return.')'
 endfunction
 
 
