@@ -174,13 +174,13 @@ endfunction
 
 " Remove all overlays that ensime-debug has created
 function! s:db_clear_breakpoint_overlays()
-  call vimside#sign#ClearType('Debug', 'active')
-  call vimside#sign#ClearType('Debug', 'pending')
+  call vimside#sign#ClearKind('Debug', 'active')
+  call vimside#sign#ClearKind('Debug', 'pending')
 endfunction
 
 " Remove all overlays that ensime-debug has created
 function! s:db_clear_marker_overlays()
-  call vimside#sign#ClearType('Debug', 'marker')
+  call vimside#sign#ClearKind('Debug', 'marker')
 endfunction
 
 " function! s:db_set_marker_overlays(line, file)

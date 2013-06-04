@@ -2285,6 +2285,16 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+  let l:options['sign-start-place-id'] = {
+        \ 'name': 'sign-start-place-id',
+        \ 'type': g:OPTION_NUMBER_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'The value of the first sign id. Each subsequent sign',
+            \ 'id has a value one more than its predecessor'
+          \ ]
+      \ }
+
 
   " Event Trigger
   let l:options['swank-event-trigger-compiler-ready'] = {

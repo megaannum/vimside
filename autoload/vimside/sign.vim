@@ -17,10 +17,12 @@ let s:is_sign_init = 0
 
 let s:categories = {}
 
-" TODO Option
-let s:start_place_id = 4555
+let [found, s:sign_start_place_id] = g:vimside.GetOption('sign-start-place-id')
+if ! found
+  throw "Option not found: sign-start-place-id"
+endif
 
-let s:next_place_id = s:start_place_id
+let s:next_place_id = s:sign_start_place_id
 
 " ==============================================
 " Utils
@@ -63,6 +65,9 @@ call s:LOG("vimside#sign#AddCategory: category=". a:category)
   endif
   if ! has_key(a:cdata, 'kinds')
     throw "Category does not have kinds attribute"
+  endif
+  if ! has_key(a:cdata, 'ids')
+    let a:cdata['ids'] = {}
   endif
 
   let kinds = a:cdata['kinds']
@@ -119,7 +124,7 @@ endfunction
 " ==============================================
 
 " returns [found, kdata]
-function! s:GetTypeData(cdata, kind)
+function! s:GetKindData(cdata, kind)
   let l:kinds = a:cdata.kinds
   for [kname, kdata] in items(kinds)
     if kname == a:kind
@@ -142,6 +147,10 @@ endfunction
 
 " ==============================================
 " Actions
+" ==============================================
+
+" ==============================================
+" Place
 " ==============================================
 
 " takes list of { "file": file, "line": line }
@@ -188,6 +197,11 @@ function! vimside#sign#Place(linenos, filename, category, kind)
   let ids[l:id] = [l:filename, a:linenos, a:kind]
 endfunction
 
+" ==============================================
+" UnPlace
+" ==============================================
+
+" TODO seems to be the same as the Clear function
 function! vimside#sign#UnPlace(linenos, filename, category, kind)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
@@ -197,16 +211,20 @@ function! vimside#sign#UnPlace(linenos, filename, category, kind)
   let l:cdata = s:categories[a:category]
   let l:ids = l:cdata.ids
 
-  let [found, id] = s:GetId(a:linenos, l:filename, l:ids)
-  if found 
-    execute ':sign unplace '. id .' file='. fn
+  let [l:found, id] = s:GetId(a:linenos, l:filename, l:ids)
+  if l:found 
+    execute ':sign unplace '. id .' file='. l:filename
     unlet l:ids[id]
   else
     echo "Bad filename: ". l:filename ." and linenos: ". a:linenos
   endif
 endfunction
 
-function! vimside#sign#ChangeType(linenos, filename, category, kind)
+" ==============================================
+" Change Type
+" ==============================================
+
+function! vimside#sign#ChangeKind(linenos, filename, category, to_kind)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
     return
@@ -216,14 +234,36 @@ function! vimside#sign#ChangeType(linenos, filename, category, kind)
   let l:abbrev = cdata.abbreviation
   let l:ids = l:cdata.ids
 
-  let [found, id] = s:GetId(a:linenos, l:filename, l:ids)
-  if found 
-    let l:name = l:abbrev .'_'. a:kind
+  let [l:found, id] = s:GetId(a:linenos, l:filename, l:ids)
+  if l:found 
+    let l:name = l:abbrev .'_'. a:to_kind
     execute ':sign place '. id ' name='. l:name .' file='. l:filename
   else
     echo "Bad filename: ". l:filename ." and linenos: ". a:linenos
   endif
 endfunction
+
+function! vimside#sign#ChangeKindKind(category, from_kind, to_kind)
+  if ! has_key(s:categories, a:category)
+    echo "Bad Category: ". a:category
+    return
+  endif
+  let l:cdata = s:categories[a:category]
+  let l:ids = l:cdata.ids
+  let l:name = l:abbrev .'_'. a:to_kind
+
+  for [id, finfo] in items(l:ids)
+    let [fn, ln, kind] = finfo
+    if kind == a:from_kind
+      execute ':sign place '. id ' name='. l:name .' file='. l:filename
+      let finfo[2] = a:to_kind
+    endif
+  endfor
+endfunction
+
+" ==============================================
+" Clear
+" ==============================================
 
 function! vimside#sign#Clear(linenos, filename, category)
   if ! has_key(s:categories, a:category)
@@ -234,14 +274,14 @@ function! vimside#sign#Clear(linenos, filename, category)
   let l:cdata = s:categories[a:category]
   let l:ids = l:cdata.ids
 
-  let [found, id] = s:GetId(a:linenos, l:filename, l:ids)
-  if found
+  let [l:found, id] = s:GetId(a:linenos, l:filename, l:ids)
+  if l:found
     execute ':sign unplace '. id .' file='. l:filename
     unlet l:ids[id]
   endif
 endfunction
 
-function! vimside#sign#ClearType(category, kind)
+function! vimside#sign#ClearKind(category, kind)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
     return
@@ -253,6 +293,7 @@ function! vimside#sign#ClearType(category, kind)
     let [fn, ln, kind] = finfo
     if kind == a:kind
       execute ':sign unplace '. id .' file='. fn
+      unlet l:ids[id]
     endif
   endfor
 endfunction
@@ -268,6 +309,7 @@ function! vimside#sign#ClearCategory(category)
   for [id, finfo] in items(l:ids)
     let [fn, ln, kind] = finfo
     execute ':sign unplace '. id .' file='. fn
+    unlet l:ids[id]
   endfor
 endfunction
 
@@ -280,8 +322,8 @@ function! vimside#sign#ClearAtCursor()
 
   for [name, cdata] in items(s:categories)
     let l:ids = cdata.ids
-    let [found, id] = s:GetId(l:linenos, l:filename, l:ids)
-    if found
+    let [l:found, id] = s:GetId(l:linenos, l:filename, l:ids)
+    if l:found
       unlet l:ids[id]
     endif
   endfor

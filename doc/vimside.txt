@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.3.00
+Version:     0.3.01
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -1564,6 +1564,15 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.3.01   - Fix: ~
+  Make sure when 'sign' definition is added via vimside#sign#AddCategory
+  that the data has an 'ids' entry.
+  Made sure that when a 'sign' Clear function is called that the associate
+  id is removed from the 'ids' Dictionary.
+  There is now an Option, 'sign-start-place-id' with default value 2656
+  which is the value of the first 'sign' id. Subsequent ids are one greater
+  than there predecessor.
+
 0.3.00   - Fix: ~
   Change the new window option 'tab' to 'tab_window' so that it is similar
    to all the other options values ('same_window', 'split_window',

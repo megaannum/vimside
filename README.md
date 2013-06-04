@@ -30,6 +30,14 @@ unit/regression tests in the future.
 
 ## Latest checkin
 
+Make sure when 'sign' definition is added via vimside#sign#AddCategory
+that the data has an 'ids' entry.
+Made sure that when a 'sign' Clear function is called that the associate
+id is removed from the 'ids' Dictionary.
+There is now an Option, 'sign-start-place-id' with default value 2656
+which is the value of the first 'sign' id. Subsequent ids are one greater
+than there predecessor.
+
 The latest checkin included an initial (un-tested and thus not usable) 
 snapshot of the debug code along with a "sign" module that supports
 quickfix window, location window and debug breakpoint visualization.

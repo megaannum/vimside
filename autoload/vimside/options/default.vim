@@ -248,6 +248,7 @@ function! vimside#options#default#Load(owner)
   call owner.Set('sign-debug-marker-text', 'M>')
   call owner.Set('sign-debug-marker-texthl', 'Ignore')
 
+  call owner.Set('sign-start-place-id', 2656)
 
   " add default swank event triggers
 
