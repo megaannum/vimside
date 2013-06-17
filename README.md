@@ -30,7 +30,7 @@ unit/regression tests in the future.
 
 ## Latest checkin
 
-Just checking in as snapshot of work in progess, the actwin.vim
+Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. As an Option, the actwin will allow for an
 alternate way to visualize and act upon compiler error from standard
 quickfix; but, quickfix will, as an Option, still be available.
