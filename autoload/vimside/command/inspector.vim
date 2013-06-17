@@ -3,8 +3,6 @@
 "
 " File:          inspector.vim
 " Summary:       inspect type at point
-" Summary:       inspect package type at point
-" Summary:       inspect project package 
 " Author:        Richard Emberson <richard.n.embersonATgmailDOTcom>
 " Last Modified: 2013
 "
@@ -77,8 +75,8 @@ function! s:SetupSyntax()
     syn match TI_Name1 "[^ \.]\+" contained
 
 
-"    syn match TI_ClassName "[^ =:;(\[]\+" contained
-"    syn match TI_ClassName "[a-zA-Z0-9_\.\$\[\]]\+"
+  "    syn match TI_ClassName "[^ =:;(\[]\+" contained
+  "    syn match TI_ClassName "[a-zA-Z0-9_\.\$\[\]]\+"
 
 
     syn match TI_COMMENT "(via implicit [a-zA-Z0-9_]\+)"
@@ -134,15 +132,6 @@ call s:LOG("KeyMappings: TOP")
     nnoremap <script> <silent> <buffer> q :call <SID>Close()<CR>
     nnoremap <script> <silent> <buffer> :q :call <SID>Close()<CR>
 
-
-"    map <script> <silent> <Leader>t1         :call TypeInspector1()<CR>
-"    map <script> <silent> <Leader>t2         :call TypeInspector2()<CR>
-if 0
-noremap <script> <silent> <unique> <Leader>ti :TypeInspector<CR>
-noremap <script> <silent> <unique> <Leader>tt :TypeInspectorTab<CR>
-noremap <script> <silent> <unique> <Leader>tv :TypeInspectorVerticalSplit<CR>
-noremap <script> <silent> <unique> <Leader>ts :TypeInspectorHorizontalSplit<CR>
-endif " 0
 
     let s:done_key_mappings = 1
   endif
@@ -202,13 +191,13 @@ endif " 0
 endfunction
 
 function! s:Reset()
-call s:LOG("Reset: TOP")
+  call s:LOG("Reset: TOP")
 endfunction
 
 " Close {{{2
 " called on quit
 function! s:Close()
-call s:LOG("Close: TOP")
+  call s:LOG("Close: TOP")
   call s:Cleanup()
 
   " If we needed to split the main window, close the split one.
@@ -1669,7 +1658,7 @@ call s:LOG("DoTypeInspector TOP")
     " do split mode
     if s:split_mode != ""
       " exe 'keepalt '. s:split_mode
-      execute s:split_mode .' '. 'Inspector'
+      execute s:split_mode .' '. 'ActWin'
     endif
   endif
 
@@ -1711,10 +1700,10 @@ call s:LOG("vimside#command#inspector#package_at_point BOTTOM")
 endfunction
 
 function!  vimside#command#inspector#project_package()
-call s:LOG("vimside#command#inspector#project_package TOP")
-  echo "Starting Type Inspector..."
-  call s:inspect_project_package()
-call s:LOG("vimside#command#inspector#project_package BOTTOM")
+  call s:LOG("vimside#command#inspector#project_package TOP")
+    echo "Starting Type Inspector..."
+    call s:inspect_project_package()
+  call s:LOG("vimside#command#inspector#project_package BOTTOM")
 endfunction
 
 

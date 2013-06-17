@@ -32,6 +32,7 @@ if exists("g:vimside")
   endif
 
   function! vimside#log#log(msg)
+    " TODO convert to load/optimize version of getting time
     if s:log_enabled
       let t = exists("*strftime")
           \ ? strftime("%Y%m%d-%H%M%S: ")    
@@ -44,6 +45,7 @@ if exists("g:vimside")
   endfunction
 
   function! vimside#log#error(msg)
+    " TODO convert to load/optimize version of getting time
     let t = exists("*strftime")
           \ ? strftime("%Y%m%d-%H%M%S: ")    
           \ : "" . localtime() . ": "

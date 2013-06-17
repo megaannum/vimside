@@ -12,7 +12,7 @@
 
 let s:version_major = 0
 let s:version_minor = 3
-let s:version_patch = 01
+let s:version_patch = 02
 let s:version_pre_release = ''
 " build version is not applicable
 

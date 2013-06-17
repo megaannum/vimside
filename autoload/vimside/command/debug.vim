@@ -183,10 +183,6 @@ function! s:db_clear_marker_overlays()
   call vimside#sign#ClearKind('Debug', 'marker')
 endfunction
 
-" function! s:db_set_marker_overlays(line, file)
-"   call vimside#sign#Place(line, file, 'Debug', 'marker')
-" endfunction
-
 function! s:debug_set_marker(line, file)
   call s:db_clear_marker_overlays()
 
@@ -199,7 +195,7 @@ function! s:debug_set_marker(line, file)
          \ }
   vimside#util#GotoSourceLocation(l:dic)
 
-  call vimside#sign#Place(a:line, a:file, 'Debug', 'marker')
+  call vimside#sign#PlaceFile(a:line, a:file, 'Debug', 'marker')
 endfunction
 
 " ==============================================

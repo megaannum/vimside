@@ -33,6 +33,7 @@
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+if 0 " REMOVE
 let [found, use_signs] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-use-signs')
 if found
   let s:use_signs = use_signs
@@ -45,8 +46,29 @@ if found
 else
   let s:use_sign_kind_marker = 0
 endif
+endif " REMOVE
 
 " public API
+function! vimside#swank#rpc#uses_of_symbol_at_point#Run(...)
+" call s:LOG("UsesOfSymbolAtPoint TOP") 
+
+  if ! exists("s:Handler")
+    let s:Handler = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-uses-of-symbol-at-point-handler')
+    let s:Caller = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-rpc-uses-of-symbol-at-point-caller')
+  endif
+
+  let l:args = { }
+  let l:args['filename'] = ""
+  let l:args['offset'] = ""
+  let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
+  call vimside#ensime#swank#dispatch(l:rr)
+
+" call s:LOG("UsesOfSymbolAtPoint BOTTOM") 
+endfunction
+
+
+
+if 0 " REMOVE
 function! vimside#swank#rpc#uses_of_symbol_at_point#Run(...)
 " call s:LOG("UsesOfSymbolAtPoint TOP") 
 
@@ -75,6 +97,7 @@ call s:LOG("UsesOfSymbolAtPoint line=". line)
 
 " call s:LOG("UsesOfSymbolAtPoint BOTTOM") 
 endfunction
+endif " REMOVE
 
 
 "======================================================================
@@ -101,6 +124,7 @@ function! g:UsesOfSymbolAtPointHandler()
   endfunction
 
   function! g:UsesOfSymbolAtPointHandler_Ok(diclist, ...)
+if 0 " REMOVE
     let diclist = a:diclist
 " call s:LOG("UsesOfSymbolAtPointHandler_Ok dic=list".  string(diclist)) 
     if a:0 == 0
@@ -197,6 +221,7 @@ call s:LOG("UsesOfSymbolAtPointHandler_Ok location=".  location)
         execute "autocmd BufWinLeave <buffer=" . bn . "> call s:CloseWindow()"
       augroup END
     endif
+endif " REMOVE
 
     return 1
   endfunction
@@ -206,6 +231,8 @@ call s:LOG("UsesOfSymbolAtPointHandler_Ok location=".  location)
     \ 'ok': function("g:UsesOfSymbolAtPointHandler_Ok") 
     \ }
 endfunction
+
+if 0 " REMOVE
 
 function! s:GetLocation()
   let l:option_name = 'tailor-uses-of-symbol-at-point-location'
@@ -227,3 +254,4 @@ call s:LOG("CloseWindow:")
     quit
   endif
 endfunction
+endif " REMOVE

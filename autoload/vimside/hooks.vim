@@ -1,6 +1,156 @@
 
-let s:LOG = function("vimside#log#log")
-let s:ERROR = function("vimside#log#error")
+" let s:LOG = function("vimside#log#log")
+
+" -------------------------------------------------------
+"  Hooks
+" -------------------------------------------------------
+
+"
+" Internal hooks variables
+"
+
+function! s:LOG(msg)
+  execute "redir >> ". "HOOKS_LOG"
+  silent echo "INFO: ". a:msg
+  execute "redir END"
+endfunction
+
+call s:LOG("vimside#hooks: TOP")
+
+let s:hooks_categories = {}
+let s:hooks_is_init = 0
+
+"
+" Pre-defined hook categories
+"
+" 
+let s:hooks_category_names = [
+      \ "PostStartUp",
+      \ "PreShutDown",
+      \ "PostBufferRead",
+      \ "PostBufferWrite",
+      \ "PreQuickFix",
+      \ "PostQuickFix",
+      \ "NetProcessClose",
+      \ "DbThreadSuspended",
+      \ "VimLeave"
+      \ ]
+
+function! s:Hooks_Init()
+  for category in s:hooks_category_names
+    call vimside#hooks#Register(category)
+  endfor
+endfunction
+
+function! vimside#hooks#HasCategory(category)
+  return has_key(s:hooks_categories, a:category)
+endfunction
+
+function! vimside#hooks#Register(category)
+  if ! has_key(s:hooks_categories, a:category)
+    let l:cat_hooks = []
+    let s:hooks_categories[a:category] = l:cat_hooks
+  endif
+endfunction
+
+
+function! vimside#hooks#AddHook(category, Hook)
+call s:LOG("vimside#hooks#AddHook: category=". a:category)
+  if ! has_key(s:hooks_categories, a:category)
+    call vimside#hooks#Register(a:category)
+  endif
+
+  let l:category = s:hooks_categories[a:category]
+
+  call add(l:category, a:Hook)
+endfunction
+
+" return 0 or 1
+function! vimside#hooks#Clear(category)
+  if has_key(s:hooks_categories, a:category)
+    let s:hooks_categories[a:category] = []
+    return 1
+  else
+    return 0
+  endif
+endfunction
+
+" return 0 or 1
+function! vimside#hooks#ClearHook(category, Hook)
+  if ! has_key(s:hooks_categories, a:category)
+    return 0
+  endif
+
+  let l:cat_hooks = s:hooks_categories[a:category]
+  let l:len = len(l:cat_hooks)
+
+  let hookname = String(a:Hook)
+  call filter(l:cat_hooks, 'string(v:val) !='. hookname)
+
+  return l:len != len(l:cat_hooks)
+
+endfunction
+
+function! vimside#hooks#Run(category)
+call s:LOG("vimside#hooks#Run: category=". a:category)
+  if has_key(s:hooks_categories, a:category)
+    for Hook in s:hooks_categories[a:category]
+      try
+        call Hook()
+      catch /.*/
+        let l:ERROR = function("vimside#log#error")
+        call l:ERROR("Run: ". v:exception ." at ". v:throwpoint)
+      endtry
+    endfor
+  endif
+endfunction
+
+
+
+
+
+function! vimside#hooks#AssciateHooksAutoCmd()
+call s:LOG("vimside#hooks#AssciateHooksAutoCmd")
+  augroup VIMSIDE_AUTOCMD_HOOKS
+    au!
+    autocmd BufReadPost *.scala call vimside#hooks#Run('PostBufferRead')
+    autocmd FileReadPost *.scala call vimside#hooks#Run('PostBufferRead')
+    autocmd BufWritePost *.scala call vimside#hooks#Run('PostBufferWrite')
+    autocmd FileWritePost *.scala call vimside#hooks#Run('PostBufferWrite')
+    autocmd VimLeave * call vimside#hooks#Run('VimLeave')
+  augroup END
+endfunction
+
+function! vimside#hooks#ClearHooksAutoCmd()
+call s:LOG("vimside#hooks#ClearHooksAutoCmd")
+  augroup VIMSIDE_AUTOCMD_HOOKS
+    au!
+  augroup END
+endfunction
+
+
+call s:Hooks_Init()
+
+call s:LOG("vimside#hooks: BOTTOM")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if 0 " BUFFER REMOVE
+
 
 " -------------------------------------------------------
 "  Buffer Saved
@@ -20,7 +170,8 @@ function! vimside#hooks#BufferSavedRun()
       try
         call Hook()
       catch /.*/
-        call s:ERROR("RunSaved: ". v:exception ." at ". v:throwpoint)
+        let l:ERROR = function("vimside#log#error")
+        call l:ERROR("RunSaved: ". v:exception ." at ". v:throwpoint)
       endtry
     endfor
   endif
@@ -58,7 +209,8 @@ function! vimside#hooks#BufferLoadedRun()
       try
         call Hook()
       catch /.*/
-        call s:ERROR("RunLoaded: ". v:exception ." at ". v:throwpoint)
+        let l:ERROR = function("vimside#log#error")
+        call l:ERROR("RunLoaded: ". v:exception ." at ". v:throwpoint)
       endtry
     endfor
   endif
@@ -93,3 +245,5 @@ function! vimside#hooks#StopAutoCmd()
     au!
   augroup END
 endfunction
+
+endif " BUFFER REMOVE

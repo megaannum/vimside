@@ -123,6 +123,8 @@ call s:LOG("s:InitSign: BOTTOM")
 
   let cdata['ids'] = {}
 
+  let cdata['toggle'] = 'qf'
+
   call vimside#sign#AddCategory(s:category, cdata)
 call s:LOG("s:InitSign: TOP")
 endfunction
@@ -139,7 +141,7 @@ call s:LOG("s:WriteSign: TOP")
     else
       let l:kind = 'error'
     endif
-    call vimside#sign#Place(l:line, l:file, s:category, l:kind)
+    call vimside#sign#PlaceFile(l:line, l:file, s:category, l:kind)
 
   endfor
 

@@ -30,6 +30,25 @@ unit/regression tests in the future.
 
 ## Latest checkin
 
+Just checking in as snapshot of work in progess, the actwin.vim
+(ActionWindow) code. As an Option, the actwin will allow for an
+alternate way to visualize and act upon compiler error from standard
+quickfix; but, quickfix will, as an Option, still be available.
+Use of actwin is not documented nor does any code actually use it
+yet, but a flavor of how it might work can be seen by executing:
+
+        vimside#actwin#TestQuickFix()
+
+See the functions:
+
+        MakeKeyMappings
+        MakeUserCommands
+        MakeOverrideCommands
+
+for some mappings.
+
+## Previous checkin
+
 Make sure when 'sign' definition is added via vimside#sign#AddCategory
 that the data has an 'ids' entry.
 Made sure that when a 'sign' Clear function is called that the associate

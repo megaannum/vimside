@@ -92,7 +92,7 @@ call s:LOG("s:WriteSign: TOP")
     let l:file = entry['filename']
     let l:line = entry['lnum']
     let l:kind = entry['kind']
-    call vimside#sign#Place(l:line, l:file, s:category, l:kind)
+    call vimside#sign#PlaceFile(l:line, l:file, s:category, l:kind)
   endfor
 
 call s:LOG("s:WriteSign: BOTTOM")

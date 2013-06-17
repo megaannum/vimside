@@ -1564,6 +1564,8 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.3.02   - Snapshot
+  Just checking is some work in progress.
 0.3.01   - Fix: ~
   Make sure when 'sign' definition is added via vimside#sign#AddCategory
   that the data has an 'ids' entry.
