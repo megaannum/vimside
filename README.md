@@ -39,6 +39,10 @@ yet, but a flavor of how it might work can be seen by executing:
 
         vimside#actwin#TestQuickFix()
 
+Go to the project: data/vimside/projects/simple, 
+"vi src/main/scala/com/megaannum/Foo.scala" and then call the
+above function.
+
 See the functions:
 
         MakeKeyMappings
