@@ -25,6 +25,21 @@ endfunction
 " active row/column highlight 
 " range of lines
 "
+"http://stackoverflow.com/questions/2447109/showing-a-different-background-colour-in-vim-past-80-characters
+"http://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
+"http://vim.wikia.com/wiki/Highlight_current_line
+"
+"sort entries
+"various sort functions
+"
+"help: no display, one line, full help vim help
+"
+"range of source lines per target line
+"sign a range of lines
+"
+"
+"options
+"row/column display
 
 let s:is_colorline_enabled = 1
 let s:is_colorcolumn_enabled = 1
@@ -36,14 +51,22 @@ let s:split_below_default = 1
 let s:split_right_default = 0
 let s:winname_default="ActWin"
 
+" control whether or not buffer entry events trigger 
+" save/restore option code execution
+let s:buf_change = 1
+
 " actwin {
 "   is_global: 0,
 "   source_buffer_nr: source_buffer_nr
 "   source_buffer_name: source_buffer_name
+"   buffer_nr
 "   uid: unique id
 "   tag: tag
 "   first_buffer_line: first_buffer_line
 "   current_line: current_line
+"   linenos_to_entrynos: []
+"   entrynos_to_linenos: []
+"   entrynos_to_nos_of_lines: []
 "   data {
 "   }
 " }
@@ -87,7 +110,7 @@ let s:winname_default="ActWin"
 "     file:
 "     line:
 "     optional col: (default 0)
-"     text: [lines] and/or line
+"     content: [lines] and/or line
 "     id: unique identifying number 
 "     kind: 'error'
 "     optional actions: {
@@ -255,7 +278,7 @@ function! s:ClearUserCommands(actwin)
     endif
 
     if has_key(l:usercmd,'close')
-      execute "nunmap <silent> <Leader>ccl". l:usercmd.close
+      execute "nunmap <silent> <Leader>". l:usercmd.close
     endif
   endif
 endfunction
@@ -435,7 +458,7 @@ call s:LOG("DisplayLocal split=" .l:split_size . l:split_mode .' '. l:winname)
     let b:buffer_nr = l:actwin.buffer_nr
     let s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr] = l:actwin
 
-let b:buf_change = 0
+let s:buf_change = 0
     call s:Initialize(l:actwin)
   endif
 
@@ -449,7 +472,7 @@ call s:LOG("Display actwin_buffer=". l:actwin.buffer_nr)
 
   call s:SetAtEntry(1, l:actwin)
 
-let b:buf_change = 1
+let s:buf_change = 1
 
 call s:LOG("DisplayLocal BOTTOM")
 endfunction
@@ -632,6 +655,9 @@ call s:LOG("Adjust  TOP")
       let a:data.actions['leave'] = function("s:LeaveActionDoNothing")
     endif
   endif
+  if ! has_key(a:data, 'formatter')
+      let a:data['formatter'] = function("s:FormatterDefault")
+  endif
 call s:LOG("Adjust  BOTTOM")
 endfunction
 
@@ -777,10 +803,46 @@ function! s:CreateHelp(actwin)
 endfunction
 
 function! s:BuildDisplay(actwin)
+  let l:Formatter = a:actwin.data.formatter
+
   call setline(1, s:CreateHelp(a:actwin))
 
-  let lines = s:GetLines(a:actwin)
+  let l:linenos_to_entrynos = []
+  let l:entrynos_to_linenos = []
+  let l:entrynos_to_nos_of_lines = []
+
+  let l:linenos = 0
+  let l:entrynos = 0
+  let l:lines = []
+  let l:lineslen = 0
+  for entry in a:actwin.data.entries
+    let l:current_lineslen = l:lineslen
+
+    call l:Formatter(lines, entry)
+
+    let l:lineslen = len(l:lines)
+    let l:delta = l:lineslen - l:current_lineslen
+    if l:delta == 1
+      call add(l:linenos_to_entrynos, l:entrynos)
+    else
+      call extend(l:linenos_to_entrynos, repeat([l:entrynos], l:delta))
+    endif
+
+    call add(l:entrynos_to_linenos, l:lineslen)
+    call add(l:entrynos_to_nos_of_lines, l:delta)
+
+    let l:entrynos += 1
+
+  endfor
+
   call setline(a:actwin.first_buffer_line, lines)
+  let a:actwin.linenos_to_entrynos = l:linenos_to_entrynos
+  let a:actwin.entrynos_to_linenos = l:entrynos_to_linenos
+  let a:actwin.entrynos_to_nos_of_lines = l:entrynos_to_nos_of_lines
+
+  " TODO REMOVE
+  " let lines = s:GetLines(a:actwin)
+  " call setline(a:actwin.first_buffer_line, lines)
 endfunction
 
 " ============================================================================
@@ -828,25 +890,27 @@ endfunction
 " Util {{{1
 " ============================================================================
 
+if 0 " NOT USED
 " return [line, ...]
 function! s:GetLines(actwin)
   let l:lines = []
   for entry in a:actwin.data.entries
-    let l:text = entry.text
-    call add(l:lines, l:text)
+    let l:content = entry.content
+    call add(l:lines, l:content)
   endfor
 
   return l:lines
 endfunction
+endif " NOT USED
 
 " return [found, line]
-function! s:GetLine(pos, actwin)
-  if a:pos < 0
+function! s:GetLine(entrynos, actwin)
+  if a:entrynos < 0
     return [0, {}]
   else
     let l:entries = a:actwin.data.entries
-    if a:pos < len(l:entries)
-      return [1, l:entries[a:pos]]
+    if a:entrynos < len(l:entries)
+      return [1, l:entries[a:entrynos]]
     else
       return [0, {}]
     endif
@@ -884,8 +948,6 @@ function! s:Close(actwin)
     exec "wincmd c"
   endif
 
-  " call s:CleanUp(l:actwin)
-
   call s:ClearUserCommands(l:actwin)
   call s:ClearOverrideCommands(l:actwin)
 
@@ -902,31 +964,6 @@ endif
   unlet s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr]
 call s:LOG("Close BOTTOM")
 endfunction
-
-if 0 " XXXXX
-function!  s:CleanUp(actwin)
-  if exists("b:insertmode")
-    let &insertmode = b:insertmode
-  endif
-
-  if exists("b:showcmd")
-    let &showcmd = b:showcmd
-  endif
-
-  if exists("b:cpo")
-    let &cpo = b:cpo
-  endif
-
-  if exists("b:report")
-    let &report = b:report
-  endif
-
-  if exists("b:list")
-    let &list = b:list
-  endif
-
-endfunction
-endif " XXXXX
 
 " ============================================================================
 " KeyMappings: {{{1
@@ -965,16 +1002,18 @@ call s:LOG("ToggleHelp NOT FOUND BOTTOM")
 call s:LOG("ToggleHelp BOTTOM")
 endfunction
 
-function! s:Enter(linenos, actwin)
-  call a:actwin.data.actions.enter(a:linenos, a:actwin)
+" cursor entering given entrynos
+function! s:Enter(entrynos, actwin)
+  call a:actwin.data.actions.enter(a:entrynos, a:actwin)
 endfunction
 
-function! s:Select(linenos, actwin)
-  call a:actwin.data.actions.select(a:linenos, a:actwin)
+function! s:Select(entrynos, actwin)
+  call a:actwin.data.actions.select(a:entrynos, a:actwin)
 endfunction
 
-function! s:Leave(linenos, actwin)
-  call a:actwin.data.actions.leave(a:linenos, a:actwin)
+" cursor leaving given entrynos
+function! s:Leave(entrynos, actwin)
+  call a:actwin.data.actions.leave(a:entrynos, a:actwin)
 endfunction
 
 
@@ -986,15 +1025,30 @@ call s:LOG("s:OnEnterMouse NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+
   let l:current_line = l:actwin.current_line
   let l:linenos = line(".")
+  let l:current_entrynos = l:linenos_to_entrynos[l:current_line-1]
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+
 "call s:LOG("s:OnEnterMouse l:current_line=". l:current_line)
 "call s:LOG("s:OnEnterMouse l:linenos=". l:linenos)
+if 1
+  if l:entrynos != l:current_entrynos
+    call s:Leave(l:current_entrynos, l:actwin)
+    call s:Enter(l:entrynos, l:actwin)
+    let l:actwin.current_line = l:linenos
+  endif
+
+else
   if l:linenos != l:current_line
     call s:Leave(l:current_line, l:actwin)
     call s:Enter(l:linenos, l:actwin)
     let l:actwin.current_line = l:linenos
   endif
+endif
 call s:LOG("s:OnEnterMouse: BOTTOM")
 endfunction
 
@@ -1006,8 +1060,12 @@ call s:LOG("s:OnSelect NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+
   let l:linenos = line(".")
-  call s:Select(l:linenos, l:actwin)
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+
+  call s:Select(l:entrynos, l:actwin)
   let l:actwin.current_line = l:linenos
 call s:LOG("s:OnSelect: BOTTOM")
 endfunction
@@ -1020,12 +1078,36 @@ call s:LOG("s:OnUp NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+
   let l:linenos = line(".")
-  if l:linenos > 1
-    call s:Leave(l:linenos, l:actwin)
-    call feedkeys('k', 'n')
-    call s:Enter(l:linenos-1, l:actwin)
-    let l:actwin.current_line = l:linenos-1
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+
+call s:LOG("s:OnUp l:entrynos=". l:entrynos)
+  if l:entrynos > 0
+    call s:Leave(l:entrynos, l:actwin)
+
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
+    if l:nos_of_linenos == 1
+      call feedkeys('k', 'n')
+    else
+      call feedkeys(repeat('k', l:nos_of_linenos), 'n')
+    endif
+
+if 0 " XXXX
+    let l:delta = l:linenos - l:new_linenos
+    if l:delta == 1
+      call feedkeys('k', 'n')
+    else
+      call feedkeys(repeat('k', l:delta), 'n')
+    endif
+endif " XXXX
+
+    call s:Enter(l:entrynos-1, l:actwin)
+    let l:actwin.current_line = l:new_linenos
   endif
 call s:LOG("s:OnUp: BOTTOM")
 endfunction
@@ -1038,13 +1120,39 @@ call s:LOG("s:OnDown NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+
   let l:linenos = line(".")
-  let l:len = len(l:actwin.data.entries)
-  if l:linenos < l:len
-    call s:Leave(l:linenos, l:actwin)
-    call feedkeys('j', 'n')
-    call s:Enter(l:linenos+1, l:actwin)
-    let l:actwin.current_line = l:linenos+1
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnDown l:entrynos=". l:entrynos)
+
+  let l:len = len(l:entrynos_to_linenos)
+call s:LOG("s:OnDown l:len=". l:len)
+
+  if l:entrynos < l:len - 1
+    call s:Leave(l:entrynos, l:actwin)
+
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+    if l:nos_of_linenos == 1
+      call feedkeys('j', 'n')
+    else
+      call feedkeys(repeat('j', l:nos_of_linenos), 'n')
+    endif
+
+if 0 " XXXX
+    let l:delta = l:new_linenos - l:linenos
+    if l:delta == 0
+      call feedkeys('j', 'n')
+    else
+      call feedkeys(repeat('j', l:delta-1), 'n')
+    endif
+endif " XXXX
+
+    call s:Enter(l:entrynos+1, l:actwin)
+    let l:actwin.current_line = l:new_linenos
   endif
 call s:LOG("s:OnDown: BOTTOM")
 endfunction
@@ -1061,12 +1169,33 @@ call s:LOG("g:UserUp NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+
   let l:linenos = l:actwin.current_line
-  let l:len = len(l:actwin.data.entries)
-  if l:linenos < l:len
-    call s:Leave(l:linenos, l:actwin)
-    call s:Select(l:linenos-1, l:actwin)
-    let l:actwin.current_line = l:linenos-1
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+
+  " let l:len = len(l:actwin.data.entries)
+  if l:entrynos > 0
+    call s:Leave(l:entrynos, l:actwin)
+
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
+
+    call s:Select(l:entrynos-1, l:actwin)
+
+let s:buf_change = 0
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1) | redraw'
+    else
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-'. l:nos_of_linenos .'),1) | redraw'
+    endif
+    
+    wincmd p
+let s:buf_change = 1
+
+    let l:actwin.current_line = l:new_linenos
   endif
 echo ""
 call s:LOG("g:UserUp: BOTTOM")
@@ -1080,12 +1209,33 @@ call s:LOG("g:UserDown NOT FOUND BOTTOM")
     return
   endif
 
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+
   let l:linenos = l:actwin.current_line
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+
   let l:len = len(l:actwin.data.entries)
-  if l:linenos < l:len
-    call s:Leave(l:linenos, l:actwin)
-    call s:Select(l:linenos+1, l:actwin)
-    let l:actwin.current_line = l:linenos+1
+  if l:entrynos < l:len - 1
+    call s:Leave(l:entrynos, l:actwin)
+
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
+
+    call s:Select(l:entrynos+1, l:actwin)
+
+let s:buf_change = 0
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1) | redraw'
+    else
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+'. l:nos_of_linenos .'),1) | redraw'
+    endif
+
+    wincmd p
+let s:buf_change = 1
+
+    let l:actwin.current_line = l:new_linenos
   endif
 echo ""
 call s:LOG("g:UserDown: BOTTOM")
@@ -1110,7 +1260,7 @@ endfunction
 " ============================================================================
 
 function! s:BufEnter()
-  if b:buf_change
+  if s:buf_change
 call s:LOG("s:BufEnter: TOP")
     let b:insertmode = &insertmode
     let b:showcmd = &showcmd
@@ -1122,7 +1272,7 @@ call s:LOG("s:BufEnter: BOTTOM")
 endfunction
 
 function! s:BufLeave()
-  if b:buf_change
+  if s:buf_change
 call s:LOG("s:BufLeave: TOP")
     if exists("b:insertmode")
       let &insertmode = b:insertmode
@@ -1149,6 +1299,21 @@ call s:LOG("s:BufLeave: BOTTOM")
 endfunction
 
 " ============================================================================
+" Formatter Functions: {{{1
+" ============================================================================
+
+function! s:FormatterDefault(lines, entry)
+  call s:LOG("s:FormatterDefault: TOP")
+  let content = a:entry.content
+  if type(content) == type([])
+    call extend(a:lines, content)
+  else
+    call add(a:lines, string(content))
+  endif
+  call s:LOG("s:FormatterDefault: BOTTOM")
+endfunction
+
+" ============================================================================
 " Default Action Functions: {{{1
 " ============================================================================
 
@@ -1157,39 +1322,39 @@ endfunction
 " --------------------------------------------
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionDoNothing(linenos, actwin)
-  call s:LOG("s:EnterActionDoNothing: linenos=". a:linenos)
+function! s:EnterActionDoNothing(entrynos, actwin)
+  call s:LOG("s:EnterActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionDoNothing(linenos, actwin)
+function! s:SelectActionDoNothing(entrynos, actwin)
   call s:LOG("s:SelectActionDoNothing")
 endfunction
 
 " Do Nothing
-function! s:LeaveActionDoNothing(linenos, actwin)
-  call s:LOG("s:LeaveActionDoNothing: linenos=". a:linenos)
+function! s:LeaveActionDoNothing(entrynos, actwin)
+  call s:LOG("s:LeaveActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " --------------------------------------------
 " Behavior: QuickFix
 " --------------------------------------------
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionQuickFix(linenos, actwin)
-  call s:LOG("s:EnterActionQuickFix: linenos=". a:linenos)
-  call s:SetAtEntry(a:linenos, a:actwin)
+function! s:EnterActionQuickFix(entrynos, actwin)
+  call s:LOG("s:EnterActionQuickFix: entrynos=". a:entrynos)
+  call s:SetAtEntry(a:entrynos, a:actwin)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionQuickFix(linenos, actwin)
+function! s:SelectActionQuickFix(entrynos, actwin)
   call s:LOG("s:SelectActionQuickFix")
-  call s:GoToEntry(a:linenos, a:actwin)
+  call s:GoToEntry(a:entrynos, a:actwin)
 endfunction
 
 " Do Nothing
-function! s:LeaveActionQuickFix(linenos, actwin)
-  call s:LOG("s:LeaveActionQuickFix: linenos=". a:linenos)
-  call s:RemoveAtEntry(a:linenos, a:actwin)
+function! s:LeaveActionQuickFix(entrynos, actwin)
+  call s:LOG("s:LeaveActionQuickFix: entrynos=". a:entrynos)
+  call s:RemoveAtEntry(a:entrynos, a:actwin)
 endfunction
 
 " --------------------------------------------
@@ -1212,16 +1377,17 @@ endfunction
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
 function! s:SetAtEntry(entrynos, actwin)
-let b:buf_change = 0
+let s:buf_change = 0
 call s:LOG("s:SetAtEntry: entrynos=". a:entrynos)
-  let [l:found, l:line] = s:GetLine(a:entrynos - 1, a:actwin)
-  if l:found && has_key(l:line, 'file')
-    let l:file = l:line.file
+  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
+  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  if l:found && has_key(l:entry, 'file')
+    let l:file = l:entry.file
     let l:winnr = bufwinnr(l:file)
 call s:LOG("s:SetAtEntry: winnr=". l:winnr)
     if l:winnr > 0
-      let l:linenos = has_key(l:line, 'line') ? l:line.line : 1
-      let l:colnos = has_key(l:line, 'col') ? l:line.col : -1
+      let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
+      let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 call s:LOG("s:SetAtEntry: linenos=". l:linenos)
 call s:LOG("s:SetAtEntry: colnos=". l:colnos)
       " execute 'keepjumps silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . " "
@@ -1231,7 +1397,7 @@ call s:LOG("s:SetAtEntry: colnos=". l:colnos)
         execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G'
       endif
 if s:is_colorline_enabled
-  let l:kind = l:line.kind
+  let l:kind = l:entry.kind
   let l:category = a:actwin.data.sign.category
   call  vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, 'marker')
 endif
@@ -1248,37 +1414,39 @@ endif
     endif
   endif
 call s:LOG("s:SetAtEntry: BOTTOM")
-let b:buf_change = 1
+let s:buf_change = 1
 endfunction
 
 function! s:RemoveAtEntry(entrynos, actwin)
-let b:buf_change = 0
+let s:buf_change = 0
 call s:LOG("s:RemoveAtEntry: entrynos=". a:entrynos)
-  let [l:found, l:line] = s:GetLine(a:entrynos - 1, a:actwin)
-  if l:found && has_key(l:line, 'file')
-    let l:file = l:line.file
-    let l:linenos = has_key(l:line, 'line') ? l:line.line : 1
+  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
+  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  if l:found && has_key(l:entry, 'file')
+    let l:file = l:entry.file
+    let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
 if s:is_colorline_enabled
-  let l:kind = l:line.kind
+  let l:kind = l:entry.kind
   let l:category = a:actwin.data.sign.category
   call vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, l:kind)
 endif
   endif
 call s:LOG("s:RemoveAtEntry: BOTTOM")
-let b:buf_change = 1
+let s:buf_change = 1
 endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:GoToEntry(entrynos, actwin)
 call s:LOG("s:GoToEntry: entrynos=". a:entrynos)
-  let [l:found, l:line] = s:GetLine(a:entrynos - 1, a:actwin)
-  if l:found && has_key(l:line, 'file')
-    let l:file = l:line.file
+  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
+  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  if l:found && has_key(l:entry, 'file')
+    let l:file = l:entry.file
     let l:winnr = bufwinnr(l:file)
 call s:LOG("s:GoToEntry: winnr=". l:winnr)
     if l:winnr > 0
-      let l:linenos = has_key(l:line, 'line') ? l:line.line : 1
-      let l:colnos = has_key(l:line, 'col') ? l:line.col : -1
+      let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
+      let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 call s:LOG("s:GoToEntry: linenos=". l:linenos)
 call s:LOG("s:GoToEntry: colnos=". l:colnos)
       " execute 'keepjumps silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . " "
@@ -1287,6 +1455,7 @@ call s:LOG("s:GoToEntry: colnos=". l:colnos)
       else
         execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G'
       endif
+
 if s:is_colorcolumn_enabled
   if l:colnos > 1
     execute 'silent '. l:winnr.'wincmd w | :set colorcolumn='. l:colnos
@@ -1375,64 +1544,77 @@ function! vimside#actwin#TestQuickFix()
           \ "leave": function("s:LeaveActionQuickFix")
         \ },
         \ "entries": [
-        \  { 'text': "line one",
+        \  { 'content': "line one",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 1,
           \ "col": 1,
           \ "kind": "error"
           \ },
-        \  { 'text': "line three",
+        \  { 'content': "line three",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 3,
           \ "col": 6,
           \ "kind": "warn"
           \ },
-        \  { 'text': "line five",
+        \  { 'content': [
+            \  "Entry 3 line 0",
+            \  "   Entry 3 line 1",
+            \  "   Entry 3 line 2"
+            \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 5,
           \ "col": 7,
           \ "kind": "info"
           \ },
-        \  { 'text': "line seven",
+        \  { 'content': "line seven",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 7,
           \ "col": 2,
           \ "kind": "error"
           \ },
-        \  { 'text': "line nine",
+        \  { 'content': [
+            \  "Entry 5 line 0",
+            \  "   Entry 5 line 1",
+            \  "   Entry 5 line 2"
+            \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 9,
           \ "col": 4,
           \ "kind": "warn"
           \ },
-        \  { 'text': "line ten",
+        \  { 'content': [
+            \  "Entry 6 line 0"
+            \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 10,
           \ "col": 8,
           \ "kind": "info"
           \ },
-        \  { 'text': "line eleven",
+        \  { 'content': [
+            \  "Entry 7 line 0",
+            \  "  Entry 7 line 1"
+            \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 11,
           \ "col": 10,
           \ "kind": "error"
           \ },
-        \  { 'text': "line thirteen",
+        \  { 'content': "line thirteen",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 13,
           \ "kind": "warn"
           \ },
-        \  { 'text': "line fourteen",
+        \  { 'content': "line fourteen",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 14,
           \ "kind": "info"
           \ },
-        \  { 'text': "line fifteen",
+        \  { 'content': "line fifteen",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 15,
           \ "kind": "error"
           \ },
-        \  { 'text': "line sixteen",
+        \  { 'content': "line sixteen",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 16,
           \ "kind": "warn"
