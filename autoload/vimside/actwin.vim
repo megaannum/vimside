@@ -25,6 +25,8 @@ endfunction
 " active row/column highlight 
 " range of lines
 "
+"http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
+"
 "http://stackoverflow.com/questions/2447109/showing-a-different-background-colour-in-vim-past-80-characters
 "http://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
 "http://vim.wikia.com/wiki/Highlight_current_line
@@ -41,14 +43,19 @@ endfunction
 "options
 "row/column display
 
-let s:is_colorline_enabled = 1
-let s:is_colorcolumn_enabled = 1
-let s:is_sign_enabled = 1
+let s:is_colorline_enabled = 0
+let s:is_colorcolumn_enabled = 0
+let s:is_sign_enabled = 0
+let s:is_cursorline = 0
+let s:is_entry_highlight = 1
 
 let s:split_mode_default = "new"
 let s:split_size_default = "10"
 let s:split_below_default = 1
 let s:split_right_default = 0
+let s:edit_mode_default = "enew"
+let s:tab_mode_default = "tabnew"
+
 let s:winname_default="ActWin"
 
 " control whether or not buffer entry events trigger 
@@ -81,14 +88,37 @@ let s:buf_change = 1
 "     .....
 "   }
 "   window: {
+"     split; {
+"        mode: "new"
+"        size: "10"
+"        below: 1
+"        right: 0
+"     }
+"     edit: {
+"        mode: "enew"
+"     }
+"     tab: {
+"        mode: "tabnew"
+"     }
+"   }
+"   window: {
 "     split_size: "10"
 "     split_mode: "new"
 "     split_below: 1
 "     split_right: 0
 "   }
-"   builtincmd: {
+"   keymappings: {
+"     help: ""
+"     select: []
+"     select_mouse: []
+"     enter_mouse: []
+"     down: []
+"     up: []
+"     close: []
 "   }
-"   usercmd: {
+"   builtin_cmd: {
+"   }
+"   leader_cmd: {
 "     up: cp
 "     down: cn
 "     close: ccl
@@ -138,6 +168,19 @@ let s:buf_change = 1
 "      <Leader>ve
 "
 "
+
+" functions that can be bound to keys (key mappings)
+" keymappings
+let s:know_km_fns = {
+      \ "help": [ "OnHelp", "Display help" ],
+      \ "select": [ "OnSelect", "Select current line" ],
+      \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
+      \ "down": [ "OnDown", "Move down to next line" ],
+      \ "up": [ "OnUp", "Move up to next line" ],
+      \ "left": [ "OnLeft", "Move left one postion" ],
+      \ "right": [ "OnRight", "Move right one postion" ],
+      \ "close": [ "OnClose", "Close window"]
+      \ }
 
 
 " globals = {
@@ -200,23 +243,46 @@ call s:LOG("Initialize TOP")
   let &report = 10000
   set nolist
 
+  set bufhidden=hide
+
   setlocal nonumber
   setlocal foldcolumn=0
   setlocal nofoldenable
-  setlocal cursorline
+  if s:is_cursorline
+    setlocal cursorline
+  endif
   setlocal nospell
   setlocal nobuflisted
 call s:LOG("Initialize BOTTOM")
 endfunction
 
 function! s:MakeKeyMappings(actwin)
+
+  for [l:key, l:value] in items(a:actwin.data.keymappings)
+    if has_key(s:know_km_fns, l:key)
+      let [l:fn, l:txt] = s:know_km_fns[l:key]
+      if type(l:value) == type("")
+        execute 'nnoremap <script> <silent> <buffer> '. l:value .' :call <SID>'. l:fn .'()<CR>'
+      elseif type(l:value) == type([])
+        for l:v in l:value
+          execute 'nnoremap <script> <silent> <buffer> '. l:v .' :call <SID>'. l:fn .'()<CR>'
+        endfor
+      endif
+    endif
+
+    unlet l:value
+  endfor
+
+
+
+if 0 " KM
   " These are created as "buffer" maps so they disappear
   " when the buffer is deleted.
-  nnoremap <script> <silent> <buffer> <F1> :call <SID>ToggleHelp()<CR>
-  nnoremap <script> <silent> <buffer> <TAB> :call <SID>ForwardAtion()<CR>
-  nnoremap <script> <silent> <buffer> <C-n> :call <SID>ForwardAtion()<CR>
-  nnoremap <script> <silent> <buffer> <S-TAB> :call <SID>BackwardAtion()<CR>
-  nnoremap <script> <silent> <buffer> <C-p> :call <SID>BackwardAtion()<CR>
+  nnoremap <script> <silent> <buffer> <F1> :call <SID>OnHelp()<CR>
+"  nnoremap <script> <silent> <buffer> <TAB> :call <SID>ForwardAtion()<CR>
+"  nnoremap <script> <silent> <buffer> <C-n> :call <SID>ForwardAtion()<CR>
+"  nnoremap <script> <silent> <buffer> <S-TAB> :call <SID>BackwardAtion()<CR>
+"  nnoremap <script> <silent> <buffer> <C-p> :call <SID>BackwardAtion()<CR>
 
   nnoremap <script> <silent> <buffer> <2-LeftMouse> :call <SID>OnSelect()<CR>
   nnoremap <script> <silent> <buffer> <CR> :call <SID>OnSelect()<CR>
@@ -230,6 +296,7 @@ function! s:MakeKeyMappings(actwin)
 
   nnoremap <script> <silent> <buffer> q :call vimside#actwin#Close()<CR>
   nnoremap <script> <silent> <buffer> :q :call vimside#actwin#Close()<CR>
+endif " KM
 endfunction
 
 function! s:MakeAutoCmds(actwin)
@@ -247,57 +314,57 @@ function! s:CloseAutoCmds(actwin)
 endfunction
 
 function! s:MakeUserCommands(actwin)
-  if has_key(a:actwin.data, 'usercmd')
-    let l:usercmd = a:actwin.data.usercmd
+  if has_key(a:actwin.data, 'leader_cmd')
+    let l:leader_cmd = a:actwin.data.leader_cmd
     let l:buffer_nr =  a:actwin.buffer_nr
 
-    if has_key(l:usercmd,'up')
-      execute ":nnoremap <silent> <Leader>". l:usercmd.up ." :call g:UserUp(". l:buffer_nr .")<CR>"
+    if has_key(l:leader_cmd,'up')
+      execute ":nnoremap <silent> <Leader>". l:leader_cmd.up ." :call g:UserUp(". l:buffer_nr .")<CR>"
     endif
 
-    if has_key(l:usercmd,'down')
-      execute ":nnoremap <silent> <Leader>". l:usercmd.down ." :call g:UserDown(". l:buffer_nr .")<CR>"
+    if has_key(l:leader_cmd,'down')
+      execute ":nnoremap <silent> <Leader>". l:leader_cmd.down ." :call g:UserDown(". l:buffer_nr .")<CR>"
     endif
 
-    if has_key(l:usercmd,'close')
-      execute ":nnoremap <silent> <Leader>". l:usercmd.close ." :call g:UserClose(". l:buffer_nr .")<CR>"
+    if has_key(l:leader_cmd,'close')
+      execute ":nnoremap <silent> <Leader>". l:leader_cmd.close ." :call g:UserClose(". l:buffer_nr .")<CR>"
     endif
   endif
 endfunction
 
 function! s:ClearUserCommands(actwin)
-  if has_key(a:actwin.data, 'usercmd')
-    let l:usercmd = a:actwin.data.usercmd
+  if has_key(a:actwin.data, 'leader_cmd')
+    let l:leader_cmd = a:actwin.data.leader_cmd
 
-    if has_key(l:usercmd,'up')
-      execute "nunmap <silent> <Leader>". l:usercmd.up
+    if has_key(l:leader_cmd,'up')
+      execute "nunmap <silent> <Leader>". l:leader_cmd.up
     endif
 
-    if has_key(l:usercmd,'down')
-      execute "nunmap <silent> <Leader>". l:usercmd.down
+    if has_key(l:leader_cmd,'down')
+      execute "nunmap <silent> <Leader>". l:leader_cmd.down
     endif
 
-    if has_key(l:usercmd,'close')
-      execute "nunmap <silent> <Leader>". l:usercmd.close
+    if has_key(l:leader_cmd,'close')
+      execute "nunmap <silent> <Leader>". l:leader_cmd.close
     endif
   endif
 endfunction
 
 function! s:MakeOverrideCommands(actwin)
   " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
-  if has_key(a:actwin.data, 'builtincmd')
-    let l:builtincmd = a:actwin.data.builtincmd
+  if has_key(a:actwin.data, 'builtin_cmd')
+    let l:builtin_cmd = a:actwin.data.builtin_cmd
     let l:buffer_nr =  a:actwin.buffer_nr
 
-    if has_key(l:builtincmd,'cp')
+    if has_key(l:builtin_cmd,'cp')
       execute "cabbrev cp <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserUp(". l:buffer_nr .")' : 'cp')<CR>"
     endif
 
-    if has_key(l:builtincmd,'cn')
+    if has_key(l:builtin_cmd,'cn')
       execute "cabbrev cn <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserDown(". l:buffer_nr .")' : 'cn')<CR>"
     endif
 
-    if has_key(l:builtincmd,'ccl')
+    if has_key(l:builtin_cmd,'ccl')
       execute "cabbrev ccl <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserClose(". l:buffer_nr .")' : 'ccl')<CR>"
     endif
 
@@ -307,23 +374,24 @@ endfunction
 function! s:ClearOverrideCommands(actwin)
   " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
   " cunabbrev e
-  if has_key(a:actwin.data, 'builtincmd')
-    let l:builtincmd = a:actwin.data.builtincmd
+  if has_key(a:actwin.data, 'builtin_cmd')
+    let l:builtin_cmd = a:actwin.data.builtin_cmd
 
-    if has_key(l:builtincmd,'cp')
+    if has_key(l:builtin_cmd,'cp')
       execute "cunabbrev cp"
     endif
 
-    if has_key(l:builtincmd,'cn')
+    if has_key(l:builtin_cmd,'cn')
       execute "cunabbrev cn"
     endif
 
-    if has_key(l:builtincmd,'ccl')
+    if has_key(l:builtin_cmd,'ccl')
       execute "cunabbrev ccl"
     endif
   endif
 endfunction
 
+" MUST be called from local buffer
 " return [0, _] or [1, actwin]
 function! s:GetBufferActWin()
   if exists("b:buffer_nr") && has_key(s:actwin_buffer_nr_to_actwin, b:buffer_nr)
@@ -431,11 +499,47 @@ call s:LOG("DisplayLocal action=". l:action)
     let l:window =  l:data.window
     let l:winname =  l:data.winname
 
+    let l:window = l:actwin.data.window
+    if has_key(l:window, 'split')
+call s:LOG("DisplayLocal split")
+      let l:split = l:window.split
+
+      " save current values
+      let l:below = &splitbelow
+      let &splitbelow = l:split.below
+
+      let l:right = &splitright
+      let &splitright = l:split.right
+
+      let l:mode = l:split.mode
+      let l:size = l:split.size
+
+      execute l:size . l:mode .' '. l:winname
+
+      " restore values
+      let &splitbelow = l:below
+      let &splitright = l:right
+
+    elseif has_key(l:window, 'edit')
+call s:LOG("DisplayLocal edit")
+      let l:edit = l:window.edit
+      let l:mode = l:edit.mode
+      " execute l:mode .' '. l:winname
+      execute l:mode 
+
+    elseif has_key(l:window, 'tab')
+call s:LOG("DisplayLocal tab")
+      let l:tab = l:window.tab
+      let l:mode = l:tab.mode
+      execute l:mode .' '. l:winname
+
+    endif
+
+if 0 " WINDOW
     " save current values
     let l:split_below = &splitbelow
     let &splitbelow = l:window.split_below
 
-call s:LOG("DisplayLocal split")
     let l:split_right = &splitright
     let &splitright = l:window.split_right
 
@@ -452,6 +556,7 @@ call s:LOG("DisplayLocal split=" .l:split_size . l:split_mode .' '. l:winname)
     " restore values
     let &splitbelow = l:split_below
     let &splitright = l:split_right
+endif " WINDOW
 
     " save the buffer number
     let l:actwin.buffer_nr = bufnr(bufname("%"))
@@ -470,7 +575,9 @@ endif
 
 call s:LOG("Display actwin_buffer=". l:actwin.buffer_nr)
 
-  call s:SetAtEntry(1, l:actwin)
+" TODO REMOVE
+  " call s:SetAtEntry(1, l:actwin)
+  call s:EnterEntry(0, l:actwin)
 
 let s:buf_change = 1
 
@@ -571,8 +678,9 @@ call s:LOG("DisplayGlobal action=". l:action)
 
 call s:LOG("Display s:actwin_buffer=". s:actwin_buffer)
 
-  " execute ':sign place 2 line=1 name=aw buffer='. s:actwin_buffer
-  call s:SetAtEntry(1, l:actwin)
+" TODO REMOVE
+  " call s:SetAtEntry(1, l:actwin)
+  call s:EnterEntry(0, l:actwin)
 
 call s:LOG("Display BOTTOM")
 endfunction
@@ -602,6 +710,70 @@ call s:LOG("Adjust  TOP")
   if ! has_key(a:data, 'winname')
     let a:data['winname'] = s:winname_default
   endif
+
+  if ! has_key(a:data, 'keymappings')
+    let a:data['keymappings'] = {}
+  else
+    for [l:key, l:value] in items(a:data.keymappings)
+      if ! has_key(s:know_km_fns, l:key)
+        call s:ERROR('Adjust keymappings - bad key "'. l:key .'"')
+        continue
+      endif
+      if type(l:value) != type("") && type(l:value) != type([])
+        call s:ERROR('Adjust keymappings - for key "'. l:key .'" bad value type: '. type(l:value))
+      endif
+
+      unlet l:value
+    endfor
+  endif
+  if ! has_key(a:data, 'window')
+    let a:data['window'] = {
+      \ "split": {
+        \ "mode": s:split_mode_default,
+        \ "size": s:split_size_default,
+        \ "below": s:split_below_default,
+        \ "right": s:split_right_default 
+        \ }
+      \ }
+  else
+    let l:window = a:data.window
+    if has_key(l:window, 'split')
+      let l:split = l:window.split
+      if ! has_key(l:split, 'mode')
+        let l:split['mode'] = s:split_mode_default
+      endif
+      if ! has_key(l:split, 'size')
+        let l:split['size'] = s:split_size_default
+      endif
+      if ! has_key(l:split, 'below')
+        let l:split['below'] = s:split_below_default
+      endif
+      if ! has_key(l:split, 'right')
+        let l:split['right'] = s:split_right_default
+      endif
+
+    elseif has_key(l:window, 'edit')
+      let l:edit = l:window.edit
+      if ! has_key(l:edit, 'mode')
+        let l:edit['mode'] = s:edit_mode_default
+      endif
+
+    elseif has_key(l:window, 'tab')
+      let l:tab = l:window.tab
+      if ! has_key(l:tab, 'mode')
+        let l:tab['mode'] = s:tab_mode_default
+      endif
+
+    else
+      let l:window['split'] = {
+          \ "mode": s:split_mode_default,
+          \ "size": s:split_size_default,
+          \ "below": s:split_below_default,
+          \ "right": s:split_right_default 
+        \ }
+    endif
+  endif
+if 0 " WINDOW
   if ! has_key(a:data, 'window')
     let a:data['window'] = {
       \ "split_size": s:split_size_default,
@@ -623,6 +795,7 @@ call s:LOG("Adjust  TOP")
       let a:data.window['split_right'] = s:split_right_default
     endif
   endif
+endif " WINDOW
 
   if ! has_key(a:data, 'help')
     let a:data['help'] = {
@@ -673,7 +846,9 @@ function! s:Modify(org_data, new_data)
   "   abbreviation
   "   kinds
   if has_key(a:org_data, 'sign') && has_key(a:new_data, 'sign')
+    " TODO
   elseif has_key(a:org_data, 'sign') 
+    " TODO
   elseif has_key(a:new_data, 'sign') 
     " register sign
     let l:sign = a:new_data.sign
@@ -776,6 +951,7 @@ endfunction
 
 " return [lines...]
 function! s:CreateHelp(actwin)
+if 0 " HELP
   let l:help = a:actwin.data.help
 
   if l:help.do_show
@@ -800,12 +976,17 @@ function! s:CreateHelp(actwin)
     let a:actwin.first_buffer_line = 1
     return []
   endif
+endif " HELP
+
+  let a:actwin.first_buffer_line = 1
+  return []
 endfunction
 
 function! s:BuildDisplay(actwin)
   let l:Formatter = a:actwin.data.formatter
 
-  call setline(1, s:CreateHelp(a:actwin))
+  let a:actwin.first_buffer_line = 1
+  " call setline(1, s:CreateHelp(a:actwin))
 
   let l:linenos_to_entrynos = []
   let l:entrynos_to_linenos = []
@@ -904,7 +1085,7 @@ endfunction
 endif " NOT USED
 
 " return [found, line]
-function! s:GetLine(entrynos, actwin)
+function! s:GetEntry(entrynos, actwin)
   if a:entrynos < 0
     return [0, {}]
   else
@@ -920,14 +1101,8 @@ endfunction
 " Close {{{1
 " ============================================================================
 
-if 0 " CLOSE
-function! s:Close()
-call s:LOG("s:Close")
-  call vimside#actwin#Close()
-endfunction
-endif " CLOSE
-
 " TODO how to close from a different buffer???
+" MUST be called from local buffer
 function! vimside#actwin#Close()
 call s:LOG("vimside#actwin#Close TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -938,28 +1113,64 @@ call s:LOG("vimside#actwin#Close NOT FOUND BOTTOM")
   call s:Close(l:actwin)
 endfunction
 
+function! s:OnClose()
+call s:LOG("s:OnClose TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+call s:LOG("s:OnClose NOT FOUND BOTTOM")
+    return
+  endif
+  call s:Close(l:actwin)
+endfunction
+
 function! s:Close(actwin)
   let l:actwin = a:actwin
   call s:CloseAutoCmds(l:actwin)
   call s:BufLeave()
+call s:LOG("s:Close l:actwin.buffer_nr=". l:actwin.buffer_nr)
 
-  " If we needed to split the main window, close the split one.
-  if l:actwin.data.window.split_mode != ""
-    exec "wincmd c"
+  if s:is_entry_highlight && exists("b:actwin_sids")
+    " execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+    call s:HighlightClear(b:actwin_sids)
+    " wincmd p
   endif
 
   call s:ClearUserCommands(l:actwin)
   call s:ClearOverrideCommands(l:actwin)
 
-  exec "keepjumps silent b ". l:actwin.source_buffer_name
-  execute 'silent set colorcolumn='
+  " If we needed to split the main window, close the split one.
+  let l:window = l:actwin.data.window
+  if has_key(l:window, 'split')
+call s:LOG("s:Close split")
+execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+    exec "wincmd c"
+wincmd p
+  elseif has_key(l:window, 'edit')
+call s:LOG("s:Close edit")
+    let l:source_buffer_nr = l:actwin.source_buffer_nr
+call s:LOG("s:Close source_buffer_nr=". l:source_buffer_nr)
+    " exec "wincmd c"
+    execute "buffer ". l:source_buffer_nr
+    execute "bwipeout ". l:actwin.buffer_nr
+    " exec "e!#"
+  elseif has_key(l:window, 'tab')
+call s:LOG("s:Close tab")
+execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+    exec "e!#"
+wincmd p
+    " exec "wincmd c"
+  endif
+
+
+"  exec "keepjumps silent b ". l:actwin.source_buffer_name
+"  execute 'silent set colorcolumn='
 
 if s:is_sign_enabled
   call s:ClearSigns(l:actwin)
 endif
 
   " Clear any messages.
-  echo ""
+  "  echo ""
 
   unlet s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr]
 call s:LOG("Close BOTTOM")
@@ -969,19 +1180,23 @@ endfunction
 " KeyMappings: {{{1
 " ============================================================================
 
-function! s:ToggleHelp()
-call s:LOG("ToggleHelp TOP")
+" MUST be called from local buffer
+function! s:OnHelp()
+call s:LOG("OnHelp TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("ToggleHelp NOT FOUND BOTTOM")
+call s:LOG("OnHelp NOT FOUND BOTTOM")
     return
   endif
 
-  let l:help = l:actwin.help
+  let l:help = l:actwin.data.help
 
   if l:help.do_show
-    let l:help.is_open = !l:help.is_open
+      let l:help.is_open = !l:help.is_open
+      call vimside#actwin#DisplayLocal('testhelp', l:help.data)
+  endif
 
+if 0 " HELP
     setlocal modifiable
 
     " Save position.
@@ -998,25 +1213,51 @@ call s:LOG("ToggleHelp NOT FOUND BOTTOM")
     delmarks a
 
     setlocal nomodifiable
-  endif
-call s:LOG("ToggleHelp BOTTOM")
+endif " HELP
+
+call s:LOG("OnHelp BOTTOM")
 endfunction
 
+
+
+
+" MUST be called from local buffer
 " cursor entering given entrynos
-function! s:Enter(entrynos, actwin)
+function! s:EnterEntry(entrynos, actwin)
+call s:LOG("s:EnterEntry entrynos=". a:entrynos)
   call a:actwin.data.actions.enter(a:entrynos, a:actwin)
+
+  if s:is_entry_highlight
+    let l:entry = a:actwin.data.entries[a:entrynos]
+    let l:content = l:entry.content
+    let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines
+call s:LOG("s:EnterEntry line_start=". l:line_start)
+call s:LOG("s:EnterEntry nos_lines=". l:nos_lines)
+    let b:actwin_sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines)
+  endif
 endfunction
 
-function! s:Select(entrynos, actwin)
+" MUST be called from local buffer
+function! s:SelectEntry(entrynos, actwin)
   call a:actwin.data.actions.select(a:entrynos, a:actwin)
 endfunction
 
+" MUST be called from local buffer
 " cursor leaving given entrynos
-function! s:Leave(entrynos, actwin)
+function! s:LeaveEntry(entrynos, actwin)
+  if s:is_entry_highlight
+    call s:HighlightClear(b:actwin_sids)
+  endif
+
   call a:actwin.data.actions.leave(a:entrynos, a:actwin)
 endfunction
 
 
+
+
+
+" MUST be called from local buffer
 function! s:OnEnterMouse()
 call s:LOG("s:OnEnterMouse: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -1037,21 +1278,22 @@ call s:LOG("s:OnEnterMouse NOT FOUND BOTTOM")
 "call s:LOG("s:OnEnterMouse l:linenos=". l:linenos)
 if 1
   if l:entrynos != l:current_entrynos
-    call s:Leave(l:current_entrynos, l:actwin)
-    call s:Enter(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:current_entrynos, l:actwin)
+    call s:EnterEntry(l:entrynos, l:actwin)
     let l:actwin.current_line = l:linenos
   endif
 
 else
   if l:linenos != l:current_line
-    call s:Leave(l:current_line, l:actwin)
-    call s:Enter(l:linenos, l:actwin)
+    call s:LeaveEntry(l:current_line, l:actwin)
+    call s:EnterEntry(l:linenos, l:actwin)
     let l:actwin.current_line = l:linenos
   endif
 endif
 call s:LOG("s:OnEnterMouse: BOTTOM")
 endfunction
 
+" MUST be called from local buffer
 function! s:OnSelect()
 call s:LOG("s:OnSelect: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -1065,11 +1307,12 @@ call s:LOG("s:OnSelect NOT FOUND BOTTOM")
   let l:linenos = line(".")
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
 
-  call s:Select(l:entrynos, l:actwin)
+  call s:SelectEntry(l:entrynos, l:actwin)
   let l:actwin.current_line = l:linenos
 call s:LOG("s:OnSelect: BOTTOM")
 endfunction
 
+" MUST be called from local buffer
 function! s:OnUp()
 call s:LOG("s:OnUp: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -1087,7 +1330,7 @@ call s:LOG("s:OnUp NOT FOUND BOTTOM")
 
 call s:LOG("s:OnUp l:entrynos=". l:entrynos)
   if l:entrynos > 0
-    call s:Leave(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:actwin)
 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
@@ -1106,12 +1349,13 @@ if 0 " XXXX
     endif
 endif " XXXX
 
-    call s:Enter(l:entrynos-1, l:actwin)
+    call s:EnterEntry(l:entrynos-1, l:actwin)
     let l:actwin.current_line = l:new_linenos
   endif
 call s:LOG("s:OnUp: BOTTOM")
 endfunction
 
+" MUST be called from local buffer
 function! s:OnDown()
 call s:LOG("s:OnDown: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -1132,7 +1376,7 @@ call s:LOG("s:OnDown l:entrynos=". l:entrynos)
 call s:LOG("s:OnDown l:len=". l:len)
 
   if l:entrynos < l:len - 1
-    call s:Leave(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:actwin)
 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
@@ -1151,16 +1395,29 @@ if 0 " XXXX
     endif
 endif " XXXX
 
-    call s:Enter(l:entrynos+1, l:actwin)
+    call s:EnterEntry(l:entrynos+1, l:actwin)
     let l:actwin.current_line = l:new_linenos
   endif
 call s:LOG("s:OnDown: BOTTOM")
+endfunction
+
+function! s:OnLeft()
+call s:LOG("s:OnLeft: TOP")
+  call feedkeys('h', 'n')
+call s:LOG("s:OnLeft: BOTTOM")
+endfunction
+
+function! s:OnRight()
+call s:LOG("s:OnRight: TOP")
+  call feedkeys('l', 'n')
+call s:LOG("s:OnLeft: BOTTOM")
 endfunction
 
 " ============================================================================
 " User commands: {{{1
 " ============================================================================
 
+" Called from external buffer
 function! g:UserUp(buffer_nr)
 call s:LOG("g:UserUp: TOP")
   let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
@@ -1178,14 +1435,18 @@ call s:LOG("g:UserUp NOT FOUND BOTTOM")
 
   " let l:len = len(l:actwin.data.entries)
   if l:entrynos > 0
-    call s:Leave(l:entrynos, l:actwin)
+let s:buf_change = 0
+if 0 " MMMMM
+
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:LeaveEntry(l:entrynos, l:actwin)
+wincmd p
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
 
-    call s:Select(l:entrynos-1, l:actwin)
+    call s:SelectEntry(l:entrynos-1, l:actwin)
 
-let s:buf_change = 0
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1) | redraw'
     else
@@ -1193,6 +1454,33 @@ let s:buf_change = 0
     endif
     
     wincmd p
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:EnterEntry(l:entrynos-1, l:actwin)
+wincmd p
+else
+
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:LeaveEntry(l:entrynos, l:actwin)
+
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
+
+    call s:SelectEntry(l:entrynos-1, l:actwin)
+
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1)'
+      " call cursor((line(".")-1),1)
+    else
+      " call cursor((line(".")-l:nos_of_linenos),1)
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-'. l:nos_of_linenos .'),1)'
+    endif
+    
+    call s:EnterEntry(l:entrynos-1, l:actwin)
+redraw
+wincmd p
+
+endif " MMMMM
+
 let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
@@ -1201,6 +1489,7 @@ echo ""
 call s:LOG("g:UserUp: BOTTOM")
 endfunction
 
+" Called from external buffer
 function! g:UserDown(buffer_nr)
 call s:LOG("g:UserDown: TOP")
   let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
@@ -1218,14 +1507,17 @@ call s:LOG("g:UserDown NOT FOUND BOTTOM")
 
   let l:len = len(l:actwin.data.entries)
   if l:entrynos < l:len - 1
-    call s:Leave(l:entrynos, l:actwin)
+let s:buf_change = 0
+if 0 " MMMMM
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:LeaveEntry(l:entrynos, l:actwin)
+wincmd p
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
 
-    call s:Select(l:entrynos+1, l:actwin)
+    call s:SelectEntry(l:entrynos+1, l:actwin)
 
-let s:buf_change = 0
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1) | redraw'
     else
@@ -1233,6 +1525,35 @@ let s:buf_change = 0
     endif
 
     wincmd p
+
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:EnterEntry(l:entrynos+1, l:actwin)
+wincmd p
+else
+
+execute 'silent '. a:buffer_nr.'wincmd w'
+    call s:LeaveEntry(l:entrynos, l:actwin)
+
+    let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
+
+    call s:SelectEntry(l:entrynos+1, l:actwin)
+
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1)'
+      "call cursor((line(".")+1),1)
+    else
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+'. l:nos_of_linenos .'),1)'
+      "call cursor((line(".")+ l:nos_of_linenos),1)
+    endif
+
+
+    call s:EnterEntry(l:entrynos+1, l:actwin)
+redraw
+wincmd p
+
+endif " MMMMM
+
 let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
@@ -1241,6 +1562,7 @@ echo ""
 call s:LOG("g:UserDown: BOTTOM")
 endfunction
 
+" Called from external buffer
 function! g:UserClose(buffer_nr)
 call s:LOG("g:UserClose: TOP")
   let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
@@ -1303,14 +1625,14 @@ endfunction
 " ============================================================================
 
 function! s:FormatterDefault(lines, entry)
-  call s:LOG("s:FormatterDefault: TOP")
+" call s:LOG("s:FormatterDefault: TOP")
   let content = a:entry.content
   if type(content) == type([])
     call extend(a:lines, content)
   else
     call add(a:lines, string(content))
   endif
-  call s:LOG("s:FormatterDefault: BOTTOM")
+" call s:LOG("s:FormatterDefault: BOTTOM")
 endfunction
 
 " ============================================================================
@@ -1323,17 +1645,17 @@ endfunction
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
 function! s:EnterActionDoNothing(entrynos, actwin)
-  call s:LOG("s:EnterActionDoNothing: entrynos=". a:entrynos)
+call s:LOG("s:EnterActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:SelectActionDoNothing(entrynos, actwin)
-  call s:LOG("s:SelectActionDoNothing")
+call s:LOG("s:SelectActionDoNothing")
 endfunction
 
 " Do Nothing
 function! s:LeaveActionDoNothing(entrynos, actwin)
-  call s:LOG("s:LeaveActionDoNothing: entrynos=". a:entrynos)
+call s:LOG("s:LeaveActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " --------------------------------------------
@@ -1341,19 +1663,19 @@ endfunction
 " --------------------------------------------
 " Set Non-ActWin cursor file and postion but stay in ActWin
 function! s:EnterActionQuickFix(entrynos, actwin)
-  call s:LOG("s:EnterActionQuickFix: entrynos=". a:entrynos)
+call s:LOG("s:EnterActionQuickFix: entrynos=". a:entrynos)
   call s:SetAtEntry(a:entrynos, a:actwin)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:SelectActionQuickFix(entrynos, actwin)
-  call s:LOG("s:SelectActionQuickFix")
+call s:LOG("s:SelectActionQuickFix")
   call s:GoToEntry(a:entrynos, a:actwin)
 endfunction
 
 " Do Nothing
 function! s:LeaveActionQuickFix(entrynos, actwin)
-  call s:LOG("s:LeaveActionQuickFix: entrynos=". a:entrynos)
+call s:LOG("s:LeaveActionQuickFix: entrynos=". a:entrynos)
   call s:RemoveAtEntry(a:entrynos, a:actwin)
 endfunction
 
@@ -1380,7 +1702,7 @@ function! s:SetAtEntry(entrynos, actwin)
 let s:buf_change = 0
 call s:LOG("s:SetAtEntry: entrynos=". a:entrynos)
   " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
-  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:winnr = bufwinnr(l:file)
@@ -1397,9 +1719,11 @@ call s:LOG("s:SetAtEntry: colnos=". l:colnos)
         execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G'
       endif
 if s:is_colorline_enabled
-  let l:kind = l:entry.kind
-  let l:category = a:actwin.data.sign.category
-  call  vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, 'marker')
+  if has_key(a:actwin.data, 'sign')
+    let l:category = a:actwin.data.sign.category
+    let l:kind = l:entry.kind
+    call  vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, 'marker')
+  endif
 endif
 if s:is_colorcolumn_enabled
   if l:colnos > 0
@@ -1421,14 +1745,16 @@ function! s:RemoveAtEntry(entrynos, actwin)
 let s:buf_change = 0
 call s:LOG("s:RemoveAtEntry: entrynos=". a:entrynos)
   " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
-  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
 if s:is_colorline_enabled
-  let l:kind = l:entry.kind
-  let l:category = a:actwin.data.sign.category
-  call vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, l:kind)
+  if has_key(a:actwin.data, 'sign')
+    let l:category = a:actwin.data.sign.category
+    let l:kind = l:entry.kind
+    call vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, l:kind)
+  endif
 endif
   endif
 call s:LOG("s:RemoveAtEntry: BOTTOM")
@@ -1439,7 +1765,7 @@ endfunction
 function! s:GoToEntry(entrynos, actwin)
 call s:LOG("s:GoToEntry: entrynos=". a:entrynos)
   " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
-  let [l:found, l:entry] = s:GetLine(a:entrynos, a:actwin)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:winnr = bufwinnr(l:file)
@@ -1467,6 +1793,148 @@ endif
   endif
 endfunction
 
+" ============================================================================
+" Highlight Patterns: {{{1
+" ============================================================================
+
+function! s:GetOption(name)
+  let [found, value] = g:vimside.GetOption(a:name)
+  if ! found
+    throw "Option not found: '". a:name ."'
+  endif
+  return value
+endfunction
+
+function! s:Color_2_Number(color)
+  " is it a name
+  let rgbtxt = forms#color#util#ConvertName_2_RGB(a:color)
+  if rgbtxt == ''
+    let nos = forms#color#term#ConvertRGBTxt_2_Int(a:color)
+  else
+    let nos = forms#color#term#ConvertRGBTxt_2_Int(rgbtxt)
+  endif
+  return nos
+endfunction
+
+function! s:InitGui()
+  if &background == 'light' 
+    let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-light')
+
+  else " &background == 'dark'
+    let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-dark')
+  endif
+call s:LOG("s:InitGui: selectedColor=". selectedColor) 
+  execute "hi VimsideActWin_HL gui=bold guibg=#" . selectedColor
+endfunction
+
+function! s:InitCTerm()
+  if exists("g:vimside.plugins.forms") && g:vimside.plugins.forms
+    if &background == 'light' 
+      let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-light')
+    else " &background == 'dark'
+      let selectedColor = s:GetOption('tailor-expand-selection-highlight-color-dark')
+    endif
+call s:LOG("s:InitCTerm: selectedColor=". selectedColor) 
+    let selectedNumber = s:Color_2_Number(selectedColor)
+  else
+    if &background == 'light' 
+      " TODO: hardcode for now
+      let selectedNumber = '87'
+    else " &background == 'dark'
+      " TODO: hardcode for now
+      let selectedNumber = '87'
+    endif
+  endif
+call s:LOG("s:InitCTerm: selectedNumber=". selectedNumber) 
+  execute "hi VimsideActWin_HL cterm=bold ctermbg=" . selectedNumber
+endfunction
+
+function! s:InitializeHighlight()
+  if has("gui_running")
+    call s:InitGui()
+  else
+    call s:InitCTerm()
+  endif
+endfunction
+
+call s:InitializeHighlight()
+
+function! s:GetLinesMatchPatterns(line_start, line_end)
+  let lnum1 = a:line_start
+  let lnum2 = a:line_end
+  let endCol = 200
+
+  if lnum1 == lnum2
+    " one lines
+    " let range = [ '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol+2).'v' ]
+    let patterns = [ '\%'.lnum1.'l', '\%3c' ]
+  elseif lnum1+1 == lnum2
+    " two lines
+    " let pat1 = '\%'.lnum1.'l\%>'.(col1+1).'v.*\%<'.(endCol).'v'
+    " let pat1 = '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol).'v'
+    " let pat2 = '\%'.lnum2.'l\%>'.(1).'v.*\%<'.(endCol).'v'
+    let pat1 = '\%'.lnum1.'l'
+    let pat2 = '\%'.lnum2.'l'
+    let patterns = [ pat1, pat2 ]
+  else
+    " general case
+    let patterns = [ ]
+    let l:ln = lnum1
+    while l:ln <= lnum2
+      let pat = '\%'.l:ln.'l'
+      call add(patterns, pat)
+      let l:ln += 1
+    endwhile
+if 0 " XXX
+    let range_start = '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol).'v'
+    call add(range, range_start)
+
+    let range_mid =
+             \'\%>'.(0).'v'.
+             \'\%<'.(endCol).'v'.
+             \'\%>'.(lnum1).'l'.
+             \'\%<'.(lnum2).'l'.
+             \'.'
+    call add(range, range_mid)
+
+    let range_end = '\%'.lnum2.'l\%>'.(0).'v.*\%<'.(endCol).'v'
+    call add(range, range_end)
+endif " XXX
+
+  endif
+call s:LOG("s:GetLinesMatchPatterns: patterns=". string(patterns)) 
+  return patterns
+endfunction
+
+function! s:HighlightClear(sids)
+call s:LOG("s:HighlightClear: TOP") 
+call s:LOG("s:HighlightClear: clearing sids") 
+  for sid in a:sids
+call s:LOG("s:HighlightClear: clear sid=". sid) 
+    try
+      if matchdelete(sid) == -1
+call s:LOG("s:HighlightClear: failed to clear sid=". sid) 
+      endif
+    catch /.*/
+call s:LOG("ERROR s:HighlightClear: sid=". sid) 
+    endtry
+  endfor
+call s:LOG("s:HighlightClear: matches=". string(getmatches())) 
+call s:LOG("s:HighlightClear: BOTTOM") 
+endfunction
+
+" returns list of sids
+function! s:HighlightDisplay(line_start, line_end)
+call s:LOG("s:HighlightDisplay: line_start=". a:line_start .", line_end=". a:line_end) 
+  let patterns = s:GetLinesMatchPatterns(a:line_start, a:line_end)
+  let l:sids = []
+  for pattern in patterns
+    let sid = matchadd("VimsideActWin_HL", pattern)
+call s:LOG("s:HighlightDisplay: sid=". sid) 
+    call add(l:sids, sid)
+  endfor
+  return l:sids
+endfunction
 
 " ============================================================================
 " Test: {{{1
@@ -1485,9 +1953,9 @@ function! vimside#actwin#TestQuickFix()
 "     split_below: 1
 "     split_right: 0
 "   }
-"   builtincmd: {
+"   builtin_cmd: {
 "   }
-"   usercmd: {
+"   leader_cmd: {
 "   }
 "   sign: {
 "     category: QuickFix
@@ -1498,15 +1966,59 @@ function! vimside#actwin#TestQuickFix()
 "     file:
 "     line:
 "     kind: 'error'
+"
+  let l:helpdata = {
+        \ "title": "Help Window",
+        \ "winname": "Help",
+        \ "window": {
+          \ "edit": {
+          \ "mode": "enew"
+          \ }
+        \ },
+        \ "keymappings": {
+          \ "close": "q"
+        \ },
+        \ "actions": {
+          \ "enter": function("s:EnterActionDoNothing"),
+          \ "select": function("s:SelectActionDoNothing"),
+          \ "leave": function("s:LeaveActionDoNothing")
+        \ },
+        \ "entries": [
+        \  { 'content': [
+            \  "This is some help text",
+            \  "  Help text line 1",
+            \  "  Help text line 2",
+            \  "  Help text line 3",
+            \  "  Help text line 4",
+            \  "  Help text line 5",
+            \  "  Help text line 6"
+            \ ],
+          \ "kind": "info"
+          \ }
+        \ ]
+    \ }
+
   let l:data = {
         \ "title": "Test Window",
         \ "winname": "Test",
-        \ "builtincmd": {
+        \ "help": {
+          \ "do_show": 1,
+          \ "data": l:helpdata,
+        \ },
+        \ "keymappings": {
+          \ "help": "<F1>",
+          \ "select": [ "<CR>", "<2-LeftMouse>"],
+          \ "enter_mouse": "<LeftMouse> <LeftMouse>",
+          \ "down": [ "j", "<Down>"],
+          \ "up": [ "k", "<Up>"],
+          \ "close": "q"
+        \ },
+        \ "builtin_cmd": {
           \ "cp": "cp",
           \ "cn": "cn",
           \ "ccl": "ccl"
         \ },
-        \ "usercmd": {
+        \ "leader_cmd": {
           \ "up": "cp",
           \ "down": "cn",
           \ "close": "ccl"
@@ -1621,6 +2133,35 @@ function! vimside#actwin#TestQuickFix()
           \ }
         \ ]
     \ }
-  call vimside#actwin#DisplayLocal('test', l:data)
+  call vimside#actwin#DisplayLocal('testqf', l:data)
 
+endfunction
+
+function! vimside#actwin#TestHelp()
+  let l:data = {
+        \ "title": "Help Window",
+        \ "winname": "Help",
+        \ "keymappings": {
+          \ "close": "q"
+        \ },
+        \ "actions": {
+          \ "enter": function("s:EnterActionDoNothing"),
+          \ "select": function("s:SelectActionDoNothing"),
+          \ "leave": function("s:LeaveActionDoNothing")
+        \ },
+        \ "entries": [
+        \  { 'content': [
+            \  "This is some help text",
+            \  "  Help text line 1",
+            \  "  Help text line 2",
+            \  "  Help text line 3",
+            \  "  Help text line 4",
+            \  "  Help text line 5",
+            \  "  Help text line 6"
+            \ ],
+          \ "kind": "info"
+          \ }
+        \ ]
+    \ }
+  call vimside#actwin#DisplayLocal('testhelp', l:data)
 endfunction

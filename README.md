@@ -33,6 +33,9 @@ unit/regression tests in the future.
 Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. 
 
+ActWin's behavior is defined by the client that creates an instance.
+Added ActWin client-defined help and keymappings.
+
 Added multi-line content support.
 
 As an Option, the actwin will allow for an
