@@ -18,8 +18,17 @@ function! s:LOG(msg)
   silent echo "INFO: ". a:msg
   execute "redir END"
 endfunction
+function! s:ERROR(msg)
+  execute "redir >> ". "AW_LOG"
+  silent echo "ERROR: ". a:msg
+  execute "redir END"
+endfunction
 
 "TODO
+" toggle: km uc bc
+" user_cmds
+" builtin cmds
+"
 " remove entry, list of entries
 " help: 
 " active row/column highlight 
@@ -74,6 +83,7 @@ let s:buf_change = 1
 "   linenos_to_entrynos: []
 "   entrynos_to_linenos: []
 "   entrynos_to_nos_of_lines: []
+"   is_info_open: 0
 "   data {
 "   }
 " }
@@ -107,7 +117,10 @@ let s:buf_change = 1
 "     split_below: 1
 "     split_right: 0
 "   }
-"   keymappings: {
+"   key_map: {
+"     key_map_data: ""
+"     builtin_cmd_data: ""
+"     user_cmd_data: ""
 "     help: ""
 "     select: []
 "     select_mouse: []
@@ -118,7 +131,7 @@ let s:buf_change = 1
 "   }
 "   builtin_cmd: {
 "   }
-"   leader_cmd: {
+"   user_cmd: {
 "     up: cp
 "     down: cn
 "     close: ccl
@@ -170,8 +183,11 @@ let s:buf_change = 1
 "
 
 " functions that can be bound to keys (key mappings)
-" keymappings
-let s:know_km_fns = {
+" key_map
+let s:key_map_defs = {
+      \ "key_map_data": [ "ToggleKeyMapInfo", "Display key-map info" ],
+      \ "builtin_cmd_data": [ "ToggleBuiltinCmdInfo", "Display builtin cmd info" ],
+      \ "user_cmd_data": [ "ToggleUserCmdOnInfo", "Display user cmd info" ],
       \ "help": [ "OnHelp", "Display help" ],
       \ "select": [ "OnSelect", "Select current line" ],
       \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
@@ -182,6 +198,19 @@ let s:know_km_fns = {
       \ "close": [ "OnClose", "Close window"]
       \ }
 
+" mappings to override existing builtin commands
+let s:builtin_cmd_defs = {
+      \ "cp": [ "UserUp", "Move up to next line" ],
+      \ "cn": [ "UserDown", "Move down to next line" ],
+      \ "ccl": [ "UserClose", "Close window" ]
+      \ }
+
+" mappings to define mapleader based commands
+let s:user_cmd_defs = {
+      \ "up": [ "UserUp", "Move up to next line" ],
+      \ "down": [ "UserDown", "Move down to next line" ],
+      \ "close": [ "UserClose", "Close window" ]
+      \ }
 
 " globals = {
 "   type1: actwin1
@@ -258,9 +287,9 @@ endfunction
 
 function! s:MakeKeyMappings(actwin)
 
-  for [l:key, l:value] in items(a:actwin.data.keymappings)
-    if has_key(s:know_km_fns, l:key)
-      let [l:fn, l:txt] = s:know_km_fns[l:key]
+  for [l:key, l:value] in items(a:actwin.data.key_map)
+    if has_key(s:key_map_defs, l:key)
+      let [l:fn, l:txt] = s:key_map_defs[l:key]
       if type(l:value) == type("")
         execute 'nnoremap <script> <silent> <buffer> '. l:value .' :call <SID>'. l:fn .'()<CR>'
       elseif type(l:value) == type([])
@@ -314,38 +343,38 @@ function! s:CloseAutoCmds(actwin)
 endfunction
 
 function! s:MakeUserCommands(actwin)
-  if has_key(a:actwin.data, 'leader_cmd')
-    let l:leader_cmd = a:actwin.data.leader_cmd
+  if has_key(a:actwin.data, 'user_cmd')
+    let l:user_cmd = a:actwin.data.user_cmd
     let l:buffer_nr =  a:actwin.buffer_nr
 
-    if has_key(l:leader_cmd,'up')
-      execute ":nnoremap <silent> <Leader>". l:leader_cmd.up ." :call g:UserUp(". l:buffer_nr .")<CR>"
+    if has_key(l:user_cmd,'up')
+      execute ":nnoremap <silent> <Leader>". l:user_cmd.up ." :call g:UserUp(". l:buffer_nr .")<CR>"
     endif
 
-    if has_key(l:leader_cmd,'down')
-      execute ":nnoremap <silent> <Leader>". l:leader_cmd.down ." :call g:UserDown(". l:buffer_nr .")<CR>"
+    if has_key(l:user_cmd,'down')
+      execute ":nnoremap <silent> <Leader>". l:user_cmd.down ." :call g:UserDown(". l:buffer_nr .")<CR>"
     endif
 
-    if has_key(l:leader_cmd,'close')
-      execute ":nnoremap <silent> <Leader>". l:leader_cmd.close ." :call g:UserClose(". l:buffer_nr .")<CR>"
+    if has_key(l:user_cmd,'close')
+      execute ":nnoremap <silent> <Leader>". l:user_cmd.close ." :call g:UserClose(". l:buffer_nr .")<CR>"
     endif
   endif
 endfunction
 
 function! s:ClearUserCommands(actwin)
-  if has_key(a:actwin.data, 'leader_cmd')
-    let l:leader_cmd = a:actwin.data.leader_cmd
+  if has_key(a:actwin.data, 'user_cmd')
+    let l:user_cmd = a:actwin.data.user_cmd
 
-    if has_key(l:leader_cmd,'up')
-      execute "nunmap <silent> <Leader>". l:leader_cmd.up
+    if has_key(l:user_cmd,'up')
+      execute "nunmap <silent> <Leader>". l:user_cmd.up
     endif
 
-    if has_key(l:leader_cmd,'down')
-      execute "nunmap <silent> <Leader>". l:leader_cmd.down
+    if has_key(l:user_cmd,'down')
+      execute "nunmap <silent> <Leader>". l:user_cmd.down
     endif
 
-    if has_key(l:leader_cmd,'close')
-      execute "nunmap <silent> <Leader>". l:leader_cmd.close
+    if has_key(l:user_cmd,'close')
+      execute "nunmap <silent> <Leader>". l:user_cmd.close
     endif
   endif
 endfunction
@@ -434,6 +463,7 @@ call s:LOG("DisplayLocal TOP")
         let l:uid = s:NextUID()
         let l:actwin = {
             \ "is_global": 0,
+            \ "is_info_open": 0,
             \ "source_buffer_nr": l:source_buffer_nr,
             \ "source_buffer_name": l:source_buffer_name,
             \ "tag": a:tag,
@@ -449,6 +479,7 @@ call s:LOG("DisplayLocal TOP")
       let l:uid = s:NextUID()
       let l:actwin = {
           \ "is_global": 0,
+          \ "is_info_open": 0,
           \ "source_buffer_nr": l:source_buffer_nr,
           \ "source_buffer_name": l:source_buffer_name,
           \ "tag": a:tag,
@@ -464,6 +495,7 @@ call s:LOG("DisplayLocal TOP")
     let l:uid = s:NextUID()
     let l:actwin = {
         \ "is_global": 0,
+        \ "is_info_open": 0,
         \ "source_buffer_nr": l:source_buffer_nr,
         \ "source_buffer_name": l:source_buffer_name,
         \ "tag": a:tag,
@@ -711,21 +743,54 @@ call s:LOG("Adjust  TOP")
     let a:data['winname'] = s:winname_default
   endif
 
-  if ! has_key(a:data, 'keymappings')
-    let a:data['keymappings'] = {}
+  if ! has_key(a:data, 'key_map')
+    let a:data['key_map'] = {}
   else
-    for [l:key, l:value] in items(a:data.keymappings)
-      if ! has_key(s:know_km_fns, l:key)
-        call s:ERROR('Adjust keymappings - bad key "'. l:key .'"')
+    for [l:key, l:value] in items(a:data.key_map)
+      if ! has_key(s:key_map_defs, l:key)
+        call s:ERROR('Adjust key_map - bad key "'. l:key .'"')
         continue
       endif
       if type(l:value) != type("") && type(l:value) != type([])
-        call s:ERROR('Adjust keymappings - for key "'. l:key .'" bad value type: '. type(l:value))
+        call s:ERROR('Adjust key_map - for key "'. l:key .'" bad value type: '. type(l:value))
       endif
 
       unlet l:value
     endfor
   endif
+
+  if ! has_key(a:data, 'builtin_cmd')
+    let a:data['builtin_cmd'] = {}
+  else
+    for [l:key, l:value] in items(a:data.builtin_cmd)
+      if ! has_key(s:builtin_cmd_defs, l:key)
+        call s:ERROR('Adjust builtin_cmd - bad key "'. l:key .'"')
+        continue
+      endif
+      if type(l:value) != type("") && type(l:value) != type([])
+        call s:ERROR('Adjust builtin_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
+      endif
+
+      unlet l:value
+    endfor
+  endif
+
+  if ! has_key(a:data, 'user_cmd')
+    let a:data['user_cmd'] = {}
+  else
+    for [l:key, l:value] in items(a:data.user_cmd)
+      if ! has_key(s:user_cmd_defs, l:key)
+        call s:ERROR('Adjust user_cmd - bad key "'. l:key .'"')
+        continue
+      endif
+      if type(l:value) != type("") && type(l:value) != type([])
+        call s:ERROR('Adjust user_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
+      endif
+
+      unlet l:value
+    endfor
+  endif
+
   if ! has_key(a:data, 'window')
     let a:data['window'] = {
       \ "split": {
@@ -949,8 +1014,63 @@ function! s:LoadDisplay(actwin)
  setlocal nomodifiable
 endfunction
 
+function! s:CreateToggleInfo(data_element, key_value, defs, actwin)
+  let a:actwin.is_info_open = ! a:actwin.is_info_open 
+
+  if ! a:actwin.is_info_open
+    let a:actwin.first_buffer_line = 1
+call s:LOG("CreateToggleInfo lines=[]")
+    return []
+  endif
+
+  let l:data = a:actwin.data
+  let l:elements = l:data[a:data_element]
+
+  let l:lines = []
+  let l:size = 25
+
+  let l:head = "Key Map Info (toggle: '". a:key_value ."')"
+  call add(l:lines, l:head)
+  call add(l:lines, repeat('-', len(l:head)))
+
+
+  for l:key in sort(keys(l:elements))
+    let l:value = l:elements[l:key]
+    let [l:fn, l:txt] = a:defs[l:key]
+    if type(l:value) == type("")
+      let l:head =  l:key ." '". l:value . "'"
+      let l:len = len(l:head)
+      call add(l:lines, l:head. repeat(' ', l:size - l:len) .': '. l:txt)
+      
+    elseif type(l:value) == type([])
+      let l:vs = ""
+      for l:v in l:value
+        if l:vs == ""
+          let l:vs = "'". l:v . "'"
+        else
+          let l:vs .= " '". l:v . "'"
+        endif
+      endfor
+      let l:head =  l:key ." ". l:vs
+
+      let l:len = len(l:head)
+      call add(l:lines, l:head. repeat(' ', l:size - l:len) .': '. l:txt)
+
+    endif
+
+    unlet l:value
+  endfor
+  call add(l:lines, "")
+
+call s:LOG("CreateToggleInfo lines=". string(l:lines))
+  let a:actwin.first_buffer_line = len(lines) + 1
+  return l:lines
+
+endfunction
+
 " return [lines...]
 function! s:CreateHelp(actwin)
+
 if 0 " HELP
   let l:help = a:actwin.data.help
 
@@ -985,6 +1105,7 @@ endfunction
 function! s:BuildDisplay(actwin)
   let l:Formatter = a:actwin.data.formatter
 
+  " TODO
   let a:actwin.first_buffer_line = 1
   " call setline(1, s:CreateHelp(a:actwin))
 
@@ -1218,6 +1339,49 @@ endif " HELP
 call s:LOG("OnHelp BOTTOM")
 endfunction
 
+" MUST be called from local buffer
+function! s:ToggleKeyMapInfo()
+  call s:Toggle('key_map', 'key_map_data', 'key_map', s:key_map_defs)
+endfunction
+
+function! s:ToggleBuiltinCmdInfo()
+  call s:Toggle('key_map', 'builtin_cmd_data', 'builtin_cmd', s:builtin_cmd_defs)
+endfunction
+
+function! s:ToggleUserCmdOnInfo()
+  call s:Toggle('key_map', 'user_cmd_data', 'user_cmd', s:user_cmd_defs)
+endfunction
+
+function! s:Toggle(cmdiname, key_name, data_element, defs)
+call s:LOG("Toggle TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+call s:LOG("Toggle NOT FOUND BOTTOM")
+    return
+  endif
+
+  let l:key_value = l:actwin.data[a:cmdiname][a:key_name]
+
+  setlocal modifiable
+
+  " Save position.
+  normal! ma
+    
+  " Remove existing help
+  if (l:actwin.first_buffer_line > 1)
+call s:LOG("Toggle delete")
+    exec "keepjumps 1,".(l:actwin.first_buffer_line - 1) "d _"
+  endif
+    
+  call append(0, s:CreateToggleInfo(a:data_element, l:key_value, a:defs, l:actwin))
+
+  silent! normal! g`a
+  delmarks a
+
+  setlocal nomodifiable
+  redraw
+call s:LOG("Toggle BOTTOM")
+endfunction
 
 
 
@@ -1231,7 +1395,9 @@ call s:LOG("s:EnterEntry entrynos=". a:entrynos)
     let l:entry = a:actwin.data.entries[a:entrynos]
     let l:content = l:entry.content
     let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines
+    " TODO fix
+    " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
 call s:LOG("s:EnterEntry line_start=". l:line_start)
 call s:LOG("s:EnterEntry nos_lines=". l:nos_lines)
     let b:actwin_sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines)
@@ -1266,11 +1432,27 @@ call s:LOG("s:OnEnterMouse NOT FOUND BOTTOM")
     return
   endif
 
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:current_line = l:actwin.current_line
+    let l:current_entrynos = l:actwin.linenos_to_entrynos[l:current_line-1]
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+
+    if l:entrynos != l:current_entrynos
+      call s:LeaveEntry(l:current_entrynos, l:actwin)
+      call s:EnterEntry(l:entrynos, l:actwin)
+      let l:actwin.current_line = l:linenos
+    endif
+  endif
+
+if 0 " XXXXXX
   let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
   let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
 
   let l:current_line = l:actwin.current_line
-  let l:linenos = line(".")
+  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
   let l:current_entrynos = l:linenos_to_entrynos[l:current_line-1]
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
 
@@ -1290,6 +1472,8 @@ else
     let l:actwin.current_line = l:linenos
   endif
 endif
+endif " XXXXXX
+
 call s:LOG("s:OnEnterMouse: BOTTOM")
 endfunction
 
@@ -1302,13 +1486,28 @@ call s:LOG("s:OnSelect NOT FOUND BOTTOM")
     return
   endif
 
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+
+    call s:SelectEntry(l:entrynos, l:actwin)
+    let l:actwin.current_line = l:linenos
+  else
+    call feedkeys("\<CR>", 'n')
+  endif
+
+if 0 " XXXXXX
   let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
 
-  let l:linenos = line(".")
+  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
 
   call s:SelectEntry(l:entrynos, l:actwin)
   let l:actwin.current_line = l:linenos
+endif " XXXXXX
+
 call s:LOG("s:OnSelect: BOTTOM")
 endfunction
 
@@ -1321,10 +1520,32 @@ call s:LOG("s:OnUp NOT FOUND BOTTOM")
     return
   endif
 
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+  let l:line = line(".")
 
-  let l:linenos = line(".")
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnUp l:entrynos=". l:entrynos)
+
+    call s:LeaveEntry(l:entrynos, l:actwin)
+
+    let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos-1] 
+    let l:new_linenos = l:actwin.entrynos_to_linenos[l:entrynos-1] 
+    if l:nos_of_linenos == 1
+      call feedkeys('k', 'n')
+    else
+      call feedkeys(repeat('k', l:nos_of_linenos), 'n')
+    endif
+
+
+    call s:EnterEntry(l:entrynos-1, l:actwin)
+    let l:actwin.current_line = l:new_linenos
+  else
+    call feedkeys('k', 'n')
+  endif
+
+if 0 " XXXXXX
+  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
   let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
 
@@ -1340,18 +1561,12 @@ call s:LOG("s:OnUp l:entrynos=". l:entrynos)
       call feedkeys(repeat('k', l:nos_of_linenos), 'n')
     endif
 
-if 0 " XXXX
-    let l:delta = l:linenos - l:new_linenos
-    if l:delta == 1
-      call feedkeys('k', 'n')
-    else
-      call feedkeys(repeat('k', l:delta), 'n')
-    endif
-endif " XXXX
 
     call s:EnterEntry(l:entrynos-1, l:actwin)
     let l:actwin.current_line = l:new_linenos
   endif
+endif " XXXXXX
+
 call s:LOG("s:OnUp: BOTTOM")
 endfunction
 
@@ -1364,12 +1579,41 @@ call s:LOG("s:OnDown NOT FOUND BOTTOM")
     return
   endif
 
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+  let l:line = line(".")
 
-  let l:linenos = line(".")
-  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnDown l:entrynos=". l:entrynos)
+
+    let l:len = len(l:entrynos_to_linenos)
+call s:LOG("s:OnDown l:len=". l:len)
+    if l:entrynos < l:len - 1
+      call s:LeaveEntry(l:entrynos, l:actwin)
+
+      let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos] 
+      let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+      if l:nos_of_linenos == 1
+        call feedkeys('j', 'n')
+      else
+        call feedkeys(repeat('j', l:nos_of_linenos), 'n')
+      endif
+
+
+      call s:EnterEntry(l:entrynos+1, l:actwin)
+      let l:actwin.current_line = l:new_linenos
+    endif
+
+  else
+    call feedkeys('j', 'n')
+  endif
+
+if 0 " XXXXXX
+  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+
+  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
+  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnDown l:entrynos=". l:entrynos)
 
   let l:len = len(l:entrynos_to_linenos)
@@ -1378,7 +1622,7 @@ call s:LOG("s:OnDown l:len=". l:len)
   if l:entrynos < l:len - 1
     call s:LeaveEntry(l:entrynos, l:actwin)
 
-    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
+    let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos] 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
     if l:nos_of_linenos == 1
       call feedkeys('j', 'n')
@@ -1386,18 +1630,12 @@ call s:LOG("s:OnDown l:len=". l:len)
       call feedkeys(repeat('j', l:nos_of_linenos), 'n')
     endif
 
-if 0 " XXXX
-    let l:delta = l:new_linenos - l:linenos
-    if l:delta == 0
-      call feedkeys('j', 'n')
-    else
-      call feedkeys(repeat('j', l:delta-1), 'n')
-    endif
-endif " XXXX
 
     call s:EnterEntry(l:entrynos+1, l:actwin)
     let l:actwin.current_line = l:new_linenos
   endif
+endif " XXXXXX
+
 call s:LOG("s:OnDown: BOTTOM")
 endfunction
 
@@ -1436,6 +1674,7 @@ call s:LOG("g:UserUp NOT FOUND BOTTOM")
   " let l:len = len(l:actwin.data.entries)
   if l:entrynos > 0
 let s:buf_change = 0
+
 if 0 " MMMMM
 
 execute 'silent '. a:buffer_nr.'wincmd w'
@@ -1447,6 +1686,7 @@ wincmd p
 
     call s:SelectEntry(l:entrynos-1, l:actwin)
 
+" TODO fix - l:actwin.first_buffer_line
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1) | redraw'
     else
@@ -1467,6 +1707,15 @@ execute 'silent '. a:buffer_nr.'wincmd w'
 
     call s:SelectEntry(l:entrynos-1, l:actwin)
 
+" TODO fix - l:actwin.first_buffer_line
+    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
+    else
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'-'. l:nos_of_linenos .'),1)'
+    endif
+
+if 0
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1)'
       " call cursor((line(".")-1),1)
@@ -1474,6 +1723,7 @@ execute 'silent '. a:buffer_nr.'wincmd w'
       " call cursor((line(".")-l:nos_of_linenos),1)
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-'. l:nos_of_linenos .'),1)'
     endif
+endif
     
     call s:EnterEntry(l:entrynos-1, l:actwin)
 redraw
@@ -1518,6 +1768,7 @@ wincmd p
 
     call s:SelectEntry(l:entrynos+1, l:actwin)
 
+" TODO fix - l:actwin.first_buffer_line
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1) | redraw'
     else
@@ -1539,6 +1790,15 @@ execute 'silent '. a:buffer_nr.'wincmd w'
 
     call s:SelectEntry(l:entrynos+1, l:actwin)
 
+" TODO fix - l:actwin.first_buffer_line
+    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    if l:nos_of_linenos == 1
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'+1),1)'
+    else
+      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'+'. l:nos_of_linenos .'),1)'
+    endif
+
+if 0
     if l:nos_of_linenos == 1
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1)'
       "call cursor((line(".")+1),1)
@@ -1546,6 +1806,7 @@ execute 'silent '. a:buffer_nr.'wincmd w'
       execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+'. l:nos_of_linenos .'),1)'
       "call cursor((line(".")+ l:nos_of_linenos),1)
     endif
+endif
 
 
     call s:EnterEntry(l:entrynos+1, l:actwin)
@@ -1867,7 +2128,8 @@ function! s:GetLinesMatchPatterns(line_start, line_end)
   if lnum1 == lnum2
     " one lines
     " let range = [ '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol+2).'v' ]
-    let patterns = [ '\%'.lnum1.'l', '\%3c' ]
+    " let patterns = [ '\%'.lnum1.'l', '\%3c' ]
+    let patterns = [ '\%'.lnum1.'l' ]
   elseif lnum1+1 == lnum2
     " two lines
     " let pat1 = '\%'.lnum1.'l\%>'.(col1+1).'v.*\%<'.(endCol).'v'
@@ -1955,7 +2217,7 @@ function! vimside#actwin#TestQuickFix()
 "   }
 "   builtin_cmd: {
 "   }
-"   leader_cmd: {
+"   user_cmd: {
 "   }
 "   sign: {
 "     category: QuickFix
@@ -1975,7 +2237,7 @@ function! vimside#actwin#TestQuickFix()
           \ "mode": "enew"
           \ }
         \ },
-        \ "keymappings": {
+        \ "key_map": {
           \ "close": "q"
         \ },
         \ "actions": {
@@ -2005,7 +2267,10 @@ function! vimside#actwin#TestQuickFix()
           \ "do_show": 1,
           \ "data": l:helpdata,
         \ },
-        \ "keymappings": {
+        \ "key_map": {
+          \ "key_map_data": "<F2>",
+          \ "builtin_cmd_data": "<F3>",
+          \ "user_cmd_data": "<F4>",
           \ "help": "<F1>",
           \ "select": [ "<CR>", "<2-LeftMouse>"],
           \ "enter_mouse": "<LeftMouse> <LeftMouse>",
@@ -2018,7 +2283,7 @@ function! vimside#actwin#TestQuickFix()
           \ "cn": "cn",
           \ "ccl": "ccl"
         \ },
-        \ "leader_cmd": {
+        \ "user_cmd": {
           \ "up": "cp",
           \ "down": "cn",
           \ "close": "ccl"
@@ -2141,7 +2406,7 @@ function! vimside#actwin#TestHelp()
   let l:data = {
         \ "title": "Help Window",
         \ "winname": "Help",
-        \ "keymappings": {
+        \ "key_map": {
           \ "close": "q"
         \ },
         \ "actions": {

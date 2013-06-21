@@ -34,6 +34,10 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. 
 
 ActWin's behavior is defined by the client that creates an instance.
+
+Added key_map, builtin_cmd and user_cmd "fasthelp" toggle displays
+using <F2> <F3> and <F4>.
+
 Added ActWin client-defined help and keymappings.
 
 Added multi-line content support.
