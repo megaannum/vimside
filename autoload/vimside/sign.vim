@@ -14,7 +14,6 @@ let s:ERROR = function("vimside#log#error")
 
 
 let s:is_sign_init = 0
-let s:is_toggle = 0
 let s:sign_toggle_name = 'empty'
 
 let s:categories = {}
@@ -131,7 +130,8 @@ call s:LOG("s:loadCategory cmd=". cmd)
     let l:toggle = l:cdata.toggle
     let l:category = l:cdata.category
     execute ":nmap <silent> <Leader>" . l:toggle . " :call vimside#sign#Toggle('". l:category ."')<CR>"
-call s:LOG("s:loadCategory: mapping make")
+    let l:cdata['is_toggle'] = 0
+call s:LOG("s:loadCategory: toggle mapping made")
   endif
 
 call s:LOG("s:loadCategory: BOTTOM")
@@ -204,22 +204,24 @@ call s:LOG("vimside#sign#PlaceMany: category=". a:category)
   let l:abbrev = cdata.abbreviation
   let ids = l:cdata.ids
 
-  for dic in a:line_tag_List 
-    let l:line = dic["line"]
+  for l:dic in a:line_tag_List 
+    let l:line = l:dic["line"]
     let l:id = s:GetNextId()
     let l:name = l:abbrev .'_'. a:kind
 
-    if has_key(dic, 'file')
-      let l:file = dic["file"]
+    if has_key(l:dic, 'file') && bufnr(l:dic.file) > 0
+      let l:file = l:dic.file
 
       let l:file = fnamemodify(l:file, ":p")
       execute ':sign place '. l:id .' line='. l:line .' name='. l:name .' file='. l:file
       let ids[l:id] = ['file', l:file, l:line, a:kind]
-    elseif has_key(dic, 'buffer')
-      let l:buffer = dic["buffer"]
+
+    elseif has_key(l:dic, 'buffer')
+      let l:buffer = l:dic["buffer"]
 
       execute ':sign place '. l:id .' line='. l:line .' name='. l:name .' buffer='. l:buffer
       let ids[l:id] = ["buffer", l:buffer, l:line, a:kind]
+
     else
       throw "Missing sign place file/buffer"
     endif
@@ -317,21 +319,25 @@ endfunction
 " ==============================================
 
 " return 0 or 1
-function! vimside#sign#Toggle(category)
+function! vimside#sign#Toggle(category, ...)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
     return 0
   endif
 
   let l:cdata = s:categories[a:category]
-  if ! has_key(l:cdata, 'toggle')
-    return 1
+  if has_key(l:cdata, 'is_toggle')
+    let l:cdata.is_toggle = ! l:cdata.is_toggle
+    let l:is_toggle = l:cdata.is_toggle
+  elseif a:0 > 0
+    let l:is_toggle = a:1
+  else
+    return 0
   endif
 
   let l:ids = l:cdata.ids
-  let s:is_toggle = !s:is_toggle
 
-  if s:is_toggle
+  if l:is_toggle
     let l:name = s:sign_toggle_name 
     for [id, finfo] in items(l:ids)
       let [tagtype, tag, ln, kind] = finfo
@@ -352,7 +358,7 @@ function! vimside#sign#Toggle(category)
 endfunction
 
 " return 0 or 1
-function! vimside#sign#ToggleKind(category, kind)
+function! vimside#sign#ToggleKind(category, kind, ...)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
     return 0
@@ -361,15 +367,25 @@ function! vimside#sign#ToggleKind(category, kind)
   let l:cdata = s:categories[a:category]
   let l:kinds = l:cdata['kinds']
 
-  if ! has_key(l:kinds, a:kind) 
+  if has_key(l:kinds, a:kind) 
+    let l:kind = l:kinds[a:kind]
+  else
     echo "Bad Kind: ". a:kind ."for Category " . a.category
     return 0
   endif
 
-  let l:ids = l:cdata.ids
-  let s:is_toggle = !s:is_toggle
+  if has_key(l:kind, 'is_toggle')
+    let l:kind.is_toggle = ! l:kind.is_toggle
+    let l:is_toggle = l:kind.is_toggle
+  elseif a:0 > 0
+    let l:is_toggle = a:1
+  else
+    return 0
+  endif
 
-  if s:is_toggle
+  let l:ids = l:cdata.ids
+
+  if l:is_toggle
     let l:name = s:sign_toggle_name 
     for [id, finfo] in items(l:ids)
       let [tagtype, tag, ln, kind] = finfo
@@ -535,6 +551,7 @@ function! vimside#sign#ClearCategory(category)
     echo "Bad Category: ". a:category
     return 0
   endif
+
   let l:cdata = s:categories[a:category]
   let l:ids = l:cdata.ids
 
@@ -545,6 +562,7 @@ function! vimside#sign#ClearCategory(category)
     unlet tag
   endfor
 
+  " Remove the toggle key map if it exists
   if has_key(l:cdata, 'toggle')
     let l:toggle = l:cdata.toggle
     let l:key = g:mapleader . l:toggle
@@ -554,7 +572,6 @@ call s:LOG("vimside#sign#ClearCategory: mapping=" . l:key ."<CR>")
 call s:LOG("vimside#sign#ClearCategory: mapping removed")
       execute ":nunmap ". l:key
     endif
-    let s:is_toggle = 0
   endif
 
   return 1
@@ -591,6 +608,19 @@ function! vimside#sign#ClearAll()
   for [name, cdata] in items(s:categories)
     let cdata['ids'] = {}
   endfor
+endfunction
+
+" return 0 or 1
+function! vimside#sign#RemoveCategory(category)
+  if ! has_key(s:categories, a:category)
+    echo "Bad Category: ". a:category
+    return 0
+  endif
+
+  call vimside#sign#ClearCategory(a:category)
+
+  unlet s:categories[a:category]
+  return 1
 endfunction
 
 " Initialize debug module

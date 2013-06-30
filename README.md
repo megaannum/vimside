@@ -35,6 +35,10 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Generalized the definition and create to both "source" and "actwin"
+commands (keymap cmds, leader-based cmds and the redefinition of
+existing cmds using abbreviations).
+
 Added key_map, builtin_cmd and user_cmd "fasthelp" toggle displays
 using \<F2>, \<F3> and \<F4>.
 

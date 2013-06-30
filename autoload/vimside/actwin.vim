@@ -25,9 +25,91 @@ function! s:ERROR(msg)
 endfunction
 
 "TODO
+"06/27
+"   colors
+"   split Foo/Bar cn from Foo to Bar
+"   Foo cn in actwin??
+"   fix BufLeave/BufEnter s:buf_change to == 0 and ++ --
+"   goto first/last/enter
+"
+"
+
 " toggle: km uc bc
-" user_cmds
+" leader_cmds
 " builtin cmds
+"
+" toggle
+"   is_XXX_enable
+"   is_XXX_on
+"
+"   source window
+"     sign
+"       category
+"       different kinds
+"       current position
+"     entity
+"       row (sign or highlight)
+"       column (color or highlight)
+"       row & column
+"       cursorcolumn
+"   actwin window
+"     cursorline cl
+"     text highlight th
+"     lines highlight lh
+
+" term= bold underline reverse italic standout NONE
+" cterm= bold underline reverse italic standout NONE
+" ctermfg
+" ctermbg
+" gui=
+" guifg=
+" guibg=
+
+if 0 " HHHHHHHHHHHHHHH
+"display": {
+  "source": {
+    "sign": {
+      "toggle": "ss"
+      "current_line": "sscl"
+      "is_enable": 0
+      "is_on": 0
+      "kinds": {
+        "kind1": {
+          "toggle": "sskind1"
+          "is_enable": 0
+          "is_on": 0
+          "text": "EE",
+          "texthl": "Todo",
+          "linehl": "Error",
+        }
+        ...
+      }
+"       row (sign or highlight)
+"       column (color or highlight)
+"       row & column
+"       cursorcolumn
+    }
+    "entity": {
+    }
+  }
+  "window": {
+    "cursor_line": {
+        "toggle": "wcl"
+        "is_enable": 0
+        "is_on": 0
+    }
+    "highlight_line": {
+        "toggle": "whl"
+        "is_enable": 0
+        "is_on": 0
+        "all_text": 0
+        "is_full": 0
+    }
+    }
+  }
+}
+endif " HHHHHHHHHHHHHHH
+
 "
 " remove entry, list of entries
 " help: 
@@ -52,18 +134,27 @@ endfunction
 "options
 "row/column display
 
-let s:is_colorline_enabled = 0
 let s:is_colorcolumn_enabled = 0
-let s:is_sign_enabled = 0
-let s:is_cursorline = 0
-let s:is_entry_highlight = 1
+let s:is_sign_colorline_enabled = 0
+let s:is_sign_enabled = 1
+if 0 " EHL
+let s:is_entry_highlight = 0
+endif " EHL
 
-let s:split_mode_default = "new"
+let s:split_cmd_default = "new"
 let s:split_size_default = "10"
 let s:split_below_default = 1
 let s:split_right_default = 0
-let s:edit_mode_default = "enew"
-let s:tab_mode_default = "tabnew"
+let s:edit_cmd_default = "enew"
+let s:tab_cmd_default = "tabnew"
+
+let s:dislay_window_cursor_line_toggle_default = "wcl"
+let s:dislay_window_cursor_line_is_on_default = 0
+let s:dislay_window_highlight_line_toggle_default = "whl"
+let s:dislay_window_highlight_line_is_on_default = 0
+let s:dislay_window_highlight_line_is_full_default = 0
+let s:dislay_window_highlight_line_all_text_default = 0
+
 
 let s:winname_default="ActWin"
 
@@ -73,9 +164,12 @@ let s:buf_change = 1
 
 " actwin {
 "   is_global: 0,
+"   is_info_open: 0,
+"   source_win_nr: source_win_nr
 "   source_buffer_nr: source_buffer_nr
 "   source_buffer_name: source_buffer_name
 "   buffer_nr
+"   win_nr
 "   uid: unique id
 "   tag: tag
 "   first_buffer_line: first_buffer_line
@@ -99,28 +193,22 @@ let s:buf_change = 1
 "   }
 "   window: {
 "     split; {
-"        mode: "new"
+"        cmd: "new"
 "        size: "10"
 "        below: 1
 "        right: 0
 "     }
 "     edit: {
-"        mode: "enew"
+"        cmd: "enew"
 "     }
 "     tab: {
-"        mode: "tabnew"
+"        cmd: "tabnew"
 "     }
 "   }
-"   window: {
-"     split_size: "10"
-"     split_mode: "new"
-"     split_below: 1
-"     split_right: 0
-"   }
 "   key_map: {
-"     key_map_data: ""
-"     builtin_cmd_data: ""
-"     user_cmd_data: ""
+"     window_key_map_show: ""
+"     source_builtin_cmd_show: ""
+"     source_leader_cmd_show: ""
 "     help: ""
 "     select: []
 "     select_mouse: []
@@ -131,7 +219,7 @@ let s:buf_change = 1
 "   }
 "   builtin_cmd: {
 "   }
-"   user_cmd: {
+"   leader_cmd: {
 "     up: cp
 "     down: cn
 "     close: ccl
@@ -184,14 +272,16 @@ let s:buf_change = 1
 
 " functions that can be bound to keys (key mappings)
 " key_map
-let s:key_map_defs = {
-      \ "key_map_data": [ "ToggleKeyMapInfo", "Display key-map info" ],
-      \ "builtin_cmd_data": [ "ToggleBuiltinCmdInfo", "Display builtin cmd info" ],
-      \ "user_cmd_data": [ "ToggleUserCmdOnInfo", "Display user cmd info" ],
+let s:cmds_window_defs = {
+      \ "window_key_map_show": [ "ToggleWindowKeyMapInfo", "Display window key-map info" ],
+      \ "source_builtin_cmd_show": [ "ToggleSourceBuiltinCmdInfo", "Display source builtin cmd info" ],
+      \ "source_leader_cmd_show": [ "ToggleSourceLeaderCmdInfo", "Display source leader cmd info" ],
       \ "help": [ "OnHelp", "Display help" ],
       \ "select": [ "OnSelect", "Select current line" ],
       \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
       \ "down": [ "OnDown", "Move down to next line" ],
+      \ "top": [ "OnTop", "Move to top line" ],
+      \ "bottom": [ "OnBottom", "Move to bottom line" ],
       \ "up": [ "OnUp", "Move up to next line" ],
       \ "left": [ "OnLeft", "Move left one postion" ],
       \ "right": [ "OnRight", "Move right one postion" ],
@@ -199,17 +289,13 @@ let s:key_map_defs = {
       \ }
 
 " mappings to override existing builtin commands
-let s:builtin_cmd_defs = {
-      \ "cp": [ "UserUp", "Move up to next line" ],
-      \ "cn": [ "UserDown", "Move down to next line" ],
-      \ "ccl": [ "UserClose", "Close window" ]
-      \ }
-
-" mappings to define mapleader based commands
-let s:user_cmd_defs = {
-      \ "up": [ "UserUp", "Move up to next line" ],
-      \ "down": [ "UserDown", "Move down to next line" ],
-      \ "close": [ "UserClose", "Close window" ]
+let s:cmds_source_defs = {
+      \ "first": [ "g:VimsideActWinFirst", "Goto first line" ],
+      \ "last": [ "g:VimsideActWinLast", "Goto last line" ],
+      \ "previous": [ "g:VimsideActWinUp", "Move up to next line" ],
+      \ "next": [ "g:VimsideActWinDown", "Move down to next line" ],
+      \ "enter": [ "g:VimsideActWinEnter", "Enter window" ],
+      \ "close": [ "g:VimsideActWinClose", "Close window" ]
       \ }
 
 " globals = {
@@ -243,6 +329,10 @@ let s:uid_to_actwin = {}
 " maps actwin buffer number to actwin
 let s:actwin_buffer_nr_to_actwin = {}
 
+" --------------------------------------------
+" Util
+" --------------------------------------------
+
 
 let s:next_uid = 0
 function! s:NextUID()
@@ -251,172 +341,11 @@ function! s:NextUID()
   return l:uid
 endfunction
 
-function! s:Initialize(actwin)
-call s:LOG("Initialize TOP")
-
-  call s:MakeKeyMappings(a:actwin)
-  call s:MakeAutoCmds(a:actwin)
-  call s:MakeUserCommands(a:actwin)
-  call s:MakeOverrideCommands(a:actwin)
-
-  " TODO is this needed ... only when using the same window
-  " how about using enter/leave buffer autocmd maps instead
-  let b:insertmode = &insertmode
-  let b:showcmd = &showcmd
-  let b:cpo = &cpo
-  let b:report = &report
-  let b:list = &list
-  set noinsertmode
-  set noshowcmd
-  set cpo&vim
-  let &report = 10000
-  set nolist
-
-  set bufhidden=hide
-
-  setlocal nonumber
-  setlocal foldcolumn=0
-  setlocal nofoldenable
-  if s:is_cursorline
-    setlocal cursorline
-  endif
-  setlocal nospell
-  setlocal nobuflisted
-call s:LOG("Initialize BOTTOM")
-endfunction
-
-function! s:MakeKeyMappings(actwin)
-
-  for [l:key, l:value] in items(a:actwin.data.key_map)
-    if has_key(s:key_map_defs, l:key)
-      let [l:fn, l:txt] = s:key_map_defs[l:key]
-      if type(l:value) == type("")
-        execute 'nnoremap <script> <silent> <buffer> '. l:value .' :call <SID>'. l:fn .'()<CR>'
-      elseif type(l:value) == type([])
-        for l:v in l:value
-          execute 'nnoremap <script> <silent> <buffer> '. l:v .' :call <SID>'. l:fn .'()<CR>'
-        endfor
-      endif
-    endif
-
-    unlet l:value
-  endfor
-
-
-
-if 0 " KM
-  " These are created as "buffer" maps so they disappear
-  " when the buffer is deleted.
-  nnoremap <script> <silent> <buffer> <F1> :call <SID>OnHelp()<CR>
-"  nnoremap <script> <silent> <buffer> <TAB> :call <SID>ForwardAtion()<CR>
-"  nnoremap <script> <silent> <buffer> <C-n> :call <SID>ForwardAtion()<CR>
-"  nnoremap <script> <silent> <buffer> <S-TAB> :call <SID>BackwardAtion()<CR>
-"  nnoremap <script> <silent> <buffer> <C-p> :call <SID>BackwardAtion()<CR>
-
-  nnoremap <script> <silent> <buffer> <2-LeftMouse> :call <SID>OnSelect()<CR>
-  nnoremap <script> <silent> <buffer> <CR> :call <SID>OnSelect()<CR>
-
-  " nnoremap <script> <buffer> <LeftMouse> <LeftMouse> :echo v:mouse_lnum<CR>
-  nnoremap <script> <silent> <buffer> <LeftMouse> <LeftMouse> :call <SID>OnEnterMouse()<CR>
-  nnoremap <script> <silent> <buffer> <Down> :call <SID>OnDown()<CR>
-  nnoremap <script> <silent> <buffer> j :call <SID>OnDown()<CR>
-  nnoremap <script> <silent> <buffer> <Up> :call <SID>OnUp()<CR>
-  nnoremap <script> <silent> <buffer> k :call <SID>OnUp()<CR>
-
-  nnoremap <script> <silent> <buffer> q :call vimside#actwin#Close()<CR>
-  nnoremap <script> <silent> <buffer> :q :call vimside#actwin#Close()<CR>
-endif " KM
-endfunction
-
-function! s:MakeAutoCmds(actwin)
-  augroup ACT_WIN_AUTOCMD
-    autocmd!
-    autocmd BufEnter <buffer> call s:BufEnter()
-    autocmd BufLeave <buffer> call s:BufLeave()
-  augroup END
-endfunction
-
-function! s:CloseAutoCmds(actwin)
-  augroup ACT_WIN_AUTOCMD
-    autocmd!
-  augroup END
-endfunction
-
-function! s:MakeUserCommands(actwin)
-  if has_key(a:actwin.data, 'user_cmd')
-    let l:user_cmd = a:actwin.data.user_cmd
-    let l:buffer_nr =  a:actwin.buffer_nr
-
-    if has_key(l:user_cmd,'up')
-      execute ":nnoremap <silent> <Leader>". l:user_cmd.up ." :call g:UserUp(". l:buffer_nr .")<CR>"
-    endif
-
-    if has_key(l:user_cmd,'down')
-      execute ":nnoremap <silent> <Leader>". l:user_cmd.down ." :call g:UserDown(". l:buffer_nr .")<CR>"
-    endif
-
-    if has_key(l:user_cmd,'close')
-      execute ":nnoremap <silent> <Leader>". l:user_cmd.close ." :call g:UserClose(". l:buffer_nr .")<CR>"
-    endif
-  endif
-endfunction
-
-function! s:ClearUserCommands(actwin)
-  if has_key(a:actwin.data, 'user_cmd')
-    let l:user_cmd = a:actwin.data.user_cmd
-
-    if has_key(l:user_cmd,'up')
-      execute "nunmap <silent> <Leader>". l:user_cmd.up
-    endif
-
-    if has_key(l:user_cmd,'down')
-      execute "nunmap <silent> <Leader>". l:user_cmd.down
-    endif
-
-    if has_key(l:user_cmd,'close')
-      execute "nunmap <silent> <Leader>". l:user_cmd.close
-    endif
-  endif
-endfunction
-
-function! s:MakeOverrideCommands(actwin)
-  " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
-  if has_key(a:actwin.data, 'builtin_cmd')
-    let l:builtin_cmd = a:actwin.data.builtin_cmd
-    let l:buffer_nr =  a:actwin.buffer_nr
-
-    if has_key(l:builtin_cmd,'cp')
-      execute "cabbrev cp <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserUp(". l:buffer_nr .")' : 'cp')<CR>"
-    endif
-
-    if has_key(l:builtin_cmd,'cn')
-      execute "cabbrev cn <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserDown(". l:buffer_nr .")' : 'cn')<CR>"
-    endif
-
-    if has_key(l:builtin_cmd,'ccl')
-      execute "cabbrev ccl <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:UserClose(". l:buffer_nr .")' : 'ccl')<CR>"
-    endif
-
-  endif
-endfunction
-
-function! s:ClearOverrideCommands(actwin)
-  " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
-  " cunabbrev e
-  if has_key(a:actwin.data, 'builtin_cmd')
-    let l:builtin_cmd = a:actwin.data.builtin_cmd
-
-    if has_key(l:builtin_cmd,'cp')
-      execute "cunabbrev cp"
-    endif
-
-    if has_key(l:builtin_cmd,'cn')
-      execute "cunabbrev cn"
-    endif
-
-    if has_key(l:builtin_cmd,'ccl')
-      execute "cunabbrev ccl"
-    endif
+function! s:Redraw()
+  if has('gui_running') || has('gui_macvim')
+    redraw
+  else
+    redraw!
   endif
 endfunction
 
@@ -438,12 +367,353 @@ function! s:GetActWin(buffer_nr)
   endif
 endfunction
 
+" --------------------------------------------
+" Initialize
+" --------------------------------------------
+
+" MUST be called from local buffer
+function! s:Initialize(actwin)
+call s:LOG("Initialize TOP")
+call s:LOG("Initialize current buffer=". bufnr("%"))
+
+  " must create handlers first
+  call s:CreateFileHandlers(a:actwin)
+
+  call s:MakeAutoCmds(a:actwin)
+  call s:MakeCmds(a:actwin)
+
+
+  " TODO is this needed ... only when using the same window
+  " how about using enter/leave buffer autocmd maps instead
+  let b:insertmode = &insertmode
+  let b:showcmd = &showcmd
+  let b:cpo = &cpo
+  let b:report = &report
+  let b:list = &list
+  set noinsertmode
+  set noshowcmd
+  set cpo&vim
+  let &report = 10000
+  set nolist
+
+  set bufhidden=hide
+
+  setlocal nonumber
+  setlocal foldcolumn=0
+  setlocal nofoldenable
+  setlocal nospell
+  setlocal nobuflisted
+call s:LOG("Initialize current buffer=". bufnr("%"))
+call s:LOG("Initialize BOTTOM")
+endfunction
+
+" --------------------------------------------
+" Source File Handlers
+" --------------------------------------------
+
+function! s:CreateFileHandlers(actwin)
+  let a:actwin.files = []
+  let a:actwin.handlers = {}
+  let a:actwin.handlers['onnewfile'] = []
+  let a:actwin.handlers['onclose'] = []
+endfunction
+
+function! s:CallNewFileHandlers(actwin, file)
+  call add(a:actwin.files, a:file)
+
+  for l:Handler in a:actwin.handlers.onnewfile
+    call l:Handler(a:actwin, a:file)
+  endfor
+endfunction
+
+function! s:CallOnCloseHandlers(actwin)
+  let l:onclosehandlers = a:actwin.handlers.onclose
+  for l:file in a:actwin.files
+    for l:Handler in l:onclosehandlers
+      call l:Handler(a:actwin, l:file)
+    endfor
+  endfor
+  let a:actwin.files = []
+endfunction
+
+" --------------------------------------------
+" Auto Cmds
+" --------------------------------------------
+
+" MUST be called from local buffer
+function! s:MakeAutoCmds(actwin)
+call s:LOG("MakeAutoCmds current buffer=". bufnr("%"))
+  augroup ACT_WIN_AUTOCMD
+    " autocmd!
+    
+    execute "autocmd BufEnter <buffer=". bufnr("%") ."> call s:BufEnter()"
+    execute "autocmd BufLeave <buffer=". bufnr("%") ."> call s:BufLeave()"
+
+    execute "autocmd BufWinEnter <buffer=". bufnr("%") ."> call s:BufWinEnter()"
+    execute "autocmd BufWinLeave <buffer=". bufnr("%") ."> call s:BufWinLeave()"
+  augroup END
+endfunction
+
+function! s:CloseAutoCmds(actwin)
+call s:LOG("CloseAutoCmds close buffer=". a:actwin.buffer_nr)
+call s:LOG("CloseAutoCmds current buffer=". bufnr("%"))
+ augroup ACT_WIN_AUTOCMD
+   execute "autocmd! *  <buffer=". a:actwin.buffer_nr .">"
+ augroup END
+endfunction
+
+" --------------------------------------------
+" Cmds
+" --------------------------------------------
+
+" MUST be called from local buffer
+function! s:MakeCmds(actwin)
+  call s:MakeWindowKeyMappings(a:actwin)
+  call s:MakeWindowLeaderCommands(a:actwin)
+  call s:MakeWindowBuiltinCommands(a:actwin)
+
+  call s:MakeSourceKeyMappings(a:actwin)
+  call s:MakeSourceLeaderCommands(a:actwin)
+  call s:MakeSourceBuiltinCommands(a:actwin)
+endfunction
+
+" MUST be called from local buffer
+function! s:ClearCmds(actwin)
+  call s:ClearSourceKeyMappings(a:actwin)
+  call s:ClearSourceLeaderCommands(a:actwin)
+  call s:ClearSourceBuiltinCommands(a:actwin)
+endfunction
+
+" MUST be called from local buffer
+function! s:MakeWindowKeyMappings(actwin)
+  if ! empty(a:actwin.data.cmds.window.key_map)
+    for [l:key, l:value] in items(a:actwin.data.cmds.window.key_map)
+      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
+      for l:v in l:value
+        execute 'nnoremap <script> <silent> <buffer> '. l:v .' :call <SID>'. l:fn .'()<CR>'
+      endfor
+    endfor
+  endif
+endfunction
+
+" MUST be called from local buffer
+function! s:MakeWindowLeaderCommands(actwin)
+  if ! empty(a:actwin.data.cmds.window.leader_cmd)
+    for [l:key, l:value] in items(a:actwin.data.cmds.window.leader_cmd)
+      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
+      for l:v in l:value
+        execute ":nnoremap <silent> <buffer> <Leader>". l:v ." :call ". l:fn ."()<CR>"
+      endfor
+    endfor
+  endif
+endfunction
+
+" MUST be called from local buffer
+function! s:MakeWindowBuiltinCommands(actwin)
+  if ! empty(a:actwin.data.cmds.window.builtin_cmd)
+    for [l:key, l:value] in items(a:actwin.data.cmds.window.builtin_cmd)
+      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
+      for l:v in l:value
+        execute "cabbrev <silent> <buffer> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."()' : '". l:v ."')<CR>"
+      endfor
+    endfor
+  endif
+endfunction
+
+
+
+
+" MUST be called from local buffer
+function! s:MakeSourceKeyMappings(actwin)
+  if ! empty(a:actwin.data.cmds.source.key_map)
+    let l:leader_cmd = a:actwin.data.cmds.source.key_map
+    let l:buffer_nr =  a:actwin.buffer_nr
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for [l:key, l:value] in items(l:leader_cmd)
+        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+        for l:v in l:value
+          execute ":nnoremap <silent> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
+        endfor
+      endfor
+
+    else
+      let s:buf_change = 0
+      execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+        for [l:key, l:value] in items(l:leader_cmd)
+          let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+          for l:v in l:value
+            execute ":nnoremap <silent> <buffer> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
+          endfor
+        endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      let s:buf_change = 1
+    endif
+  endif
+endfunction
+
+function! s:ClearSourceKeyMappings(actwin)
+  if ! empty(a:actwin.data.cmds.source.key_map)
+    let s:buf_change = 0
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for l:value in values(a:actwin.data.cmds.source.key_map)
+        for l:v in l:value
+          execute "nunmap ". l:v
+        endfor
+      endfor
+    else
+      " execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+      execute ':buffer '. a:actwin.source_buffer_nr
+      for l:value in values(a:actwin.data.cmds.source.key_map)
+        for l:v in l:value
+          execute "nunmap <buffer> ". l:v
+        endfor
+      endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+    endif
+    let s:buf_change = 1
+  endif
+endfunction
+
+" MUST be called from local buffer
+function! s:MakeSourceLeaderCommands(actwin)
+  if ! empty(a:actwin.data.cmds.source.leader_cmd)
+    let l:leader_cmd = a:actwin.data.cmds.source.leader_cmd
+    let l:buffer_nr =  a:actwin.buffer_nr
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for [l:key, l:value] in items(l:leader_cmd)
+        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+        for l:v in l:value
+          execute ":nnoremap <silent> <Leader>". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
+        endfor
+      endfor
+
+    else
+      let s:buf_change = 0
+      execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+call s:LOG("s:MakeSourceLeaderCommands: win_rn=". a:actwin.source_win_nr )
+        for [l:key, l:value] in items(l:leader_cmd)
+          let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+          for l:v in l:value
+call s:LOG("s:MakeSourceLeaderCommands: key=". l:key .", value=" . l:v)
+            execute ":nnoremap <buffer> <silent> <Leader>". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
+          endfor
+        endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      let s:buf_change = 1
+    endif
+  endif
+endfunction
+
+" MUST be called from local buffer
+function! s:ClearSourceLeaderCommands(actwin)
+  if ! empty(a:actwin.data.cmds.source.leader_cmd)
+    let s:buf_change = 0
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for l:value in values(a:actwin.data.cmds.source.leader_cmd)
+        for l:v in l:value
+          execute ":nunmap <silent> <Leader>". l:v
+        endfor
+      endfor
+    else
+      " execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+      execute ':buffer '. a:actwin.source_buffer_nr
+call s:LOG("s:ClearSourceLeaderCommands: win_rn=". a:actwin.source_win_nr )
+      for l:value in values(a:actwin.data.cmds.source.leader_cmd)
+        for l:v in l:value
+call s:LOG("s:ClearSourceLeaderCommands: value=" . l:v)
+          execute ":nunmap <buffer> <Leader>". l:v
+        endfor
+      endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+    endif
+    let s:buf_change = 1
+  endif
+endfunction
+
+
+
+function! s:MakeSourceBuiltinCommands(actwin)
+  " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
+  if ! empty(a:actwin.data.cmds.source.builtin_cmd)
+    let l:builtin_cmd = a:actwin.data.cmds.source.builtin_cmd
+    let l:buffer_nr =  a:actwin.buffer_nr
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for [l:key, l:value] in items(l:builtin_cmd)
+        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+        for l:v in l:value
+          execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
+        endfor
+      endfor
+
+    else
+      let s:buf_change = 0
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      for [l:key, l:value] in items(l:builtin_cmd)
+        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+        for l:v in l:value
+        execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
+        endfor
+      endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      let s:buf_change = 1
+    endif
+  endif
+endfunction
+
+" MUST be called from local buffer
+function! s:ClearSourceBuiltinCommands(actwin)
+  " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
+  " cunabbrev e
+  if ! empty(a:actwin.data.cmds.source.builtin_cmd)
+    let s:buf_change = 0
+    let l:builtin_cmd = a:actwin.data.cmds.source.builtin_cmd
+    let l:is_global = a:actwin.is_global
+
+    if l:is_global
+      for l:value in values(l:builtin_cmd)
+        for l:v in l:value
+          execute "cunabbrev ". l:v
+        endfor
+      endfor
+
+    else
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      for l:value in values(l:builtin_cmd)
+        for l:v in l:value
+          execute "cunabbrev ". l:v
+        endfor
+      endfor
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+
+    endif
+    let s:buf_change = 1
+  endif
+endfunction
+
+
+
+" --------------------------------------------
+" Main entry function
+" --------------------------------------------
 
 function! vimside#actwin#DisplayLocal(tag, data)
 call s:LOG("DisplayLocal TOP")
   let l:data = deepcopy(a:data)
   let l:source_buffer_name = bufname("%")
   let l:source_buffer_nr = bufnr("%")
+  let l:source_win_nr = bufwinnr(l:source_buffer_nr)
+call s:LOG("DisplayLocal l:source_buffer_nr=". l:source_buffer_nr)
+call s:LOG("DisplayLocal l:source_win_nr=". l:source_win_nr)
 
   if has_key(s:locals, l:source_buffer_nr)
     let l:bnr_dic = s:locals[l:source_buffer_nr]
@@ -464,6 +734,7 @@ call s:LOG("DisplayLocal TOP")
         let l:actwin = {
             \ "is_global": 0,
             \ "is_info_open": 0,
+            \ "source_win_nr": l:source_win_nr,
             \ "source_buffer_nr": l:source_buffer_nr,
             \ "source_buffer_name": l:source_buffer_name,
             \ "tag": a:tag,
@@ -480,6 +751,7 @@ call s:LOG("DisplayLocal TOP")
       let l:actwin = {
           \ "is_global": 0,
           \ "is_info_open": 0,
+          \ "source_win_nr": l:source_win_nr,
           \ "source_buffer_nr": l:source_buffer_nr,
           \ "source_buffer_name": l:source_buffer_name,
           \ "tag": a:tag,
@@ -496,6 +768,7 @@ call s:LOG("DisplayLocal TOP")
     let l:actwin = {
         \ "is_global": 0,
         \ "is_info_open": 0,
+        \ "source_win_nr": l:source_win_nr,
         \ "source_buffer_nr": l:source_buffer_nr,
         \ "source_buffer_name": l:source_buffer_name,
         \ "tag": a:tag,
@@ -543,10 +816,10 @@ call s:LOG("DisplayLocal split")
       let l:right = &splitright
       let &splitright = l:split.right
 
-      let l:mode = l:split.mode
+      let l:cmd = l:split.cmd
       let l:size = l:split.size
 
-      execute l:size . l:mode .' '. l:winname
+      execute l:size . l:cmd .' '. l:winname
 
       " restore values
       let &splitbelow = l:below
@@ -555,43 +828,27 @@ call s:LOG("DisplayLocal split")
     elseif has_key(l:window, 'edit')
 call s:LOG("DisplayLocal edit")
       let l:edit = l:window.edit
-      let l:mode = l:edit.mode
-      " execute l:mode .' '. l:winname
-      execute l:mode 
+      let l:cmd = l:edit.cmd
+call s:LOG("DisplayLocal l:cmd=". l:cmd)
+call s:LOG("DisplayLocal current buffer=". bufnr("%"))
+      " execute l:cmd .' '. l:winname
+      execute l:cmd 
+call s:LOG("DisplayLocal current buffer=". bufnr("%"))
 
     elseif has_key(l:window, 'tab')
 call s:LOG("DisplayLocal tab")
       let l:tab = l:window.tab
-      let l:mode = l:tab.mode
-      execute l:mode .' '. l:winname
+      let l:cmd = l:tab.cmd
+      execute l:cmd .' '. l:winname
 
     endif
 
-if 0 " WINDOW
-    " save current values
-    let l:split_below = &splitbelow
-    let &splitbelow = l:window.split_below
+    " save the buffer and window number
+    let l:actwin.buffer_nr = bufnr("%")
+    let l:actwin.win_nr = bufwinnr(l:actwin.buffer_nr)
+    let b:return_win_nr = l:source_win_nr 
 
-    let l:split_right = &splitright
-    let &splitright = l:window.split_right
-
-    let l:split_mode = l:window.split_mode
-    let l:split_size = l:window.split_size
-
-    " do split mode
-    if l:split_mode != ""
-      " exe 'keepalt '. l:split_mode
-call s:LOG("DisplayLocal split=" .l:split_size . l:split_mode .' '. l:winname)
-      execute l:split_size . l:split_mode .' '. l:winname
-    endif
-
-    " restore values
-    let &splitbelow = l:split_below
-    let &splitright = l:split_right
-endif " WINDOW
-
-    " save the buffer number
-    let l:actwin.buffer_nr = bufnr(bufname("%"))
+call s:LOG("DisplayLocal l:actwin.buffer_nr=". l:actwin.buffer_nr)
     let b:buffer_nr = l:actwin.buffer_nr
     let s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr] = l:actwin
 
@@ -600,18 +857,18 @@ let s:buf_change = 0
   endif
 
   call s:LoadDisplay(l:actwin)
-if s:is_sign_enabled
-  call s:DefineSigns(l:actwin)
-  call s:WriteSigns(l:actwin)
-endif
+
+  call s:DisplayDefine(l:actwin)
+
+  call s:DisplayEnable(l:actwin)
 
 call s:LOG("Display actwin_buffer=". l:actwin.buffer_nr)
 
-" TODO REMOVE
-  " call s:SetAtEntry(1, l:actwin)
   call s:EnterEntry(0, l:actwin)
 
 let s:buf_change = 1
+
+ echo  "Show cmds: <F2>"
 
 call s:LOG("DisplayLocal BOTTOM")
 endfunction
@@ -690,7 +947,7 @@ call s:LOG("DisplayGlobal action=". l:action)
     let s:_splitbelow = &splitbelow
     let &splitbelow = 1
 
-    " do split mode
+    " do split cmd
     if l:split_mode != ""
       " exe 'keepalt '. l:split_mode
       let l:winname = has_key(s:dic, 'winname') ? s:dic.winname : s:winname_default
@@ -699,19 +956,14 @@ call s:LOG("DisplayGlobal action=". l:action)
   endif
 
 
-  let s:actwin_buffer = bufnr(bufname("%"))
-
   " only does something it s:running == 0
   call s:Initialize()
 
   call s:LoadDisplay()
-  call s:DefineSigns()
-  call s:WriteSigns()
+  call s:DisplayDefine(l:actwin)
 
-call s:LOG("Display s:actwin_buffer=". s:actwin_buffer)
+call s:LOG("Display actwin_buffer=". bufnr("%"))
 
-" TODO REMOVE
-  " call s:SetAtEntry(1, l:actwin)
   call s:EnterEntry(0, l:actwin)
 
 call s:LOG("Display BOTTOM")
@@ -735,39 +987,126 @@ function! s:GetAction(data)
   return 'c'
 endfunction
 
+function! s:AdjustMapping(owner, mapname, ref_map_defs)
+  if ! has_key(a:owner, a:mapname)
+    let a:owner[a:mapname] = {}
+  else
+    let map = {}
+    for [l:key, l:value] in items(a:owner[a:mapname])
+      if ! has_key(a:ref_map_defs, l:key)
+        call s:ERROR('AdjustMapping '. a:mapname .' - bad key "'. l:key .'"')
+      elseif type(l:value) == type("") 
+        let map[l:key] = [ l:value ]
+      elseif type(l:value) == type([])
+        let map[l:key] = l:value
+      else
+        call s:ERROR('AdjustMapping '. a:mapname .' - for key "'. l:key .'" bad value type: '. type(l:value))
+      endif
+      unlet l:value
+    endfor
+    let a:owner[a:mapname] = map
+  endif
+endfunction
 
-" create = new display
+if 0 " NOTUSED
+function! s:CheckMapping(mapname, keyvals, ref_map_defs)
+  for [l:key, l:value] in items(a:keyvals)
+    if ! has_key(a:ref_map_defs, l:key)
+      call s:ERROR('Adjust '. a:mapname .' - bad key "'. l:key .'"')
+    elseif type(l:value) != type("") && type(l:value) != type([])
+      call s:ERROR('Adjust '. a:mapname .' - for key "'. l:key .'" bad value type: '. type(l:value))
+    endif
+
+    unlet l:value
+  endfor
+endfunction
+endif " NOTUSED
+
 function! s:Adjust(data)
 call s:LOG("Adjust  TOP")
   if ! has_key(a:data, 'winname')
     let a:data['winname'] = s:winname_default
   endif
 
-  if ! has_key(a:data, 'key_map')
-    let a:data['key_map'] = {}
+  "--------------
+  " cmds
+  "--------------
+  if ! has_key(a:data, 'cmds')
+    let a:data['cmds'] = {}
+  endif
+  let l:cmds = a:data.cmds
+
+  if ! has_key(l:cmds, 'window')
+    let l:cmds['window'] = {}
+  endif
+  let l:window = l:cmds.window
+
+  if ! has_key(l:cmds, 'source')
+    let l:cmds['source'] = {}
+  endif
+  let l:source = l:cmds.source
+
+  " window cmds
+  call s:AdjustMapping(l:window, 'key_map', s:cmds_window_defs)
+
+if 0 " NOUSE
+  if ! has_key(l:window, 'key_map')
+    let l:window['key_map'] = {}
   else
-    for [l:key, l:value] in items(a:data.key_map)
-      if ! has_key(s:key_map_defs, l:key)
+    call s:CheckMapping('key_map', l:window.key_map, s:cmds_window_defs)
+
+" NOUSE
+    for [l:key, l:value] in items(l:window.key_map)
+      if ! has_key(s:cmds_window_defs, l:key)
         call s:ERROR('Adjust key_map - bad key "'. l:key .'"')
-        continue
-      endif
-      if type(l:value) != type("") && type(l:value) != type([])
+      elseif type(l:value) != type("") && type(l:value) != type([])
         call s:ERROR('Adjust key_map - for key "'. l:key .'" bad value type: '. type(l:value))
       endif
 
       unlet l:value
     endfor
   endif
+endif " NOUSE
 
-  if ! has_key(a:data, 'builtin_cmd')
-    let a:data['builtin_cmd'] = {}
+  call s:AdjustMapping(l:window, 'builtin_cmd', s:cmds_window_defs)
+  call s:AdjustMapping(l:window, 'leader_cmd', s:cmds_window_defs)
+
+if 0 " NOUSE
+  if ! has_key(l:window, 'builtin_cmd')
+    let l:window['builtin_cmd'] = {}
   else
-    for [l:key, l:value] in items(a:data.builtin_cmd)
-      if ! has_key(s:builtin_cmd_defs, l:key)
+    call s:CheckMapping('builtin_cmd', l:window.builtin_cmd, s:cmds_window_defs)
+  endif
+
+  if ! has_key(l:window, 'leader_cmd')
+    let l:window['leader_cmd'] = {}
+  else
+    call s:CheckMapping('leader_cmd', l:window.leader_cmd, s:cmds_window_defs)
+  endif
+endif " NOUSE
+
+  " source cmds
+  call s:AdjustMapping(l:source, 'key_map', s:cmds_source_defs)
+  call s:AdjustMapping(l:source, 'builtin_cmd', s:cmds_source_defs)
+  call s:AdjustMapping(l:source, 'leader_cmd', s:cmds_source_defs)
+
+if 0 " NOUSE
+  if ! has_key(l:source, 'key_map')
+    let l:source['key_map'] = {}
+  else
+    call s:CheckMapping('key_map', l:source.key_map, s:cmds_source_defs)
+  endif
+
+  if ! has_key(l:source, 'builtin_cmd')
+    let l:source['builtin_cmd'] = {}
+  else
+    call s:CheckMapping('builtin_cmd', l:source.builtin_cmd, s:cmds_source_defs)
+
+" NOUSE
+    for [l:key, l:value] in items(l:source.builtin_cmd)
+      if ! has_key(s:cmds_source_defs, l:key)
         call s:ERROR('Adjust builtin_cmd - bad key "'. l:key .'"')
-        continue
-      endif
-      if type(l:value) != type("") && type(l:value) != type([])
+      elseif type(l:value) != type("") && type(l:value) != type([])
         call s:ERROR('Adjust builtin_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
       endif
 
@@ -775,26 +1114,30 @@ call s:LOG("Adjust  TOP")
     endfor
   endif
 
-  if ! has_key(a:data, 'user_cmd')
-    let a:data['user_cmd'] = {}
+  if ! has_key(l:source, 'leader_cmd')
+    let l:source['leader_cmd'] = {}
   else
-    for [l:key, l:value] in items(a:data.user_cmd)
-      if ! has_key(s:user_cmd_defs, l:key)
-        call s:ERROR('Adjust user_cmd - bad key "'. l:key .'"')
-        continue
-      endif
-      if type(l:value) != type("") && type(l:value) != type([])
-        call s:ERROR('Adjust user_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
+    call s:CheckMapping('leader_cmd', l:source.leader_cmd, s:cmds_source_defs)
+
+    for [l:key, l:value] in items(l:source.leader_cmd)
+      if ! has_key(s:cmds_source_defs, l:key)
+        call s:ERROR('Adjust leader_cmd - bad key "'. l:key .'"')
+      elseif type(l:value) != type("") && type(l:value) != type([])
+        call s:ERROR('Adjust leader_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
       endif
 
       unlet l:value
     endfor
   endif
+endif " NOUSE
 
+  "--------------
+  " window
+  "--------------
   if ! has_key(a:data, 'window')
     let a:data['window'] = {
       \ "split": {
-        \ "mode": s:split_mode_default,
+        \ "cmd": s:split_cmd_default,
         \ "size": s:split_size_default,
         \ "below": s:split_below_default,
         \ "right": s:split_right_default 
@@ -804,8 +1147,8 @@ call s:LOG("Adjust  TOP")
     let l:window = a:data.window
     if has_key(l:window, 'split')
       let l:split = l:window.split
-      if ! has_key(l:split, 'mode')
-        let l:split['mode'] = s:split_mode_default
+      if ! has_key(l:split, 'cmd')
+        let l:split['cmd'] = s:split_cmd_default
       endif
       if ! has_key(l:split, 'size')
         let l:split['size'] = s:split_size_default
@@ -819,48 +1162,119 @@ call s:LOG("Adjust  TOP")
 
     elseif has_key(l:window, 'edit')
       let l:edit = l:window.edit
-      if ! has_key(l:edit, 'mode')
-        let l:edit['mode'] = s:edit_mode_default
+      if ! has_key(l:edit, 'cmd')
+        let l:edit['cmd'] = s:edit_cmd_default
       endif
 
     elseif has_key(l:window, 'tab')
       let l:tab = l:window.tab
-      if ! has_key(l:tab, 'mode')
-        let l:tab['mode'] = s:tab_mode_default
+      if ! has_key(l:tab, 'cmd')
+        let l:tab['cmd'] = s:tab_cmd_default
       endif
 
     else
       let l:window['split'] = {
-          \ "mode": s:split_mode_default,
+          \ "cmd": s:split_cmd_default,
           \ "size": s:split_size_default,
           \ "below": s:split_below_default,
           \ "right": s:split_right_default 
         \ }
     endif
   endif
-if 0 " WINDOW
-  if ! has_key(a:data, 'window')
-    let a:data['window'] = {
-      \ "split_size": s:split_size_default,
-      \ "split_mode": s:split_mode_default,
-      \ "split_below": s:split_below_default,
-      \ "split_right": s:split_right_default 
+
+  if ! has_key(a:data, 'display')
+    let a:data['display'] = {
+        \ "source": {
+        \ },
+        \ "window": {
+          \ "cursor_line": {
+            \ "is_enable": 0
+          \ },
+          \ "highlight_line": {
+            \ "is_enable": 0
+          \ },
+          \ "highlight_text": {
+            \ "is_enable": 0
+          \ }
+        \ }
       \ }
   else
-    if ! has_key(a:data.window, 'split_size')
-      let a:data.window['split_size'] = s:split_size_default
+    let l:display = a:data.display
+
+    " display.source
+    if ! has_key(l:display, 'source')
+      let l:display['source'] = { }
+    else
+" TODO
     endif
-    if ! has_key(a:data.window, 'split_mode')
-      let a:data.window['split_mode'] = s:split_mode_default
+
+    " display.window
+    if ! has_key(l:display, 'window')
+      let l:display['window'] = { 
+          \ "cursor_line": {
+            \ "is_enable": 0
+          \ },
+          \ "highlight_line": {
+            \ "is_enable": 0
+          \ },
+          \ "highlight_text": {
+            \ "is_enable": 0
+          \ }
+        \ }
+    else
+      let l:window = l:display.window
+
+      " display.window.cursor_line
+      if ! has_key(l:window, 'cursor_line')
+        let l:display['cursor_line'] = {
+          \ "is_enable": 0
+          \ }
+      else
+        let l:cursor_line = l:window.cursor_line
+
+        if ! has_key(l:cursor_line, 'is_enable')
+          let l:cursor_line['is_enable'] = 0
+        else
+          if ! has_key(l:cursor_line, 'toggle')
+            let l:cursor_line['toggle'] = s:dislay_window_cursor_line_toggle_default
+          endif
+          if ! has_key(l:cursor_line, 'is_on')
+            let l:cursor_line['is_on'] = s:dislay_window_cursor_line_is_on_default
+          endif
+        endif
+      endif
+
+      " display.window.highlight_line
+      if ! has_key(l:window, 'highlight_line')
+        let l:display['highlight_line'] = {
+          \ "is_enable": 0
+          \ }
+      else
+        let l:highlight_line = l:window.highlight_line
+
+        if ! has_key(l:highlight_line, 'is_enable')
+          let l:highlight_line['is_enable'] = 0
+        else
+          if ! has_key(l:highlight_line, 'toggle')
+            let l:highlight_line['toggle'] = s:dislay_window_highlight_line_toggle_default
+          endif
+          if ! has_key(l:highlight_line, 'is_on')
+            let l:highlight_line['is_on'] = s:dislay_window_highlight_line_is_on_default
+          endif
+          if ! has_key(l:highlight_line, 'is_full')
+            let l:highlight_line['is_full'] = s:dislay_window_highlight_line_is_full_default
+          endif
+          if ! has_key(l:highlight_line, 'all_text')
+            let l:highlight_line['all_text'] = s:dislay_window_highlight_line_all_text_default
+          endif
+        endif
+
+        " TODO highlight colors
+      endif
+
     endif
-    if ! has_key(a:data.window, 'split_below')
-      let a:data.window['split_below'] = s:split_below_default
-    endif
-    if ! has_key(a:data.window, 'split_right')
-      let a:data.window['split_right'] = s:split_right_default
-    endif
+
   endif
-endif " WINDOW
 
   if ! has_key(a:data, 'help')
     let a:data['help'] = {
@@ -896,6 +1310,19 @@ endif " WINDOW
   if ! has_key(a:data, 'formatter')
       let a:data['formatter'] = function("s:FormatterDefault")
   endif
+
+  if has_key(a:data, 'entries')
+    for l:entry in a:data.entries
+      if has_key(l:entry, 'file')
+        let l:file = l:entry.file
+        if filereadable(l:file)
+          let l:entry.file = fnamemodify(l:file, ":p")
+        endif
+      endif
+    endfor
+  endif
+
+
 call s:LOG("Adjust  BOTTOM")
 endfunction
 
@@ -910,13 +1337,17 @@ function! s:Modify(org_data, new_data)
   "   category 
   "   abbreviation
   "   kinds
-  if has_key(a:org_data, 'sign') && has_key(a:new_data, 'sign')
+" TODO SIGN data.display.source.sign
+  let l:has_org_data_sign = has_key(a:org_data, 'display') && has_key(a:org_data.display, 'source') && has_key(a:org_data.display.source, 'sign')
+  let l:has_new_data_sign = has_key(a:new_data, 'display') && has_key(a:new_data.display, 'source') && has_key(a:new_data.display.source, 'sign')
+
+  if l:has_org_data_sign && l:has_new_data_sign
     " TODO
-  elseif has_key(a:org_data, 'sign') 
+  elseif l:has_org_data_sign 
     " TODO
-  elseif has_key(a:new_data, 'sign') 
+  elseif l:has_new_data_sign 
     " register sign
-    let l:sign = a:new_data.sign
+    let l:sign = a:new_data.display.source.sign
     if ! vimside#sign#HasCategory(l:sign.category)
       vimside#sign#AddCategory(l:sign.category, l:sign)
     endif
@@ -999,6 +1430,7 @@ function! s:AdjustInput()
 endfunction
 
 function! s:LoadDisplay(actwin)
+call s:LOG("LoadDisplay current buffer=". bufnr("%"))
   setlocal buftype=nofile
   setlocal modifiable
   setlocal noswapfile
@@ -1006,7 +1438,6 @@ function! s:LoadDisplay(actwin)
 
   execute "1,$d"
 
-  " call s:SetupSyntax()
   call s:BuildDisplay(a:actwin)
   call cursor(a:actwin.first_buffer_line, 1)
   let a:actwin.current_line = a:actwin.first_buffer_line
@@ -1014,7 +1445,11 @@ function! s:LoadDisplay(actwin)
  setlocal nomodifiable
 endfunction
 
-function! s:CreateToggleInfo(data_element, key_value, defs, actwin)
+" --------------------------------------------
+" FastHelp  
+" --------------------------------------------
+
+function! s:CreateToggleInfo(data_win, data_element, key_value, defs, actwin)
   let a:actwin.is_info_open = ! a:actwin.is_info_open 
 
   if ! a:actwin.is_info_open
@@ -1023,8 +1458,9 @@ call s:LOG("CreateToggleInfo lines=[]")
     return []
   endif
 
-  let l:data = a:actwin.data
-  let l:elements = l:data[a:data_element]
+  let l:cmds = a:actwin.data.cmds
+  let l:data_win = l:cmds[a:data_win]
+  let l:elements = l:data_win[a:data_element]
 
   let l:lines = []
   let l:size = 25
@@ -1068,46 +1504,16 @@ call s:LOG("CreateToggleInfo lines=". string(l:lines))
 
 endfunction
 
-" return [lines...]
-function! s:CreateHelp(actwin)
 
-if 0 " HELP
-  let l:help = a:actwin.data.help
-
-  if l:help.do_show
-    let help_lines = []
-    if l:help.is_open
-      call add(help_lines, s:dic.title )
-      call add(help_lines, "-------------------")
-      call add(help_lines, "<F1>    : toggle help")
-      call add(help_lines, "<CR>    : inspect type")
-      call add(help_lines, "<TAB>   : next type")
-      call add(help_lines, "<C-n>   : next type")
-      call add(help_lines, "<S-TAB> : previous type (may not work)")
-      call add(help_lines, "<C-p>   : previous type")
-      call add(help_lines, "q       : quit")
-    else
-      call add(help_lines, "Press <F1> for Help")
-    endif
-    
-    let a:actwin.first_buffer_line = len(help_lines) + 1
-    return help_lines
-  else
-    let a:actwin.first_buffer_line = 1
-    return []
-  endif
-endif " HELP
-
-  let a:actwin.first_buffer_line = 1
-  return []
-endfunction
-
+" --------------------------------------------
+" Build Display
+" --------------------------------------------
 function! s:BuildDisplay(actwin)
+call s:LOG("BuildDisplay TOP")
   let l:Formatter = a:actwin.data.formatter
 
   " TODO
   let a:actwin.first_buffer_line = 1
-  " call setline(1, s:CreateHelp(a:actwin))
 
   let l:linenos_to_entrynos = []
   let l:entrynos_to_linenos = []
@@ -1136,57 +1542,486 @@ function! s:BuildDisplay(actwin)
     let l:entrynos += 1
 
   endfor
+call s:LOG("BuildDisplay current buffer=". bufnr("%"))
 
   call setline(a:actwin.first_buffer_line, lines)
   let a:actwin.linenos_to_entrynos = l:linenos_to_entrynos
   let a:actwin.entrynos_to_linenos = l:entrynos_to_linenos
   let a:actwin.entrynos_to_nos_of_lines = l:entrynos_to_nos_of_lines
 
-  " TODO REMOVE
-  " let lines = s:GetLines(a:actwin)
-  " call setline(a:actwin.first_buffer_line, lines)
+call s:LOG("BuildDisplay BOTTOM")
 endfunction
 
 " ============================================================================
-" Sign {{{1
+" Display: {{{1
+"   LifeCycle:
+"     Define
+"     Enable
+"     EnableFile
+"     Toggle
+"     Entry
+"       Enter
+"       Leave
+"     DisableFile
+"     Disable
+"     Destroy
 " ============================================================================
+
+function! s:DisplayDefine(actwin)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+if s:is_sign_enabled
+  call s:DefineSigns(a:actwin)
+endif
+
+  " window
+  let l:window = l:display.window
+
+  if l:window.cursor_line.is_enable
+    call s:DefineCursorLine(a:actwin)
+  endif
+
+  if l:window.highlight_line.is_enable
+    call s:DefineHighlightLine(a:actwin)
+  endif
+
+  " handlers
+  call add(a:actwin.handlers.onnewfile, function("s:DisplayEnableFile"))
+  call add(a:actwin.handlers.onclose, function("s:DisplayDisableFile"))
+endfunction
+
+function! s:DisplayEnable(actwin)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+if s:is_sign_enabled
+  call s:EnableSigns(a:actwin)
+endif
+
+  " window
+  let l:window = l:display.window
+
+endfunction
+
+function! s:DisplayEnableFile(actwin, file)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+if s:is_sign_enabled
+  call s:EnableFileSigns(a:actwin, a:file)
+endif
+
+  " window
+  let l:window = l:display.window
+
+endfunction
+
+
+function! s:DisplayEntryEnter(entrynos, actwin)
+call s:LOG("DisplayEntryEnter TOP")
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+
+  " window
+  let l:window = l:display.window
+
+  if l:window.cursor_line.is_enable
+    call s:EnterCursorLine(a:entrynos, a:actwin)
+  endif
+
+  if l:window.highlight_line.is_enable
+    call s:EnterHighlightLine(a:entrynos, a:actwin)
+  endif
+call s:LOG("DisplayEntryEnter BOTTOM")
+endfunction
+
+function! s:DisplayEntryLeave(entrynos, actwin)
+call s:LOG("DisplayEntryLeave TOP")
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+
+  " window
+  let l:window = l:display.window
+
+  if l:window.cursor_line.is_enable
+    call s:LeaveCursorLine(a:entrynos, a:actwin)
+  endif
+
+  if l:window.highlight_line.is_enable
+    call s:LeaveHighlightLine(a:entrynos, a:actwin)
+  endif
+call s:LOG("DisplayEntryLeave BOTTOM")
+endfunction
+
+" MUST be called from local buffer
+function! s:DisplayDisableFile(actwin, file)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+"  if s:is_sign_enabled
+"    call s:DisableFileSigns(a:actwin, a:file)
+"  endif
+
+  " window
+  let l:window = l:display.window
+
+endfunction
+
+" MUST be called from local buffer
+function! s:DisplayDisable(actwin)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+  if s:is_sign_enabled
+    call s:DisableSigns(a:actwin)
+  endif
+
+  " window
+  let l:window = l:display.window
+
+endfunction
+
+" MUST be called from local buffer
+function! s:DisplayDestroy(actwin)
+  let l:display = a:actwin.data.display
+
+  " source
+  let l:source = l:display.source
+  if s:is_sign_enabled
+    call s:DestroySigns(a:actwin)
+  endif
+
+  " window
+  let l:window = l:display.window
+
+  if l:window.cursor_line.is_enable
+    call s:DestroyCursorLine(a:actwin)
+  endif
+
+  if l:window.highlight_line.is_enable
+    call s:DestroyHighlightLine(a:actwin)
+  endif
+endfunction
+
+" ------------------------------
+" Display Source: {{{1
+"   Define
+"    Toggle
+"    Enable
+"     Enter
+"     Leave
+"    Disable
+"   Destroy
+" ------------------------------
+
+" ------------------------------
+" Sign {{{1
+" ------------------------------
 
 function! s:DefineSigns(actwin)
   let l:data = a:actwin.data
-  if has_key(l:data, 'sign')
-    let l:sign = l:data.sign
+" TODO SIGN data.display.source.sign
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
     let l:category = l:sign.category
+
+    if has_key(l:sign, 'toggle')
+      let b:sign_toggle = l:sign.toggle
+      unlet l:sign.toggle
+    endif
+
     if has_key(l:sign, 'kinds') && ! vimside#sign#HasCategory(l:category)
       call vimside#sign#AddCategory(l:category, l:sign)
     endif
   endif
 endfunction
 
-function! s:WriteSigns(actwin)
-"     file:
-"     line:
-"     sign: kind
+function! s:EnableSigns(actwin)
   let l:data = a:actwin.data
-  if has_key(l:data, 'sign')
-    let l:sign = l:data.sign
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
     let l:category = l:sign.category
     for entry in l:data.entries
       let l:file = entry.file
-      let l:line = entry.line
-      let l:kind = entry.kind
-      call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+      let l:bnr = bufnr(l:file)
+      if l:bnr > 0
+        let l:line = entry.line
+        let l:kind = entry.kind
+        call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+      else
+call s:LOG("EnableSigns not placed file=". l:file)
+      endif
+    endfor
+
+    " XXXXXXXXXXXXXXXX
+    if exists("b:sign_toggle")
+      execute ":nnoremap <silent> <Leader>". b:sign_toggle ." :call g:ToggleSigns(". a:actwin.buffer_nr .")<CR>"
+      let b:is_toggle = 0
+    endif
+  endif
+endfunction
+
+function! s:EnableFileSigns(actwin, file)
+  let l:file = fnamemodify(a:file, ":p")
+  let l:data = a:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
+    let l:category = l:sign.category
+    for entry in l:data.entries
+      let l:file = entry.file
+      let l:bnr = bufnr(l:file)
+      if l:bnr > 0 && a:file == l:file
+        let l:line = entry.line
+        let l:kind = entry.kind
+        call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+call s:LOG("EnableFileSigns placed file=". l:file)
+      endif
     endfor
   endif
 endfunction
 
-function! s:ClearSigns(actwin)
-  let l:data = a:actwin.data
-  if has_key(l:data, 'sign')
-    let l:sign = l:data.sign
-    let l:category = l:sign.category
-    call vimside#sign#ClearCategory(l:category)
+
+function! g:ToggleSigns(buffer_nr)
+call s:LOG("ToggleSigns TOP")
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:ToggleSigns actwin not found")
+    return
+  endif
+
+  let l:data = l:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
+    let b:is_toggle = ! b:is_toggle
+    call vimside#sign#Toggle(l:sign.category, b:is_toggle)
   endif
 endfunction
+
+function! s:DisableSigns(actwin)
+  let l:data = a:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
+    call vimside#sign#ClearCategory(l:sign.category)
+  endif
+endfunction
+
+function! s:DestroySigns(actwin)
+" TODO SIGN data.display.source.sign
+  let l:data = a:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:sign = l:data.display.source.sign
+    call vimside#sign#RemoveCategory(l:sign.category)
+  endif
+endfunction
+
+
+" ------------------------------
+" Display Window: {{{1
+"   Define
+"    Enter
+"    Leave
+"    Toggle
+"   Destroy
+" ------------------------------
+
+" ------------------------------
+" CursorLine {{{1
+" ------------------------------
+
+" MUST be called from local buffer
+function! s:DefineCursorLine(actwin)
+  let l:cursor_line = a:actwin.data.display.window.cursor_line
+
+  if l:cursor_line.is_on
+    setlocal modifiable
+    setlocal cursorline
+    setlocal nomodifiable
+  endif
+
+  " execute ":nnoremap <silent> <Leader>". l:cursor_line.toggle ." :call g:ToggleCursorLine(". l:buffer_nr .")<CR>"
+  execute ":nnoremap <silent> <buffer> <Leader>". l:cursor_line.toggle ." :call g:ToggleCursorLine()<CR>"
+
+endfunction
+
+function! s:EnterCursorLine(entrynos, actwin)
+  " emtpy
+endfunction
+
+function! s:LeaveCursorLine(entrynos, actwin)
+  " emtpy
+endfunction
+
+
+function! g:ToggleCursorLine()
+call s:LOG("ToggleCursorLine TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:ToggleCursorLine actwin not found")
+    return
+  endif
+
+  let l:cursor_line = l:actwin.data.display.window.cursor_line
+  let l:cursor_line.is_enable = ! l:cursor_line.is_enable
+
+  setlocal modifiable
+  if l:cursor_line.is_enable
+    setlocal cursorline
+  else
+    setlocal nocursorline
+  endif
+  setlocal nomodifiable
+
+call s:LOG("ToggleCursorLine BOTTOM")
+endfunction
+
+" MUST be called from local buffer
+function! s:DestroyCursorLine(actwin)
+  " empty
+endfunction
+
+" ------------------------------
+" HighlightLine {{{1
+" ------------------------------
+
+" MUST be called from local buffer
+function! s:DefineHighlightLine(actwin)
+  let l:highlight_line = a:actwin.data.display.window.highlight_line
+
+  execute ":nnoremap <silent> <buffer> <Leader>". l:highlight_line.toggle ." :call g:ToggleHighlightLine()<CR>"
+
+  if l:highlight_line.is_full
+    let l:currentline = a:actwin.current_line
+" call s:LOG("s:DefineHighlightLine currentline=". l:currentline)
+    let l:winWidth = winwidth(0)
+    let l:winHeight = line('$')
+
+    let l:cnt = 1
+    setlocal modifiable
+    execute "normal! 1G"
+    for l:line in getline(0, l:winHeight)
+      execute "normal! ". (l:winWidth - len(l:line)) ."A "
+      " execute "normal! j"
+      let l:cnt += 1
+      execute "normal! ".l:cnt."G"
+    endfor
+    execute "normal! ".l:currentline."G"
+    setlocal nomodifiable
+  endif
+
+endfunction
+
+function! s:EnterHighlightLine(entrynos, actwin)
+call s:LOG("EnterHighlightLine TOP")
+  let l:highlight_line = a:actwin.data.display.window.highlight_line
+
+" call s:LOG("s:EnterHighlightLine entrynos=". a:entrynos)
+
+  let l:entry = a:actwin.data.entries[a:entrynos]
+  let l:content = l:entry.content
+  let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
+  if l:highlight_line.all_text
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+  else
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:nos_lines = 0
+  endif
+  let l:nos_columns = l:highlight_line.nos_columns
+
+" call s:LOG("s:EnterHighlightLine line_start=". l:line_start)
+" call s:LOG("s:EnterHighlightLine nos_lines=". l:nos_lines)
+  let l:highlight_line.sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines, l:nos_columns)
+
+  let l:highlight_line.is_on = 1
+
+endfunction
+
+function! s:LeaveHighlightLine(entrynos, actwin)
+call s:LOG("s:LeaveHighlightLine entrynos=". a:entrynos)
+  let l:highlight_line = a:actwin.data.display.window.highlight_line
+
+  if has_key(l:highlight_line, 'sids')
+    call s:HighlightClear(l:highlight_line.sids)
+    unlet l:highlight_line.sids
+  endif
+
+endfunction
+
+function! g:ToggleHighlightLine()
+call s:LOG("ToggleHighlightLine TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:ToggleHighlightLine actwin not found")
+    return
+  endif
+
+call s:LOG("ToggleHighlightLine l:actwin.current_line=". l:actwin.current_line)
+  let l:linenos = l:actwin.current_line
+  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+
+  let l:highlight_line = l:actwin.data.display.window.highlight_line
+  let l:highlight_line.is_enable = ! l:highlight_line.is_enable
+
+  if l:highlight_line.is_enable
+    call s:EnterHighlightLine(l:entrynos, l:actwin)
+  else
+    call s:LeaveHighlightLine(l:entrynos, l:actwin)
+  endif
+
+call s:LOG("ToggleHighlightLine BOTTOM")
+endfunction
+
+" MUST be called from local buffer
+function! s:DestroyHighlightLine(actwin)
+call s:LOG("DestroyHighlightLine TOP")
+  let l:highlight_line = a:actwin.data.display.window.highlight_line
+
+  if has_key(l:highlight_line, 'sids')
+    call s:HighlightClear(l:highlight_line.sids)
+    unlet l:highlight_line.sids
+  endif
+
+  if l:highlight_line.is_full
+    let l:currentline = a:actwin.current_line
+    let l:winHeight = line('$')
+
+    let l:cnt = 1
+    setlocal modifiable
+    execute "normal! 1G"
+    for l:line in getline(0, l:winHeight)                
+      execute "normal! $b1 D"
+      " execute "normal! b"
+      " execute "normal! 1 "
+      " execute "normal! D"
+      let l:cnt += 1
+      execute "normal! ".l:cnt."G"
+    endfor
+    execute "normal! ".l:currentline."G"
+    setlocal nomodifiable
+  endif
+
+
+  let l:highlight_line.is_on = 0
+endfunction
+
+
+
+
 
 " ============================================================================
 " Util {{{1
@@ -1228,7 +2063,7 @@ function! vimside#actwin#Close()
 call s:LOG("vimside#actwin#Close TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("vimside#actwin#Close NOT FOUND BOTTOM")
+    call s:ERROR("vimside#actwin#Close: actwin not found")
     return
   endif
   call s:Close(l:actwin)
@@ -1238,57 +2073,61 @@ function! s:OnClose()
 call s:LOG("s:OnClose TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("s:OnClose NOT FOUND BOTTOM")
+    call s:ERROR("s:OnClose: actwin not found")
     return
   endif
+
   call s:Close(l:actwin)
+call s:LOG("s:OnClose BOTTOM")
 endfunction
 
+" MUST be called from local buffer
 function! s:Close(actwin)
   let l:actwin = a:actwin
-  call s:CloseAutoCmds(l:actwin)
-  call s:BufLeave()
 call s:LOG("s:Close l:actwin.buffer_nr=". l:actwin.buffer_nr)
 
-  if s:is_entry_highlight && exists("b:actwin_sids")
-    " execute 'silent '. l:actwin.buffer_nr.'wincmd w'
-    call s:HighlightClear(b:actwin_sids)
-    " wincmd p
-  endif
+  call s:DisplayDisable(l:actwin)
 
-  call s:ClearUserCommands(l:actwin)
-  call s:ClearOverrideCommands(l:actwin)
+  call s:DisplayDestroy(l:actwin)
+
+if 0 " EHL
+  if s:is_entry_highlight && exists("b:actwin_sids")
+    call s:HighlightClear(b:actwin_sids)
+  endif
+endif " EHL
+
+  call s:ClearCmds(l:actwin)
 
   " If we needed to split the main window, close the split one.
   let l:window = l:actwin.data.window
   if has_key(l:window, 'split')
 call s:LOG("s:Close split")
-execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+execute 'silent '. l:actwin.win_nr.'wincmd w'
     exec "wincmd c"
-wincmd p
+" execute 'silent '. l:actwin.win_nr.'wincmd w'
   elseif has_key(l:window, 'edit')
 call s:LOG("s:Close edit")
     let l:source_buffer_nr = l:actwin.source_buffer_nr
 call s:LOG("s:Close source_buffer_nr=". l:source_buffer_nr)
-    " exec "wincmd c"
     execute "buffer ". l:source_buffer_nr
-    execute "bwipeout ". l:actwin.buffer_nr
     " exec "e!#"
   elseif has_key(l:window, 'tab')
 call s:LOG("s:Close tab")
-execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+execute 'silent '. l:actwin.win_nr.'wincmd w'
     exec "e!#"
-wincmd p
+" execute 'silent '. l:actwin.buffer_nr.'wincmd w'
     " exec "wincmd c"
   endif
 
+  execute "bwipeout ". l:actwin.buffer_nr 
+  call s:CloseAutoCmds(l:actwin)
+execute 'silent '. l:actwin.source_win_nr.'wincmd w'
+
+  call s:CallOnCloseHandlers(l:actwin)
 
 "  exec "keepjumps silent b ". l:actwin.source_buffer_name
 "  execute 'silent set colorcolumn='
 
-if s:is_sign_enabled
-  call s:ClearSigns(l:actwin)
-endif
 
   " Clear any messages.
   "  echo ""
@@ -1306,61 +2145,43 @@ function! s:OnHelp()
 call s:LOG("OnHelp TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("OnHelp NOT FOUND BOTTOM")
+    call s:ERROR("s:OnHelp: actwin not found")
     return
   endif
 
   let l:help = l:actwin.data.help
 
   if l:help.do_show
-      let l:help.is_open = !l:help.is_open
-      call vimside#actwin#DisplayLocal('testhelp', l:help.data)
+    " TODO remove is_open   
+    let l:help.is_open = !l:help.is_open
+    call vimside#actwin#DisplayLocal('testhelp', l:help.data)
   endif
-
-if 0 " HELP
-    setlocal modifiable
-
-    " Save position.
-    normal! ma
-    
-    " Remove existing help
-    if (l:actwin.first_buffer_line > 1)
-      exec "keepjumps 1,".(l:actwin.first_buffer_line - 1) "d _"
-    endif
-    
-    call append(0, s:CreateHelp(l:actwin))
-
-    silent! normal! g`a
-    delmarks a
-
-    setlocal nomodifiable
-endif " HELP
 
 call s:LOG("OnHelp BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:ToggleKeyMapInfo()
-  call s:Toggle('key_map', 'key_map_data', 'key_map', s:key_map_defs)
+function! s:ToggleWindowKeyMapInfo()
+  call s:Toggle('window_key_map_show', 'window', 'key_map', s:cmds_window_defs)
 endfunction
 
-function! s:ToggleBuiltinCmdInfo()
-  call s:Toggle('key_map', 'builtin_cmd_data', 'builtin_cmd', s:builtin_cmd_defs)
+function! s:ToggleSourceBuiltinCmdInfo()
+  call s:Toggle('source_builtin_cmd_show', 'source', 'builtin_cmd', s:cmds_source_defs)
 endfunction
 
-function! s:ToggleUserCmdOnInfo()
-  call s:Toggle('key_map', 'user_cmd_data', 'user_cmd', s:user_cmd_defs)
+function! s:ToggleSourceLeaderCmdInfo()
+  call s:Toggle('source_leader_cmd_show', 'source', 'leader_cmd', s:cmds_source_defs)
 endfunction
 
-function! s:Toggle(cmdiname, key_name, data_element, defs)
+function! s:Toggle(key_name, data_win, data_element, defs)
 call s:LOG("Toggle TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("Toggle NOT FOUND BOTTOM")
+    call s:ERROR("s:Toggle: actwin not found")
     return
   endif
 
-  let l:key_value = l:actwin.data[a:cmdiname][a:key_name]
+  let l:key_value = l:actwin.data.cmds.window.key_map[a:key_name]
 
   setlocal modifiable
 
@@ -1373,7 +2194,7 @@ call s:LOG("Toggle delete")
     exec "keepjumps 1,".(l:actwin.first_buffer_line - 1) "d _"
   endif
     
-  call append(0, s:CreateToggleInfo(a:data_element, l:key_value, a:defs, l:actwin))
+  call append(0, s:CreateToggleInfo(a:data_win, a:data_element, l:key_value, a:defs, l:actwin))
 
   silent! normal! g`a
   delmarks a
@@ -1383,25 +2204,22 @@ call s:LOG("Toggle delete")
 call s:LOG("Toggle BOTTOM")
 endfunction
 
+" MUST be called from local buffer
+function! s:EnterCurrentEntry(actwin)
+  let l:current_line = a:actwin.current_line
+  let l:current_entrynos = a:actwin.linenos_to_entrynos[l:current_line-1]
+  call s:EnterEntry(l:current_entrynos, a:actwin)
+endfunction
 
 
 " MUST be called from local buffer
 " cursor entering given entrynos
 function! s:EnterEntry(entrynos, actwin)
-call s:LOG("s:EnterEntry entrynos=". a:entrynos)
+call s:LOG("s:EnterEntry TOP entrynos=". a:entrynos)
   call a:actwin.data.actions.enter(a:entrynos, a:actwin)
 
-  if s:is_entry_highlight
-    let l:entry = a:actwin.data.entries[a:entrynos]
-    let l:content = l:entry.content
-    let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
-    " TODO fix
-    " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
-call s:LOG("s:EnterEntry line_start=". l:line_start)
-call s:LOG("s:EnterEntry nos_lines=". l:nos_lines)
-    let b:actwin_sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines)
-  endif
+  call s:DisplayEntryEnter(a:entrynos, a:actwin)
+call s:LOG("s:EnterEntry BOTTOM")
 endfunction
 
 " MUST be called from local buffer
@@ -1410,13 +2228,26 @@ function! s:SelectEntry(entrynos, actwin)
 endfunction
 
 " MUST be called from local buffer
+function! s:LeaveCurrentEntry(actwin)
+  let l:current_line = a:actwin.current_line
+  let l:current_entrynos = a:actwin.linenos_to_entrynos[l:current_line-1]
+  call s:LeaveEntry(l:current_entrynos, a:actwin)
+endfunction
+
+" MUST be called from local buffer
 " cursor leaving given entrynos
 function! s:LeaveEntry(entrynos, actwin)
+call s:LOG("s:LeaveEntry TOP entrynos=". a:entrynos)
+  call s:DisplayEntryLeave(a:entrynos, a:actwin)
+
+if 0 " EHL
   if s:is_entry_highlight
     call s:HighlightClear(b:actwin_sids)
   endif
+endif " EHL
 
   call a:actwin.data.actions.leave(a:entrynos, a:actwin)
+call s:LOG("s:LeaveEntry BOTTOM")
 endfunction
 
 
@@ -1428,7 +2259,7 @@ function! s:OnEnterMouse()
 call s:LOG("s:OnEnterMouse: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("s:OnEnterMouse NOT FOUND BOTTOM")
+    call s:ERROR("s:OnEnterMouse: actwin not found")
     return
   endif
 
@@ -1482,7 +2313,7 @@ function! s:OnSelect()
 call s:LOG("s:OnSelect: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("s:OnSelect NOT FOUND BOTTOM")
+    call s:ERROR("s:OnSelect: actwin not found")
     return
   endif
 
@@ -1512,11 +2343,91 @@ call s:LOG("s:OnSelect: BOTTOM")
 endfunction
 
 " MUST be called from local buffer
+function! s:OnTop()
+call s:LOG("s:OnTop: TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:OnTop: actwin not found")
+    return
+  endif
+
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnTop l:entrynos=". l:entrynos)
+
+    call s:LeaveEntry(l:entrynos, l:actwin)
+
+    let l:nos_of_linenos = l:linenos
+    if l:nos_of_linenos == 1
+      call feedkeys('k', 'n')
+    else
+      call feedkeys(repeat('k', l:nos_of_linenos), 'n')
+    endif
+
+
+    call s:EnterEntry(0, l:actwin)
+    let l:actwin.current_line = 1
+call s:LOG("s:OnTop l:actwin.current_line=". l:actwin.current_line)
+  endif
+call s:LOG("s:OnTop: BOTTOM")
+endfunction
+
+" MUST be called from local buffer
+function! s:OnBottom()
+call s:LOG("s:OnBottom: TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:OnBottom: actwin not found")
+    return
+  endif
+
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnBottom l:entrynos=". l:entrynos)
+
+    let l:len = len(l:entrynos_to_linenos)
+call s:LOG("s:OnBottom l:len=". l:len)
+    if l:entrynos < l:len - 1
+      call s:LeaveEntry(l:entrynos, l:actwin)
+
+      let l:entries = l:actwin.data.entries
+      let l:entries_len = len(l:entries)
+      let l:delta_lines = 0
+      let l:cnt = l:entrynos
+      while l:cnt < l:entries_len
+        let l:delta_lines += l:actwin.entrynos_to_nos_of_lines[l:cnt]
+        let l:cnt += 1
+      endwhile
+      let l:nos_of_linenos = l:delta_lines
+      if l:nos_of_linenos == 1
+        call feedkeys('j', 'n')
+      else
+        call feedkeys(repeat('j', l:nos_of_linenos), 'n')
+      endif
+
+
+      call s:EnterEntry(l:entries_len-1, l:actwin)
+      let l:actwin.current_line += l:delta_lines
+call s:LOG("s:OnBottom l:actwin.current_line=". l:actwin.current_line)
+    endif
+  endif
+
+call s:LOG("s:OnBottom: BOTTOM")
+endfunction
+
+" MUST be called from local buffer
 function! s:OnUp()
 call s:LOG("s:OnUp: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("s:OnUp NOT FOUND BOTTOM")
+    call s:ERROR("s:OnUp: actwin not found")
     return
   endif
 
@@ -1531,41 +2442,20 @@ call s:LOG("s:OnUp l:entrynos=". l:entrynos)
 
     let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos-1] 
     let l:new_linenos = l:actwin.entrynos_to_linenos[l:entrynos-1] 
+call s:LOG("s:OnUp l:nos_of_linenos=". l:nos_of_linenos)
     if l:nos_of_linenos == 1
       call feedkeys('k', 'n')
-    else
+    elseif l:nos_of_linenos > 1
       call feedkeys(repeat('k', l:nos_of_linenos), 'n')
     endif
 
 
     call s:EnterEntry(l:entrynos-1, l:actwin)
     let l:actwin.current_line = l:new_linenos
+call s:LOG("s:OnUp l:actwin.current_line=". l:actwin.current_line)
   else
     call feedkeys('k', 'n')
   endif
-
-if 0 " XXXXXX
-  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
-  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
-  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
-
-call s:LOG("s:OnUp l:entrynos=". l:entrynos)
-  if l:entrynos > 0
-    call s:LeaveEntry(l:entrynos, l:actwin)
-
-    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
-    let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
-    if l:nos_of_linenos == 1
-      call feedkeys('k', 'n')
-    else
-      call feedkeys(repeat('k', l:nos_of_linenos), 'n')
-    endif
-
-
-    call s:EnterEntry(l:entrynos-1, l:actwin)
-    let l:actwin.current_line = l:new_linenos
-  endif
-endif " XXXXXX
 
 call s:LOG("s:OnUp: BOTTOM")
 endfunction
@@ -1575,7 +2465,7 @@ function! s:OnDown()
 call s:LOG("s:OnDown: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
   if ! l:found
-call s:LOG("s:OnDown NOT FOUND BOTTOM")
+    call s:ERROR("s:OnDown: actwin not found")
     return
   endif
 
@@ -1594,47 +2484,26 @@ call s:LOG("s:OnDown l:len=". l:len)
 
       let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos] 
       let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+call s:LOG("s:OnDown l:nos_of_linenos=". l:nos_of_linenos)
+      let l:nos_of_linenos -= 1
       if l:nos_of_linenos == 1
         call feedkeys('j', 'n')
-      else
+      elseif l:nos_of_linenos > 1
         call feedkeys(repeat('j', l:nos_of_linenos), 'n')
       endif
 
 
       call s:EnterEntry(l:entrynos+1, l:actwin)
       let l:actwin.current_line = l:new_linenos
+call s:LOG("s:OnDown l:actwin.current_line=". l:actwin.current_line)
     endif
 
+if 0 " IS_THIS_NEEDED
   else
     call feedkeys('j', 'n')
+endif " IS_THIS_NEEDED
+
   endif
-
-if 0 " XXXXXX
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-
-  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
-  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
-call s:LOG("s:OnDown l:entrynos=". l:entrynos)
-
-  let l:len = len(l:entrynos_to_linenos)
-call s:LOG("s:OnDown l:len=". l:len)
-
-  if l:entrynos < l:len - 1
-    call s:LeaveEntry(l:entrynos, l:actwin)
-
-    let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos] 
-    let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
-    if l:nos_of_linenos == 1
-      call feedkeys('j', 'n')
-    else
-      call feedkeys(repeat('j', l:nos_of_linenos), 'n')
-    endif
-
-
-    call s:EnterEntry(l:entrynos+1, l:actwin)
-    let l:actwin.current_line = l:new_linenos
-  endif
-endif " XXXXXX
 
 call s:LOG("s:OnDown: BOTTOM")
 endfunction
@@ -1652,17 +2521,144 @@ call s:LOG("s:OnLeft: BOTTOM")
 endfunction
 
 " ============================================================================
-" User commands: {{{1
+" Leader Commands: {{{1
 " ============================================================================
 
-" Called from external buffer
-function! g:UserUp(buffer_nr)
-call s:LOG("g:UserUp: TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
-  if ! l:found
-call s:LOG("g:UserUp NOT FOUND BOTTOM")
+function! g:VimsideActWinFirst(buffer_nr)
+call s:LOG("g:VimsideActWinFirst: TOP")
+  " If called from ActWin
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
+    call s:OnTop()
     return
   endif
+
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinFirst: actwin not found")
+    return
+  endif
+
+  let l:win_nr = bufwinnr(a:buffer_nr)
+  let l:current_win_nr = bufwinnr(l:current_buffer_nr)
+  let b:return_win_nr = l:current_win_nr 
+
+let s:buf_change = 0
+  execute 'silent '. l:win_nr.'wincmd w'
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("s:OnTop l:entrynos=". l:entrynos)
+
+    call s:LeaveEntry(l:entrynos, l:actwin)
+
+    let l:nos_of_linenos = l:linenos
+execute 'silent '. l:win_nr.'wincmd w'
+    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    if l:nos_of_linenos == 1
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
+    else
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-'. l:nos_of_linenos .'),1)'
+    endif
+
+
+    call s:EnterEntry(0, l:actwin)
+    redraw
+
+    let l:actwin.current_line = 1
+call s:LOG("s:OnTop l:actwin.current_line=". l:actwin.current_line)
+  endif
+
+  execute 'silent '. b:return_win_nr.'wincmd w'
+let s:buf_change = 1
+
+echo ""
+
+call s:LOG("g:VimsideActWinFirst: BOTTOM")
+endfunction
+
+function! g:VimsideActWinLast(buffer_nr)
+call s:LOG("g:VimsideActWinLast: TOP")
+  " If called from ActWin
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
+    call s:OnBottom()
+    return
+  endif
+
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinLast: actwin not found")
+    return
+  endif
+
+  let l:win_nr = bufwinnr(a:buffer_nr)
+  let l:current_win_nr = bufwinnr(l:current_buffer_nr)
+  let b:return_win_nr = l:current_win_nr 
+
+let s:buf_change = 0
+  execute 'silent '. l:win_nr.'wincmd w'
+  let l:line = line(".")
+
+  if l:line > (l:actwin.first_buffer_line - 1)
+    let l:linenos = l:line - l:actwin.first_buffer_line + 1
+    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+call s:LOG("s:OnTop l:entrynos=". l:entrynos)
+
+    let l:len = len(l:entrynos_to_linenos)
+call s:LOG("s:VimsideActWinLast l:len=". l:len)
+    if l:entrynos < l:len - 1
+      call s:LeaveEntry(l:entrynos, l:actwin)
+
+      let l:entries = l:actwin.data.entries
+      let l:entries_len = len(l:entries)
+      let l:delta_lines = 0
+      let l:cnt = l:entrynos
+      while l:cnt < l:entries_len
+        let l:delta_lines += l:actwin.entrynos_to_nos_of_lines[l:cnt]
+        let l:cnt += 1
+      endwhile
+
+      let l:nos_of_linenos = l:line+l:delta_lines -1
+      call cursor(l:nos_of_linenos, 1)
+
+      call s:EnterEntry(l:entries_len-1, l:actwin)
+      let l:actwin.current_line = l:nos_of_linenos
+      redraw
+call s:LOG("s:VimsideActWinLast l:actwin.current_line=". l:actwin.current_line)
+
+    endif
+  endif
+
+  execute 'silent '. b:return_win_nr.'wincmd w'
+let s:buf_change = 1
+
+echo ""
+call s:LOG("g:VimsideActWinLast: BOTTOM")
+endfunction
+
+" Called from external buffer
+function! g:VimsideActWinUp(buffer_nr)
+call s:LOG("g:VimsideActWinUp: TOP")
+  " If called from ActWin
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
+    call s:OnUp()
+    return
+  endif
+
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinUp: actwin not found")
+    return
+  endif
+
+  let l:current_win_nr = bufwinnr(l:current_buffer_nr)
+let b:return_win_nr = l:current_win_nr 
+  let l:win_nr = bufwinnr(a:buffer_nr)
 
   let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
   let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
@@ -1675,31 +2671,7 @@ call s:LOG("g:UserUp NOT FOUND BOTTOM")
   if l:entrynos > 0
 let s:buf_change = 0
 
-if 0 " MMMMM
-
-execute 'silent '. a:buffer_nr.'wincmd w'
-    call s:LeaveEntry(l:entrynos, l:actwin)
-wincmd p
-
-    let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
-    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
-
-    call s:SelectEntry(l:entrynos-1, l:actwin)
-
-" TODO fix - l:actwin.first_buffer_line
-    if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1) | redraw'
-    else
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-'. l:nos_of_linenos .'),1) | redraw'
-    endif
-    
-    wincmd p
-execute 'silent '. a:buffer_nr.'wincmd w'
-    call s:EnterEntry(l:entrynos-1, l:actwin)
-wincmd p
-else
-
-execute 'silent '. a:buffer_nr.'wincmd w'
+execute 'silent '. l:win_nr.'wincmd w'
     call s:LeaveEntry(l:entrynos, l:actwin)
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
@@ -1707,46 +2679,46 @@ execute 'silent '. a:buffer_nr.'wincmd w'
 
     call s:SelectEntry(l:entrynos-1, l:actwin)
 
-" TODO fix - l:actwin.first_buffer_line
+execute 'silent '. l:win_nr.'wincmd w'
     let l:line = line(".") - l:actwin.first_buffer_line + 1
     if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
     else
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'-'. l:nos_of_linenos .'),1)'
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-'. l:nos_of_linenos .'),1)'
     endif
 
-if 0
-    if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-1),1)'
-      " call cursor((line(".")-1),1)
-    else
-      " call cursor((line(".")-l:nos_of_linenos),1)
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")-'. l:nos_of_linenos .'),1)'
-    endif
-endif
-    
     call s:EnterEntry(l:entrynos-1, l:actwin)
 redraw
-wincmd p
+" execute 'silent '. l:current_win_nr.'wincmd w'
+execute 'silent '. b:return_win_nr.'wincmd w'
 
-endif " MMMMM
 
 let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
   endif
 echo ""
-call s:LOG("g:UserUp: BOTTOM")
+call s:LOG("g:VimsideActWinUp: BOTTOM")
 endfunction
 
 " Called from external buffer
-function! g:UserDown(buffer_nr)
-call s:LOG("g:UserDown: TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
-  if ! l:found
-call s:LOG("g:UserDown NOT FOUND BOTTOM")
+function! g:VimsideActWinDown(buffer_nr)
+call s:LOG("g:VimsideActWinDown: TOP")
+  " If called from ActWin
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
+    call s:OnDown()
     return
   endif
+
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinDown: actwin not found")
+    return
+  endif
+
+let b:return_win_nr = bufwinnr(l:current_buffer_nr)
+  let l:win_nr = bufwinnr(a:buffer_nr)
 
   let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
   let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
@@ -1754,97 +2726,91 @@ call s:LOG("g:UserDown NOT FOUND BOTTOM")
 
   let l:linenos = l:actwin.current_line
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+call s:LOG("g:VimsideActWinDown l:linenos=". l:linenos)
+call s:LOG("g:VimsideActWinDown l:entrynos=". l:entrynos)
 
   let l:len = len(l:actwin.data.entries)
   if l:entrynos < l:len - 1
 let s:buf_change = 0
-if 0 " MMMMM
-execute 'silent '. a:buffer_nr.'wincmd w'
-    call s:LeaveEntry(l:entrynos, l:actwin)
-wincmd p
 
-    let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
-    let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
-
-    call s:SelectEntry(l:entrynos+1, l:actwin)
-
-" TODO fix - l:actwin.first_buffer_line
-    if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1) | redraw'
-    else
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+'. l:nos_of_linenos .'),1) | redraw'
-    endif
-
-    wincmd p
-
-execute 'silent '. a:buffer_nr.'wincmd w'
-    call s:EnterEntry(l:entrynos+1, l:actwin)
-wincmd p
-else
-
-execute 'silent '. a:buffer_nr.'wincmd w'
+execute 'silent '. l:win_nr.'wincmd w'
     call s:LeaveEntry(l:entrynos, l:actwin)
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
+call s:LOG("g:VimsideActWinDown l:new_linenos=". l:new_linenos)
+call s:LOG("g:VimsideActWinDown l:nos_of_linenos=". l:nos_of_linenos)
 
     call s:SelectEntry(l:entrynos+1, l:actwin)
 
-" TODO fix - l:actwin.first_buffer_line
+execute 'silent '. l:win_nr.'wincmd w'
     let l:line = line(".") - l:actwin.first_buffer_line + 1
+call s:LOG("g:VimsideActWinDown l:line=". l:line)
     if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'+1),1)'
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'+1),1)'
     else
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor(('. l:line .'+'. l:nos_of_linenos .'),1)'
+      execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'+'. l:nos_of_linenos .'),1)'
     endif
-
-if 0
-    if l:nos_of_linenos == 1
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+1),1)'
-      "call cursor((line(".")+1),1)
-    else
-      execute 'silent '. a:buffer_nr.'wincmd w | :call cursor((line(".")+'. l:nos_of_linenos .'),1)'
-      "call cursor((line(".")+ l:nos_of_linenos),1)
-    endif
-endif
 
 
     call s:EnterEntry(l:entrynos+1, l:actwin)
 redraw
-wincmd p
-
-endif " MMMMM
+execute 'silent '. b:return_win_nr.'wincmd w'
 
 let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
   endif
 echo ""
-call s:LOG("g:UserDown: BOTTOM")
+call s:LOG("g:VimsideActWinDown: BOTTOM")
 endfunction
 
-" Called from external buffer
-function! g:UserClose(buffer_nr)
-call s:LOG("g:UserClose: TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
-  if ! l:found
-call s:LOG("g:UserClose NOT FOUND BOTTOM")
+function! g:VimsideActWinEnter(buffer_nr)
+call s:LOG("g:VimsideActWinEnter: TOP buffer_nr=". a:buffer_nr)
+  " If called from ActWin, do nothing
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
     return
   endif
 
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinEnter: actwin not found")
+    return
+  endif
+
+  execute 'silent '. l:actwin.win_nr.'wincmd w'
+
+call s:LOG("g:VimsideActWinEnter: BOTTOM")
+endfunction
+
+" Called from external buffer
+function! g:VimsideActWinClose(buffer_nr)
+call s:LOG("g:VimsideActWinClose: TOP buffer_nr=". a:buffer_nr)
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinClose: actwin not found")
+    return
+  endif
+
+  let b:return_win_nr = bufwinnr(bufnr("%"))
+
+  execute 'silent '. l:actwin.win_nr.'wincmd w'
   call s:Close(l:actwin)
+  execute 'silent '. b:return_win_nr.'wincmd w'
 
 echo ""
-call s:LOG("g:UserClose: BOTTOM")
+call s:LOG("g:VimsideActWinClose: BOTTOM")
 endfunction
 
 " ============================================================================
-" AutoCmd functions: {{{1
+" AutoCmd Functions: {{{1
 " ============================================================================
 
+" called after entering or switching to buffer
 function! s:BufEnter()
   if s:buf_change
-call s:LOG("s:BufEnter: TOP")
+call s:LOG("s:BufEnter: TOP ". bufnr("%"))
     let b:insertmode = &insertmode
     let b:showcmd = &showcmd
     let b:cpo = &cpo
@@ -1854,9 +2820,10 @@ call s:LOG("s:BufEnter: BOTTOM")
   endif
 endfunction
 
+" called when switching from buffer to another buffer
 function! s:BufLeave()
   if s:buf_change
-call s:LOG("s:BufLeave: TOP")
+call s:LOG("s:BufLeave: TOP ".  bufnr("%"))
     if exists("b:insertmode")
       let &insertmode = b:insertmode
       unlet b:insertmode
@@ -1881,6 +2848,36 @@ call s:LOG("s:BufLeave: BOTTOM")
   endif
 endfunction
 
+" called when buffer is displayed in window
+" when loaded or no longer hidden
+function! s:BufWinEnter()
+call s:LOG("s:BufWinEnter: buffer_nr=". bufnr("%"))
+  let [l:found, l:actwin] = s:GetActWin(bufnr("%"))
+  if ! l:found
+    call s:ERROR("s:BufWinEnter actwin not found")
+    return
+  endif
+
+  call s:EnterCurrentEntry(l:actwin)
+endfunction
+
+" called before buffer is removed from window
+" Note that buffer "%" may not be buffer being unloaded
+function! s:BufWinLeave()
+" call s:LOG("s:BufWinLeave: buffer_nr=". bufnr("%"))
+" call s:LOG("s:BufWinLeave: afile=". expand('<afile>')) 
+call s:LOG("s:BufWinLeave: afile nr=". bufnr(expand('<afile>'))) 
+  " call s:DisplayDestroy()
+  
+  let [l:found, l:actwin] = s:GetActWin(bufnr(expand('<afile>')))
+  if ! l:found
+    call s:ERROR("s:BufWinLeave actwin not found")
+    return
+  endif
+
+  call s:LeaveCurrentEntry(l:actwin)
+endfunction
+
 " ============================================================================
 " Formatter Functions: {{{1
 " ============================================================================
@@ -1891,7 +2888,7 @@ function! s:FormatterDefault(lines, entry)
   if type(content) == type([])
     call extend(a:lines, content)
   else
-    call add(a:lines, string(content))
+    call add(a:lines, content)
   endif
 " call s:LOG("s:FormatterDefault: BOTTOM")
 endfunction
@@ -1924,20 +2921,23 @@ endfunction
 " --------------------------------------------
 " Set Non-ActWin cursor file and postion but stay in ActWin
 function! s:EnterActionQuickFix(entrynos, actwin)
-call s:LOG("s:EnterActionQuickFix: entrynos=". a:entrynos)
+call s:LOG("s:EnterActionQuickFix: TOP entrynos=". a:entrynos)
   call s:SetAtEntry(a:entrynos, a:actwin)
+call s:LOG("s:EnterActionQuickFix: BOTTOM")
 endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:SelectActionQuickFix(entrynos, actwin)
-call s:LOG("s:SelectActionQuickFix")
+call s:LOG("s:SelectActionQuickFix TOP")
   call s:GoToEntry(a:entrynos, a:actwin)
+call s:LOG("s:SelectActionQuickFix BOTTOM")
 endfunction
 
 " Do Nothing
 function! s:LeaveActionQuickFix(entrynos, actwin)
-call s:LOG("s:LeaveActionQuickFix: entrynos=". a:entrynos)
+call s:LOG("s:LeaveActionQuickFix: TOP entrynos=". a:entrynos)
   call s:RemoveAtEntry(a:entrynos, a:actwin)
+call s:LOG("s:LeaveActionQuickFix: BOTTOM")
 endfunction
 
 " --------------------------------------------
@@ -1962,40 +2962,69 @@ endfunction
 function! s:SetAtEntry(entrynos, actwin)
 let s:buf_change = 0
 call s:LOG("s:SetAtEntry: entrynos=". a:entrynos)
-  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
   let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
-    let l:winnr = bufwinnr(l:file)
-call s:LOG("s:SetAtEntry: winnr=". l:winnr)
-    if l:winnr > 0
+    let l:bnr = bufnr(l:file)
+call s:LOG("s:SetAtEntry: bnr=". l:bnr)
+    let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("s:SetAtEntry: file=". l:file)
+call s:LOG("s:SetAtEntry: win_nr=". l:win_nr)
+call s:LOG("s:SetAtEntry: source_buffer_nr bufwinnr=". bufwinnr(a:actwin.source_buffer_nr))
+
+    let l:new_file = 0
+    if l:win_nr == -1
+execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+      execute "edit ". l:file
+execute 'silent '. bufwinnr(a:actwin.win_nr).'wincmd w'
+      let l:bnr = bufnr(l:file)
+call s:LOG("s:SetAtEntry: bnr=". l:bnr)
+      let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("s:SetAtEntry: win_nr=". l:win_nr)
+      let l:new_file = 1
+    endif
+
+    if l:win_nr > 0
+let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 call s:LOG("s:SetAtEntry: linenos=". l:linenos)
 call s:LOG("s:SetAtEntry: colnos=". l:colnos)
-      " execute 'keepjumps silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . " "
+      " execute 'keepjumps silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . " "
       if l:colnos > 1
-        execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . "l"
+        execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . "l"
       else
-        execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G'
+        execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G'
       endif
-if s:is_colorline_enabled
-  if has_key(a:actwin.data, 'sign')
-    let l:category = a:actwin.data.sign.category
+
+      if l:new_file 
+" DOES THIS WORK
+        " call s:DisplayEnableFile(a:actwin, l:file)
+        call s:CallNewFileHandlers(a:actwin, l:file)
+      endif
+
+if s:is_sign_colorline_enabled
+" TODO SIGN data.display.source.sign
+  let l:data = a:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:category = l:data.display.source.sign.category
     let l:kind = l:entry.kind
     call  vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, 'marker')
   endif
 endif
 if s:is_colorcolumn_enabled
   if l:colnos > 0
-    execute 'silent '. l:winnr.'wincmd w | :set colorcolumn='. l:colnos
+    execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
   else
-    execute 'silent '. l:winnr.'wincmd w | :set colorcolumn='
+    execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
   endif
 endif
 
       " execute 'keepjumps silent '. actwin_buffer.'wincmd 2'
-      wincmd p
+      " TODO should this be a:actwin.buffer_nr
+      " wincmd p
+execute 'silent '. a:actwin.win_nr.'wincmd w'
     endif
   endif
 call s:LOG("s:SetAtEntry: BOTTOM")
@@ -2005,18 +3034,21 @@ endfunction
 function! s:RemoveAtEntry(entrynos, actwin)
 let s:buf_change = 0
 call s:LOG("s:RemoveAtEntry: entrynos=". a:entrynos)
-  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
   let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
-if s:is_colorline_enabled
-  if has_key(a:actwin.data, 'sign')
-    let l:category = a:actwin.data.sign.category
+
+if s:is_sign_colorline_enabled
+  let l:data = a:actwin.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  if l:has_data_sign
+    let l:category = l:data.display.source.sign.category
     let l:kind = l:entry.kind
     call vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, l:kind)
   endif
 endif
+
   endif
 call s:LOG("s:RemoveAtEntry: BOTTOM")
 let s:buf_change = 1
@@ -2024,32 +3056,32 @@ endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:GoToEntry(entrynos, actwin)
-call s:LOG("s:GoToEntry: entrynos=". a:entrynos)
-  " let [l:found, l:entry] = s:GetLine(a:entrynos - 1, a:actwin)
+call s:LOG("s:GoToEntry: in Non-ActWin entrynos=". a:entrynos)
   let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
-    let l:winnr = bufwinnr(l:file)
-call s:LOG("s:GoToEntry: winnr=". l:winnr)
-    if l:winnr > 0
+    let l:win_nr = bufwinnr(l:file)
+call s:LOG("s:GoToEntry: win_nr=". l:win_nr)
+    if l:win_nr > 0
+let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 call s:LOG("s:GoToEntry: linenos=". l:linenos)
 call s:LOG("s:GoToEntry: colnos=". l:colnos)
-      " execute 'keepjumps silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . " "
       if l:colnos > 1
-        execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G' . l:colnos . "l"
+        execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . "l"
       else
-        execute 'silent '. l:winnr.'wincmd w | :normal '. l:linenos .'G'
+        execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G'
       endif
 
 if s:is_colorcolumn_enabled
   if l:colnos > 1
-    execute 'silent '. l:winnr.'wincmd w | :set colorcolumn='. l:colnos
+    execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
   else
-    execute 'silent '. l:winnr.'wincmd w | :set colorcolumn='
+    execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
   endif
 endif
+
     endif
   endif
 endfunction
@@ -2120,79 +3152,92 @@ endfunction
 
 call s:InitializeHighlight()
 
-function! s:GetLinesMatchPatterns(line_start, line_end)
+function! s:GetLinesMatchPatterns(line_start, line_end, nos_columns)
   let lnum1 = a:line_start
   let lnum2 = a:line_end
   let endCol = 200
 
-  if lnum1 == lnum2
-    " one lines
-    " let range = [ '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol+2).'v' ]
-    " let patterns = [ '\%'.lnum1.'l', '\%3c' ]
-    let patterns = [ '\%'.lnum1.'l' ]
-  elseif lnum1+1 == lnum2
-    " two lines
-    " let pat1 = '\%'.lnum1.'l\%>'.(col1+1).'v.*\%<'.(endCol).'v'
-    " let pat1 = '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol).'v'
-    " let pat2 = '\%'.lnum2.'l\%>'.(1).'v.*\%<'.(endCol).'v'
-    let pat1 = '\%'.lnum1.'l'
-    let pat2 = '\%'.lnum2.'l'
-    let patterns = [ pat1, pat2 ]
+  if a:nos_columns > 0
+    let l:nos_columns = a:nos_columns + 1
+
+    if lnum1 == lnum2
+      " one lines
+      
+      let patterns = [ '\%'.lnum1.'l\%<'. l:nos_columns .'c' ]
+    elseif lnum1+1 == lnum2
+      let pat1 = '\%'.lnum1.'l\%<'. l:nos_columns .'c'
+      let pat2 = '\%'.lnum2.'l\%<'. l:nos_columns .'c'
+      let patterns = [ pat1, pat2 ]
+    else
+      " general case
+      let patterns = [ ]
+      let l:ln = lnum1
+      while l:ln <= lnum2
+        let pat = '\%'.l:ln.'l\%<'. l:nos_columns .'c'
+        call add(patterns, pat)
+        let l:ln += 1
+      endwhile
+
+    endif
+
   else
-    " general case
-    let patterns = [ ]
-    let l:ln = lnum1
-    while l:ln <= lnum2
-      let pat = '\%'.l:ln.'l'
-      call add(patterns, pat)
-      let l:ln += 1
-    endwhile
-if 0 " XXX
-    let range_start = '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol).'v'
-    call add(range, range_start)
+    if lnum1 == lnum2
+      " one lines
+      " let range = [ '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol+2).'v' ]
+      " let patterns = [ '\%'.lnum1.'l', '\%3c' ]
+      
+      let patterns = [ '\%'.lnum1.'l' ]
+    elseif lnum1+1 == lnum2
+      " two lines
+      " let pat1 = '\%'.lnum1.'l\%>'.(col1+1).'v.*\%<'.(endCol).'v'
+      " let pat1 = '\%'.lnum1.'l\%>'.(0).'v.*\%<'.(endCol).'v'
+      " let pat2 = '\%'.lnum2.'l\%>'.(1).'v.*\%<'.(endCol).'v'
 
-    let range_mid =
-             \'\%>'.(0).'v'.
-             \'\%<'.(endCol).'v'.
-             \'\%>'.(lnum1).'l'.
-             \'\%<'.(lnum2).'l'.
-             \'.'
-    call add(range, range_mid)
+      let pat1 = '\%'.lnum1.'l'
+      let pat2 = '\%'.lnum2.'l'
+      let patterns = [ pat1, pat2 ]
+    else
+      " general case
+      let patterns = [ ]
+      let l:ln = lnum1
+      while l:ln <= lnum2
+        let pat = '\%'.l:ln.'l'
+        call add(patterns, pat)
+        let l:ln += 1
+      endwhile
 
-    let range_end = '\%'.lnum2.'l\%>'.(0).'v.*\%<'.(endCol).'v'
-    call add(range, range_end)
-endif " XXX
-
+    endif
   endif
+
 call s:LOG("s:GetLinesMatchPatterns: patterns=". string(patterns)) 
   return patterns
 endfunction
 
 function! s:HighlightClear(sids)
-call s:LOG("s:HighlightClear: TOP") 
-call s:LOG("s:HighlightClear: clearing sids") 
+" call s:LOG("s:HighlightClear: TOP") 
+" call s:LOG("s:HighlightClear: clearing sids") 
   for sid in a:sids
-call s:LOG("s:HighlightClear: clear sid=". sid) 
+" call s:LOG("s:HighlightClear: clear sid=". sid) 
     try
       if matchdelete(sid) == -1
-call s:LOG("s:HighlightClear: failed to clear sid=". sid) 
+" call s:LOG("s:HighlightClear: failed to clear sid=". sid) 
       endif
     catch /.*/
-call s:LOG("ERROR s:HighlightClear: sid=". sid) 
+" call s:LOG("ERROR s:HighlightClear: sid=". sid) 
     endtry
   endfor
-call s:LOG("s:HighlightClear: matches=". string(getmatches())) 
-call s:LOG("s:HighlightClear: BOTTOM") 
+" call s:LOG("s:HighlightClear: matches=". string(getmatches())) 
+" call s:LOG("s:HighlightClear: BOTTOM") 
 endfunction
 
 " returns list of sids
-function! s:HighlightDisplay(line_start, line_end)
-call s:LOG("s:HighlightDisplay: line_start=". a:line_start .", line_end=". a:line_end) 
-  let patterns = s:GetLinesMatchPatterns(a:line_start, a:line_end)
+function! s:HighlightDisplay(line_start, line_end, nos_columns)
+" call s:LOG("s:HighlightDisplay: line_start=". a:line_start .", line_end=". a:line_end) 
+  let patterns = s:GetLinesMatchPatterns(a:line_start, a:line_end, a:nos_columns)
   let l:sids = []
   for pattern in patterns
     let sid = matchadd("VimsideActWin_HL", pattern)
-call s:LOG("s:HighlightDisplay: sid=". sid) 
+" call s:LOG("s:HighlightDisplay: sid=". sid) 
     call add(l:sids, sid)
   endfor
   return l:sids
@@ -2209,15 +3254,9 @@ function! vimside#actwin#TestQuickFix()
 "     is_open: 0
 "     .....
 "   }
-"   window: {
-"     split_size: "10"
-"     split_mode: "new"
-"     split_below: 1
-"     split_right: 0
-"   }
 "   builtin_cmd: {
 "   }
-"   user_cmd: {
+"   leader_cmd: {
 "   }
 "   sign: {
 "     category: QuickFix
@@ -2234,11 +3273,15 @@ function! vimside#actwin#TestQuickFix()
         \ "winname": "Help",
         \ "window": {
           \ "edit": {
-          \ "mode": "enew"
+          \ "cmd": "enew"
           \ }
         \ },
-        \ "key_map": {
-          \ "close": "q"
+        \ "cmds": {
+          \ "window": {
+            \ "key_map": {
+              \ "close": "q"
+            \ }
+          \ }
         \ },
         \ "actions": {
           \ "enter": function("s:EnterActionDoNothing"),
@@ -2260,6 +3303,7 @@ function! vimside#actwin#TestQuickFix()
         \ ]
     \ }
 
+" TODO SIGN data.display.source.sign
   let l:data = {
         \ "title": "Test Window",
         \ "winname": "Test",
@@ -2267,51 +3311,81 @@ function! vimside#actwin#TestQuickFix()
           \ "do_show": 1,
           \ "data": l:helpdata,
         \ },
-        \ "key_map": {
-          \ "key_map_data": "<F2>",
-          \ "builtin_cmd_data": "<F3>",
-          \ "user_cmd_data": "<F4>",
-          \ "help": "<F1>",
-          \ "select": [ "<CR>", "<2-LeftMouse>"],
-          \ "enter_mouse": "<LeftMouse> <LeftMouse>",
-          \ "down": [ "j", "<Down>"],
-          \ "up": [ "k", "<Up>"],
-          \ "close": "q"
-        \ },
-        \ "builtin_cmd": {
-          \ "cp": "cp",
-          \ "cn": "cn",
-          \ "ccl": "ccl"
-        \ },
-        \ "user_cmd": {
-          \ "up": "cp",
-          \ "down": "cn",
-          \ "close": "ccl"
-        \ },
-        \ "sign": {
-          \ "category": "TestWindow",
-          \ "abbreviation": "tw",
-          \ "toggle": "tw",
-          \ "kinds": {
-            \ "error": {
-              \ "text": "EE",
-              \ "texthl": "Todo",
-              \ "linehl": "Error",
+        \ "cmds": {
+          \ "source": {
+            \ "builtin_cmd": {
+              \ "first": "cr",
+              \ "last": "cl",
+              \ "previous": "cp",
+              \ "next": "cn",
+              \ "enter": "ce",
+              \ "close": "ccl"
             \ },
-            \ "warn": {
-              \ "text": "WW",
-              \ "texthl": "ToDo",
-              \ "linehl": "StatusLine",
+            \ "leader_cmd": {
+              \ "previous": "cp",
+              \ "next": "cn",
+              \ "close": "ccl"
             \ },
-            \ "info": {
-              \ "text": "II",
-              \ "texthl": "DiffAdd",
-              \ "linehl": "Ignore",
+          \ },
+          \ "window": {
+            \ "key_map": {
+              \ "window_key_map_show": "<F2>",
+              \ "source_builtin_cmd_show": "<F3>",
+              \ "source_leader_cmd_show": "<F4>",
+              \ "help": "<F1>",
+              \ "select": [ "<CR>", "<2-LeftMouse>"],
+              \ "enter_mouse": "<LeftMouse> <LeftMouse>",
+              \ "top": [ "gg", "1G", "<PageUp>"],
+              \ "bottom": [ "G", "<PageDown>"],
+              \ "down": [ "j", "<Down>"],
+              \ "up": [ "k", "<Up>"],
+              \ "close": "q"
             \ },
-            \ "marker": {
-              \ "text": "MM",
-              \ "texthl": "Search",
-              \ "linehl": "Ignore",
+          \ },
+        \ },
+        \ "display": {
+          \ "source": {
+            \ "sign": {
+              \ "category": "TestWindow",
+              \ "abbreviation": "tw",
+              \ "toggle": "tw",
+              \ "kinds": {
+                \ "error": {
+                  \ "text": "EE",
+                  \ "texthl": "Todo",
+                  \ "linehl": "Error"
+                \ },
+                \ "warn": {
+                  \ "text": "WW",
+                  \ "texthl": "ToDo",
+                  \ "linehl": "StatusLine"
+                \ },
+                \ "info": {
+                  \ "text": "II",
+                  \ "texthl": "DiffAdd",
+                  \ "linehl": "Ignore"
+                \ },
+                \ "marker": {
+                  \ "text": "MM",
+                  \ "texthl": "Search",
+                  \ "linehl": "Ignore"
+                \ }
+              \ }
+            \ }
+          \ },
+          \ "window": {
+            \ "cursor_line": {
+              \ "toggle": "wcl",
+              \ "is_enable": 0,
+              \ "is_on": 0
+            \ },
+            \ "highlight_line": {
+              \ "toggle": "whl",
+              \ "is_enable": 1,
+              \ "is_on": 0,
+              \ "is_full": 1,
+              \ "nos_columns": 0,
+              \ "all_text": 1
             \ }
           \ }
         \ },
@@ -2321,38 +3395,38 @@ function! vimside#actwin#TestQuickFix()
           \ "leave": function("s:LeaveActionQuickFix")
         \ },
         \ "entries": [
-        \  { 'content': "line one",
+        \  { 'content': "Entry 1 line one",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 1,
           \ "col": 1,
           \ "kind": "error"
           \ },
-        \  { 'content': "line three",
+        \  { 'content': "Entry 2 line two",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 3,
           \ "col": 6,
           \ "kind": "warn"
           \ },
         \  { 'content': [
-            \  "Entry 3 line 0",
-            \  "   Entry 3 line 1",
-            \  "   Entry 3 line 2"
+            \  "Entry 3 line three line 0",
+            \  "   Entry 3 line four line 1",
+            \  "   Entry 3 line five line 2"
             \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 5,
           \ "col": 7,
           \ "kind": "info"
           \ },
-        \  { 'content': "line seven",
+        \  { 'content': "Entry 4 line six",
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 7,
           \ "col": 2,
           \ "kind": "error"
           \ },
         \  { 'content': [
-            \  "Entry 5 line 0",
-            \  "   Entry 5 line 1",
-            \  "   Entry 5 line 2"
+            \  "Entry 5 line seven line 0",
+            \  "   Entry 5 line eigth line 1",
+            \  "   Entry 5 line nine line 2"
             \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 9,
@@ -2360,7 +3434,7 @@ function! vimside#actwin#TestQuickFix()
           \ "kind": "warn"
           \ },
         \  { 'content': [
-            \  "Entry 6 line 0"
+            \  "Entry 6 line ten"
             \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
           \ "line": 10,
@@ -2368,7 +3442,7 @@ function! vimside#actwin#TestQuickFix()
           \ "kind": "info"
           \ },
         \  { 'content': [
-            \  "Entry 7 line 0",
+            \  "Entry 7 line eleven",
             \  "  Entry 7 line 1"
             \ ],
           \ "file": "src/main/scala/com/megaannum/Foo.scala",
@@ -2376,8 +3450,8 @@ function! vimside#actwin#TestQuickFix()
           \ "col": 10,
           \ "kind": "error"
           \ },
-        \  { 'content': "line thirteen",
-          \ "file": "src/main/scala/com/megaannum/Foo.scala",
+        \  { 'content': "line thirteen Bar",
+          \ "file": "src/main/scala/com/megaannum/Bar.scala",
           \ "line": 13,
           \ "kind": "warn"
           \ },
@@ -2406,8 +3480,12 @@ function! vimside#actwin#TestHelp()
   let l:data = {
         \ "title": "Help Window",
         \ "winname": "Help",
-        \ "key_map": {
-          \ "close": "q"
+        \ "cmds": {
+          \ "window": {
+            \ "key_map": {
+              \ "close": "q"
+            \ }
+          \ }
         \ },
         \ "actions": {
           \ "enter": function("s:EnterActionDoNothing"),
