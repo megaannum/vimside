@@ -155,6 +155,8 @@ let s:dislay_window_highlight_line_is_on_default = 0
 let s:dislay_window_highlight_line_is_full_default = 0
 let s:dislay_window_highlight_line_all_text_default = 0
 
+let s:dislay_window_sign_all_text_default = 0
+
 
 let s:winname_default="ActWin"
 
@@ -1193,7 +1195,7 @@ endif " NOUSE
           \ "highlight_line": {
             \ "is_enable": 0
           \ },
-          \ "highlight_text": {
+          \ "sign": {
             \ "is_enable": 0
           \ }
         \ }
@@ -1270,6 +1272,21 @@ endif " NOUSE
         endif
 
         " TODO highlight colors
+      endif
+
+      " display.window.sign
+      if ! has_key(l:window, 'sign')
+        let l:display['sign'] = {
+          \ "is_enable": 0
+          \ }
+      else
+        let l:sign = l:window.sign
+        if ! has_key(l:sign, 'is_enable')
+          let l:sign['is_enable'] = 0
+        endif
+        if ! has_key(l:sign, 'all_text')
+          let l:sign['all_text'] = s:dislay_window_sign_all_text_default
+        endif
       endif
 
     endif
@@ -1587,6 +1604,10 @@ endif
     call s:DefineHighlightLine(a:actwin)
   endif
 
+  if l:window.sign.is_enable
+    call s:DefineSign(a:actwin)
+  endif
+
   " handlers
   call add(a:actwin.handlers.onnewfile, function("s:DisplayEnableFile"))
   call add(a:actwin.handlers.onclose, function("s:DisplayDisableFile"))
@@ -1638,6 +1659,11 @@ call s:LOG("DisplayEntryEnter TOP")
   if l:window.highlight_line.is_enable
     call s:EnterHighlightLine(a:entrynos, a:actwin)
   endif
+
+  if l:window.sign.is_enable
+    call s:EnterSign(a:entrynos, a:actwin)
+  endif
+
 call s:LOG("DisplayEntryEnter BOTTOM")
 endfunction
 
@@ -1657,6 +1683,10 @@ call s:LOG("DisplayEntryLeave TOP")
 
   if l:window.highlight_line.is_enable
     call s:LeaveHighlightLine(a:entrynos, a:actwin)
+  endif
+
+  if l:window.sign.is_enable
+    call s:LeaveSign(a:entrynos, a:actwin)
   endif
 call s:LOG("DisplayEntryLeave BOTTOM")
 endfunction
@@ -1710,6 +1740,10 @@ function! s:DisplayDestroy(actwin)
 
   if l:window.highlight_line.is_enable
     call s:DestroyHighlightLine(a:actwin)
+  endif
+
+  if l:window.sign.is_enable
+    call s:DestroySign(a:actwin)
   endif
 endfunction
 
@@ -2020,7 +2054,97 @@ call s:LOG("DestroyHighlightLine TOP")
 endfunction
 
 
+" ------------------------------
+" Sign {{{1
+" ------------------------------
 
+function! s:DefineSign(actwin)
+call s:LOG("DefineSign TOP")
+  let l:sign = a:actwin.data.display.window.sign
+  let l:category = l:sign.category
+
+  if has_key(l:sign, 'kinds') && ! vimside#sign#HasCategory(l:category)
+    call vimside#sign#AddCategory(l:category, l:sign)
+  endif
+endfunction
+
+function! s:EnterSign(entrynos, actwin)
+call s:LOG("EnterSign TOP")
+call s:LOG("EnterSign entrynos=". a:entrynos)
+  let l:sign = a:actwin.data.display.window.sign
+  let l:buffer_nr = a:actwin.buffer_nr
+  let l:category = l:sign.category
+  let l:entry = a:actwin.data.entries[a:entrynos]
+  let l:kind = l:entry.kind
+
+  let l:content = l:entry.content
+  let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
+  " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+  "
+  if l:sign.all_text
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:cnt = 0
+    while l:cnt <= l:nos_lines
+      call vimside#sign#PlaceBuffer(l:line_start+l:cnt, l:buffer_nr, l:category, l:kind)
+      let l:cnt += 1
+    endwhile
+  else
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+  endif
+
+  " call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+
+if 0 " example of text file sign
+  let l:file = l:entry.file
+  call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+endif " example of text file sign
+
+endfunction
+
+function! s:LeaveSign(entrynos, actwin)
+call s:LOG("LeaveSign TOP")
+call s:LOG("LeaveSign entrynos=". a:entrynos)
+  let l:sign = a:actwin.data.display.window.sign
+  let l:buffer_nr = a:actwin.buffer_nr
+  let l:category = l:sign.category
+  let l:entry = a:actwin.data.entries[a:entrynos]
+  let l:file = l:entry.file
+  let l:kind = l:entry.kind
+
+  let l:content = l:entry.content
+  let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
+  " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+  if l:sign.all_text
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:cnt = 0
+    while l:cnt <= l:nos_lines
+      call vimside#sign#UnPlaceBuffer(l:line_start+l:cnt, l:buffer_nr, l:category, l:kind)
+      let l:cnt += 1
+    endwhile
+  else
+    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    call vimside#sign#UnPlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+  endif
+
+  " call vimside#sign#UnPlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+  " call vimside#sign#EmptyBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+
+
+if 0 " example of text file sign
+  let l:file = l:entry.file
+  call vimside#sign#UnPlaceFile(l:line, l:file, l:category, l:kind)
+endif " example of text file sign
+
+endfunction
+
+function! s:DestroySign(actwin)
+call s:LOG("DestroySign TOP")
+  let l:sign = a:actwin.data.display.window.sign
+  let l:category = l:sign.category
+
+  call vimside#sign#RemoveCategory(l:category)
+endfunction
 
 
 " ============================================================================
@@ -2216,9 +2340,10 @@ endfunction
 " cursor entering given entrynos
 function! s:EnterEntry(entrynos, actwin)
 call s:LOG("s:EnterEntry TOP entrynos=". a:entrynos)
-  call a:actwin.data.actions.enter(a:entrynos, a:actwin)
 
   call s:DisplayEntryEnter(a:entrynos, a:actwin)
+  call a:actwin.data.actions.enter(a:entrynos, a:actwin)
+
 call s:LOG("s:EnterEntry BOTTOM")
 endfunction
 
@@ -2238,15 +2363,10 @@ endfunction
 " cursor leaving given entrynos
 function! s:LeaveEntry(entrynos, actwin)
 call s:LOG("s:LeaveEntry TOP entrynos=". a:entrynos)
-  call s:DisplayEntryLeave(a:entrynos, a:actwin)
-
-if 0 " EHL
-  if s:is_entry_highlight
-    call s:HighlightClear(b:actwin_sids)
-  endif
-endif " EHL
 
   call a:actwin.data.actions.leave(a:entrynos, a:actwin)
+  call s:DisplayEntryLeave(a:entrynos, a:actwin)
+
 call s:LOG("s:LeaveEntry BOTTOM")
 endfunction
 
@@ -3381,11 +3501,34 @@ function! vimside#actwin#TestQuickFix()
             \ },
             \ "highlight_line": {
               \ "toggle": "whl",
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "is_on": 0,
               \ "is_full": 1,
               \ "nos_columns": 0,
               \ "all_text": 1
+            \ },
+            \ "sign": {
+              \ "is_enable": 1,
+              \ "all_text": 1,
+              \ "category": "SourceWindow",
+              \ "abbreviation": "sw",
+              \ "toggle": "sw",
+              \ "kinds": {
+                \ "error": {
+                  \ "text": "EE"
+                \ },
+                \ "warn": {
+                  \ "linehl": "StatusLine",
+                  \ "text": "WW"
+                \ },
+                \ "info": {
+                  \ "texthl": "DiffAdd",
+                  \ "text": "II"
+                \ },
+                \ "marker": {
+                  \ "text": "MM"
+                \ }
+              \ }
             \ }
           \ }
         \ },
@@ -3455,8 +3598,8 @@ function! vimside#actwin#TestQuickFix()
           \ "line": 13,
           \ "kind": "warn"
           \ },
-        \  { 'content': "line fourteen",
-          \ "file": "src/main/scala/com/megaannum/Foo.scala",
+        \  { 'content': "line fourteen Bar",
+          \ "file": "src/main/scala/com/megaannum/Bar.scala",
           \ "line": 14,
           \ "kind": "info"
           \ },

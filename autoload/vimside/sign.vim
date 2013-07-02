@@ -85,19 +85,26 @@ call s:LOG("vimside#sign#AddCategory: category=". a:category)
   endif
 
   for [kname, kdata] in items(kinds)
-    if ! has_key(kdata, 'linehl')
-      throw "Category kind data: ". kname ." does not have linehl attribute"
+    if has_key(kdata, 'linehl') 
+      if hlexists(kdata.linehl) == 0
+        throw "Category kind data: ". kname ." bad linehl attribute: ". kdata.linehl
+      endif
+    else
+      let kdata['linehl'] = ""
     endif
-    if ! has_key(kdata, 'texthl')
-      throw "Category kind data: ". kname ." does not have texthl attribute"
+    if has_key(kdata, 'texthl') 
+      if hlexists(kdata.texthl) == 0
+        throw "Category kind data: ". kname ." bad texthl attribute: ". kdata.texthl
+      endif
+    else
+      let kdata['texthl'] = ""
     endif
-    if ! has_key(kdata, 'text')
-      throw "Category kind data: ". kname ." does not have text attribute"
-    endif
-
-    let text = kdata['text']
-    if len(text) > 2
-      throw "Category kind data: ". kname ." text attribute too large: ". len(text)
+    if has_key(kdata, 'text') 
+      if len(kdata.text) > 2
+        throw "Category kind data: ". kname ." bad text attribute length"
+      endif
+    else
+      let kdata['text'] = ""
     endif
 
   endfor
@@ -118,9 +125,15 @@ call s:LOG("s:loadCategory: TOP")
   let l:abbrev = l:cdata.abbreviation
   for [kname, kdata] in items(kinds)
     let cmd = ':sign define '. l:abbrev .'_'. kname
-    let cmd .= ' linehl='. kdata.linehl
-    let cmd .= ' texthl='. kdata.texthl
-    let cmd .= ' text='. kdata.text
+    if kdata.linehl != ""
+      let cmd .= ' linehl='. kdata.linehl
+    endif
+    if kdata.texthl != ""
+      let cmd .= ' texthl='. kdata.texthl
+    endif
+    if kdata.text != ""
+      let cmd .= ' text='. kdata.text
+    endif
 " echo "cmd=" . cmd
 call s:LOG("s:loadCategory cmd=". cmd)
     execute cmd
@@ -315,6 +328,47 @@ function! s:UnPlaceTag(linenos, tagtype, tag, category, kind)
 endfunction
 
 " ==============================================
+" Empty
+" ==============================================
+
+" TODO seems to be the same as the Clear function
+" return 0 or 1
+function! vimside#sign#EmptyFile(linenos, filename, category, kind)
+  let l:filename = fnamemodify(a:filename, ":p")
+  call s:EmptyTag(a:linenos, 'file', l:filename, a:category, a:kind)
+endfunction
+function! vimside#sign#EmptyBuffer(linenos, buffer, category, kind)
+  call s:EmptyTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
+endfunction
+
+function! s:EmptyTag(linenos, tagtype, tag, category, kind)
+  if ! has_key(s:categories, a:category)
+    echo "Bad Category: ". a:category
+    return 0
+  endif
+
+  let l:cdata = s:categories[a:category]
+  let l:ids = l:cdata.ids
+
+
+  let [l:found, l:id] = s:GetId(a:linenos, a:tag, l:ids)
+  if l:found 
+    execute ':sign unplace '. l:id .' '. a:tagtype .'='. a:tag
+    unlet l:ids[l:id]
+
+    let l:id = s:GetNextId()
+    let l:name = s:sign_toggle_name 
+    execute ':sign place '. l:id .' line='. a:linenos .' name='. l:name .' '. a:tagtype .'='. a:tag
+    let ids[l:id] = [a:tagtype, a:tag, a:linenos, a:kind]
+
+    return 1
+  else
+    echo "Bad tag: ". a:tag ." and linenos: ". a:linenos
+    return 0
+  endif
+endfunction
+
+" ==============================================
 " Toggle
 " ==============================================
 
@@ -341,7 +395,7 @@ function! vimside#sign#Toggle(category, ...)
     let l:name = s:sign_toggle_name 
     for [id, finfo] in items(l:ids)
       let [tagtype, tag, ln, kind] = finfo
-      execute ':sign place '. id ' name='. l:name .' '. tagtype .'='. tag
+      execute ':sign place '. id .' name='. l:name .' '. tagtype .'='. tag
       unlet tag
     endfor
   else
@@ -484,6 +538,7 @@ function! vimside#sign#ChangeKindKind(category, from_kind, to_kind)
 
   return 1
 endfunction
+
 
 " ==============================================
 " Clear
