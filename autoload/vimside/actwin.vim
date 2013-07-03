@@ -57,6 +57,24 @@ endfunction
 "     text highlight th
 "     lines highlight lh
 
+"
+" vimside properties
+" vimside.quickfix.texthl.group=
+" vimside.quickfix.texthl.ctermfg=
+"
+" for line inf readfile(prop_file)
+"   if [found, name, value] = ParseProp(line)
+"   if found
+"   endif
+" endfor
+"  let [namepath, value] = split(line, "=")
+"  let names = split(namepath, ".")
+"
+"  vimside.actwin.quickfix.window.sign.error.textln.group=
+"  vimside.actwin.quickfix.window.sign.error.textln.cterm=
+"
+
+"
 " term= bold underline reverse italic standout NONE
 " cterm= bold underline reverse italic standout NONE
 " ctermfg
@@ -64,51 +82,26 @@ endfunction
 " gui=
 " guifg=
 " guibg=
-
-if 0 " HHHHHHHHHHHHHHH
-"display": {
-  "source": {
-    "sign": {
-      "toggle": "ss"
-      "current_line": "sscl"
-      "is_enable": 0
-      "is_on": 0
-      "kinds": {
-        "kind1": {
-          "toggle": "sskind1"
-          "is_enable": 0
-          "is_on": 0
-          "text": "EE",
-          "texthl": "Todo",
-          "linehl": "Error",
-        }
-        ...
-      }
-"       row (sign or highlight)
-"       column (color or highlight)
-"       row & column
-"       cursorcolumn
-    }
-    "entity": {
-    }
-  }
-  "window": {
-    "cursor_line": {
-        "toggle": "wcl"
-        "is_enable": 0
-        "is_on": 0
-    }
-    "highlight_line": {
-        "toggle": "whl"
-        "is_enable": 0
-        "is_on": 0
-        "all_text": 0
-        "is_full": 0
-    }
-    }
-  }
-}
-endif " HHHHHHHHHHHHHHH
+"  attrs
+"    bold
+"    underline
+"    reverse
+"    italic
+"    standout
+"    NONE
+"  ctermfg color_nr or simple_color_name
+"  ctermbg color_nr or simple_color_name
+"  guifg  color_name
+"  guibg  color_name
+"  
+"  group="Comment"
+"  group="Comment"
+"  texthl={ ... fg/bg}
+"  texthl=group
+"  linehl={ fg/bg}
+"  linehl=group
+"
+"
 
 "
 " remove entry, list of entries
@@ -155,6 +148,8 @@ let s:dislay_window_highlight_line_is_on_default = 0
 let s:dislay_window_highlight_line_is_full_default = 0
 let s:dislay_window_highlight_line_all_text_default = 0
 
+let s:dislay_window_sign_toggle_default = "sw"
+let s:dislay_window_sign_is_on_default = 0
 let s:dislay_window_sign_all_text_default = 0
 
 
@@ -1284,13 +1279,17 @@ endif " NOUSE
         if ! has_key(l:sign, 'is_enable')
           let l:sign['is_enable'] = 0
         endif
+        if ! has_key(l:sign, 'toggle')
+          let l:sign['toggle'] = s:dislay_window_sign_toggle_default
+        endif
+        if ! has_key(l:sign, 'is_on')
+          let l:sign['is_on'] = s:dislay_window_sign_is_on_default
+        endif
         if ! has_key(l:sign, 'all_text')
           let l:sign['all_text'] = s:dislay_window_sign_all_text_default
         endif
       endif
-
     endif
-
   endif
 
   if ! has_key(a:data, 'help')
@@ -2061,6 +2060,9 @@ endfunction
 function! s:DefineSign(actwin)
 call s:LOG("DefineSign TOP")
   let l:sign = a:actwin.data.display.window.sign
+
+  execute ":nnoremap <silent> <buffer> <Leader>". l:sign.toggle ." :call g:ToggleSign()<CR>"
+
   let l:category = l:sign.category
 
   if has_key(l:sign, 'kinds') && ! vimside#sign#HasCategory(l:category)
@@ -2136,6 +2138,30 @@ if 0 " example of text file sign
   call vimside#sign#UnPlaceFile(l:line, l:file, l:category, l:kind)
 endif " example of text file sign
 
+endfunction
+
+function! g:ToggleSign()
+call s:LOG("ToggleSign TOP")
+  let [l:found, l:actwin] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:ToggleSign actwin not found")
+    return
+  endif
+
+call s:LOG("ToggleSign l:actwin.current_line=". l:actwin.current_line)
+  let l:linenos = l:actwin.current_line
+  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+
+  let l:sign = l:actwin.data.display.window.sign
+  let l:sign.is_enable = ! l:sign.is_enable
+
+  if l:sign.is_enable
+    call s:EnterSign(l:entrynos, l:actwin)
+  else
+    call s:LeaveSign(l:entrynos, l:actwin)
+  endif
+
+call s:LOG("ToggleSign BOTTOM")
 endfunction
 
 function! s:DestroySign(actwin)
@@ -3423,7 +3449,6 @@ function! vimside#actwin#TestQuickFix()
         \ ]
     \ }
 
-" TODO SIGN data.display.source.sign
   let l:data = {
         \ "title": "Test Window",
         \ "winname": "Test",
@@ -3595,12 +3620,12 @@ function! vimside#actwin#TestQuickFix()
           \ },
         \  { 'content': "line thirteen Bar",
           \ "file": "src/main/scala/com/megaannum/Bar.scala",
-          \ "line": 13,
+          \ "line": 12,
           \ "kind": "warn"
           \ },
         \  { 'content': "line fourteen Bar",
           \ "file": "src/main/scala/com/megaannum/Bar.scala",
-          \ "line": 14,
+          \ "line": 15,
           \ "kind": "info"
           \ },
         \  { 'content': "line fifteen",
