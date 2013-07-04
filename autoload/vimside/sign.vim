@@ -271,11 +271,11 @@ function! s:PlaceTag(linenos, tagtype, tag, category, kind)
 
   let l:id = s:GetNextId()
   let l:name = l:abbrev .'_'. a:kind
-call s:LOG("vimside#sign#Place: l:id=". l:id)
-call s:LOG("vimside#sign#Place: l:line=". a:linenos)
-call s:LOG("vimside#sign#Place: l:name=". l:name)
-call s:LOG("vimside#sign#Place: a:tagtype=". a:tagtype)
-call s:LOG("vimside#sign#Place: a:tag=". a:tag)
+call s:LOG("s:PlaceTag: l:id=". l:id)
+call s:LOG("s:PlaceTag: l:line=". a:linenos)
+call s:LOG("s:PlaceTag: l:name=". l:name)
+call s:LOG("s:PlaceTag: a:tagtype=". a:tagtype)
+call s:LOG("s:PlaceTag: a:tag=". a:tag)
 
   execute ':sign place '. l:id .' line='. a:linenos .' name='. l:name .' '. a:tagtype .'='. a:tag
 
@@ -494,10 +494,15 @@ function! s:ChangeKind(linenos, tagtype, tag, category, to_kind)
   let l:abbrev = cdata.abbreviation
   let l:ids = l:cdata.ids
 
-  let [l:found, id] = s:GetId(a:linenos, a:tag, l:ids)
+  let [l:found, l:id] = s:GetId(a:linenos, a:tag, l:ids)
   if l:found 
     let l:name = l:abbrev .'_'. a:to_kind
-    execute ':sign place '. id ' name='. l:name .' '. a:tagtype .'='. a:tag
+
+call s:LOG("s:ChangeKind: l:id=". l:id)
+call s:LOG("s:ChangeKind: l:name=". l:name)
+call s:LOG("s:ChangeKind: a:tagtype=". a:tagtype)
+call s:LOG("s:ChangeKind: a:tag=". a:tag)
+    execute ':sign place '. l:id ' name='. l:name .' '. a:tagtype .'='. a:tag
     return 1
   else
     echo "Bad filename: ". a:tag ." and linenos: ". a:linenos

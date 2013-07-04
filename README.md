@@ -35,6 +35,8 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Now property.vim file reading code mirrors Java's Properties code.
+
 Added property.vim which can convert properties to Options.
 
 Added "sign" base highlighting to actwin text.

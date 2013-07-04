@@ -1334,6 +1334,7 @@ endif " NOUSE
         if filereadable(l:file)
           let l:entry.file = fnamemodify(l:file, ":p")
         endif
+        let l:entry.is_defined = 0
       endif
     endfor
   endif
@@ -1642,7 +1643,7 @@ endfunction
 
 
 function! s:DisplayEntryEnter(entrynos, actwin)
-call s:LOG("DisplayEntryEnter TOP")
+call s:LOG("s:DisplayEntryEnter TOP")
   let l:display = a:actwin.data.display
 
   " source
@@ -1663,11 +1664,11 @@ call s:LOG("DisplayEntryEnter TOP")
     call s:EnterSign(a:entrynos, a:actwin)
   endif
 
-call s:LOG("DisplayEntryEnter BOTTOM")
+call s:LOG("s:DisplayEntryEnter BOTTOM")
 endfunction
 
 function! s:DisplayEntryLeave(entrynos, actwin)
-call s:LOG("DisplayEntryLeave TOP")
+call s:LOG("s:DisplayEntryLeave TOP")
   let l:display = a:actwin.data.display
 
   " source
@@ -1687,7 +1688,7 @@ call s:LOG("DisplayEntryLeave TOP")
   if l:window.sign.is_enable
     call s:LeaveSign(a:entrynos, a:actwin)
   endif
-call s:LOG("DisplayEntryLeave BOTTOM")
+call s:LOG("s:DisplayEntryLeave BOTTOM")
 endfunction
 
 " MUST be called from local buffer
@@ -1792,6 +1793,7 @@ function! s:EnableSigns(actwin)
       if l:bnr > 0
         let l:line = entry.line
         let l:kind = entry.kind
+call s:LOG("EnableSigns placed file=". l:file)
         call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
       else
 call s:LOG("EnableSigns not placed file=". l:file)
@@ -1813,14 +1815,17 @@ function! s:EnableFileSigns(actwin, file)
   if l:has_data_sign
     let l:sign = l:data.display.source.sign
     let l:category = l:sign.category
-    for entry in l:data.entries
-      let l:file = entry.file
-      let l:bnr = bufnr(l:file)
-      if l:bnr > 0 && a:file == l:file
-        let l:line = entry.line
-        let l:kind = entry.kind
-        call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-call s:LOG("EnableFileSigns placed file=". l:file)
+    for l:entry in l:data.entries
+      if ! l:entry.is_defined
+        let l:file = l:entry.file
+        let l:bnr = bufnr(l:file)
+        if l:bnr > 0 && a:file == l:file
+          let l:line = l:entry.line
+          let l:kind = l:entry.kind
+  call s:LOG("EnableFileSigns placed file=". l:file)
+          call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+        endif
+        let l:entry.is_defined = 1
       endif
     endfor
   endif
@@ -1850,6 +1855,9 @@ function! s:DisableSigns(actwin)
   if l:has_data_sign
     let l:sign = l:data.display.source.sign
     call vimside#sign#ClearCategory(l:sign.category)
+    for l:entry in l:data.entries
+      let l:entry.is_defined = 0
+    endfor
   endif
 endfunction
 
@@ -2095,7 +2103,7 @@ call s:LOG("EnterSign entrynos=". a:entrynos)
     call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
   endif
 
-  " call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+" call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
 
 if 0 " example of text file sign
   let l:file = l:entry.file
@@ -3533,7 +3541,7 @@ function! vimside#actwin#TestQuickFix()
               \ "all_text": 1
             \ },
             \ "sign": {
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "all_text": 1,
               \ "category": "SourceWindow",
               \ "abbreviation": "sw",
