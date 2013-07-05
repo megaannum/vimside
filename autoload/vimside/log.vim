@@ -44,6 +44,19 @@ if exists("g:vimside")
     endif
   endfunction
 
+  function! vimside#log#warn(msg)
+    " TODO convert to load/optimize version of getting time
+    if s:log_enabled
+      let t = exists("*strftime")
+          \ ? strftime("%Y%m%d-%H%M%S: ")    
+          \ : "" . localtime() . ": "
+
+      execute "redir >> " . s:log_file
+      silent echo "WARN: ". t . a:msg
+      execute "redir END"
+    endif
+  endfunction
+
   function! vimside#log#error(msg)
     " TODO convert to load/optimize version of getting time
     let t = exists("*strftime")
@@ -56,11 +69,19 @@ if exists("g:vimside")
 
 else
   let s:CWD = getcwd()
+
   function! vimside#log#log(msg)
     execute "redir >> ". s:CWD ."/VS_LOG"
     silent echo "INFO: ". a:msg
     execute "redir END"
   endfunction
+
+  function! vimside#log#warn(msg)
+    execute "redir >> ". s:CWD ."/VS_LOG"
+    silent echo "WARN: ". a:msg
+    execute "redir END"
+  endfunction
+
   function! vimside#log#error(msg)
     execute "redir >> ". s:CWD ."/VS_LOG"
     silent echo "ERROR: ". a:msg
