@@ -2645,5 +2645,10 @@ function! s:MakeOptions()
 endfunction
 
 function! vimside#options#defined#Load(options)
-  let a:options['defined'] = s:MakeOptions()
+  if ! has_key(a:options, 'defined') || empty(a:options.defined)
+    if ! exists("s:defined_options")
+      let s:defined_options = s:MakeOptions()
+    endif
+    let a:options['defined'] = s:defined_options
+  endif
 endfunction

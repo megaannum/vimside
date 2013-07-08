@@ -24,15 +24,6 @@ function! s:ERROR(msg)
   execute "redir END"
 endfunction
 
-"TODO
-"06/27
-"   colors
-"   split Foo/Bar cn from Foo to Bar
-"   Foo cn in actwin??
-"   fix BufLeave/BufEnter s:buf_change to == 0 and ++ --
-"   goto first/last/enter
-"
-"
 
 " toggle: km uc bc
 " leader_cmds
@@ -127,12 +118,8 @@ endfunction
 "options
 "row/column display
 
-let s:is_colorcolumn_enabled = 0
-let s:is_sign_colorline_enabled = 0
-let s:is_sign_enabled = 1
-if 0 " EHL
-let s:is_entry_highlight = 0
-endif " EHL
+let s:is_colorcolumn_enabled = 1
+let s:is_sign_colorline_enabled = 1
 
 let s:split_cmd_default = "new"
 let s:split_size_default = "10"
@@ -140,6 +127,9 @@ let s:split_below_default = 1
 let s:split_right_default = 0
 let s:edit_cmd_default = "enew"
 let s:tab_cmd_default = "tabnew"
+
+let s:dislay_source_sign_toggle_default = "ss"
+let s:dislay_source_sign_is_on_default = 0
 
 let s:dislay_window_cursor_line_toggle_default = "wcl"
 let s:dislay_window_cursor_line_is_on_default = 0
@@ -411,20 +401,20 @@ endfunction
 function! s:CreateFileHandlers(actwin)
   let a:actwin.files = []
   let a:actwin.handlers = {}
-  let a:actwin.handlers['onnewfile'] = []
-  let a:actwin.handlers['onclose'] = []
+  let a:actwin.handlers['on_new_file'] = []
+  let a:actwin.handlers['on_close'] = []
 endfunction
 
 function! s:CallNewFileHandlers(actwin, file)
   call add(a:actwin.files, a:file)
 
-  for l:Handler in a:actwin.handlers.onnewfile
+  for l:Handler in a:actwin.handlers.on_new_file
     call l:Handler(a:actwin, a:file)
   endfor
 endfunction
 
 function! s:CallOnCloseHandlers(actwin)
-  let l:onclosehandlers = a:actwin.handlers.onclose
+  let l:onclosehandlers = a:actwin.handlers.on_close
   for l:file in a:actwin.files
     for l:Handler in l:onclosehandlers
       call l:Handler(a:actwin, l:file)
@@ -1182,6 +1172,9 @@ endif " NOUSE
   if ! has_key(a:data, 'display')
     let a:data['display'] = {
         \ "source": {
+          \ "sign": {
+            \ "is_enable": 0
+          \ }
         \ },
         \ "window": {
           \ "cursor_line": {
@@ -1200,9 +1193,32 @@ endif " NOUSE
 
     " display.source
     if ! has_key(l:display, 'source')
-      let l:display['source'] = { }
+      let l:display['source'] = { 
+          \ "sign": {
+            \ "is_enable": 0
+          \ }
+        \ }
     else
-" TODO
+      let l:source = l:display.source
+      " display.source.sign
+      if ! has_key(l:source, 'sign')
+        let l:display['sign'] = {
+          \ "is_enable": 0
+          \ }
+      else
+        let l:sign = l:source.sign
+
+        if ! has_key(l:sign, 'is_enable')
+          let l:sign['is_enable'] = 0
+        else
+          if ! has_key(l:sign, 'toggle')
+            let l:sign['toggle'] = s:dislay_source_sign_toggle_default
+          endif
+          if ! has_key(l:sign, 'is_on')
+            let l:sign['is_on'] = s:dislay_source_sign_is_on_default
+          endif
+        endif
+      endif
     endif
 
     " display.window
@@ -1334,7 +1350,6 @@ endif " NOUSE
         if filereadable(l:file)
           let l:entry.file = fnamemodify(l:file, ":p")
         endif
-        let l:entry.is_defined = 0
       endif
     endfor
   endif
@@ -1529,7 +1544,6 @@ function! s:BuildDisplay(actwin)
 call s:LOG("BuildDisplay TOP")
   let l:Formatter = a:actwin.data.formatter
 
-  " TODO
   let a:actwin.first_buffer_line = 1
 
   let l:linenos_to_entrynos = []
@@ -1582,6 +1596,67 @@ endfunction
 "     DisableFile
 "     Disable
 "     Destroy
+"
+"
+" Display Source LifeCycle: {{{1
+"     Define - create structures
+"       s:SourceDefineSigns(a:actwin)
+"     Enable - enable on buffered files
+"       s:SourceEnableSigns(a:actwin)
+"     EnableFile (goto file previously not displayed)
+"       s:SourceEnableFileSigns(a:actwin, a:file)
+"     Toggle - toggle between effect on/off (Enable/Disable)
+"       g:ToggleSigns(buffer_nr)
+"       - ToggleSignMatch
+"       - ToggleShowColumn - colorcolumn
+"
+" s:EnterEntry(0, l:actwin)
+"   calls s:EnterActionQuickFix(entrynos, actwin)
+"      calls s:SourceSetAtEntry(entrynos, actwin)
+"         s:is_sign_colorline_enabled
+" s:SelectEntry(0, l:actwin)
+"   calls s:SelectActionQuickFix(entrynos, actwin)
+"      calls s:SourceGoToEntry(entrynos, actwin)
+" s:LeaveEntry(0, l:actwin)
+"   calls s:LeaveActionQuickFix(entrynos, actwin)
+"      calls s:RemoveAtEntry(a:entrynos, a:actwin)
+"         s:is_sign_colorline_enabled
+"
+"     Entry
+"       Enter - side effect of entering Window line
+"       Leave - side effect of leaving Window line
+"     DisableFile - disable on file that has been unbuffered
+"     Disable - disable on buffered files
+"       s:SourceDisableSigns(a:actwin)
+"     Destroy - remove structures
+"       s:SourceDestroySigns(a:actwin)
+"
+" Display Window LifeCycle: {{{1
+"     Define - create structures
+"       s:WindowDefineCursorLine(a:actwin)
+"       s:WindowDefineHighlightLine(a:actwin)
+"       s:WindowDefineSign(a:actwin)
+"     Enable
+"     EnableFile
+"     Toggle - toggle between effect on/off (Enable/Disable)
+"       g:ToggleCursorLine()
+"       g:ToggleHighlightLine()
+"       g:ToggleSign()
+"     Entry
+"       Enter call by s:EnterEntry(0, l:actwin)
+"           s:WindowEnterCursorLine(a:entrynos, a:actwin)
+"           s:WindowEnterHighlightLine(a:entrynos, a:actwin)
+"           s:WindowEnterSign(a:entrynos, a:actwin)
+"       Leave call by s:LeaveEntry(entrynos, actwin)
+"           s:WindowLeaveCursorLine(a:entrynos, a:actwin)
+"           s:WindowLeaveHighlightLine(a:entrynos, a:actwin)
+"           s:WindowLeaveSign(a:entrynos, a:actwin)
+"     DisableFile
+"     Disable
+"     Destroy - remove structures
+"       s:WindowDestroyCursorLine(a:actwin)
+"       s:WindowDestroyHighlightLine(a:actwin)
+"       s:WindowDestroySign(a:actwin)
 " ============================================================================
 
 function! s:DisplayDefine(actwin)
@@ -1589,28 +1664,28 @@ function! s:DisplayDefine(actwin)
 
   " source
   let l:source = l:display.source
-if s:is_sign_enabled
-  call s:DefineSigns(a:actwin)
-endif
+  if l:source.sign.is_enable
+    call s:SourceDefineSigns(a:actwin)
+  endif
 
   " window
   let l:window = l:display.window
 
   if l:window.cursor_line.is_enable
-    call s:DefineCursorLine(a:actwin)
+    call s:WindowDefineCursorLine(a:actwin)
   endif
 
   if l:window.highlight_line.is_enable
-    call s:DefineHighlightLine(a:actwin)
+    call s:WindowDefineHighlightLine(a:actwin)
   endif
 
   if l:window.sign.is_enable
-    call s:DefineSign(a:actwin)
+    call s:WindowDefineSign(a:actwin)
   endif
 
   " handlers
-  call add(a:actwin.handlers.onnewfile, function("s:DisplayEnableFile"))
-  call add(a:actwin.handlers.onclose, function("s:DisplayDisableFile"))
+  call add(a:actwin.handlers.on_new_file, function("s:DisplayEnableFile"))
+  call add(a:actwin.handlers.on_close, function("s:DisplayDisableFile"))
 endfunction
 
 function! s:DisplayEnable(actwin)
@@ -1618,9 +1693,9 @@ function! s:DisplayEnable(actwin)
 
   " source
   let l:source = l:display.source
-if s:is_sign_enabled
-  call s:EnableSigns(a:actwin)
-endif
+  if l:source.sign.is_enable
+    call s:SourceEnableSigns(a:actwin)
+  endif
 
   " window
   let l:window = l:display.window
@@ -1632,9 +1707,9 @@ function! s:DisplayEnableFile(actwin, file)
 
   " source
   let l:source = l:display.source
-if s:is_sign_enabled
-  call s:EnableFileSigns(a:actwin, a:file)
-endif
+  if l:source.sign.is_enable
+    call s:SourceEnableFileSigns(a:actwin, a:file)
+  endif
 
   " window
   let l:window = l:display.window
@@ -1653,15 +1728,15 @@ call s:LOG("s:DisplayEntryEnter TOP")
   let l:window = l:display.window
 
   if l:window.cursor_line.is_enable
-    call s:EnterCursorLine(a:entrynos, a:actwin)
+    call s:WindowEnterCursorLine(a:entrynos, a:actwin)
   endif
 
   if l:window.highlight_line.is_enable
-    call s:EnterHighlightLine(a:entrynos, a:actwin)
+    call s:WindowEnterHighlightLine(a:entrynos, a:actwin)
   endif
 
   if l:window.sign.is_enable
-    call s:EnterSign(a:entrynos, a:actwin)
+    call s:WindowEnterSign(a:entrynos, a:actwin)
   endif
 
 call s:LOG("s:DisplayEntryEnter BOTTOM")
@@ -1678,15 +1753,15 @@ call s:LOG("s:DisplayEntryLeave TOP")
   let l:window = l:display.window
 
   if l:window.cursor_line.is_enable
-    call s:LeaveCursorLine(a:entrynos, a:actwin)
+    call s:WindowLeaveCursorLine(a:entrynos, a:actwin)
   endif
 
   if l:window.highlight_line.is_enable
-    call s:LeaveHighlightLine(a:entrynos, a:actwin)
+    call s:WindowLeaveHighlightLine(a:entrynos, a:actwin)
   endif
 
   if l:window.sign.is_enable
-    call s:LeaveSign(a:entrynos, a:actwin)
+    call s:WindowLeaveSign(a:entrynos, a:actwin)
   endif
 call s:LOG("s:DisplayEntryLeave BOTTOM")
 endfunction
@@ -1697,7 +1772,7 @@ function! s:DisplayDisableFile(actwin, file)
 
   " source
   let l:source = l:display.source
-"  if s:is_sign_enabled
+"  if l:source.sign.is_enable
 "    call s:DisableFileSigns(a:actwin, a:file)
 "  endif
 
@@ -1712,8 +1787,8 @@ function! s:DisplayDisable(actwin)
 
   " source
   let l:source = l:display.source
-  if s:is_sign_enabled
-    call s:DisableSigns(a:actwin)
+  if l:source.sign.is_enable
+    call s:SourceDisableSigns(a:actwin)
   endif
 
   " window
@@ -1723,28 +1798,33 @@ endfunction
 
 " MUST be called from local buffer
 function! s:DisplayDestroy(actwin)
+call s:LOG("s:DisplayDestroy TOP")
   let l:display = a:actwin.data.display
 
   " source
   let l:source = l:display.source
-  if s:is_sign_enabled
-    call s:DestroySigns(a:actwin)
+  if l:source.sign.is_enable
+    call s:SourceDestroySigns(a:actwin)
   endif
+if s:is_colorcolumn_enabled
+    execute 'silent '. a:actwin.source_win_nr.'wincmd w | :set colorcolumn='
+endif
 
   " window
   let l:window = l:display.window
 
   if l:window.cursor_line.is_enable
-    call s:DestroyCursorLine(a:actwin)
+    call s:WindowDestroyCursorLine(a:actwin)
   endif
 
   if l:window.highlight_line.is_enable
-    call s:DestroyHighlightLine(a:actwin)
+    call s:WindowDestroyHighlightLine(a:actwin)
   endif
 
   if l:window.sign.is_enable
-    call s:DestroySign(a:actwin)
+    call s:WindowDestroySign(a:actwin)
   endif
+call s:LOG("s:DisplayDestroy BOTTOM")
 endfunction
 
 " ------------------------------
@@ -1762,7 +1842,7 @@ endfunction
 " Sign {{{1
 " ------------------------------
 
-function! s:DefineSigns(actwin)
+function! s:SourceDefineSigns(actwin)
   let l:data = a:actwin.data
 " TODO SIGN data.display.source.sign
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
@@ -1781,22 +1861,21 @@ function! s:DefineSigns(actwin)
   endif
 endfunction
 
-function! s:EnableSigns(actwin)
+function! s:SourceEnableSigns(actwin)
   let l:data = a:actwin.data
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
   if l:has_data_sign
     let l:sign = l:data.display.source.sign
     let l:category = l:sign.category
-    for entry in l:data.entries
-      let l:file = entry.file
+    for l:entry in l:data.entries
+      let l:file = l:entry.file
       let l:bnr = bufnr(l:file)
       if l:bnr > 0
-        let l:line = entry.line
-        let l:kind = entry.kind
-call s:LOG("EnableSigns placed file=". l:file)
+        let l:line = l:entry.line
+        let l:kind = l:entry.kind
         call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
       else
-call s:LOG("EnableSigns not placed file=". l:file)
+call s:LOG("SourceEnableSigns not placed file=". l:file)
       endif
     endfor
 
@@ -1808,7 +1887,7 @@ call s:LOG("EnableSigns not placed file=". l:file)
   endif
 endfunction
 
-function! s:EnableFileSigns(actwin, file)
+function! s:SourceEnableFileSigns(actwin, file)
   let l:file = fnamemodify(a:file, ":p")
   let l:data = a:actwin.data
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
@@ -1816,16 +1895,13 @@ function! s:EnableFileSigns(actwin, file)
     let l:sign = l:data.display.source.sign
     let l:category = l:sign.category
     for l:entry in l:data.entries
-      if ! l:entry.is_defined
-        let l:file = l:entry.file
-        let l:bnr = bufnr(l:file)
-        if l:bnr > 0 && a:file == l:file
-          let l:line = l:entry.line
-          let l:kind = l:entry.kind
-  call s:LOG("EnableFileSigns placed file=". l:file)
-          call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-        endif
-        let l:entry.is_defined = 1
+      let l:file = l:entry.file
+      let l:bnr = bufnr(l:file)
+      if l:bnr > 0 && a:file == l:file
+        let l:line = l:entry.line
+        let l:kind = l:entry.kind
+        call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+call s:LOG("SourceEnableFileSigns placed file=". l:file)
       endif
     endfor
   endif
@@ -1849,19 +1925,16 @@ call s:LOG("ToggleSigns TOP")
   endif
 endfunction
 
-function! s:DisableSigns(actwin)
+function! s:SourceDisableSigns(actwin)
   let l:data = a:actwin.data
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
   if l:has_data_sign
     let l:sign = l:data.display.source.sign
     call vimside#sign#ClearCategory(l:sign.category)
-    for l:entry in l:data.entries
-      let l:entry.is_defined = 0
-    endfor
   endif
 endfunction
 
-function! s:DestroySigns(actwin)
+function! s:SourceDestroySigns(actwin)
 " TODO SIGN data.display.source.sign
   let l:data = a:actwin.data
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
@@ -1886,7 +1959,7 @@ endfunction
 " ------------------------------
 
 " MUST be called from local buffer
-function! s:DefineCursorLine(actwin)
+function! s:WindowDefineCursorLine(actwin)
   let l:cursor_line = a:actwin.data.display.window.cursor_line
 
   if l:cursor_line.is_on
@@ -1900,11 +1973,11 @@ function! s:DefineCursorLine(actwin)
 
 endfunction
 
-function! s:EnterCursorLine(entrynos, actwin)
+function! s:WindowEnterCursorLine(entrynos, actwin)
   " emtpy
 endfunction
 
-function! s:LeaveCursorLine(entrynos, actwin)
+function! s:WindowLeaveCursorLine(entrynos, actwin)
   " emtpy
 endfunction
 
@@ -1932,7 +2005,7 @@ call s:LOG("ToggleCursorLine BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:DestroyCursorLine(actwin)
+function! s:WindowDestroyCursorLine(actwin)
   " empty
 endfunction
 
@@ -1941,14 +2014,14 @@ endfunction
 " ------------------------------
 
 " MUST be called from local buffer
-function! s:DefineHighlightLine(actwin)
+function! s:WindowDefineHighlightLine(actwin)
   let l:highlight_line = a:actwin.data.display.window.highlight_line
 
   execute ":nnoremap <silent> <buffer> <Leader>". l:highlight_line.toggle ." :call g:ToggleHighlightLine()<CR>"
 
   if l:highlight_line.is_full
     let l:currentline = a:actwin.current_line
-" call s:LOG("s:DefineHighlightLine currentline=". l:currentline)
+" call s:LOG("s:WindowDefineHighlightLine currentline=". l:currentline)
     let l:winWidth = winwidth(0)
     let l:winHeight = line('$')
 
@@ -1968,10 +2041,10 @@ function! s:DefineHighlightLine(actwin)
 endfunction
 
 function! s:EnterHighlightLine(entrynos, actwin)
-call s:LOG("EnterHighlightLine TOP")
+call s:LOG("WindowEnterHighlightLine TOP")
   let l:highlight_line = a:actwin.data.display.window.highlight_line
 
-" call s:LOG("s:EnterHighlightLine entrynos=". a:entrynos)
+" call s:LOG("s:WindowEnterHighlightLine entrynos=". a:entrynos)
 
   let l:entry = a:actwin.data.entries[a:entrynos]
   let l:content = l:entry.content
@@ -1984,16 +2057,16 @@ call s:LOG("EnterHighlightLine TOP")
   endif
   let l:nos_columns = l:highlight_line.nos_columns
 
-" call s:LOG("s:EnterHighlightLine line_start=". l:line_start)
-" call s:LOG("s:EnterHighlightLine nos_lines=". l:nos_lines)
+" call s:LOG("s:WindowEnterHighlightLine line_start=". l:line_start)
+" call s:LOG("s:WindowEnterHighlightLine nos_lines=". l:nos_lines)
   let l:highlight_line.sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines, l:nos_columns)
 
   let l:highlight_line.is_on = 1
 
 endfunction
 
-function! s:LeaveHighlightLine(entrynos, actwin)
-call s:LOG("s:LeaveHighlightLine entrynos=". a:entrynos)
+function! s:WindowLeaveHighlightLine(entrynos, actwin)
+call s:LOG("s:WindowLeaveHighlightLine entrynos=". a:entrynos)
   let l:highlight_line = a:actwin.data.display.window.highlight_line
 
   if has_key(l:highlight_line, 'sids')
@@ -2019,17 +2092,17 @@ call s:LOG("ToggleHighlightLine l:actwin.current_line=". l:actwin.current_line)
   let l:highlight_line.is_enable = ! l:highlight_line.is_enable
 
   if l:highlight_line.is_enable
-    call s:EnterHighlightLine(l:entrynos, l:actwin)
+    call s:WindowEnterHighlightLine(l:entrynos, l:actwin)
   else
-    call s:LeaveHighlightLine(l:entrynos, l:actwin)
+    call s:WindowLeaveHighlightLine(l:entrynos, l:actwin)
   endif
 
 call s:LOG("ToggleHighlightLine BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:DestroyHighlightLine(actwin)
-call s:LOG("DestroyHighlightLine TOP")
+function! s:WindowDestroyHighlightLine(actwin)
+call s:LOG("WindowDestroyHighlightLine TOP")
   let l:highlight_line = a:actwin.data.display.window.highlight_line
 
   if has_key(l:highlight_line, 'sids')
@@ -2065,8 +2138,8 @@ endfunction
 " Sign {{{1
 " ------------------------------
 
-function! s:DefineSign(actwin)
-call s:LOG("DefineSign TOP")
+function! s:WindowDefineSign(actwin)
+call s:LOG("WindowDefineSign TOP")
   let l:sign = a:actwin.data.display.window.sign
 
   execute ":nnoremap <silent> <buffer> <Leader>". l:sign.toggle ." :call g:ToggleSign()<CR>"
@@ -2078,9 +2151,9 @@ call s:LOG("DefineSign TOP")
   endif
 endfunction
 
-function! s:EnterSign(entrynos, actwin)
-call s:LOG("EnterSign TOP")
-call s:LOG("EnterSign entrynos=". a:entrynos)
+function! s:WindowEnterSign(entrynos, actwin)
+call s:LOG("WindowEnterSign TOP")
+call s:LOG("WindowEnterSign entrynos=". a:entrynos)
   let l:sign = a:actwin.data.display.window.sign
   let l:buffer_nr = a:actwin.buffer_nr
   let l:category = l:sign.category
@@ -2112,9 +2185,9 @@ endif " example of text file sign
 
 endfunction
 
-function! s:LeaveSign(entrynos, actwin)
-call s:LOG("LeaveSign TOP")
-call s:LOG("LeaveSign entrynos=". a:entrynos)
+function! s:WindowLeaveSign(entrynos, actwin)
+call s:LOG("WindowLeaveSign TOP")
+call s:LOG("WindowLeaveSign entrynos=". a:entrynos)
   let l:sign = a:actwin.data.display.window.sign
   let l:buffer_nr = a:actwin.buffer_nr
   let l:category = l:sign.category
@@ -2164,16 +2237,16 @@ call s:LOG("ToggleSign l:actwin.current_line=". l:actwin.current_line)
   let l:sign.is_enable = ! l:sign.is_enable
 
   if l:sign.is_enable
-    call s:EnterSign(l:entrynos, l:actwin)
+    call s:WindowEnterSign(l:entrynos, l:actwin)
   else
-    call s:LeaveSign(l:entrynos, l:actwin)
+    call s:WindowLeaveSign(l:entrynos, l:actwin)
   endif
 
 call s:LOG("ToggleSign BOTTOM")
 endfunction
 
-function! s:DestroySign(actwin)
-call s:LOG("DestroySign TOP")
+function! s:WindowDestroySign(actwin)
+call s:LOG("WindowDestroySign TOP")
   let l:sign = a:actwin.data.display.window.sign
   let l:category = l:sign.category
 
@@ -2247,12 +2320,6 @@ call s:LOG("s:Close l:actwin.buffer_nr=". l:actwin.buffer_nr)
   call s:DisplayDisable(l:actwin)
 
   call s:DisplayDestroy(l:actwin)
-
-if 0 " EHL
-  if s:is_entry_highlight && exists("b:actwin_sids")
-    call s:HighlightClear(b:actwin_sids)
-  endif
-endif " EHL
 
   call s:ClearCmds(l:actwin)
 
@@ -2432,37 +2499,10 @@ call s:LOG("s:OnEnterMouse: TOP")
     endif
   endif
 
-if 0 " XXXXXX
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-
-  let l:current_line = l:actwin.current_line
-  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
-  let l:current_entrynos = l:linenos_to_entrynos[l:current_line-1]
-  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
-
-"call s:LOG("s:OnEnterMouse l:current_line=". l:current_line)
-"call s:LOG("s:OnEnterMouse l:linenos=". l:linenos)
-if 1
-  if l:entrynos != l:current_entrynos
-    call s:LeaveEntry(l:current_entrynos, l:actwin)
-    call s:EnterEntry(l:entrynos, l:actwin)
-    let l:actwin.current_line = l:linenos
-  endif
-
-else
-  if l:linenos != l:current_line
-    call s:LeaveEntry(l:current_line, l:actwin)
-    call s:EnterEntry(l:linenos, l:actwin)
-    let l:actwin.current_line = l:linenos
-  endif
-endif
-endif " XXXXXX
-
 call s:LOG("s:OnEnterMouse: BOTTOM")
 endfunction
 
-" MUST be called from local buffer
+" MUST be called from local buffer <CR> -> OnSelect
 function! s:OnSelect()
 call s:LOG("s:OnSelect: TOP")
   let [l:found, l:actwin] = s:GetBufferActWin()
@@ -2482,16 +2522,6 @@ call s:LOG("s:OnSelect: TOP")
   else
     call feedkeys("\<CR>", 'n')
   endif
-
-if 0 " XXXXXX
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-
-  let l:linenos = line(".") - l:actwin.first_buffer_line + 1
-  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
-
-  call s:SelectEntry(l:entrynos, l:actwin)
-  let l:actwin.current_line = l:linenos
-endif " XXXXXX
 
 call s:LOG("s:OnSelect: BOTTOM")
 endfunction
@@ -2831,7 +2861,8 @@ execute 'silent '. l:win_nr.'wincmd w'
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
 
-    call s:SelectEntry(l:entrynos-1, l:actwin)
+    " TODO Selection is not Entry
+    " call s:SelectEntry(l:entrynos-1, l:actwin)
 
 execute 'silent '. l:win_nr.'wincmd w'
     let l:line = line(".") - l:actwin.first_buffer_line + 1
@@ -2895,7 +2926,8 @@ execute 'silent '. l:win_nr.'wincmd w'
 call s:LOG("g:VimsideActWinDown l:new_linenos=". l:new_linenos)
 call s:LOG("g:VimsideActWinDown l:nos_of_linenos=". l:nos_of_linenos)
 
-    call s:SelectEntry(l:entrynos+1, l:actwin)
+    " TODO Selection is not Entry
+    " call s:SelectEntry(l:entrynos+1, l:actwin)
 
 execute 'silent '. l:win_nr.'wincmd w'
     let l:line = line(".") - l:actwin.first_buffer_line + 1
@@ -3076,14 +3108,14 @@ endfunction
 " Set Non-ActWin cursor file and postion but stay in ActWin
 function! s:EnterActionQuickFix(entrynos, actwin)
 call s:LOG("s:EnterActionQuickFix: TOP entrynos=". a:entrynos)
-  call s:SetAtEntry(a:entrynos, a:actwin)
+  call s:SourceSetAtEntry(a:entrynos, a:actwin)
 call s:LOG("s:EnterActionQuickFix: BOTTOM")
 endfunction
 
 " Goto Non-ActWin cursor file and postion
 function! s:SelectActionQuickFix(entrynos, actwin)
 call s:LOG("s:SelectActionQuickFix TOP")
-  call s:GoToEntry(a:entrynos, a:actwin)
+  call s:SourceGoToEntry(a:entrynos, a:actwin)
 call s:LOG("s:SelectActionQuickFix BOTTOM")
 endfunction
 
@@ -3113,18 +3145,18 @@ endfunction
 
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:SetAtEntry(entrynos, actwin)
+function! s:SourceSetAtEntry(entrynos, actwin)
 let s:buf_change = 0
-call s:LOG("s:SetAtEntry: entrynos=". a:entrynos)
+call s:LOG("s:SourceSetAtEntry: entrynos=". a:entrynos)
   let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:bnr = bufnr(l:file)
-call s:LOG("s:SetAtEntry: bnr=". l:bnr)
+call s:LOG("s:SourceSetAtEntry: bnr=". l:bnr)
     let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SetAtEntry: file=". l:file)
-call s:LOG("s:SetAtEntry: win_nr=". l:win_nr)
-call s:LOG("s:SetAtEntry: source_buffer_nr bufwinnr=". bufwinnr(a:actwin.source_buffer_nr))
+call s:LOG("s:SourceSetAtEntry: file=". l:file)
+call s:LOG("s:SourceSetAtEntry: win_nr=". l:win_nr)
+call s:LOG("s:SourceSetAtEntry: source_buffer_nr bufwinnr=". bufwinnr(a:actwin.source_buffer_nr))
 
     let l:new_file = 0
     if l:win_nr == -1
@@ -3132,9 +3164,9 @@ execute 'silent '. a:actwin.source_win_nr.'wincmd w'
       execute "edit ". l:file
 execute 'silent '. bufwinnr(a:actwin.win_nr).'wincmd w'
       let l:bnr = bufnr(l:file)
-call s:LOG("s:SetAtEntry: bnr=". l:bnr)
+call s:LOG("s:SourceSetAtEntry: bnr=". l:bnr)
       let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SetAtEntry: win_nr=". l:win_nr)
+call s:LOG("s:SourceSetAtEntry: win_nr=". l:win_nr)
       let l:new_file = 1
     endif
 
@@ -3142,8 +3174,8 @@ call s:LOG("s:SetAtEntry: win_nr=". l:win_nr)
 let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
-call s:LOG("s:SetAtEntry: linenos=". l:linenos)
-call s:LOG("s:SetAtEntry: colnos=". l:colnos)
+call s:LOG("s:SourceSetAtEntry: linenos=". l:linenos)
+call s:LOG("s:SourceSetAtEntry: colnos=". l:colnos)
       " execute 'keepjumps silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . " "
       if l:colnos > 1
         execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . "l"
@@ -3152,7 +3184,6 @@ call s:LOG("s:SetAtEntry: colnos=". l:colnos)
       endif
 
       if l:new_file 
-" DOES THIS WORK
         " call s:DisplayEnableFile(a:actwin, l:file)
         call s:CallNewFileHandlers(a:actwin, l:file)
       endif
@@ -3176,12 +3207,10 @@ if s:is_colorcolumn_enabled
 endif
 
       " execute 'keepjumps silent '. actwin_buffer.'wincmd 2'
-      " TODO should this be a:actwin.buffer_nr
-      " wincmd p
 execute 'silent '. a:actwin.win_nr.'wincmd w'
     endif
   endif
-call s:LOG("s:SetAtEntry: BOTTOM")
+call s:LOG("s:SourceSetAtEntry: BOTTOM")
 let s:buf_change = 1
 endfunction
 
@@ -3209,19 +3238,19 @@ let s:buf_change = 1
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:GoToEntry(entrynos, actwin)
-call s:LOG("s:GoToEntry: in Non-ActWin entrynos=". a:entrynos)
+function! s:SourceGoToEntry(entrynos, actwin)
+call s:LOG("s:SourceGoToEntry: in Non-ActWin entrynos=". a:entrynos)
   let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:win_nr = bufwinnr(l:file)
-call s:LOG("s:GoToEntry: win_nr=". l:win_nr)
+call s:LOG("s:SourceGoToEntry: win_nr=". l:win_nr)
     if l:win_nr > 0
 let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
-call s:LOG("s:GoToEntry: linenos=". l:linenos)
-call s:LOG("s:GoToEntry: colnos=". l:colnos)
+call s:LOG("s:SourceGoToEntry: linenos=". l:linenos)
+call s:LOG("s:SourceGoToEntry: colnos=". l:colnos)
       if l:colnos > 1
         execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . "l"
       else
@@ -3238,6 +3267,7 @@ endif
 
     endif
   endif
+call s:LOG("s:SourceGoToEntry: BOTTOM")
 endfunction
 
 " ============================================================================
@@ -3499,6 +3529,7 @@ function! vimside#actwin#TestQuickFix()
         \ "display": {
           \ "source": {
             \ "sign": {
+              \ "is_enable": 1,
               \ "category": "TestWindow",
               \ "abbreviation": "tw",
               \ "toggle": "tw",
@@ -3529,8 +3560,8 @@ function! vimside#actwin#TestQuickFix()
           \ "window": {
             \ "cursor_line": {
               \ "toggle": "wcl",
-              \ "is_enable": 0,
-              \ "is_on": 0
+              \ "is_enable": 1,
+              \ "is_on": 1
             \ },
             \ "highlight_line": {
               \ "toggle": "whl",

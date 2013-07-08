@@ -104,6 +104,9 @@ call s:LOG("vimside#options#manager: s:full_dir=". s:full_dir)
 let s:vimside_dir = resolve(s:full_dir . '/../../../data/vimside/')
 call s:LOG("vimside#options#manager: s:vimside_dir=". s:vimside_dir)
 
+if ! exists("g:vimside")
+  let g:vimside = {}
+endif
 if ! exists("g:vimside.options")
   let g:vimside['options'] = {}
 endif
@@ -720,6 +723,139 @@ call s:LOG("vimside#options#manager#Load: BOTTOM")
 endfunction
 
 
+" args:
+"   optional:
+"     filename: file to write to
+"     force: 1 overwrite 
+function! vimside#options#manager#OutputProperties(...)
+  if a:0 == 1
+    let l:has_file = 1
+    let l:filename = a:1
+    let l:force = 0
+  elseif a:0 == 2
+    let l:has_file = 1
+    let l:filename = a:1
+    let l:force = a:2
+  else
+    let l:has_file = 0
+  endif
+    
+  if l:has_file
+    let l:s = getfsize(l:filename)
+    if l:s == 0
+      echoerr "Can not write to directory: ". l:filename
+      return
+    elseif l:s == -1
+      " file does not exists
+    else
+      " file exists
+      if ! l:force
+        echoerr "Can not overwrite file: ". l:filename ." use force==1"
+        return
+      endif
+    endif
+
+    execute "redir >> ". l:filename
+
+    let l:is_silent = 1
+  else
+    let l:is_silent = 0
+  endif
+  " call vimside#options#defined#Load(g:vimside.options)
+
+  let t = exists("*strftime")
+          \ ? strftime("%Y%m%d-%H%M%S: ") : "" . localtime() . ": "
+  if l:is_silent
+    silent echo "#"
+    silent echo "# Vimside Options"
+    silent echo "# Generated on: ". t
+    silent echo "#"
+  else
+    echo "#"
+    echo "# Vimside Options"
+    echo "# Generated on: ". t
+    echo "#"
+  endif
+
+  let l:defined = g:vimside.options.defined
+  let l:user = g:vimside.options.user
+  let l:default = g:vimside.options.default
+
+  let l:no_value_set = '<No Value Set>'
+
+  for l:opt in sort(keys(l:defined))
+    let l:key = substitute(l:opt, '-', '.', "g")
+    let l:value = l:defined[l:opt] 
+
+    if l:is_silent
+      silent echo "# Option: ". l:opt
+      silent echo "# description:"
+    else
+      echo "# Option: ". l:opt
+      echo "# description:"
+    endif
+
+    for l:s in l:value['description']
+      if l:is_silent
+        silent echo "#   ". l:s
+      else
+        echo "#   ". l:s
+      endif
+    endfor
+    if has_key(l:default.keyvals, l:opt) 
+      let l:current_value= l:default.keyvals[l:opt]
+      if l:is_silent
+        silent echo "# default value: ". string(l:current_value)
+      else
+        echo "# default value: ". string(l:current_value)
+      endif
+    else
+      if l:is_silent
+        silent echo "# default value: ". l:no_value_set
+      else
+        echo "# default value: ". l:no_value_set
+      endif
+    endif
+    if has_key(l:user.keyvals, l:opt) 
+      let l:current_value= l:user.keyvals[l:opt]
+      if l:is_silent
+        silent echo "# user value: ". string(l:current_value)
+      else
+        echo "# user value: ". string(l:current_value)
+      endif
+    else
+      if l:is_silent
+        silent echo "# user value: ".  l:no_value_set
+      else
+        echo "# user value: ".  l:no_value_set
+      endif
+    endif
+    if exists("l:current_value")
+      if l:is_silent
+        silent echo l:key ."=". string(l:current_value)
+      else
+        echo l:key ."=". string(l:current_value)
+      endif
+      unlet l:current_value
+    else
+      if l:is_silent
+        silent echo "# ". l:key ."=". l:no_value_set
+      else
+        echo "# ". l:key ."=". l:no_value_set
+      endif
+    endif
+    if l:is_silent
+      silent echo " "
+    else
+      echo " "
+    endif
+  endfor
+
+  if l:has_file
+    execute "redir END"
+  endif
+
+endfunction
 
 " ==============
 "  Restore: {{{1
