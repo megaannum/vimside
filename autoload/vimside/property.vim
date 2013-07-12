@@ -42,7 +42,7 @@ function! vimside#property#ConvertToOptions(props)
 
   for [l:parts, l:value] in a:props
     let l:option_name = vimside#property#ConvertPropPartsToOptionName(l:parts)
-    call add(l:options, [l:options_name, l:value])
+    call add(l:options, [l:option_name, l:value])
   endfor
 
   return l:options

@@ -73,18 +73,18 @@ call s:LOG("vimside#sign#AddCategory: category=". a:category)
     throw "Category does not have abbreviation attribute"
   endif
   if ! has_key(a:cdata, 'kinds')
-    throw "Category does not have kinds attribute"
+      throw "Category does not have kinds attribute"
   endif
   if ! has_key(a:cdata, 'ids')
     let a:cdata['ids'] = {}
   endif
 
-  let kinds = a:cdata['kinds']
-  if type(kinds) != type({})
+  let l:kinds = a:cdata.kinds
+  if type(l:kinds) != type({})
     throw "Category kinds attribute not a Dictionary"
   endif
 
-  for [kname, kdata] in items(kinds)
+  for [kname, kdata] in items(l:kinds)
     if has_key(kdata, 'linehl') 
       if hlexists(kdata.linehl) == 0
         throw "Category kind data: ". kname ." bad linehl attribute: ". kdata.linehl
@@ -287,20 +287,28 @@ endfunction
 
 
 " ==============================================
-" UnPlace
+" UnPlace by file and optionally by line
 " ==============================================
 
 " TODO seems to be the same as the Clear function
 " return 0 or 1
-function! vimside#sign#UnPlaceFile(linenos, filename, category, kind)
+function! vimside#sign#UnPlaceFile(filename, category, kind, ...)
   let l:filename = fnamemodify(a:filename, ":p")
-  call s:UnPlaceTag(a:linenos, 'file', l:filename, a:category, a:kind)
+  if a:0 > 1
+    call s:UnPlaceTag('file', l:filename, a:category, a:kind, a:1)
+  else
+    call s:UnPlaceTag('file', l:filename, a:category, a:kind)
+  endif
 endfunction
-function! vimside#sign#UnPlaceBuffer(linenos, buffer, category, kind)
-  call s:UnPlaceTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
+function! vimside#sign#UnPlaceBuffer(buffer, category, kind, ...)
+  if a:0 > 1
+    call s:UnPlaceTag('buffer', a:buffer, a:category, a:kind, a:1)
+  else
+    call s:UnPlaceTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
+  endif
 endfunction
 
-function! s:UnPlaceTag(linenos, tagtype, tag, category, kind)
+function! s:UnPlaceTag(tagtype, tag, category, kind, ...)
   if ! has_key(s:categories, a:category)
     echo "Bad Category: ". a:category
     return 0
@@ -314,17 +322,30 @@ function! s:UnPlaceTag(linenos, tagtype, tag, category, kind)
     return 0
   endif
 
-  let l:ids = l:cdata.ids
+call s:LOG("s:UnPlaceTag: a:tagtype=". a:tagtype)
+call s:LOG("s:UnPlaceTag: a:tag=". a:tag)
+call s:LOG("s:UnPlaceTag: a:category=". a:category)
 
-  let [l:found, id] = s:GetId(a:linenos, a:tag, l:ids)
-  if l:found 
-    execute ':sign unplace '. id .' '. a:tagtype .'='. a:tag
-    unlet l:ids[id]
-    return 1
+  if a:0 > 1
+    let l:linenos = a:1
+    let l:ids = l:cdata.ids
+call s:LOG("s:UnPlaceTag: l:linenos=". l:linenos)
+
+    let [l:found, id] = s:GetId(,:linenos, a:tag, l:ids)
+    if l:found 
+call s:LOG("s:UnPlaceTag: l:id=". l:id)
+      execute ':sign unplace '. id .' '. a:tagtype .'='. a:tag
+      unlet l:ids[id]
+      return 1
+    else
+      echo "Bad tag: ". a:tag ." and linenos: ". ,:linenos
+      return 0
+    endif
   else
-    echo "Bad tag: ". a:tag ." and linenos: ". a:linenos
-    return 0
+    execute ':sign unplace * '. a:tagtype .'='. a:tag
+    let l:cdata['ids'] = {}
   endif
+
 endfunction
 
 " ==============================================
