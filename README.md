@@ -35,6 +35,10 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Invoking built-in command overrides no longer are placed in the
+command line history.
+Fixed both window/source display rendering.
+
 Scala window per-line sign highlighting option now supported.
 Fixed <F2>, <F3>, <F4> toggle keys.
 Options can now be defined in property files.

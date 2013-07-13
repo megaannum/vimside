@@ -110,7 +110,7 @@ call s:LOG("vimside#sign#AddCategory: category=". a:category)
   endfor
 
   let s:categories[a:category] = a:cdata
-  call s:loadCategory(a:cdata)
+  call s:LoadCategory(a:cdata)
 call s:LOG("vimside#sign#AddCategory: BOTTOM")
 endfunction
 
@@ -118,8 +118,8 @@ endfunction
 " LOAD
 " ==============================================
 
-function! s:loadCategory(cdata)
-call s:LOG("s:loadCategory: TOP")
+function! s:LoadCategory(cdata)
+call s:LOG("s:LoadCategory: TOP")
   let l:cdata = a:cdata
   let l:kinds = a:cdata.kinds
   let l:abbrev = l:cdata.abbreviation
@@ -135,7 +135,7 @@ call s:LOG("s:loadCategory: TOP")
       let cmd .= ' text='. kdata.text
     endif
 " echo "cmd=" . cmd
-call s:LOG("s:loadCategory cmd=". cmd)
+call s:LOG("s:LoadCategory cmd=". cmd)
     execute cmd
   endfor
 
@@ -144,10 +144,10 @@ call s:LOG("s:loadCategory cmd=". cmd)
     let l:category = l:cdata.category
     execute ":nmap <silent> <Leader>" . l:toggle . " :call vimside#sign#Toggle('". l:category ."')<CR>"
     let l:cdata['is_toggle'] = 0
-call s:LOG("s:loadCategory: toggle mapping made")
+call s:LOG("s:LoadCategory: toggle mapping made")
   endif
 
-call s:LOG("s:loadCategory: BOTTOM")
+call s:LOG("s:LoadCategory: BOTTOM")
 endfunction
 
 
@@ -210,7 +210,7 @@ call s:LOG("vimside#sign#PlaceMany: category=". a:category)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:kind) 
-    echo "Bad Kind: ". a:kind ."for Category " . a.category
+    echo "Bad Kind: ". a:kind ." for Category " . a.category
     return 0
   endif
 
@@ -247,10 +247,10 @@ endfunction
 " return 0 or 1
 function! vimside#sign#PlaceFile(linenos, filename, category, kind)
   let l:filename = fnamemodify(a:filename, ":p")
-  call s:PlaceTag(a:linenos, "file", l:filename, a:category, a:kind)
+  return s:PlaceTag(a:linenos, "file", l:filename, a:category, a:kind)
 endfunction
 function! vimside#sign#PlaceBuffer(linenos, buffer, category, kind)
-  call s:PlaceTag(a:linenos, "buffer", a:buffer, a:category, a:kind)
+  return s:PlaceTag(a:linenos, "buffer", a:buffer, a:category, a:kind)
 endfunction
 
 function! s:PlaceTag(linenos, tagtype, tag, category, kind)
@@ -263,7 +263,7 @@ function! s:PlaceTag(linenos, tagtype, tag, category, kind)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:kind) 
-    echo "Bad Kind: ". a:kind ."for Category " . a.category
+    echo "Bad Kind: ". a:kind ." for Category " . a:category
     return 0
   endif
 
@@ -295,16 +295,16 @@ endfunction
 function! vimside#sign#UnPlaceFile(filename, category, kind, ...)
   let l:filename = fnamemodify(a:filename, ":p")
   if a:0 > 1
-    call s:UnPlaceTag('file', l:filename, a:category, a:kind, a:1)
+    return s:UnPlaceTag('file', l:filename, a:category, a:kind, a:1)
   else
-    call s:UnPlaceTag('file', l:filename, a:category, a:kind)
+    return s:UnPlaceTag('file', l:filename, a:category, a:kind)
   endif
 endfunction
 function! vimside#sign#UnPlaceBuffer(buffer, category, kind, ...)
   if a:0 > 1
-    call s:UnPlaceTag('buffer', a:buffer, a:category, a:kind, a:1)
+    return s:UnPlaceTag('buffer', a:buffer, a:category, a:kind, a:1)
   else
-    call s:UnPlaceTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
+    return s:UnPlaceTag('buffer', a:buffer, a:category, a:kind)
   endif
 endfunction
 
@@ -318,7 +318,7 @@ function! s:UnPlaceTag(tagtype, tag, category, kind, ...)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:kind) 
-    echo "Bad Kind: ". a:kind ."for Category " . a.category
+    echo "Bad Kind: ". a:kind ." for Category " . a.category
     return 0
   endif
 
@@ -356,10 +356,10 @@ endfunction
 " return 0 or 1
 function! vimside#sign#EmptyFile(linenos, filename, category, kind)
   let l:filename = fnamemodify(a:filename, ":p")
-  call s:EmptyTag(a:linenos, 'file', l:filename, a:category, a:kind)
+  return s:EmptyTag(a:linenos, 'file', l:filename, a:category, a:kind)
 endfunction
 function! vimside#sign#EmptyBuffer(linenos, buffer, category, kind)
-  call s:EmptyTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
+  return s:EmptyTag(a:linenos, 'buffer', a:buffer, a:category, a:kind)
 endfunction
 
 function! s:EmptyTag(linenos, tagtype, tag, category, kind)
@@ -445,7 +445,7 @@ function! vimside#sign#ToggleKind(category, kind, ...)
   if has_key(l:kinds, a:kind) 
     let l:kind = l:kinds[a:kind]
   else
-    echo "Bad Kind: ". a:kind ."for Category " . a.category
+    echo "Bad Kind: ". a:kind ." for Category " . a.category
     return 0
   endif
 
@@ -491,10 +491,10 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ChangeKindFile(linenos, filename, category, to_kind)
   let l:filename = fnamemodify(a:filename, ":p")
-  call s:ChangeKind(a:linenos, 'file', l:filename, a:category, a:to_kind)
+  return s:ChangeKind(a:linenos, 'file', l:filename, a:category, a:to_kind)
 endfunction
 function! vimside#sign#ChangeKindBuffer(linenos, buffer, category, to_kind)
-  call s:ChangeKind(a:linenos, 'buffer', a:buffer, a:category, a:to_kind)
+  return s:ChangeKind(a:linenos, 'buffer', a:buffer, a:category, a:to_kind)
 endfunction
 
 function! s:ChangeKind(linenos, tagtype, tag, category, to_kind)
@@ -507,7 +507,7 @@ function! s:ChangeKind(linenos, tagtype, tag, category, to_kind)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:to_kind) 
-    echo "Bad Kind: ". a:to_kind ."for Category " . a.category
+    echo "Bad Kind: ". a:to_kind ." for Category " . a.category
     return 0
   endif
 
@@ -542,11 +542,11 @@ function! vimside#sign#ChangeKindKind(category, from_kind, to_kind)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:from_kind) 
-    echo "Bad From Kind: ". a:from_kind ."for Category " . a.category
+    echo "Bad From Kind: ". a:from_kind ." for Category " . a.category
     return 0
   endif
   if ! has_key(l:kinds, a:to_kind) 
-    echo "Bad To Kind: ". a:to_kind ."for Category " . a.category
+    echo "Bad To Kind: ". a:to_kind ." for Category " . a.category
     return 0
   endif
 
@@ -573,10 +573,10 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ClearFile(linenos, filename, category)
   let l:filename = fnamemodify(a:filename, ":p")
-  call s:Clear(a:linenos, 'file', l:filename, a:category)
+  return s:Clear(a:linenos, 'file', l:filename, a:category)
 endfunction
 function! vimside#sign#ClearBuffer(linenos, buffer, category)
-  call s:Clear(a:linenos, 'buffer', a:buffer, a:category)
+  return s:Clear(a:linenos, 'buffer', a:buffer, a:category)
 endfunction
 
 function! s:Clear(linenos, tagtype, tag, category)
@@ -608,7 +608,7 @@ function! vimside#sign#ClearKind(category, kind)
   let l:kinds = l:cdata['kinds']
 
   if ! has_key(l:kinds, a:kind) 
-    echo "Bad To Kind: ". a:kind ."for Category " . a.category
+    echo "Bad To Kind: ". a:kind ." for Category " . a.category
     return 0
   endif
 

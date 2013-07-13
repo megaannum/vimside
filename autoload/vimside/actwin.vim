@@ -1227,6 +1227,17 @@ endif " NOUSE
           if ! has_key(l:sign, 'is_on')
             let l:sign['is_on'] = s:dislay_source_sign_is_on_default
           endif
+
+          if ! has_key(l:sign, 'kinds')
+            let l:sign['kinds'] = {}
+          endif
+          if has_key(l:sign, 'default_kind')
+            let l:default_kind = l:sign.default_kind
+            if ! has_key(l:sign.kinds, l:default_kind)
+              " TODO issue warning????
+              unlet l:sign.default_kind
+            endif
+          endif
         endif
       endif
 
@@ -1246,6 +1257,16 @@ endif " NOUSE
           endif
           if ! has_key(l:colorline, 'is_on')
             let l:colorline['is_on'] = s:dislay_source_colorline_is_on_default
+          endif
+          if ! has_key(l:colorline, 'kinds')
+            let l:colorline['kinds'] = {}
+          endif
+          if has_key(l:colorline, 'default_kind')
+            let l:default_kind = l:colorline.default_kind
+            if ! has_key(l:colorline.kinds, l:default_kind)
+              " TODO issue warning????
+              unlet l:colorline.default_kind
+            endif
           endif
         endif
       endif
@@ -1333,6 +1354,17 @@ endif " NOUSE
         endif
         if ! has_key(l:sign, 'all_text')
           let l:sign['all_text'] = s:dislay_window_sign_all_text_default
+        endif
+
+        if ! has_key(l:sign, 'kinds')
+          let l:sign['kinds'] = {}
+        endif
+        if has_key(l:sign, 'default_kind')
+          let l:default_kind = l:sign.default_kind
+          if ! has_key(l:sign.kinds, l:default_kind)
+            " TODO issue warning????
+            unlet l:sign.default_kind
+          endif
         endif
       endif
     endif
@@ -1929,7 +1961,8 @@ endfunction
 
 function! s:SourceEnableSigns(actwin)
 call s:LOG("SourceEnableSigns TOP")
-  let l:sign = a:actwin.data.display.source.sign
+  let l:data = a:actwin.data
+  let l:sign = l:data.display.source.sign
   let l:category = l:sign.category
   for l:entry in l:data.entries
     let l:file = l:entry.file
@@ -2027,23 +2060,6 @@ endfunction
 function! s:SourceEnableColorLine(actwin)
 call s:LOG("SourceEnableColorLine TOP")
 
-
-if 0 " CCCCCCCCCCCCC
-  let l:colorline = l:data.display.source.colorline
-  let l:category = l:colorline.category
-  for l:entry in l:data.entries
-    let l:file = l:entry.file
-    let l:bnr = bufnr(l:file)
-    if l:bnr > 0
-      let l:line = l:entry.line
-      let l:kind = l:entry.kind
-      call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-    else
-call s:LOG("SourceEnableColorLine not placed file=". l:file)
-    endif
-  endfor
-endif " CCCCCCCCCCCCC
-
   if exists("b:colorline_toggle")
     execute ":nnoremap <silent> <Leader>". b:colorline_toggle ." :call g:ToggleCursorLine(". a:actwin.buffer_nr .")<CR>"
     let b:is_toggle_colorline = 0
@@ -2057,20 +2073,32 @@ call s:LOG("SourceEnableFileColorLine TOP")
   let l:data = a:actwin.data
   let l:colorline = a:actwin.data.display.source.colorline
   let l:category = l:colorline.category
-  let l:entry = l:data.entries[a:entrynos]
-  let l:file = l:entry.file
+
   let l:bnr = bufnr(l:file)
   if l:bnr > 0 && a:file == l:file
+    let l:entry = l:data.entries[a:entrynos]
+    let l:file = l:entry.file
     let l:line = l:entry.line
 
-    let l:kind = 'marker'
-    for l:key in keys(l:colorline.kinds)
-      let l:kind = l:key
-      break
-    endfor
+    let l:kind = l:entry.kind
+    let l:kinds = l:colorline.kinds
+    if ! has_key(l:kinds, l:kind)
+      if has_key(l:colorline, 'default_kind')
+        let l:kind = l:colorline.default_kind
+      else
+        let l:kind = 'marker'
+        for l:key in keys(l:kinds)
+          let l:kind = l:key
+          break
+        endfor
+      endif
+    endif
+
     
 call s:LOG("SourceEnableFileSigns placed file=". l:file)
-    call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+    if ! vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+      call s:ERROR("SourceEnableFileSigns placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
+    endif
   endif
 call s:LOG("SourceEnableFileColorLine BOTTOM")
 endfunction
@@ -2081,20 +2109,31 @@ call s:LOG("SourceEntryEnterColorLine TOP")
   let l:colorline = l:data.display.source.colorline
   let l:category = l:colorline.category
 
-  let l:kind = 'marker'
-  for l:key in keys(l:colorline.kinds)
-    let l:kind = l:key
-    break
-  endfor
-
   let l:entry = l:data.entries[a:entrynos]
   let l:line = l:entry.line
   let l:file = l:entry.file
+
+  let l:kind = l:entry.kind
+  let l:kinds = l:colorline.kinds
+  if ! has_key(l:kinds, l:kind)
+    if has_key(l:colorline, 'default_kind')
+      let l:kind = l:colorline.default_kind
+    else
+      let l:kind = 'marker'
+      for l:key in keys(l:kinds)
+        let l:kind = l:key
+        break
+      endfor
+    endif
+  endif
+
   let l:bnr = bufnr(l:file)
 call s:LOG("SourceEntryEnterColorLine file=". l:file)
 call s:LOG("SourceEntryEnterColorLine bnr=". l:bnr)
   if l:bnr > 0
-    call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+    if ! vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
+      call s:ERROR("SourceEntryEnterColorLine placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
+    endif
   endif
 
 call s:LOG("SourceEntryEnterColorLine BOTTOM")
@@ -2117,7 +2156,8 @@ call s:LOG("SourceEntryLeaveColorLine TOP")
 call s:LOG("SourceEntryLeaveColorLine file=". l:file)
   let l:line = l:entry.line
   " call vimside#sign#UnPlaceFileByLine(l:file, l:category, l:kind, l:line)
-  call vimside#sign#UnPlaceFile(l:file, l:category, l:kind)
+  " call vimside#sign#UnPlaceFile(l:file, l:category, l:kind)
+  call vimside#sign#ClearCategory(l:category)
 
 call s:LOG("SourceEntryLeaveColorLine BOTTOM")
 endfunction
@@ -2363,7 +2403,21 @@ call s:LOG("WindowEnterSign entrynos=". a:entrynos)
   let l:buffer_nr = a:actwin.buffer_nr
   let l:category = l:sign.category
   let l:entry = a:actwin.data.entries[a:entrynos]
+
   let l:kind = l:entry.kind
+  let l:kinds = l:sign.kinds
+  if ! has_key(l:kinds, l:kind)
+    if has_key(l:sign, 'default_kind')
+      let l:kind = l:sign.default_kind
+    else
+      let l:kind = 'marker'
+      for l:key in keys(l:kinds)
+        let l:kind = l:key
+        break
+      endfor
+    endif
+  endif
+call s:LOG("WindowEnterSign kind=". l:kind)
 
   let l:content = l:entry.content
   let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
@@ -2388,6 +2442,7 @@ if 0 " example of text file sign
   call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
 endif " example of text file sign
 
+call s:LOG("WindowEnterSign BOTTOM")
 endfunction
 
 function! s:WindowLeaveSign(entrynos, actwin)
@@ -2398,7 +2453,21 @@ call s:LOG("WindowLeaveSign entrynos=". a:entrynos)
   let l:category = l:sign.category
   let l:entry = a:actwin.data.entries[a:entrynos]
   let l:file = l:entry.file
+
   let l:kind = l:entry.kind
+  let l:kinds = l:sign.kinds
+  if ! has_key(l:kinds, l:kind)
+    if has_key(l:sign, 'default_kind')
+      let l:kind = l:sign.default_kind
+    else
+      let l:kind = 'marker'
+      for l:key in keys(l:kinds)
+        let l:kind = l:key
+        break
+      endfor
+    endif
+  endif
+call s:LOG("WindowLeaveSign kind=". l:kind)
 
   let l:content = l:entry.content
   let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
@@ -2407,16 +2476,14 @@ call s:LOG("WindowLeaveSign entrynos=". a:entrynos)
     let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
     let l:cnt = 0
     while l:cnt <= l:nos_lines
-      call vimside#sign#UnPlaceBuffer(l:line_start+l:cnt, l:buffer_nr, l:category, l:kind)
+      call vimside#sign#UnPlaceBuffer(l:buffer_nr, l:category, l:kind, l:line_start+l:cnt)
       let l:cnt += 1
     endwhile
   else
     let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
-    call vimside#sign#UnPlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
+    call vimside#sign#UnPlaceBuffer(l:buffer_nr, l:category, l:kind, l:line_start)
   endif
 
-  " call vimside#sign#UnPlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
-  " call vimside#sign#EmptyBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
 
 
 if 0 " example of text file sign
@@ -2424,6 +2491,7 @@ if 0 " example of text file sign
   call vimside#sign#UnPlaceFileByLine(l:line, l:file, l:category, l:kind)
 endif " example of text file sign
 
+call s:LOG("WindowLeaveSign BOTTOM")
 endfunction
 
 function! g:ToggleSign()
@@ -2963,6 +3031,7 @@ call s:LOG("s:OnTop l:actwin.current_line=". l:actwin.current_line)
   execute 'silent '. b:return_win_nr.'wincmd w'
 let s:buf_change = 1
 
+call histdel(":", "VimsideActWinFirst")
 echo ""
 
 call s:LOG("g:VimsideActWinFirst: BOTTOM")
@@ -3025,6 +3094,7 @@ call s:LOG("s:VimsideActWinLast l:actwin.current_line=". l:actwin.current_line)
   execute 'silent '. b:return_win_nr.'wincmd w'
 let s:buf_change = 1
 
+call histdel(":", "VimsideActWinLast")
 echo ""
 call s:LOG("g:VimsideActWinLast: BOTTOM")
 endfunction
@@ -3087,6 +3157,7 @@ let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
   endif
+call histdel(":", "VimsideActWinUp")
 echo ""
 call s:LOG("g:VimsideActWinUp: BOTTOM")
 endfunction
@@ -3152,6 +3223,7 @@ let s:buf_change = 1
 
     let l:actwin.current_line = l:new_linenos
   endif
+call histdel(":", "VimsideActWinDown")
 echo ""
 call s:LOG("g:VimsideActWinDown: BOTTOM")
 endfunction
@@ -3172,6 +3244,7 @@ call s:LOG("g:VimsideActWinEnter: TOP buffer_nr=". a:buffer_nr)
 
   execute 'silent '. l:actwin.win_nr.'wincmd w'
 
+call histdel(":", "VimsideActWinEnter")
 call s:LOG("g:VimsideActWinEnter: BOTTOM")
 endfunction
 
@@ -3190,6 +3263,7 @@ call s:LOG("g:VimsideActWinClose: TOP buffer_nr=". a:buffer_nr)
   call s:Close(l:actwin)
   execute 'silent '. b:return_win_nr.'wincmd w'
 
+call histdel(":", "VimsideActWinClose")
 echo ""
 call s:LOG("g:VimsideActWinClose: BOTTOM")
 endfunction
@@ -3738,10 +3812,11 @@ function! vimside#actwin#TestQuickFix()
         \ "display": {
           \ "source": {
             \ "sign": {
-              \ "is_enable": 0,
+              \ "is_enable": 1,
               \ "category": "TestWindow",
               \ "abbreviation": "tw",
               \ "toggle": "tw",
+              \ "default_kind": "marker",
               \ "kinds": {
                 \ "error": {
                   \ "text": "EE",
@@ -3768,14 +3843,20 @@ function! vimside#actwin#TestQuickFix()
             \ "colorline": {
               \ "is_enable": 1,
               \ "is_on": 0,
-              \ "toggle": "cl",
               \ "category": "ColorLine",
+              \ "toggle": "cl",
               \ "abbreviation": "cl",
+              \ "default_kind": "marker",
               \ "kinds": {
+                \ "error": {
+                  \ "text": "EE",
+                  \ "texthl": "Error",
+                  \ "linehl": "Error"
+                \ },
                 \ "marker": {
                   \ "text": "MM",
                   \ "texthl": "Search",
-                  \ "linehl": "Ignore"
+                  \ "linehl": "Search"
                 \ }
               \ }
             \ }
@@ -3795,11 +3876,12 @@ function! vimside#actwin#TestQuickFix()
               \ "all_text": 1
             \ },
             \ "sign": {
-              \ "is_enable": 0,
+              \ "is_enable": 1,
               \ "all_text": 1,
               \ "category": "SourceWindow",
               \ "abbreviation": "sw",
               \ "toggle": "sw",
+              \ "default_kind": "marker",
               \ "kinds": {
                 \ "error": {
                   \ "text": "EE"
