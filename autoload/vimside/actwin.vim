@@ -24,6 +24,14 @@ function! s:ERROR(msg)
   execute "redir END"
 endfunction
 
+" TODO
+" color_column :hi ColorColumn ctermbg=lightgrey guibg=lightgrey
+" allow toggle with key_map, leader cmd
+"    toggle: {
+"      key_map: "t",
+"      leader_cmd: "t",
+"      builtin_cmd: "t",
+"    }
 
 " toggle: km uc bc
 " leader_cmds
@@ -118,10 +126,7 @@ endfunction
 "options
 "row/column display
 
-let s:is_colorcolumn_enabled = 0
-if 0 " COLORLINE
-let s:is_sign_colorline_enabled = 0
-endif " COLORLINE
+let s:is_color_column_enabled = 0
 
 let s:split_cmd_default = "new"
 let s:split_size_default = "10"
@@ -132,8 +137,10 @@ let s:tab_cmd_default = "tabnew"
 
 let s:dislay_source_sign_toggle_default = "ss"
 let s:dislay_source_sign_is_on_default = 0
-let s:dislay_source_colorline_toggle_default = "cl"
-let s:dislay_source_colorline_is_on_default = 0
+let s:dislay_source_color_line_toggle_default = "cl"
+let s:dislay_source_color_line_is_on_default = 0
+let s:dislay_source_color_column_toggle_default = "cc"
+let s:dislay_source_color_column_is_on_default = 0
 
 let s:dislay_window_cursor_line_toggle_default = "wcl"
 let s:dislay_window_cursor_line_is_on_default = 0
@@ -1181,7 +1188,10 @@ endif " NOUSE
           \ "sign": {
             \ "is_enable": 0
           \ },
-          \ "colorline": {
+          \ "color_line": {
+            \ "is_enable": 0
+          \ },
+          \ "color_column": {
             \ "is_enable": 0
           \ }
         \ },
@@ -1241,36 +1251,59 @@ endif " NOUSE
         endif
       endif
 
-      " display.source.colorline
-      if ! has_key(l:source, 'colorline')
-        let l:display['colorline'] = {
+      " display.source.color_line
+      if ! has_key(l:source, 'color_line')
+        let l:display['color_line'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:colorline = l:source.colorline
+        let l:color_line = l:source.color_line
 
-        if ! has_key(l:colorline, 'is_enable')
-          let l:colorline['is_enable'] = 0
+        if ! has_key(l:color_line, 'is_enable')
+          let l:color_line['is_enable'] = 0
         else
-          if ! has_key(l:colorline, 'toggle')
-            let l:colorline['toggle'] = s:dislay_source_colorline_toggle_default
+          if ! has_key(l:color_line, 'toggle')
+            let l:color_line['toggle'] = s:dislay_source_color_line_toggle_default
           endif
-          if ! has_key(l:colorline, 'is_on')
-            let l:colorline['is_on'] = s:dislay_source_colorline_is_on_default
+          if ! has_key(l:color_line, 'is_on')
+            let l:color_line['is_on'] = s:dislay_source_color_line_is_on_default
           endif
-          if ! has_key(l:colorline, 'kinds')
-            let l:colorline['kinds'] = {}
+          if ! has_key(l:color_line, 'kinds')
+            let l:color_line['kinds'] = {}
           endif
-          if has_key(l:colorline, 'default_kind')
-            let l:default_kind = l:colorline.default_kind
-            if ! has_key(l:colorline.kinds, l:default_kind)
+          if has_key(l:color_line, 'default_kind')
+            let l:default_kind = l:color_line.default_kind
+            if ! has_key(l:color_line.kinds, l:default_kind)
               " TODO issue warning????
-              unlet l:colorline.default_kind
+              unlet l:color_line.default_kind
             endif
           endif
         endif
       endif
+
+      " display.source.color_column
+      if ! has_key(l:source, 'color_column')
+        let l:display['color_column'] = {
+          \ "is_enable": 0
+          \ }
+      else
+        let l:color_column = l:source.color_column
+        if ! has_key(l:color_column, 'is_enable')
+          let l:color_column['is_enable'] = 0
+        else
+          if ! has_key(l:color_column, 'toggle')
+            let l:color_column['toggle'] = s:dislay_source_color_column_toggle_default
+          endif
+          if ! has_key(l:color_column, 'is_on')
+            let l:color_column['is_on'] = s:dislay_source_color_column_is_on_default
+          endif
+
+        endif
+      endif
+      
     endif
+
+
 
     " display.window
     if ! has_key(l:display, 'window')
@@ -1688,14 +1721,12 @@ endfunction
 " s:EnterEntry(0, l:actwin)
 "   calls s:EnterActionQuickFix(entrynos, actwin)
 "      calls s:SourceSetAtEntry(entrynos, actwin)
-"         s:is_sign_colorline_enabled
 " s:SelectEntry(0, l:actwin)
 "   calls s:SelectActionQuickFix(entrynos, actwin)
 "      calls s:SourceGoToEntry(entrynos, actwin)
 " s:LeaveEntry(0, l:actwin)
 "   calls s:LeaveActionQuickFix(entrynos, actwin)
 "      calls s:RemoveAtEntry(a:entrynos, a:actwin)
-"         s:is_sign_colorline_enabled
 "
 "     Entry
 "       Enter - side effect of entering Window line
@@ -1742,8 +1773,11 @@ function! s:DisplayDefine(actwin)
   if l:source.sign.is_enable
     call s:SourceDefineSigns(a:actwin)
   endif
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceDefineColorLine(a:actwin)
+  endif
+  if l:source.color_column.is_enable
+    call s:SourceDefineColorColumn(a:actwin)
   endif
 
   " window
@@ -1774,8 +1808,11 @@ function! s:DisplayEnable(actwin)
   if l:source.sign.is_enable
     call s:SourceEnableSigns(a:actwin)
   endif
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceEnableColorLine(a:actwin)
+  endif
+  if l:source.color_column.is_enable
+    call s:SourceEnableColorColumn(a:actwin)
   endif
 
   " window
@@ -1792,9 +1829,11 @@ call s:LOG("DisplayEnableFile TOP")
   if l:source.sign.is_enable
     call s:SourceEnableFileSigns(a:actwin, a:file, a:entrynos)
   endif
-
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceEnableFileColorLine(a:actwin, a:file, a:entrynos)
+  endif
+  if l:source.color_column.is_enable
+    call s:SourceEnableFileColorColumn(a:actwin, a:file, a:entrynos)
   endif
 
   " window
@@ -1811,8 +1850,11 @@ call s:LOG("s:DisplayEntryEnter TOP")
   " source
   let l:source = l:display.source
 
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceEntryEnterColorLine(a:actwin, a:entrynos)
+  endif
+  if l:source.color_column.is_enable
+    call s:SourceEntryEnterColorColumn(a:actwin, a:entrynos)
   endif
 
   " window
@@ -1839,9 +1881,14 @@ call s:LOG("s:DisplayEntryLeave TOP")
 
   " source
   let l:source = l:display.source
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceEntryLeaveColorLine(a:actwin, a:entrynos)
   endif
+  if l:source.color_column.is_enable
+    call s:SourceEntryLeaveColorColumn(a:actwin, a:entrynos)
+  endif
+
+
 
   " window
   let l:window = l:display.window
@@ -1884,8 +1931,11 @@ function! s:DisplayDisable(actwin)
   if l:source.sign.is_enable
     call s:SourceDisableSigns(a:actwin)
   endif
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceDisableColorLine(a:actwin)
+  endif
+  if l:source.color_column.is_enable
+    call s:SourceDisableColorColumn(a:actwin)
   endif
 
   " window
@@ -1903,11 +1953,14 @@ call s:LOG("s:DisplayDestroy TOP")
   if l:source.sign.is_enable
     call s:SourceDestroySigns(a:actwin)
   endif
-  if l:source.colorline.is_enable
+  if l:source.color_line.is_enable
     call s:SourceDestroyColorLine(a:actwin)
   endif
 
-if s:is_colorcolumn_enabled
+  if l:source.color_column.is_enable
+    call s:SourceDestroyColorColumn(a:actwin)
+  endif
+if s:is_color_column_enabled
     execute 'silent '. a:actwin.source_win_nr.'wincmd w | :set colorcolumn='
 endif
 
@@ -1976,7 +2029,6 @@ call s:LOG("SourceEnableSigns not placed file=". l:file)
     endif
   endfor
 
-  " XXXXXXXXXXXXXXXX
   if exists("b:sign_toggle")
     execute ":nnoremap <silent> <Leader>". b:sign_toggle ." :call g:ToggleSigns(". a:actwin.buffer_nr .")<CR>"
     let b:is_toggle = 0
@@ -2042,17 +2094,17 @@ endfunction
 
 function! s:SourceDefineColorLine(actwin)
 call s:LOG("SourceDefineColorLine TOP")
-  let l:colorline = a:actwin.data.display.source.colorline
-  let l:category = l:colorline.category
+  let l:color_line = a:actwin.data.display.source.color_line
+  let l:category = l:color_line.category
 
-  if has_key(l:colorline, 'toggle')
+  if has_key(l:color_line, 'toggle')
 " let b:sign_toggle = l:sign.toggle
-    let b:colorline_toggle = l:colorline.toggle
-    unlet l:colorline.toggle
+    let b:color_line_toggle = l:color_line.toggle
+    unlet l:color_line.toggle
   endif
 
-  if has_key(l:colorline, 'kinds') && ! vimside#sign#HasCategory(l:category)
-    call vimside#sign#AddCategory(l:category, l:colorline)
+  if has_key(l:color_line, 'kinds') && ! vimside#sign#HasCategory(l:category)
+    call vimside#sign#AddCategory(l:category, l:color_line)
   endif
 call s:LOG("SourceDefineColorLine BOTTOM")
 endfunction
@@ -2060,9 +2112,9 @@ endfunction
 function! s:SourceEnableColorLine(actwin)
 call s:LOG("SourceEnableColorLine TOP")
 
-  if exists("b:colorline_toggle")
-    execute ":nnoremap <silent> <Leader>". b:colorline_toggle ." :call g:ToggleCursorLine(". a:actwin.buffer_nr .")<CR>"
-    let b:is_toggle_colorline = 0
+  if exists("b:color_line_toggle")
+    execute ":nnoremap <silent> <Leader>". b:color_line_toggle ." :call g:ToggleCursorLine(". a:actwin.buffer_nr .")<CR>"
+    let b:is_toggle_color_line = 0
   endif
 call s:LOG("SourceEnableColorLine BOTTOM")
 endfunction
@@ -2071,8 +2123,8 @@ function! s:SourceEnableFileColorLine(actwin, file, entrynos)
 call s:LOG("SourceEnableFileColorLine TOP")
   let l:file = fnamemodify(a:file, ":p")
   let l:data = a:actwin.data
-  let l:colorline = a:actwin.data.display.source.colorline
-  let l:category = l:colorline.category
+  let l:color_line = a:actwin.data.display.source.color_line
+  let l:category = l:color_line.category
 
   let l:bnr = bufnr(l:file)
   if l:bnr > 0 && a:file == l:file
@@ -2081,10 +2133,10 @@ call s:LOG("SourceEnableFileColorLine TOP")
     let l:line = l:entry.line
 
     let l:kind = l:entry.kind
-    let l:kinds = l:colorline.kinds
+    let l:kinds = l:color_line.kinds
     if ! has_key(l:kinds, l:kind)
-      if has_key(l:colorline, 'default_kind')
-        let l:kind = l:colorline.default_kind
+      if has_key(l:color_line, 'default_kind')
+        let l:kind = l:color_line.default_kind
       else
         let l:kind = 'marker'
         for l:key in keys(l:kinds)
@@ -2106,18 +2158,18 @@ endfunction
 function! s:SourceEntryEnterColorLine(actwin, entrynos)
 call s:LOG("SourceEntryEnterColorLine TOP")
   let l:data = a:actwin.data
-  let l:colorline = l:data.display.source.colorline
-  let l:category = l:colorline.category
+  let l:color_line = l:data.display.source.color_line
+  let l:category = l:color_line.category
 
   let l:entry = l:data.entries[a:entrynos]
   let l:line = l:entry.line
   let l:file = l:entry.file
 
   let l:kind = l:entry.kind
-  let l:kinds = l:colorline.kinds
+  let l:kinds = l:color_line.kinds
   if ! has_key(l:kinds, l:kind)
-    if has_key(l:colorline, 'default_kind')
-      let l:kind = l:colorline.default_kind
+    if has_key(l:color_line, 'default_kind')
+      let l:kind = l:color_line.default_kind
     else
       let l:kind = 'marker'
       for l:key in keys(l:kinds)
@@ -2142,11 +2194,11 @@ endfunction
 function! s:SourceEntryLeaveColorLine(actwin, entrynos)
 call s:LOG("SourceEntryLeaveColorLine TOP")
   let l:data = a:actwin.data
-  let l:colorline = l:data.display.source.colorline
-  let l:category = l:colorline.category
+  let l:color_line = l:data.display.source.color_line
+  let l:category = l:color_line.category
 
   let l:kind = 'marker'
-  for l:key in keys(l:colorline.kinds)
+  for l:key in keys(l:color_line.kinds)
     let l:kind = l:key
     break
   endfor
@@ -2170,24 +2222,148 @@ call s:LOG("ToggleColorLine TOP")
     return
   endif
 
-  let l:colorline = a:actwin.data.display.source.colorline
-  let b:is_toggle_colorline = ! b:is_toggle_colorline
-  call vimside#sign#Toggle(l:colorline.category, b:is_toggle_colorline)
+  let l:color_line = a:actwin.data.display.source.color_line
+  let b:is_toggle_color_line = ! b:is_toggle_color_line
+  call vimside#sign#Toggle(l:color_line.category, b:is_toggle_color_line)
 call s:LOG("ToggleColorLine BOTTOM")
 endfunction
 
 function! s:SourceDisableColorLine(actwin)
 call s:LOG("SourceDisableColorLine TOP")
-  let l:colorline = a:actwin.data.display.source.colorline
-  call vimside#sign#ClearCategory(l:colorline.category)
+  let l:color_line = a:actwin.data.display.source.color_line
+  call vimside#sign#ClearCategory(l:color_line.category)
 call s:LOG("SourceDisableColorLine BOTTOM")
 endfunction
 
 function! s:SourceDestroyColorLine(actwin)
 call s:LOG("SourceDestroyColorLine TOP")
-  let l:colorline = a:actwin.data.display.source.colorline
-  call vimside#sign#RemoveCategory(l:colorline.category)
+  let l:color_line = a:actwin.data.display.source.color_line
+  call vimside#sign#RemoveCategory(l:color_line.category)
 call s:LOG("SourceDestroyColorLine BOTTOM")
+endfunction
+
+" ------------------------------
+" ColorColumn {{{1
+" ------------------------------
+function! s:SourceDefineColorColumn(actwin)
+call s:LOG("SourceDefineColorColumn TOP")
+call s:LOG("SourceDefineColorColumn BOTTOM")
+endfunction
+
+function! s:SourceEnableColorColumn(actwin)
+call s:LOG("SourceEnableColorColumn TOP")
+
+  if exists("b:color_line_toggle")
+    execute ":nnoremap <silent> <Leader>". b:color_column_toggle ." :call g:ToggleCursorColumn(". a:actwin.buffer_nr .")<CR>"
+    let b:is_toggle_color_column = 0
+  endif
+call s:LOG("SourceEnableColorColumn BOTTOM")
+endfunction
+
+function! s:SourceEnableFileColorColumn(actwin, file, entrynos)
+call s:LOG("SourceEnableFileColorColumn TOP")
+
+  let l:data = a:actwin.data
+  let l:entry = l:data.entries[a:entrynos]
+  let l:file = l:entry.file
+  let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
+  let l:bnr = bufnr(l:file)
+call s:LOG("s:SourceEnableFileColorColumn: file=". l:file)
+call s:LOG("s:SourceEnableFileColorColumn: bnr=". l:bnr)
+  if l:bnr > 0 && l:file == a:file
+    let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("s:SourceEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
+
+
+    if l:win_nr > 0
+let s:buf_change = 0
+      if l:colnos > 0
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
+      else
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
+      endif
+let s:buf_change = 1
+
+call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+    endif
+  endif
+call s:LOG("SourceEnableFileColorColumn BOTTOM")
+endfunction
+
+function! s:SourceEntryEnterColorColumn(actwin, entrynos)
+call s:LOG("SourceEntryEnterColorColumn TOP")
+
+  let l:data = a:actwin.data
+  let l:entry = l:data.entries[a:entrynos]
+  let l:file = l:entry.file
+  let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
+  let l:bnr = bufnr(l:file)
+call s:LOG("s:SourceEntryEnterColorColumn: file=". l:file)
+call s:LOG("s:SourceEntryEnterColorColumn: bnr=". l:bnr)
+  if l:bnr > 0 
+    let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("s:SourceEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
+
+
+    if l:win_nr > 0
+let s:buf_change = 0
+      if l:colnos > 0
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
+      else
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
+      endif
+let s:buf_change = 1
+
+call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+    endif
+  endif
+
+call s:LOG("SourceEntryEnterColorColumn BOTTOM")
+endfunction
+
+function! s:SourceEntryLeaveColorColumn(actwin, entrynos)
+call s:LOG("SourceEntryLeaveColorColumn TOP")
+
+  let l:data = a:actwin.data
+  let l:entry = l:data.entries[a:entrynos]
+  let l:file = l:entry.file
+  " let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
+
+  let l:bnr = bufnr(l:file)
+call s:LOG("s:SourceEntryLeaveColorColumn: file=". l:file)
+call s:LOG("s:SourceEntryLeaveColorColumn: bnr=". l:bnr)
+  if l:bnr > 0
+    let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("s:SourceEntryLeaveColorColumn: DO_COLOR file win_nr=". l:win_nr)
+
+    if l:win_nr > 0
+call s:LOG("s:SourceEntryLeaveColorColumn: CLEAR")
+let s:buf_change = 0
+      execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
+let s:buf_change = 1
+
+call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
+      execute 'silent '. a:actwin.win_nr.'wincmd w'
+    endif
+  endif
+
+
+call s:LOG("SourceEntryLeaveColorColumn BOTTOM")
+endfunction
+
+function! s:SourceDisableColorColumn(actwin)
+call s:LOG("SourceDisableColorColumn TOP")
+call s:LOG("SourceDisableColorColumn BOTTOM")
+endfunction
+
+
+function! s:SourceDestroyColorColumn(actwin)
+call s:LOG("SourceDestroyColorColumn TOP")
+call s:LOG("s:SourceDestroyColorColumn: REMOVE COLOR source win_nr=". a:actwin.source_win_nr)
+  execute 'silent '. a:actwin.source_win_nr.'wincmd w | :set colorcolumn='
+call s:LOG("SourceDestroyColorColumn BOTTOM")
 endfunction
 
 " ------------------------------
@@ -2622,10 +2798,6 @@ execute 'silent '. l:actwin.win_nr.'wincmd w'
 execute 'silent '. l:actwin.source_win_nr.'wincmd w'
 
   call s:CallOnCloseHandlers(l:actwin)
-
-"  exec "keepjumps silent b ". l:actwin.source_buffer_name
-"  execute 'silent set colorcolumn='
-
 
   " Clear any messages.
   "  echo ""
@@ -3462,24 +3634,11 @@ call s:LOG("s:SourceSetAtEntry: colnos=". l:colnos)
       endif
 
       if l:new_file 
-        " call s:DisplayEnableFile(a:actwin, l:file)
         call s:CallNewFileHandlers(a:actwin, l:file, a:entrynos)
       endif
 
 
-if 0 " COLORLINE
-if s:is_sign_colorline_enabled
-" TODO SIGN data.display.source.sign
-  let l:data = a:actwin.data
-  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
-  if l:has_data_sign
-    let l:category = l:data.display.source.sign.category
-    let l:kind = l:entry.kind
-    call  vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, 'marker')
-  endif
-endif
-endif " COLORLINE
-if s:is_colorcolumn_enabled
+if s:is_color_column_enabled
   if l:colnos > 0
     execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
   else
@@ -3502,18 +3661,6 @@ call s:LOG("s:RemoveAtEntry: entrynos=". a:entrynos)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
-
-if 0 " COLORLINE
-if s:is_sign_colorline_enabled
-  let l:data = a:actwin.data
-  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
-  if l:has_data_sign
-    let l:category = l:data.display.source.sign.category
-    let l:kind = l:entry.kind
-    call vimside#sign#ChangeKindFile(l:linenos, l:file, l:category, l:kind)
-  endif
-endif
-endif " COLORLINE
 
   endif
 call s:LOG("s:RemoveAtEntry: BOTTOM")
@@ -3540,7 +3687,7 @@ call s:LOG("s:SourceGoToEntry: colnos=". l:colnos)
         execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G'
       endif
 
-if s:is_colorcolumn_enabled
+if s:is_color_column_enabled
   if l:colnos > 1
     execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
   else
@@ -3812,7 +3959,7 @@ function! vimside#actwin#TestQuickFix()
         \ "display": {
           \ "source": {
             \ "sign": {
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "category": "TestWindow",
               \ "abbreviation": "tw",
               \ "toggle": "tw",
@@ -3840,8 +3987,8 @@ function! vimside#actwin#TestQuickFix()
                 \ }
               \ }
             \ },
-            \ "colorline": {
-              \ "is_enable": 1,
+            \ "color_line": {
+              \ "is_enable": 0,
               \ "is_on": 0,
               \ "category": "ColorLine",
               \ "toggle": "cl",
@@ -3859,6 +4006,10 @@ function! vimside#actwin#TestQuickFix()
                   \ "linehl": "Search"
                 \ }
               \ }
+            \ },
+            \ "color_column": {
+              \ "is_enable": 1,
+              \ "is_on": 0,
             \ }
           \ },
           \ "window": {
@@ -3876,7 +4027,7 @@ function! vimside#actwin#TestQuickFix()
               \ "all_text": 1
             \ },
             \ "sign": {
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "all_text": 1,
               \ "category": "SourceWindow",
               \ "abbreviation": "sw",
@@ -3965,6 +4116,7 @@ function! vimside#actwin#TestQuickFix()
         \  { 'content': "line thirteen Bar",
           \ "file": "src/main/scala/com/megaannum/Bar.scala",
           \ "line": 12,
+          \ "col": 10,
           \ "kind": "warn"
           \ },
         \  { 'content': "line fourteen Bar",
