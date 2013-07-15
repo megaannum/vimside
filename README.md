@@ -35,6 +35,7 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Got color cursor toggling working.
 Got color cursor working.
 
 Invoking built-in command overrides no longer are placed in the

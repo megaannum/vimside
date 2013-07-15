@@ -26,15 +26,14 @@ endfunction
 
 " TODO
 " color_column :hi ColorColumn ctermbg=lightgrey guibg=lightgrey
-" allow toggle with key_map, leader cmd
+" allow toggle with key_map, key_map 
 "    toggle: {
 "      key_map: "t",
-"      leader_cmd: "t",
 "      builtin_cmd: "t",
 "    }
 
 " toggle: km uc bc
-" leader_cmds
+" key_map
 " builtin cmds
 "
 " toggle
@@ -206,7 +205,7 @@ let s:buf_change = 1
 "   key_map: {
 "     window_key_map_show: ""
 "     source_builtin_cmd_show: ""
-"     source_leader_cmd_show: ""
+"     source_key_map_show: ""
 "     help: ""
 "     select: []
 "     select_mouse: []
@@ -217,7 +216,7 @@ let s:buf_change = 1
 "   }
 "   builtin_cmd: {
 "   }
-"   leader_cmd: {
+"   key_map: {
 "     up: cp
 "     down: cn
 "     close: ccl
@@ -273,7 +272,7 @@ let s:buf_change = 1
 let s:cmds_window_defs = {
       \ "window_key_map_show": [ "ToggleWindowKeyMapInfo", "Display window key-map info" ],
       \ "source_builtin_cmd_show": [ "ToggleSourceBuiltinCmdInfo", "Display source builtin cmd info" ],
-      \ "source_leader_cmd_show": [ "ToggleSourceLeaderCmdInfo", "Display source leader cmd info" ],
+      \ "source_key_map_show": [ "ToggleSourceKeyMapInfo", "Display source key map cmd info" ],
       \ "help": [ "OnHelp", "Display help" ],
       \ "select": [ "OnSelect", "Select current line" ],
       \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
@@ -469,18 +468,24 @@ endfunction
 " MUST be called from local buffer
 function! s:MakeCmds(actwin)
   call s:MakeWindowKeyMappings(a:actwin)
+if 0 " NNNNNN
   call s:MakeWindowLeaderCommands(a:actwin)
+endif " NNNNNN
   call s:MakeWindowBuiltinCommands(a:actwin)
 
   call s:MakeSourceKeyMappings(a:actwin)
+if 0 " NNNNNN
   call s:MakeSourceLeaderCommands(a:actwin)
+endif " NNNNNN
   call s:MakeSourceBuiltinCommands(a:actwin)
 endfunction
 
 " MUST be called from local buffer
 function! s:ClearCmds(actwin)
   call s:ClearSourceKeyMappings(a:actwin)
+if 0 " NNNNNN
   call s:ClearSourceLeaderCommands(a:actwin)
+endif " NNNNNN
   call s:ClearSourceBuiltinCommands(a:actwin)
 endfunction
 
@@ -497,6 +502,7 @@ function! s:MakeWindowKeyMappings(actwin)
 endfunction
 
 " MUST be called from local buffer
+if 0 " NNNNNN
 function! s:MakeWindowLeaderCommands(actwin)
   if ! empty(a:actwin.data.cmds.window.leader_cmd)
     for [l:key, l:value] in items(a:actwin.data.cmds.window.leader_cmd)
@@ -507,6 +513,7 @@ function! s:MakeWindowLeaderCommands(actwin)
     endfor
   endif
 endfunction
+endif " NNNNNN
 
 " MUST be called from local buffer
 function! s:MakeWindowBuiltinCommands(actwin)
@@ -526,12 +533,12 @@ endfunction
 " MUST be called from local buffer
 function! s:MakeSourceKeyMappings(actwin)
   if ! empty(a:actwin.data.cmds.source.key_map)
-    let l:leader_cmd = a:actwin.data.cmds.source.key_map
+    let l:key_map = a:actwin.data.cmds.source.key_map
     let l:buffer_nr =  a:actwin.buffer_nr
     let l:is_global = a:actwin.is_global
 
     if l:is_global
-      for [l:key, l:value] in items(l:leader_cmd)
+      for [l:key, l:value] in items(l:key_map)
         let [l:fn, l:txt] = s:cmds_source_defs[l:key]
         for l:v in l:value
           execute ":nnoremap <silent> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
@@ -541,7 +548,7 @@ function! s:MakeSourceKeyMappings(actwin)
     else
       let s:buf_change = 0
       execute 'silent '. a:actwin.source_win_nr.'wincmd w'
-        for [l:key, l:value] in items(l:leader_cmd)
+        for [l:key, l:value] in items(l:key_map)
           let [l:fn, l:txt] = s:cmds_source_defs[l:key]
           for l:v in l:value
             execute ":nnoremap <silent> <buffer> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
@@ -579,6 +586,7 @@ function! s:ClearSourceKeyMappings(actwin)
 endfunction
 
 " MUST be called from local buffer
+if 0 " NNNNNN
 function! s:MakeSourceLeaderCommands(actwin)
   if ! empty(a:actwin.data.cmds.source.leader_cmd)
     let l:leader_cmd = a:actwin.data.cmds.source.leader_cmd
@@ -609,8 +617,10 @@ call s:LOG("s:MakeSourceLeaderCommands: key=". l:key .", value=" . l:v)
     endif
   endif
 endfunction
+endif " NNNNNN
 
 " MUST be called from local buffer
+if 0 " NNNNNN
 function! s:ClearSourceLeaderCommands(actwin)
   if ! empty(a:actwin.data.cmds.source.leader_cmd)
     let s:buf_change = 0
@@ -637,6 +647,7 @@ call s:LOG("s:ClearSourceLeaderCommands: value=" . l:v)
     let s:buf_change = 1
   endif
 endfunction
+endif " NNNNNN
 
 
 
@@ -1049,87 +1060,16 @@ call s:LOG("Adjust  TOP")
   " window cmds
   call s:AdjustMapping(l:window, 'key_map', s:cmds_window_defs)
 
-if 0 " NOUSE
-  if ! has_key(l:window, 'key_map')
-    let l:window['key_map'] = {}
-  else
-    call s:CheckMapping('key_map', l:window.key_map, s:cmds_window_defs)
-
-" NOUSE
-    for [l:key, l:value] in items(l:window.key_map)
-      if ! has_key(s:cmds_window_defs, l:key)
-        call s:ERROR('Adjust key_map - bad key "'. l:key .'"')
-      elseif type(l:value) != type("") && type(l:value) != type([])
-        call s:ERROR('Adjust key_map - for key "'. l:key .'" bad value type: '. type(l:value))
-      endif
-
-      unlet l:value
-    endfor
-  endif
-endif " NOUSE
-
   call s:AdjustMapping(l:window, 'builtin_cmd', s:cmds_window_defs)
-  call s:AdjustMapping(l:window, 'leader_cmd', s:cmds_window_defs)
+  call s:AdjustMapping(l:window, 'key_map', s:cmds_window_defs)
 
-if 0 " NOUSE
-  if ! has_key(l:window, 'builtin_cmd')
-    let l:window['builtin_cmd'] = {}
-  else
-    call s:CheckMapping('builtin_cmd', l:window.builtin_cmd, s:cmds_window_defs)
-  endif
-
-  if ! has_key(l:window, 'leader_cmd')
-    let l:window['leader_cmd'] = {}
-  else
-    call s:CheckMapping('leader_cmd', l:window.leader_cmd, s:cmds_window_defs)
-  endif
-endif " NOUSE
 
   " source cmds
   call s:AdjustMapping(l:source, 'key_map', s:cmds_source_defs)
   call s:AdjustMapping(l:source, 'builtin_cmd', s:cmds_source_defs)
+if 0 " NNNNNN
   call s:AdjustMapping(l:source, 'leader_cmd', s:cmds_source_defs)
-
-if 0 " NOUSE
-  if ! has_key(l:source, 'key_map')
-    let l:source['key_map'] = {}
-  else
-    call s:CheckMapping('key_map', l:source.key_map, s:cmds_source_defs)
-  endif
-
-  if ! has_key(l:source, 'builtin_cmd')
-    let l:source['builtin_cmd'] = {}
-  else
-    call s:CheckMapping('builtin_cmd', l:source.builtin_cmd, s:cmds_source_defs)
-
-" NOUSE
-    for [l:key, l:value] in items(l:source.builtin_cmd)
-      if ! has_key(s:cmds_source_defs, l:key)
-        call s:ERROR('Adjust builtin_cmd - bad key "'. l:key .'"')
-      elseif type(l:value) != type("") && type(l:value) != type([])
-        call s:ERROR('Adjust builtin_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
-      endif
-
-      unlet l:value
-    endfor
-  endif
-
-  if ! has_key(l:source, 'leader_cmd')
-    let l:source['leader_cmd'] = {}
-  else
-    call s:CheckMapping('leader_cmd', l:source.leader_cmd, s:cmds_source_defs)
-
-    for [l:key, l:value] in items(l:source.leader_cmd)
-      if ! has_key(s:cmds_source_defs, l:key)
-        call s:ERROR('Adjust leader_cmd - bad key "'. l:key .'"')
-      elseif type(l:value) != type("") && type(l:value) != type([])
-        call s:ERROR('Adjust leader_cmd - for key "'. l:key .'" bad value type: '. type(l:value))
-      endif
-
-      unlet l:value
-    endfor
-  endif
-endif " NOUSE
+endif " NNNNNN
 
   "--------------
   " window
@@ -2247,15 +2187,21 @@ endfunction
 " ------------------------------
 function! s:SourceDefineColorColumn(actwin)
 call s:LOG("SourceDefineColorColumn TOP")
+  let l:color_line = a:actwin.data.display.source.color_line
+  let b:color_column_toggle = l:color_line.toggle
+  let l:color_column = a:actwin.data.display.source.color_column
+
+  if has_key(l:color_column, 'toggle')
+    let b:color_column_toggle = l:color_column.toggle
+    " unlet l:color_line.toggle
+  endif
 call s:LOG("SourceDefineColorColumn BOTTOM")
 endfunction
 
 function! s:SourceEnableColorColumn(actwin)
 call s:LOG("SourceEnableColorColumn TOP")
-
-  if exists("b:color_line_toggle")
-    execute ":nnoremap <silent> <Leader>". b:color_column_toggle ." :call g:ToggleCursorColumn(". a:actwin.buffer_nr .")<CR>"
-    let b:is_toggle_color_column = 0
+  if exists("b:color_column_toggle")
+    execute ":nnoremap <silent> <Leader>". b:color_column_toggle ." :call g:ToggleColorColumn(". a:actwin.buffer_nr .")<CR>"
   endif
 call s:LOG("SourceEnableColorColumn BOTTOM")
 endfunction
@@ -2329,7 +2275,6 @@ call s:LOG("SourceEntryLeaveColorColumn TOP")
   let l:data = a:actwin.data
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
-  " let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 
   let l:bnr = bufnr(l:file)
 call s:LOG("s:SourceEntryLeaveColorColumn: file=". l:file)
@@ -2356,6 +2301,49 @@ endfunction
 function! s:SourceDisableColorColumn(actwin)
 call s:LOG("SourceDisableColorColumn TOP")
 call s:LOG("SourceDisableColorColumn BOTTOM")
+endfunction
+
+function! g:ToggleColorColumn(buffer_nr)
+call s:LOG("ToggleColorColumn TOP")
+  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:ToggleColorColumn actwin not found")
+    return
+  endif
+
+  let l:data = l:actwin.data
+  let l:color_column = l:data.display.source.color_column
+  let l:color_column.is_on = ! l:color_column.is_on
+
+  let l:linenos = l:actwin.current_line
+  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
+  let l:entry = l:data.entries[l:entrynos]
+  let l:file = l:entry.file
+  let l:bnr = bufnr(l:file)
+  let l:win_nr = bufwinnr(l:bnr)
+call s:LOG("g:ToggleColorColumn: file=". l:file)
+call s:LOG("g:ToggleColorColumn: bnr=". l:bnr)
+call s:LOG("g:ToggleColorColumn: win_nr=". l:win_nr)
+  if l:win_nr > 0
+
+let s:buf_change = 0
+    if l:color_column.is_on
+      let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
+
+      if l:colnos > 0
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='. l:colnos
+      else
+        execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
+      endif
+    else
+      execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
+    endif
+let s:buf_change = 1
+
+  endif
+
+call s:LOG("ToggleColorColumn BOTTOM")
 endfunction
 
 
@@ -2424,6 +2412,8 @@ call s:LOG("ToggleCursorLine TOP")
 
 call s:LOG("ToggleCursorLine BOTTOM")
 endfunction
+
+
 
 " MUST be called from local buffer
 function! s:WindowDestroyCursorLine(actwin)
@@ -2839,8 +2829,8 @@ function! s:ToggleSourceBuiltinCmdInfo()
   call s:Toggle('source_builtin_cmd_show', 'source', 'builtin_cmd', s:cmds_source_defs)
 endfunction
 
-function! s:ToggleSourceLeaderCmdInfo()
-  call s:Toggle('source_leader_cmd_show', 'source', 'leader_cmd', s:cmds_source_defs)
+function! s:ToggleSourceKeyMapInfo()
+  call s:Toggle('source_key_map_show', 'source', 'key_map', s:cmds_source_defs)
 endfunction
 
 function! s:Toggle(key_name, data_win, data_element, defs)
@@ -3150,7 +3140,7 @@ call s:LOG("s:OnLeft: BOTTOM")
 endfunction
 
 " ============================================================================
-" Leader Commands: {{{1
+" Source Commands: {{{1
 " ============================================================================
 
 function! g:VimsideActWinFirst(buffer_nr)
@@ -3870,7 +3860,7 @@ function! vimside#actwin#TestQuickFix()
 "   }
 "   builtin_cmd: {
 "   }
-"   leader_cmd: {
+"   key_map: {
 "   }
 "   sign: {
 "     category: QuickFix
@@ -3934,17 +3924,20 @@ function! vimside#actwin#TestQuickFix()
               \ "enter": "ce",
               \ "close": "ccl"
             \ },
-            \ "leader_cmd": {
-              \ "previous": "cp",
-              \ "next": "cn",
-              \ "close": "ccl"
+            \ "key_map": {
+              \ "first": "<Leader>cr",
+              \ "last": "<Leader>cl",
+              \ "previous": "<Leader>cp",
+              \ "next": "<Leader>cn",
+              \ "enter": "<Leader>ce",
+              \ "close": "<Leader>ccl"
             \ },
           \ },
           \ "window": {
             \ "key_map": {
               \ "window_key_map_show": "<F2>",
               \ "source_builtin_cmd_show": "<F3>",
-              \ "source_leader_cmd_show": "<F4>",
+              \ "source_key_map_show": "<F4>",
               \ "help": "<F1>",
               \ "select": [ "<CR>", "<2-LeftMouse>"],
               \ "enter_mouse": "<LeftMouse> <LeftMouse>",
