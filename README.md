@@ -35,6 +35,10 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Fixed property file reader so that values can be Dictionaries.
+Toggling Actwin "scala" and "actwin" features can now be done 
+with Option based :map, :cabbr and :command.
+
 Got color cursor toggling working.
 Got color cursor working.
 

@@ -26,21 +26,35 @@ endfunction
 
 " TODO
 " color_column :hi ColorColumn ctermbg=lightgrey guibg=lightgrey
-" allow toggle with key_map, key_map 
+" allow toggle with map, map 
 "    toggle: {
-"      key_map: "t",
-"      builtin_cmd: "t",
+"      map: "t",
+"      cmd: "t",
 "    }
+" default sign kind: marker
 
 " toggle: km uc bc
-" key_map
-" builtin cmds
+" map
+" cmds
+"
+" toggle {
+"   actwin: {
+"     map: 
+"     cmd: 
+"     abbr: 
+"   }
+"   scala: {
+"     map: 
+"     cmd: 
+"     abbr: 
+"   }
+" }
 "
 " toggle
 "   is_XXX_enable
 "   is_XXX_on
 "
-"   source window
+"   scala actwin
 "     sign
 "       category
 "       different kinds
@@ -50,7 +64,7 @@ endfunction
 "       column (color or highlight)
 "       row & column
 "       cursorcolumn
-"   actwin window
+"   actwin actwin
 "     cursorline cl
 "     text highlight th
 "     lines highlight lh
@@ -68,8 +82,8 @@ endfunction
 "  let [namepath, value] = split(line, "=")
 "  let names = split(namepath, ".")
 "
-"  vimside.actwin.quickfix.window.sign.error.textln.group=
-"  vimside.actwin.quickfix.window.sign.error.textln.cterm=
+"  vimside.actwin.quickfix.actwin.sign.error.textln.group=
+"  vimside.actwin.quickfix.actwin.sign.error.textln.cterm=
 "
 
 "
@@ -107,7 +121,7 @@ endfunction
 " active row/column highlight 
 " range of lines
 "
-"http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
+"http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_actwin
 "
 "http://stackoverflow.com/questions/2447109/showing-a-different-background-colour-in-vim-past-80-characters
 "http://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
@@ -118,7 +132,7 @@ endfunction
 "
 "help: no display, one line, full help vim help
 "
-"range of source lines per target line
+"range of scala lines per target line
 "sign a range of lines
 "
 "
@@ -134,23 +148,23 @@ let s:split_right_default = 0
 let s:edit_cmd_default = "enew"
 let s:tab_cmd_default = "tabnew"
 
-let s:dislay_source_sign_toggle_default = "ss"
-let s:dislay_source_sign_is_on_default = 0
-let s:dislay_source_color_line_toggle_default = "cl"
-let s:dislay_source_color_line_is_on_default = 0
-let s:dislay_source_color_column_toggle_default = "cc"
-let s:dislay_source_color_column_is_on_default = 0
+let s:dislay_scala_sign_toggle_default = "ss"
+let s:dislay_scala_sign_is_on_default = 0
+let s:dislay_scala_color_line_toggle_default = "cl"
+let s:dislay_scala_color_line_is_on_default = 0
+let s:dislay_scala_color_column_toggle_default = "cc"
+let s:dislay_scala_color_column_is_on_default = 0
 
-let s:dislay_window_cursor_line_toggle_default = "wcl"
-let s:dislay_window_cursor_line_is_on_default = 0
-let s:dislay_window_highlight_line_toggle_default = "whl"
-let s:dislay_window_highlight_line_is_on_default = 0
-let s:dislay_window_highlight_line_is_full_default = 0
-let s:dislay_window_highlight_line_all_text_default = 0
+let s:dislay_actwin_cursor_line_toggle_default = "wcl"
+let s:dislay_actwin_cursor_line_is_on_default = 0
+let s:dislay_actwin_highlight_line_toggle_default = "whl"
+let s:dislay_actwin_highlight_line_is_on_default = 0
+let s:dislay_actwin_highlight_line_is_full_default = 0
+let s:dislay_actwin_highlight_line_all_text_default = 0
 
-let s:dislay_window_sign_toggle_default = "sw"
-let s:dislay_window_sign_is_on_default = 0
-let s:dislay_window_sign_all_text_default = 0
+let s:dislay_actwin_sign_toggle_default = "sw"
+let s:dislay_actwin_sign_is_on_default = 0
+let s:dislay_actwin_sign_all_text_default = 0
 
 
 let s:winname_default="ActWin"
@@ -162,9 +176,9 @@ let s:buf_change = 1
 " actwin {
 "   is_global: 0,
 "   is_info_open: 0,
-"   source_win_nr: source_win_nr
-"   source_buffer_nr: source_buffer_nr
-"   source_buffer_name: source_buffer_name
+"   scala_win_nr: scala_win_nr
+"   scala_buffer_nr: scala_buffer_nr
+"   scala_buffer_name: scala_buffer_name
 "   buffer_nr
 "   win_nr
 "   uid: unique id
@@ -188,7 +202,7 @@ let s:buf_change = 1
 "     is_open: 0
 "     .....
 "   }
-"   window: {
+"   actwin: {
 "     split; {
 "        cmd: "new"
 "        size: "10"
@@ -202,10 +216,10 @@ let s:buf_change = 1
 "        cmd: "tabnew"
 "     }
 "   }
-"   key_map: {
-"     window_key_map_show: ""
-"     source_builtin_cmd_show: ""
-"     source_key_map_show: ""
+"   map: {
+"     actwin_key_map_show: ""
+"     scala_cmd_show: ""
+"     scala_key_map_show: ""
 "     help: ""
 "     select: []
 "     select_mouse: []
@@ -214,9 +228,9 @@ let s:buf_change = 1
 "     up: []
 "     close: []
 "   }
-"   builtin_cmd: {
+"   cmd: {
 "   }
-"   key_map: {
+"   map: {
 "     up: cp
 "     down: cn
 "     close: ccl
@@ -268,11 +282,11 @@ let s:buf_change = 1
 "
 
 " functions that can be bound to keys (key mappings)
-" key_map
-let s:cmds_window_defs = {
-      \ "window_key_map_show": [ "ToggleWindowKeyMapInfo", "Display window key-map info" ],
-      \ "source_builtin_cmd_show": [ "ToggleSourceBuiltinCmdInfo", "Display source builtin cmd info" ],
-      \ "source_key_map_show": [ "ToggleSourceKeyMapInfo", "Display source key map cmd info" ],
+" map
+let s:cmds_actwin_defs = {
+      \ "actwin_key_map_show": [ "ToggleActWinKeyMapInfo", "Display actwin key-map info" ],
+      \ "scala_cmd_show": [ "ToggleScalaBuiltinCmdInfo", "Display scala builtin cmd info" ],
+      \ "scala_key_map_show": [ "ToggleScalaKeyMapInfo", "Display scala key map cmd info" ],
       \ "help": [ "OnHelp", "Display help" ],
       \ "select": [ "OnSelect", "Select current line" ],
       \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
@@ -282,17 +296,17 @@ let s:cmds_window_defs = {
       \ "up": [ "OnUp", "Move up to next line" ],
       \ "left": [ "OnLeft", "Move left one postion" ],
       \ "right": [ "OnRight", "Move right one postion" ],
-      \ "close": [ "OnClose", "Close window"]
+      \ "close": [ "OnClose", "Close actwin"]
       \ }
 
 " mappings to override existing builtin commands
-let s:cmds_source_defs = {
+let s:cmds_scala_defs = {
       \ "first": [ "g:VimsideActWinFirst", "Goto first line" ],
       \ "last": [ "g:VimsideActWinLast", "Goto last line" ],
       \ "previous": [ "g:VimsideActWinUp", "Move up to next line" ],
       \ "next": [ "g:VimsideActWinDown", "Move down to next line" ],
-      \ "enter": [ "g:VimsideActWinEnter", "Enter window" ],
-      \ "close": [ "g:VimsideActWinClose", "Close window" ]
+      \ "enter": [ "g:VimsideActWinEnter", "Enter actwin" ],
+      \ "close": [ "g:VimsideActWinClose", "Close actwin" ]
       \ }
 
 " globals = {
@@ -315,7 +329,7 @@ let s:globals = {}
 "   ....
 " }
 "
-" source_buffer_nr -> tags 
+" scala_buffer_nr -> tags 
 "    tags 1-1 target_buffer_nr
 "
 let s:locals = {}
@@ -347,7 +361,7 @@ function! s:Redraw()
 endfunction
 
 " MUST be called from local buffer
-" return [0, _] or [1, actwin]
+" return [0, _] or [1, instance]
 function! s:GetBufferActWin()
   if exists("b:buffer_nr") && has_key(s:actwin_buffer_nr_to_actwin, b:buffer_nr)
     return [1, s:actwin_buffer_nr_to_actwin[b:buffer_nr]]
@@ -369,18 +383,18 @@ endfunction
 " --------------------------------------------
 
 " MUST be called from local buffer
-function! s:Initialize(actwin)
+function! s:Initialize(instance)
 call s:LOG("Initialize TOP")
 call s:LOG("Initialize current buffer=". bufnr("%"))
 
   " must create handlers first
-  call s:CreateFileHandlers(a:actwin)
+  call s:CreateFileHandlers(a:instance)
 
-  call s:MakeAutoCmds(a:actwin)
-  call s:MakeCmds(a:actwin)
+  call s:MakeAutoCmds(a:instance)
+  call s:MakeCmds(a:instance)
 
 
-  " TODO is this needed ... only when using the same window
+  " TODO is this needed ... only when using the same actwin
   " how about using enter/leave buffer autocmd maps instead
   let b:insertmode = &insertmode
   let b:showcmd = &showcmd
@@ -405,34 +419,34 @@ call s:LOG("Initialize BOTTOM")
 endfunction
 
 " --------------------------------------------
-" Source File Handlers
+" Scala File Handlers
 " --------------------------------------------
 
-function! s:CreateFileHandlers(actwin)
-  let a:actwin.files = []
-  let a:actwin.handlers = {}
-  let a:actwin.handlers['on_new_file'] = []
-  let a:actwin.handlers['on_close'] = []
+function! s:CreateFileHandlers(instance)
+  let a:instance.files = []
+  let a:instance.handlers = {}
+  let a:instance.handlers['on_new_file'] = []
+  let a:instance.handlers['on_close'] = []
 endfunction
 
-function! s:CallNewFileHandlers(actwin, file, entrynos)
+function! s:CallNewFileHandlers(instance, file, entrynos)
 call s:LOG("s:CallNewFileHandlers: TOP file=". a:file)
-  call add(a:actwin.files, a:file)
+  call add(a:instance.files, a:file)
 
-  for l:Handler in a:actwin.handlers.on_new_file
-    call l:Handler(a:actwin, a:file, a:entrynos)
+  for l:Handler in a:instance.handlers.on_new_file
+    call l:Handler(a:instance, a:file, a:entrynos)
   endfor
 call s:LOG("s:CallNewFileHandlers: BOTTOM")
 endfunction
 
-function! s:CallOnCloseHandlers(actwin)
-  let l:onclosehandlers = a:actwin.handlers.on_close
-  for l:file in a:actwin.files
+function! s:CallOnCloseHandlers(instance)
+  let l:onclosehandlers = a:instance.handlers.on_close
+  for l:file in a:instance.files
     for l:Handler in l:onclosehandlers
-      call l:Handler(a:actwin, l:file)
+      call l:Handler(a:instance, l:file)
     endfor
   endfor
-  let a:actwin.files = []
+  let a:instance.files = []
 endfunction
 
 " --------------------------------------------
@@ -440,7 +454,7 @@ endfunction
 " --------------------------------------------
 
 " MUST be called from local buffer
-function! s:MakeAutoCmds(actwin)
+function! s:MakeAutoCmds(instance)
 call s:LOG("MakeAutoCmds current buffer=". bufnr("%"))
   augroup ACT_WIN_AUTOCMD
     " autocmd!
@@ -453,11 +467,11 @@ call s:LOG("MakeAutoCmds current buffer=". bufnr("%"))
   augroup END
 endfunction
 
-function! s:CloseAutoCmds(actwin)
-call s:LOG("CloseAutoCmds close buffer=". a:actwin.buffer_nr)
+function! s:CloseAutoCmds(instance)
+call s:LOG("CloseAutoCmds close buffer=". a:instance.buffer_nr)
 call s:LOG("CloseAutoCmds current buffer=". bufnr("%"))
  augroup ACT_WIN_AUTOCMD
-   execute "autocmd! *  <buffer=". a:actwin.buffer_nr .">"
+   execute "autocmd! *  <buffer=". a:instance.buffer_nr .">"
  augroup END
 endfunction
 
@@ -466,34 +480,25 @@ endfunction
 " --------------------------------------------
 
 " MUST be called from local buffer
-function! s:MakeCmds(actwin)
-  call s:MakeWindowKeyMappings(a:actwin)
-if 0 " NNNNNN
-  call s:MakeWindowLeaderCommands(a:actwin)
-endif " NNNNNN
-  call s:MakeWindowBuiltinCommands(a:actwin)
+function! s:MakeCmds(instance)
+  call s:MakeActWinKeyMappings(a:instance)
+  call s:MakeActWinBuiltinCommands(a:instance)
 
-  call s:MakeSourceKeyMappings(a:actwin)
-if 0 " NNNNNN
-  call s:MakeSourceLeaderCommands(a:actwin)
-endif " NNNNNN
-  call s:MakeSourceBuiltinCommands(a:actwin)
+  call s:MakeScalaKeyMappings(a:instance)
+  call s:MakeScalaBuiltinCommands(a:instance)
 endfunction
 
 " MUST be called from local buffer
-function! s:ClearCmds(actwin)
-  call s:ClearSourceKeyMappings(a:actwin)
-if 0 " NNNNNN
-  call s:ClearSourceLeaderCommands(a:actwin)
-endif " NNNNNN
-  call s:ClearSourceBuiltinCommands(a:actwin)
+function! s:ClearCmds(instance)
+  call s:ClearScalaKeyMappings(a:instance)
+  call s:ClearScalaBuiltinCommands(a:instance)
 endfunction
 
 " MUST be called from local buffer
-function! s:MakeWindowKeyMappings(actwin)
-  if ! empty(a:actwin.data.cmds.window.key_map)
-    for [l:key, l:value] in items(a:actwin.data.cmds.window.key_map)
-      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
+function! s:MakeActWinKeyMappings(instance)
+  if ! empty(a:instance.data.cmds.actwin.map)
+    for [l:key, l:value] in items(a:instance.data.cmds.actwin.map)
+      let [l:fn, l:txt] = s:cmds_actwin_defs[l:key]
       for l:v in l:value
         execute 'nnoremap <script> <silent> <buffer> '. l:v .' :call <SID>'. l:fn .'()<CR>'
       endfor
@@ -501,25 +506,12 @@ function! s:MakeWindowKeyMappings(actwin)
   endif
 endfunction
 
-" MUST be called from local buffer
-if 0 " NNNNNN
-function! s:MakeWindowLeaderCommands(actwin)
-  if ! empty(a:actwin.data.cmds.window.leader_cmd)
-    for [l:key, l:value] in items(a:actwin.data.cmds.window.leader_cmd)
-      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
-      for l:v in l:value
-        execute ":nnoremap <silent> <buffer> <Leader>". l:v ." :call ". l:fn ."()<CR>"
-      endfor
-    endfor
-  endif
-endfunction
-endif " NNNNNN
 
 " MUST be called from local buffer
-function! s:MakeWindowBuiltinCommands(actwin)
-  if ! empty(a:actwin.data.cmds.window.builtin_cmd)
-    for [l:key, l:value] in items(a:actwin.data.cmds.window.builtin_cmd)
-      let [l:fn, l:txt] = s:cmds_window_defs[l:key]
+function! s:MakeActWinBuiltinCommands(instance)
+  if ! empty(a:instance.data.cmds.actwin.cmd)
+    for [l:key, l:value] in items(a:instance.data.cmds.actwin.cmd)
+      let [l:fn, l:txt] = s:cmds_actwin_defs[l:key]
       for l:v in l:value
         execute "cabbrev <silent> <buffer> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."()' : '". l:v ."')<CR>"
       endfor
@@ -531,15 +523,15 @@ endfunction
 
 
 " MUST be called from local buffer
-function! s:MakeSourceKeyMappings(actwin)
-  if ! empty(a:actwin.data.cmds.source.key_map)
-    let l:key_map = a:actwin.data.cmds.source.key_map
-    let l:buffer_nr =  a:actwin.buffer_nr
-    let l:is_global = a:actwin.is_global
+function! s:MakeScalaKeyMappings(instance)
+  if ! empty(a:instance.data.cmds.scala.map)
+    let l:map = a:instance.data.cmds.scala.map
+    let l:buffer_nr =  a:instance.buffer_nr
+    let l:is_global = a:instance.is_global
 
     if l:is_global
-      for [l:key, l:value] in items(l:key_map)
-        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+      for [l:key, l:value] in items(l:map)
+        let [l:fn, l:txt] = s:cmds_scala_defs[l:key]
         for l:v in l:value
           execute ":nnoremap <silent> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
         endfor
@@ -547,120 +539,56 @@ function! s:MakeSourceKeyMappings(actwin)
 
     else
       let s:buf_change = 0
-      execute 'silent '. a:actwin.source_win_nr.'wincmd w'
-        for [l:key, l:value] in items(l:key_map)
-          let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+      execute 'silent '. a:instance.scala_win_nr.'wincmd w'
+        for [l:key, l:value] in items(l:map)
+          let [l:fn, l:txt] = s:cmds_scala_defs[l:key]
           for l:v in l:value
             execute ":nnoremap <silent> <buffer> ". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
           endfor
         endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      execute 'silent '. a:instance.win_nr.'wincmd w'
       let s:buf_change = 1
     endif
   endif
 endfunction
 
-function! s:ClearSourceKeyMappings(actwin)
-  if ! empty(a:actwin.data.cmds.source.key_map)
+function! s:ClearScalaKeyMappings(instance)
+  if ! empty(a:instance.data.cmds.scala.map)
     let s:buf_change = 0
-    let l:is_global = a:actwin.is_global
+    let l:is_global = a:instance.is_global
 
     if l:is_global
-      for l:value in values(a:actwin.data.cmds.source.key_map)
+      for l:value in values(a:instance.data.cmds.scala.map)
         for l:v in l:value
           execute "nunmap ". l:v
         endfor
       endfor
     else
-      " execute 'silent '. a:actwin.source_win_nr.'wincmd w'
-      execute ':buffer '. a:actwin.source_buffer_nr
-      for l:value in values(a:actwin.data.cmds.source.key_map)
+      " execute 'silent '. a:instance.scala_win_nr.'wincmd w'
+      execute ':buffer '. a:instance.scala_buffer_nr
+      for l:value in values(a:instance.data.cmds.scala.map)
         for l:v in l:value
           execute "nunmap <buffer> ". l:v
         endfor
       endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      execute 'silent '. a:instance.win_nr.'wincmd w'
     endif
     let s:buf_change = 1
   endif
 endfunction
 
-" MUST be called from local buffer
-if 0 " NNNNNN
-function! s:MakeSourceLeaderCommands(actwin)
-  if ! empty(a:actwin.data.cmds.source.leader_cmd)
-    let l:leader_cmd = a:actwin.data.cmds.source.leader_cmd
-    let l:buffer_nr =  a:actwin.buffer_nr
-    let l:is_global = a:actwin.is_global
-
-    if l:is_global
-      for [l:key, l:value] in items(l:leader_cmd)
-        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
-        for l:v in l:value
-          execute ":nnoremap <silent> <Leader>". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
-        endfor
-      endfor
-
-    else
-      let s:buf_change = 0
-      execute 'silent '. a:actwin.source_win_nr.'wincmd w'
-call s:LOG("s:MakeSourceLeaderCommands: win_rn=". a:actwin.source_win_nr )
-        for [l:key, l:value] in items(l:leader_cmd)
-          let [l:fn, l:txt] = s:cmds_source_defs[l:key]
-          for l:v in l:value
-call s:LOG("s:MakeSourceLeaderCommands: key=". l:key .", value=" . l:v)
-            execute ":nnoremap <buffer> <silent> <Leader>". l:v ." :silent call ". l:fn ."(". l:buffer_nr .")<CR>"
-          endfor
-        endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
-      let s:buf_change = 1
-    endif
-  endif
-endfunction
-endif " NNNNNN
-
-" MUST be called from local buffer
-if 0 " NNNNNN
-function! s:ClearSourceLeaderCommands(actwin)
-  if ! empty(a:actwin.data.cmds.source.leader_cmd)
-    let s:buf_change = 0
-    let l:is_global = a:actwin.is_global
-
-    if l:is_global
-      for l:value in values(a:actwin.data.cmds.source.leader_cmd)
-        for l:v in l:value
-          execute ":nunmap <silent> <Leader>". l:v
-        endfor
-      endfor
-    else
-      " execute 'silent '. a:actwin.source_win_nr.'wincmd w'
-      execute ':buffer '. a:actwin.source_buffer_nr
-call s:LOG("s:ClearSourceLeaderCommands: win_rn=". a:actwin.source_win_nr )
-      for l:value in values(a:actwin.data.cmds.source.leader_cmd)
-        for l:v in l:value
-call s:LOG("s:ClearSourceLeaderCommands: value=" . l:v)
-          execute ":nunmap <buffer> <Leader>". l:v
-        endfor
-      endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
-    endif
-    let s:buf_change = 1
-  endif
-endfunction
-endif " NNNNNN
 
 
-
-function! s:MakeSourceBuiltinCommands(actwin)
+function! s:MakeScalaBuiltinCommands(instance)
   " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
-  if ! empty(a:actwin.data.cmds.source.builtin_cmd)
-    let l:builtin_cmd = a:actwin.data.cmds.source.builtin_cmd
-    let l:buffer_nr =  a:actwin.buffer_nr
-    let l:is_global = a:actwin.is_global
+  if ! empty(a:instance.data.cmds.scala.cmd)
+    let l:cmd = a:instance.data.cmds.scala.cmd
+    let l:buffer_nr =  a:instance.buffer_nr
+    let l:is_global = a:instance.is_global
 
     if l:is_global
-      for [l:key, l:value] in items(l:builtin_cmd)
-        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+      for [l:key, l:value] in items(l:cmd)
+        let [l:fn, l:txt] = s:cmds_scala_defs[l:key]
         for l:v in l:value
           execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
         endfor
@@ -668,43 +596,43 @@ function! s:MakeSourceBuiltinCommands(actwin)
 
     else
       let s:buf_change = 0
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
-      for [l:key, l:value] in items(l:builtin_cmd)
-        let [l:fn, l:txt] = s:cmds_source_defs[l:key]
+      execute 'silent '. a:instance.win_nr.'wincmd w'
+      for [l:key, l:value] in items(l:cmd)
+        let [l:fn, l:txt] = s:cmds_scala_defs[l:key]
         for l:v in l:value
         execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
         endfor
       endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      execute 'silent '. a:instance.win_nr.'wincmd w'
       let s:buf_change = 1
     endif
   endif
 endfunction
 
 " MUST be called from local buffer
-function! s:ClearSourceBuiltinCommands(actwin)
+function! s:ClearScalaBuiltinCommands(instance)
   " :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
   " cunabbrev e
-  if ! empty(a:actwin.data.cmds.source.builtin_cmd)
+  if ! empty(a:instance.data.cmds.scala.cmd)
     let s:buf_change = 0
-    let l:builtin_cmd = a:actwin.data.cmds.source.builtin_cmd
-    let l:is_global = a:actwin.is_global
+    let l:cmd = a:instance.data.cmds.scala.cmd
+    let l:is_global = a:instance.is_global
 
     if l:is_global
-      for l:value in values(l:builtin_cmd)
+      for l:value in values(l:cmd)
         for l:v in l:value
           execute "cunabbrev ". l:v
         endfor
       endfor
 
     else
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
-      for l:value in values(l:builtin_cmd)
+      execute 'silent '. a:instance.win_nr.'wincmd w'
+      for l:value in values(l:cmd)
         for l:v in l:value
           execute "cunabbrev ". l:v
         endfor
       endfor
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+      execute 'silent '. a:instance.win_nr.'wincmd w'
 
     endif
     let s:buf_change = 1
@@ -717,78 +645,84 @@ endfunction
 " Main entry function
 " --------------------------------------------
 
+function! vimside#actwin#DisplayGlobal(type, data)
+  call s:DisplayLocal(a:tag, a:data, 1)
+endfunction
 function! vimside#actwin#DisplayLocal(tag, data)
+  call s:DisplayLocal(a:tag, a:data, 0)
+endfunction
+function! s:DisplayLocal(tag, data, is_global)
 call s:LOG("DisplayLocal TOP")
   let l:data = deepcopy(a:data)
-  let l:source_buffer_name = bufname("%")
-  let l:source_buffer_nr = bufnr("%")
-  let l:source_win_nr = bufwinnr(l:source_buffer_nr)
-call s:LOG("DisplayLocal l:source_buffer_nr=". l:source_buffer_nr)
-call s:LOG("DisplayLocal l:source_win_nr=". l:source_win_nr)
+  let l:scala_buffer_name = bufname("%")
+  let l:scala_buffer_nr = bufnr("%")
+  let l:scala_win_nr = bufwinnr(l:scala_buffer_nr)
+call s:LOG("DisplayLocal l:scala_buffer_nr=". l:scala_buffer_nr)
+call s:LOG("DisplayLocal l:scala_win_nr=". l:scala_win_nr)
 
-  if has_key(s:locals, l:source_buffer_nr)
-    let l:bnr_dic = s:locals[l:source_buffer_nr]
+  if has_key(s:locals, l:scala_buffer_nr)
+    let l:bnr_dic = s:locals[l:scala_buffer_nr]
     if has_key(l:bnr_dic, a:tag)
       let l:action = s:GetAction(l:data)
       if l:action == 'm'
         " modify
-        let l:actwin = l:bnr_dic[a:tag]
+        let l:instance = l:bnr_dic[a:tag]
       elseif l:action == 'a'
         " append
-        let l:actwin = l:bnr_dic[a:tag]
+        let l:instance = l:bnr_dic[a:tag]
       elseif l:action == 'r'
         " replace
-        let l:actwin = l:bnr_dic[a:tag]
+        let l:instance = l:bnr_dic[a:tag]
       else
         " create
         let l:uid = s:NextUID()
-        let l:actwin = {
-            \ "is_global": 0,
+        let l:instance = {
+            \ "is_global": a:is_global,
             \ "is_info_open": 0,
-            \ "source_win_nr": l:source_win_nr,
-            \ "source_buffer_nr": l:source_buffer_nr,
-            \ "source_buffer_name": l:source_buffer_name,
+            \ "scala_win_nr": l:scala_win_nr,
+            \ "scala_buffer_nr": l:scala_buffer_nr,
+            \ "scala_buffer_name": l:scala_buffer_name,
             \ "tag": a:tag,
             \ "uid": l:uid,
             \ "data": l:data
           \ }
-        let l:bnr_dic[a:tag] = l:actwin
+        let l:bnr_dic[a:tag] = l:instance
 
         let l:action = 'c'
       endif
 
     else
       let l:uid = s:NextUID()
-      let l:actwin = {
-          \ "is_global": 0,
+      let l:instance = {
+          \ "is_global": a:is_global,
           \ "is_info_open": 0,
-          \ "source_win_nr": l:source_win_nr,
-          \ "source_buffer_nr": l:source_buffer_nr,
-          \ "source_buffer_name": l:source_buffer_name,
+          \ "scala_win_nr": l:scala_win_nr,
+          \ "scala_buffer_nr": l:scala_buffer_nr,
+          \ "scala_buffer_name": l:scala_buffer_name,
           \ "tag": a:tag,
           \ "uid": l:uid,
           \ "data": l:data
         \ }
-      let l:bnr_dic[a:tag] = l:actwin
+      let l:bnr_dic[a:tag] = l:instance
 
       let l:action = 'c'
     endif
 
   else
     let l:uid = s:NextUID()
-    let l:actwin = {
-        \ "is_global": 0,
+    let l:instance = {
+        \ "is_global": a:is_global,
         \ "is_info_open": 0,
-        \ "source_win_nr": l:source_win_nr,
-        \ "source_buffer_nr": l:source_buffer_nr,
-        \ "source_buffer_name": l:source_buffer_name,
+        \ "scala_win_nr": l:scala_win_nr,
+        \ "scala_buffer_nr": l:scala_buffer_nr,
+        \ "scala_buffer_name": l:scala_buffer_name,
         \ "tag": a:tag,
         \ "uid": l:uid,
         \ "data": l:data
       \ }
     let l:bnr_dic = {}
-    let l:bnr_dic[a:tag] = l:actwin
-    let s:locals[l:source_buffer_nr] = l:bnr_dic
+    let l:bnr_dic[a:tag] = l:instance
+    let s:locals[l:scala_buffer_nr] = l:bnr_dic
 
     let l:action = 'c'
   endif
@@ -796,29 +730,29 @@ call s:LOG("DisplayLocal action=". l:action)
 
   " make adjustments, modification and replacements
   if l:action == 'c'
-    " save actwin by its uid
-    let s:uid_to_actwin[l:actwin.uid] = l:actwin
+    " save instance by its uid
+    let s:uid_to_actwin[l:instance.uid] = l:instance
     " create = new display
-    call s:Adjust(l:actwin.data)
+    call s:Adjust(l:instance.data)
   elseif l:action == 'm'
     " modify = change non-entries
-    call s:Modify(l:actwin.data, l:data)
+    call s:Modify(l:instance.data, l:data)
   elseif l:action == 'r'
     " replace entries
-    call s:ReplaceEntries(l:actwin.data, l:data)
+    call s:ReplaceEntries(l:instance.data, l:data)
   else
     " append entries
-    call s:AppendEntries(l:actwin.data, l:data)
+    call s:AppendEntries(l:instance.data, l:data)
   endif
 
   if l:action == 'c'
-    let l:window =  l:data.window
+    let l:actwin =  l:data.actwin
     let l:winname =  l:data.winname
 
-    let l:window = l:actwin.data.window
-    if has_key(l:window, 'split')
+    let l:actwin = l:instance.data.actwin
+    if has_key(l:actwin, 'split')
 call s:LOG("DisplayLocal split")
-      let l:split = l:window.split
+      let l:split = l:actwin.split
 
       " save current values
       let l:below = &splitbelow
@@ -836,9 +770,9 @@ call s:LOG("DisplayLocal split")
       let &splitbelow = l:below
       let &splitright = l:right
 
-    elseif has_key(l:window, 'edit')
+    elseif has_key(l:actwin, 'edit')
 call s:LOG("DisplayLocal edit")
-      let l:edit = l:window.edit
+      let l:edit = l:actwin.edit
       let l:cmd = l:edit.cmd
 call s:LOG("DisplayLocal l:cmd=". l:cmd)
 call s:LOG("DisplayLocal current buffer=". bufnr("%"))
@@ -846,36 +780,36 @@ call s:LOG("DisplayLocal current buffer=". bufnr("%"))
       execute l:cmd 
 call s:LOG("DisplayLocal current buffer=". bufnr("%"))
 
-    elseif has_key(l:window, 'tab')
+    elseif has_key(l:actwin, 'tab')
 call s:LOG("DisplayLocal tab")
-      let l:tab = l:window.tab
+      let l:tab = l:actwin.tab
       let l:cmd = l:tab.cmd
       execute l:cmd .' '. l:winname
 
     endif
 
-    " save the buffer and window number
-    let l:actwin.buffer_nr = bufnr("%")
-    let l:actwin.win_nr = bufwinnr(l:actwin.buffer_nr)
-    let b:return_win_nr = l:source_win_nr 
+    " save the buffer and actwin number
+    let l:instance.buffer_nr = bufnr("%")
+    let l:instance.win_nr = bufwinnr(l:instance.buffer_nr)
+    let b:return_win_nr = l:scala_win_nr 
 
-call s:LOG("DisplayLocal l:actwin.buffer_nr=". l:actwin.buffer_nr)
-    let b:buffer_nr = l:actwin.buffer_nr
-    let s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr] = l:actwin
+call s:LOG("DisplayLocal l:instance.buffer_nr=". l:instance.buffer_nr)
+    let b:buffer_nr = l:instance.buffer_nr
+    let s:actwin_buffer_nr_to_actwin[l:instance.buffer_nr] = l:instance
 
 let s:buf_change = 0
-    call s:Initialize(l:actwin)
+    call s:Initialize(l:instance)
   endif
 
-  call s:LoadDisplay(l:actwin)
+  call s:LoadDisplay(l:instance)
 
-  call s:DisplayDefine(l:actwin)
+  call s:DisplayDefine(l:instance)
 
-  call s:DisplayEnable(l:actwin)
+  call s:DisplayEnable(l:instance)
 
-call s:LOG("Display actwin_buffer=". l:actwin.buffer_nr)
+call s:LOG("Display actwin_buffer=". l:instance.buffer_nr)
 
-  call s:EnterEntry(0, l:actwin)
+  call s:EnterEntry(0, l:instance)
 
 let s:buf_change = 1
 
@@ -884,102 +818,8 @@ let s:buf_change = 1
 call s:LOG("DisplayLocal BOTTOM")
 endfunction
 
-if 0 " GLOBAL
-function! vimside#actwin#DisplayGlobal(type, data)
-  let l:data = deepcopy(a:data)
-  let l:source_buffer_name = bufname("%")
-  let l:source_buffer_nr = bufnr("%")
-
-  if has_key(s:globals, a:type)
-    let l:action = s:GetAction(l:data)
-    " not modify replace or append
-    if l:action == 'm' || l:action == 'r' || l:action == 'a'
-      let l:actwin = s:globals[a:type]
-    else
-      let l:uid = s:NextUID()
-      let l:actwin = {
-          \ "is_global": 1,
-          \ "source_buffer_nr": l:source_buffer_nr,
-          \ "source_buffer_name": l:source_buffer_name,
-          \ "type": a:type,
-          \ "uid": l:uid,
-          \ "data": l:data
-        \ }
-      let s:globals[a:type] = l:actwin
-
-      let l:action = 'c'
-    endif
-  else
-    let l:uid = s:NextUID()
-    let l:actwin = {
-        \ "is_global": 1,
-        \ "source_buffer_nr": l:source_buffer_nr,
-        \ "source_buffer_name": l:source_buffer_name,
-        \ "type": a:type,
-        \ "uid": l:uid,
-        \ "data": l:data
-      \ }
-    let s:globals[a:type] = l:actwin
-
-    let l:action = 'c'
-  endif
-call s:LOG("DisplayGlobal action=". l:action)
-
-  " make adjustments, modification and replacements
-  if l:action == 'c'
-    " save actwin by its uid
-    let s:uid_to_actwin[l:actwin.uid] = l:actwin
-    " create = new display
-    call s:Adjust(l:actwin.data)
-  elseif l:action == 'm'
-    " modify = change non-entries
-    call s:Modify(l:actwin.data, l:data)
-  elseif l:action == 'r'
-    " replace entries
-    call s:ReplaceEntries(l:actwin.data, l:data)
-  else
-    " append entries
-    call s:AppendEntries(l:actwin.data, l:data)
-  endif
 
 
-
-
-
-
-
-
-  call s:AdjustInput()
-
-  if s:running == 0
-    let s:original_buffer_name = bufname("%")
-    let s:original_buffer_nr = bufnr("%")
-
-    let s:_splitbelow = &splitbelow
-    let &splitbelow = 1
-
-    " do split cmd
-    if l:split_mode != ""
-      " exe 'keepalt '. l:split_mode
-      let l:winname = has_key(s:dic, 'winname') ? s:dic.winname : s:winname_default
-      execute s:split_size . l:split_mode .' '. l:winname
-    endif
-  endif
-
-
-  " only does something it s:running == 0
-  call s:Initialize()
-
-  call s:LoadDisplay()
-  call s:DisplayDefine(l:actwin)
-
-call s:LOG("Display actwin_buffer=". bufnr("%"))
-
-  call s:EnterEntry(0, l:actwin)
-
-call s:LOG("Display BOTTOM")
-endfunction
-endif " GLOBAL
 
 "   action: create/modify/append create
 function! s:GetAction(data)
@@ -1047,35 +887,32 @@ call s:LOG("Adjust  TOP")
   endif
   let l:cmds = a:data.cmds
 
-  if ! has_key(l:cmds, 'window')
-    let l:cmds['window'] = {}
+  if ! has_key(l:cmds, 'actwin')
+    let l:cmds['actwin'] = {}
   endif
-  let l:window = l:cmds.window
+  let l:actwin = l:cmds.actwin
 
-  if ! has_key(l:cmds, 'source')
-    let l:cmds['source'] = {}
+  if ! has_key(l:cmds, 'scala')
+    let l:cmds['scala'] = {}
   endif
-  let l:source = l:cmds.source
+  let l:scala = l:cmds.scala
 
-  " window cmds
-  call s:AdjustMapping(l:window, 'key_map', s:cmds_window_defs)
+  " actwin cmds
+  call s:AdjustMapping(l:actwin, 'map', s:cmds_actwin_defs)
 
-  call s:AdjustMapping(l:window, 'builtin_cmd', s:cmds_window_defs)
-  call s:AdjustMapping(l:window, 'key_map', s:cmds_window_defs)
+  call s:AdjustMapping(l:actwin, 'cmd', s:cmds_actwin_defs)
+  call s:AdjustMapping(l:actwin, 'map', s:cmds_actwin_defs)
 
 
-  " source cmds
-  call s:AdjustMapping(l:source, 'key_map', s:cmds_source_defs)
-  call s:AdjustMapping(l:source, 'builtin_cmd', s:cmds_source_defs)
-if 0 " NNNNNN
-  call s:AdjustMapping(l:source, 'leader_cmd', s:cmds_source_defs)
-endif " NNNNNN
+  " scala cmds
+  call s:AdjustMapping(l:scala, 'map', s:cmds_scala_defs)
+  call s:AdjustMapping(l:scala, 'cmd', s:cmds_scala_defs)
 
   "--------------
-  " window
+  " actwin
   "--------------
-  if ! has_key(a:data, 'window')
-    let a:data['window'] = {
+  if ! has_key(a:data, 'actwin')
+    let a:data['actwin'] = {
       \ "split": {
         \ "cmd": s:split_cmd_default,
         \ "size": s:split_size_default,
@@ -1084,9 +921,9 @@ endif " NNNNNN
         \ }
       \ }
   else
-    let l:window = a:data.window
-    if has_key(l:window, 'split')
-      let l:split = l:window.split
+    let l:actwin = a:data.actwin
+    if has_key(l:actwin, 'split')
+      let l:split = l:actwin.split
       if ! has_key(l:split, 'cmd')
         let l:split['cmd'] = s:split_cmd_default
       endif
@@ -1100,20 +937,20 @@ endif " NNNNNN
         let l:split['right'] = s:split_right_default
       endif
 
-    elseif has_key(l:window, 'edit')
-      let l:edit = l:window.edit
+    elseif has_key(l:actwin, 'edit')
+      let l:edit = l:actwin.edit
       if ! has_key(l:edit, 'cmd')
         let l:edit['cmd'] = s:edit_cmd_default
       endif
 
-    elseif has_key(l:window, 'tab')
-      let l:tab = l:window.tab
+    elseif has_key(l:actwin, 'tab')
+      let l:tab = l:actwin.tab
       if ! has_key(l:tab, 'cmd')
         let l:tab['cmd'] = s:tab_cmd_default
       endif
 
     else
-      let l:window['split'] = {
+      let l:actwin['split'] = {
           \ "cmd": s:split_cmd_default,
           \ "size": s:split_size_default,
           \ "below": s:split_below_default,
@@ -1124,7 +961,7 @@ endif " NNNNNN
 
   if ! has_key(a:data, 'display')
     let a:data['display'] = {
-        \ "source": {
+        \ "scala": {
           \ "sign": {
             \ "is_enable": 0
           \ },
@@ -1135,7 +972,7 @@ endif " NNNNNN
             \ "is_enable": 0
           \ }
         \ },
-        \ "window": {
+        \ "actwin": {
           \ "cursor_line": {
             \ "is_enable": 0
           \ },
@@ -1150,32 +987,32 @@ endif " NNNNNN
   else
     let l:display = a:data.display
 
-    " display.source
-    if ! has_key(l:display, 'source')
-      let l:display['source'] = { 
+    " display.scala
+    if ! has_key(l:display, 'scala')
+      let l:display['scala'] = { 
           \ "sign": {
             \ "is_enable": 0
           \ }
         \ }
     else
-      let l:source = l:display.source
+      let l:scala = l:display.scala
 
-      " display.source.sign
-      if ! has_key(l:source, 'sign')
+      " display.scala.sign
+      if ! has_key(l:scala, 'sign')
         let l:display['sign'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:sign = l:source.sign
+        let l:sign = l:scala.sign
 
         if ! has_key(l:sign, 'is_enable')
           let l:sign['is_enable'] = 0
         else
           if ! has_key(l:sign, 'toggle')
-            let l:sign['toggle'] = s:dislay_source_sign_toggle_default
+            let l:sign['toggle'] = {}
           endif
           if ! has_key(l:sign, 'is_on')
-            let l:sign['is_on'] = s:dislay_source_sign_is_on_default
+            let l:sign['is_on'] = s:dislay_scala_sign_is_on_default
           endif
 
           if ! has_key(l:sign, 'kinds')
@@ -1191,22 +1028,22 @@ endif " NNNNNN
         endif
       endif
 
-      " display.source.color_line
-      if ! has_key(l:source, 'color_line')
+      " display.scala.color_line
+      if ! has_key(l:scala, 'color_line')
         let l:display['color_line'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:color_line = l:source.color_line
+        let l:color_line = l:scala.color_line
 
         if ! has_key(l:color_line, 'is_enable')
           let l:color_line['is_enable'] = 0
         else
           if ! has_key(l:color_line, 'toggle')
-            let l:color_line['toggle'] = s:dislay_source_color_line_toggle_default
+            let l:color_line['toggle'] = {}
           endif
           if ! has_key(l:color_line, 'is_on')
-            let l:color_line['is_on'] = s:dislay_source_color_line_is_on_default
+            let l:color_line['is_on'] = s:dislay_scala_color_line_is_on_default
           endif
           if ! has_key(l:color_line, 'kinds')
             let l:color_line['kinds'] = {}
@@ -1221,21 +1058,21 @@ endif " NNNNNN
         endif
       endif
 
-      " display.source.color_column
-      if ! has_key(l:source, 'color_column')
+      " display.scala.color_column
+      if ! has_key(l:scala, 'color_column')
         let l:display['color_column'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:color_column = l:source.color_column
+        let l:color_column = l:scala.color_column
         if ! has_key(l:color_column, 'is_enable')
           let l:color_column['is_enable'] = 0
         else
           if ! has_key(l:color_column, 'toggle')
-            let l:color_column['toggle'] = s:dislay_source_color_column_toggle_default
+            let l:color_column['toggle'] = {}
           endif
           if ! has_key(l:color_column, 'is_on')
-            let l:color_column['is_on'] = s:dislay_source_color_column_is_on_default
+            let l:color_column['is_on'] = s:dislay_scala_color_column_is_on_default
           endif
 
         endif
@@ -1245,9 +1082,9 @@ endif " NNNNNN
 
 
 
-    " display.window
-    if ! has_key(l:display, 'window')
-      let l:display['window'] = { 
+    " display.actwin
+    if ! has_key(l:display, 'actwin')
+      let l:display['actwin'] = { 
           \ "cursor_line": {
             \ "is_enable": 0
           \ },
@@ -1259,74 +1096,74 @@ endif " NNNNNN
           \ }
         \ }
     else
-      let l:window = l:display.window
+      let l:actwin = l:display.actwin
 
-      " display.window.cursor_line
-      if ! has_key(l:window, 'cursor_line')
+      " display.actwin.cursor_line
+      if ! has_key(l:actwin, 'cursor_line')
         let l:display['cursor_line'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:cursor_line = l:window.cursor_line
+        let l:cursor_line = l:actwin.cursor_line
 
         if ! has_key(l:cursor_line, 'is_enable')
           let l:cursor_line['is_enable'] = 0
         else
           if ! has_key(l:cursor_line, 'toggle')
-            let l:cursor_line['toggle'] = s:dislay_window_cursor_line_toggle_default
+            let l:cursor_line['toggle'] = {}
           endif
           if ! has_key(l:cursor_line, 'is_on')
-            let l:cursor_line['is_on'] = s:dislay_window_cursor_line_is_on_default
+            let l:cursor_line['is_on'] = s:dislay_actwin_cursor_line_is_on_default
           endif
         endif
       endif
 
-      " display.window.highlight_line
-      if ! has_key(l:window, 'highlight_line')
+      " display.actwin.highlight_line
+      if ! has_key(l:actwin, 'highlight_line')
         let l:display['highlight_line'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:highlight_line = l:window.highlight_line
+        let l:highlight_line = l:actwin.highlight_line
 
         if ! has_key(l:highlight_line, 'is_enable')
           let l:highlight_line['is_enable'] = 0
         else
           if ! has_key(l:highlight_line, 'toggle')
-            let l:highlight_line['toggle'] = s:dislay_window_highlight_line_toggle_default
+            let l:highlight_line['toggle'] = {}
           endif
           if ! has_key(l:highlight_line, 'is_on')
-            let l:highlight_line['is_on'] = s:dislay_window_highlight_line_is_on_default
+            let l:highlight_line['is_on'] = s:dislay_actwin_highlight_line_is_on_default
           endif
           if ! has_key(l:highlight_line, 'is_full')
-            let l:highlight_line['is_full'] = s:dislay_window_highlight_line_is_full_default
+            let l:highlight_line['is_full'] = s:dislay_actwin_highlight_line_is_full_default
           endif
           if ! has_key(l:highlight_line, 'all_text')
-            let l:highlight_line['all_text'] = s:dislay_window_highlight_line_all_text_default
+            let l:highlight_line['all_text'] = s:dislay_actwin_highlight_line_all_text_default
           endif
         endif
 
         " TODO highlight colors
       endif
 
-      " display.window.sign
-      if ! has_key(l:window, 'sign')
+      " display.actwin.sign
+      if ! has_key(l:actwin, 'sign')
         let l:display['sign'] = {
           \ "is_enable": 0
           \ }
       else
-        let l:sign = l:window.sign
+        let l:sign = l:actwin.sign
         if ! has_key(l:sign, 'is_enable')
           let l:sign['is_enable'] = 0
         endif
         if ! has_key(l:sign, 'toggle')
-          let l:sign['toggle'] = s:dislay_window_sign_toggle_default
+          let l:sign['toggle'] = {}
         endif
         if ! has_key(l:sign, 'is_on')
-          let l:sign['is_on'] = s:dislay_window_sign_is_on_default
+          let l:sign['is_on'] = s:dislay_actwin_sign_is_on_default
         endif
         if ! has_key(l:sign, 'all_text')
-          let l:sign['all_text'] = s:dislay_window_sign_all_text_default
+          let l:sign['all_text'] = s:dislay_actwin_sign_all_text_default
         endif
 
         if ! has_key(l:sign, 'kinds')
@@ -1404,9 +1241,9 @@ function! s:Modify(org_data, new_data)
   "   category 
   "   abbreviation
   "   kinds
-" TODO SIGN data.display.source.sign
-  let l:has_org_data_sign = has_key(a:org_data, 'display') && has_key(a:org_data.display, 'source') && has_key(a:org_data.display.source, 'sign')
-  let l:has_new_data_sign = has_key(a:new_data, 'display') && has_key(a:new_data.display, 'source') && has_key(a:new_data.display.source, 'sign')
+" TODO SIGN data.display.scala.sign
+  let l:has_org_data_sign = has_key(a:org_data, 'display') && has_key(a:org_data.display, 'scala') && has_key(a:org_data.display.scala, 'sign')
+  let l:has_new_data_sign = has_key(a:new_data, 'display') && has_key(a:new_data.display, 'scala') && has_key(a:new_data.display.scala, 'sign')
 
   if l:has_org_data_sign && l:has_new_data_sign
     " TODO
@@ -1414,7 +1251,7 @@ function! s:Modify(org_data, new_data)
     " TODO
   elseif l:has_new_data_sign 
     " register sign
-    let l:sign = a:new_data.display.source.sign
+    let l:sign = a:new_data.display.scala.sign
     if ! vimside#sign#HasCategory(l:sign.category)
       vimside#sign#AddCategory(l:sign.category, l:sign)
     endif
@@ -1496,7 +1333,7 @@ function! s:AdjustInput()
   endif
 endfunction
 
-function! s:LoadDisplay(actwin)
+function! s:LoadDisplay(instance)
 call s:LOG("LoadDisplay current buffer=". bufnr("%"))
   setlocal buftype=nofile
   setlocal modifiable
@@ -1505,9 +1342,9 @@ call s:LOG("LoadDisplay current buffer=". bufnr("%"))
 
   execute "1,$d"
 
-  call s:BuildDisplay(a:actwin)
-  call cursor(a:actwin.first_buffer_line, 1)
-  let a:actwin.current_line = a:actwin.first_buffer_line
+  call s:BuildDisplay(a:instance)
+  call cursor(a:instance.first_buffer_line, 1)
+  let a:instance.current_line = a:instance.first_buffer_line
 
  setlocal nomodifiable
 endfunction
@@ -1516,28 +1353,28 @@ endfunction
 " FastHelp  
 " --------------------------------------------
 
-function! s:CreateToggleInfo(data_win, data_element, key_value, defs, actwin)
-  let a:actwin.is_info_open = ! a:actwin.is_info_open 
+function! s:CreateToggleInfo(data_win, data_element, key_value, defs, instance)
+  let a:instance.is_info_open = ! a:instance.is_info_open 
 
-  if ! a:actwin.is_info_open
-    let a:actwin.first_buffer_line = 1
+  if ! a:instance.is_info_open
+    let a:instance.first_buffer_line = 1
 call s:LOG("CreateToggleInfo lines=[]")
     return []
   endif
 
-  let l:cmds = a:actwin.data.cmds
+  let l:cmds = a:instance.data.cmds
   let l:data_win = l:cmds[a:data_win]
   let l:elements = l:data_win[a:data_element]
 
   let l:lines = []
   let l:size = 25
 
-  if a:data_win == 'source'
+  if a:data_win == 'scala'
     let l:title = 'Scala'
-  elseif a:data_win == 'window'
-    let l:title = a:actwin.data.winname
+  elseif a:data_win == 'actwin'
+    let l:title = a:instance.data.winname
   else
-    let l:title = "Window"
+    let l:title = "ActWin"
   endif
 
   if type(a:key_value) == type([]) && len(a:key_value) == 1
@@ -1579,7 +1416,7 @@ call s:LOG("CreateToggleInfo lines=[]")
   call add(l:lines, "")
 
 call s:LOG("CreateToggleInfo lines=". string(l:lines))
-  let a:actwin.first_buffer_line = len(lines) + 1
+  let a:instance.first_buffer_line = len(lines) + 1
   return l:lines
 
 endfunction
@@ -1588,11 +1425,11 @@ endfunction
 " --------------------------------------------
 " Build Display
 " --------------------------------------------
-function! s:BuildDisplay(actwin)
+function! s:BuildDisplay(instance)
 call s:LOG("BuildDisplay TOP")
-  let l:Formatter = a:actwin.data.formatter
+  let l:Formatter = a:instance.data.formatter
 
-  let a:actwin.first_buffer_line = 1
+  let a:instance.first_buffer_line = 1
 
   let l:linenos_to_entrynos = []
   let l:entrynos_to_linenos = []
@@ -1602,7 +1439,7 @@ call s:LOG("BuildDisplay TOP")
   let l:entrynos = 0
   let l:lines = []
   let l:lineslen = 0
-  for entry in a:actwin.data.entries
+  for entry in a:instance.data.entries
     let l:current_lineslen = l:lineslen
 
     call l:Formatter(lines, entry)
@@ -1623,10 +1460,10 @@ call s:LOG("BuildDisplay TOP")
   endfor
 call s:LOG("BuildDisplay current buffer=". bufnr("%"))
 
-  call setline(a:actwin.first_buffer_line, lines)
-  let a:actwin.linenos_to_entrynos = l:linenos_to_entrynos
-  let a:actwin.entrynos_to_linenos = l:entrynos_to_linenos
-  let a:actwin.entrynos_to_nos_of_lines = l:entrynos_to_nos_of_lines
+  call setline(a:instance.first_buffer_line, lines)
+  let a:instance.linenos_to_entrynos = l:linenos_to_entrynos
+  let a:instance.entrynos_to_linenos = l:entrynos_to_linenos
+  let a:instance.entrynos_to_nos_of_lines = l:entrynos_to_nos_of_lines
 
 call s:LOG("BuildDisplay BOTTOM")
 endfunction
@@ -1646,42 +1483,42 @@ endfunction
 "     Destroy
 "
 "
-" Display Source LifeCycle: {{{1
+" Display Scala LifeCycle: {{{1
 "     Define - create structures
-"       s:SourceDefineSigns(a:actwin)
+"       s:ScalaDefineSigns(a:instance)
 "     Enable - enable on buffered files
-"       s:SourceEnableSigns(a:actwin)
+"       s:ScalaEnableSigns(a:instance)
 "     EnableFile (goto file previously not displayed)
-"       s:SourceEnableFileSigns(a:actwin, a:file)
+"       s:ScalaEnableFileSigns(a:instance, a:file)
 "     Toggle - toggle between effect on/off (Enable/Disable)
 "       g:ToggleSigns(buffer_nr)
 "       - ToggleSignMatch
 "       - ToggleShowColumn - colorcolumn
 "
-" s:EnterEntry(0, l:actwin)
-"   calls s:EnterActionQuickFix(entrynos, actwin)
-"      calls s:SourceSetAtEntry(entrynos, actwin)
-" s:SelectEntry(0, l:actwin)
-"   calls s:SelectActionQuickFix(entrynos, actwin)
-"      calls s:SourceGoToEntry(entrynos, actwin)
-" s:LeaveEntry(0, l:actwin)
-"   calls s:LeaveActionQuickFix(entrynos, actwin)
-"      calls s:RemoveAtEntry(a:entrynos, a:actwin)
+" s:EnterEntry(0, l:instance)
+"   calls s:EnterActionQuickFix(entrynos, instance)
+"      calls s:ScalaSetAtEntry(entrynos, instance)
+" s:SelectEntry(0, l:instance)
+"   calls s:SelectActionQuickFix(entrynos, instance)
+"      calls s:ScalaGoToEntry(entrynos, instance)
+" s:LeaveEntry(0, l:instance)
+"   calls s:LeaveActionQuickFix(entrynos, instance)
+"      calls s:RemoveAtEntry(a:entrynos, a:instance)
 "
 "     Entry
 "       Enter - side effect of entering Window line
 "       Leave - side effect of leaving Window line
 "     DisableFile - disable on file that has been unbuffered
 "     Disable - disable on buffered files
-"       s:SourceDisableSigns(a:actwin)
+"       s:ScalaDisableSigns(a:instance)
 "     Destroy - remove structures
-"       s:SourceDestroySigns(a:actwin)
+"       s:ScalaDestroySigns(a:instance)
 "
-" Display Window LifeCycle: {{{1
+" Display ActWin LifeCycle: {{{1
 "     Define - create structures
-"       s:WindowDefineCursorLine(a:actwin)
-"       s:WindowDefineHighlightLine(a:actwin)
-"       s:WindowDefineSign(a:actwin)
+"       s:ActWinDefineCursorLine(a:instance)
+"       s:ActWinDefineHighlightLine(a:instance)
+"       s:ActWinDefineSign(a:instance)
 "     Enable
 "     EnableFile
 "     Toggle - toggle between effect on/off (Enable/Disable)
@@ -1689,240 +1526,255 @@ endfunction
 "       g:ToggleHighlightLine()
 "       g:ToggleSign()
 "     Entry
-"       Enter call by s:EnterEntry(0, l:actwin)
-"           s:WindowEnterCursorLine(a:entrynos, a:actwin)
-"           s:WindowEnterHighlightLine(a:entrynos, a:actwin)
-"           s:WindowEnterSign(a:entrynos, a:actwin)
-"       Leave call by s:LeaveEntry(entrynos, actwin)
-"           s:WindowLeaveCursorLine(a:entrynos, a:actwin)
-"           s:WindowLeaveHighlightLine(a:entrynos, a:actwin)
-"           s:WindowLeaveSign(a:entrynos, a:actwin)
+"       Enter call by s:EnterEntry(0, l:instance)
+"           s:ActWinEnterCursorLine(a:entrynos, a:instance)
+"           s:ActWinEnterHighlightLine(a:entrynos, a:instance)
+"           s:ActWinEnterSign(a:entrynos, a:instance)
+"       Leave call by s:LeaveEntry(entrynos, instance)
+"           s:ActWinLeaveCursorLine(a:entrynos, a:instance)
+"           s:ActWinLeaveHighlightLine(a:entrynos, a:instance)
+"           s:ActWinLeaveSign(a:entrynos, a:instance)
 "     DisableFile
 "     Disable
 "     Destroy - remove structures
-"       s:WindowDestroyCursorLine(a:actwin)
-"       s:WindowDestroyHighlightLine(a:actwin)
-"       s:WindowDestroySign(a:actwin)
+"       s:ActWinDestroyCursorLine(a:instance)
+"       s:ActWinDestroyHighlightLine(a:instance)
+"       s:ActWinDestroySign(a:instance)
 " ============================================================================
 
-function! s:DisplayDefine(actwin)
-  let l:display = a:actwin.data.display
+function! s:DisplayDefine(instance)
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.sign.is_enable
-    call s:SourceDefineSigns(a:actwin)
-  endif
-  if l:source.color_line.is_enable
-    call s:SourceDefineColorLine(a:actwin)
-  endif
-  if l:source.color_column.is_enable
-    call s:SourceDefineColorColumn(a:actwin)
-  endif
+  " scala
+  let l:scala = l:display.scala
 
-  " window
-  let l:window = l:display.window
-
-  if l:window.cursor_line.is_enable
-    call s:WindowDefineCursorLine(a:actwin)
+  if l:scala.sign.is_enable
+    call s:ScalaDefineSigns(a:instance)
+  endif
+  if l:scala.color_line.is_enable
+    call s:ScalaDefineColorLine(a:instance)
+  endif
+  if l:scala.color_column.is_enable
+    call s:ScalaDefineColorColumn(a:instance)
   endif
 
-  if l:window.highlight_line.is_enable
-    call s:WindowDefineHighlightLine(a:actwin)
-  endif
+  " actwin
+  let l:actwin = l:display.actwin
 
-  if l:window.sign.is_enable
-    call s:WindowDefineSign(a:actwin)
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinDefineCursorLine(a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinDefineHighlightLine(a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinDefineSign(a:instance)
   endif
 
   " handlers
-  call add(a:actwin.handlers.on_new_file, function("s:DisplayEnableFile"))
-  call add(a:actwin.handlers.on_close, function("s:DisplayDisableFile"))
+  call add(a:instance.handlers.on_new_file, function("s:DisplayEnableFile"))
+  call add(a:instance.handlers.on_close, function("s:DisplayDisableFile"))
 endfunction
 
-function! s:DisplayEnable(actwin)
-  let l:display = a:actwin.data.display
+function! s:DisplayEnable(instance)
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.sign.is_enable
-    call s:SourceEnableSigns(a:actwin)
+  " scala
+  let l:scala = l:display.scala
+
+  if l:scala.sign.is_enable
+    call s:ScalaEnableSigns(a:instance)
   endif
-  if l:source.color_line.is_enable
-    call s:SourceEnableColorLine(a:actwin)
+  if l:scala.color_line.is_enable
+    call s:ScalaEnableColorLine(a:instance)
   endif
-  if l:source.color_column.is_enable
-    call s:SourceEnableColorColumn(a:actwin)
+  if l:scala.color_column.is_enable
+    call s:ScalaEnableColorColumn(a:instance)
   endif
 
-  " window
-  let l:window = l:display.window
+  " actwin
+  let l:actwin = l:display.actwin
+
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinEnableCursorLine(a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinEnableHighlightLine(a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinEnableSign(a:instance)
+  endif
 
 endfunction
 
-function! s:DisplayEnableFile(actwin, file, entrynos)
+function! s:DisplayEnableFile(instance, file, entrynos)
 call s:LOG("DisplayEnableFile TOP")
-  let l:display = a:actwin.data.display
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.sign.is_enable
-    call s:SourceEnableFileSigns(a:actwin, a:file, a:entrynos)
+  " scala
+  let l:scala = l:display.scala
+
+  if l:scala.sign.is_enable
+    call s:ScalaEnableFileSigns(a:instance, a:file, a:entrynos)
   endif
-  if l:source.color_line.is_enable
-    call s:SourceEnableFileColorLine(a:actwin, a:file, a:entrynos)
+  if l:scala.color_line.is_enable
+    call s:ScalaEnableFileColorLine(a:instance, a:file, a:entrynos)
   endif
-  if l:source.color_column.is_enable
-    call s:SourceEnableFileColorColumn(a:actwin, a:file, a:entrynos)
+  if l:scala.color_column.is_enable
+    call s:ScalaEnableFileColorColumn(a:instance, a:file, a:entrynos)
   endif
 
-  " window
-  let l:window = l:display.window
+  " actwin
+  let l:actwin = l:display.actwin
+
+  " No new files for actwin
 
 call s:LOG("DisplayEnableFile BOTTOM")
 endfunction
 
 
-function! s:DisplayEntryEnter(entrynos, actwin)
+function! s:DisplayEntryEnter(entrynos, instance)
 call s:LOG("s:DisplayEntryEnter TOP")
-  let l:display = a:actwin.data.display
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
+  " scala
+  let l:scala = l:display.scala
 
-  if l:source.color_line.is_enable
-    call s:SourceEntryEnterColorLine(a:actwin, a:entrynos)
+  if l:scala.color_line.is_enable
+    call s:ScalaEntryEnterColorLine(a:instance, a:entrynos)
   endif
-  if l:source.color_column.is_enable
-    call s:SourceEntryEnterColorColumn(a:actwin, a:entrynos)
-  endif
-
-  " window
-  let l:window = l:display.window
-
-  if l:window.cursor_line.is_enable
-    call s:WindowEnterCursorLine(a:entrynos, a:actwin)
+  if l:scala.color_column.is_enable
+    call s:ScalaEntryEnterColorColumn(a:instance, a:entrynos)
   endif
 
-  if l:window.highlight_line.is_enable
-    call s:WindowEnterHighlightLine(a:entrynos, a:actwin)
-  endif
+  " actwin
+  let l:actwin = l:display.actwin
 
-  if l:window.sign.is_enable
-    call s:WindowEnterSign(a:entrynos, a:actwin)
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinEnterCursorLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinEnterHighlightLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinEnterSign(a:entrynos, a:instance)
   endif
 
 call s:LOG("s:DisplayEntryEnter BOTTOM")
 endfunction
 
-function! s:DisplayEntryLeave(entrynos, actwin)
+function! s:DisplayEntryLeave(entrynos, instance)
 call s:LOG("s:DisplayEntryLeave TOP")
-  let l:display = a:actwin.data.display
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.color_line.is_enable
-    call s:SourceEntryLeaveColorLine(a:actwin, a:entrynos)
+  " scala
+  let l:scala = l:display.scala
+  if l:scala.color_line.is_enable
+    call s:ScalaEntryLeaveColorLine(a:instance, a:entrynos)
   endif
-  if l:source.color_column.is_enable
-    call s:SourceEntryLeaveColorColumn(a:actwin, a:entrynos)
-  endif
-
-
-
-  " window
-  let l:window = l:display.window
-
-  if l:window.cursor_line.is_enable
-    call s:WindowLeaveCursorLine(a:entrynos, a:actwin)
+  if l:scala.color_column.is_enable
+    call s:ScalaEntryLeaveColorColumn(a:instance, a:entrynos)
   endif
 
-  if l:window.highlight_line.is_enable
-    call s:WindowLeaveHighlightLine(a:entrynos, a:actwin)
-  endif
 
-  if l:window.sign.is_enable
-    call s:WindowLeaveSign(a:entrynos, a:actwin)
+  " actwin
+  let l:actwin = l:display.actwin
+
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinLeaveCursorLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinLeaveHighlightLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinLeaveSign(a:entrynos, a:instance)
   endif
 call s:LOG("s:DisplayEntryLeave BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:DisplayDisableFile(actwin, file)
-  let l:display = a:actwin.data.display
+function! s:DisplayDisableFile(instance, file)
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-"  if l:source.sign.is_enable
-"    call s:DisableFileSigns(a:actwin, a:file)
-"  endif
+  " scala
+  let l:scala = l:display.scala
 
-  " window
-  let l:window = l:display.window
+
+  " actwin
+  let l:actwin = l:display.actwin
 
 endfunction
 
 " MUST be called from local buffer
-function! s:DisplayDisable(actwin)
-  let l:display = a:actwin.data.display
+function! s:DisplayDisable(instance)
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.sign.is_enable
-    call s:SourceDisableSigns(a:actwin)
+  " scala
+  let l:scala = l:display.scala
+
+  if l:scala.sign.is_enable
+    call s:ScalaDisableSigns(a:instance)
   endif
-  if l:source.color_line.is_enable
-    call s:SourceDisableColorLine(a:actwin)
+  if l:scala.color_line.is_enable
+    call s:ScalaDisableColorLine(a:instance)
   endif
-  if l:source.color_column.is_enable
-    call s:SourceDisableColorColumn(a:actwin)
+  if l:scala.color_column.is_enable
+    call s:ScalaDisableColorColumn(a:instance)
   endif
 
-  " window
-  let l:window = l:display.window
+  " actwin
+  let l:actwin = l:display.actwin
 
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinDisableCursorLine(a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinDisableHighlightLine(a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinDisableSign(a:instance)
+  endif
 endfunction
 
 " MUST be called from local buffer
-function! s:DisplayDestroy(actwin)
+function! s:DisplayDestroy(instance)
 call s:LOG("s:DisplayDestroy TOP")
-  let l:display = a:actwin.data.display
+  let l:display = a:instance.data.display
 
-  " source
-  let l:source = l:display.source
-  if l:source.sign.is_enable
-    call s:SourceDestroySigns(a:actwin)
+  " scala
+  let l:scala = l:display.scala
+
+  if l:scala.sign.is_enable
+    call s:ScalaDestroySigns(a:instance)
   endif
-  if l:source.color_line.is_enable
-    call s:SourceDestroyColorLine(a:actwin)
+  if l:scala.color_line.is_enable
+    call s:ScalaDestroyColorLine(a:instance)
   endif
 
-  if l:source.color_column.is_enable
-    call s:SourceDestroyColorColumn(a:actwin)
+  if l:scala.color_column.is_enable
+    call s:ScalaDestroyColorColumn(a:instance)
   endif
 if s:is_color_column_enabled
-    execute 'silent '. a:actwin.source_win_nr.'wincmd w | :set colorcolumn='
+    execute 'silent '. a:instance.scala_win_nr.'wincmd w | :set colorcolumn='
 endif
 
-  " window
-  let l:window = l:display.window
+  " actwin
+  let l:actwin = l:display.actwin
 
-  if l:window.cursor_line.is_enable
-    call s:WindowDestroyCursorLine(a:actwin)
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinDestroyCursorLine(a:instance)
   endif
-
-  if l:window.highlight_line.is_enable
-    call s:WindowDestroyHighlightLine(a:actwin)
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinDestroyHighlightLine(a:instance)
   endif
-
-  if l:window.sign.is_enable
-    call s:WindowDestroySign(a:actwin)
+  if l:actwin.sign.is_enable
+    call s:ActWinDestroySign(a:instance)
   endif
 call s:LOG("s:DisplayDestroy BOTTOM")
 endfunction
 
 " ------------------------------
-" Display Source: {{{1
+" Display Scala: {{{1
 "   Define
 "    Toggle
 "    Enable
@@ -1936,26 +1788,24 @@ endfunction
 " Sign {{{1
 " ------------------------------
 
-function! s:SourceDefineSigns(actwin)
-call s:LOG("SourceDefineSigns TOP")
-  let l:sign = a:actwin.data.display.source.sign
+function! s:ScalaDefineSigns(instance)
+call s:LOG("s:ScalaDefineSigns TOP")
+  let l:sign = a:instance.data.display.scala.sign
   let l:category = l:sign.category
-
-  if has_key(l:sign, 'toggle')
-    let b:sign_toggle = l:sign.toggle
-    unlet l:sign.toggle
-  endif
 
   if has_key(l:sign, 'kinds') && ! vimside#sign#HasCategory(l:category)
     call vimside#sign#AddCategory(l:category, l:sign)
   endif
-call s:LOG("SourceDefineSigns BOTTOM")
+call s:LOG("s:ScalaDefineSigns BOTTOM")
 endfunction
 
-function! s:SourceEnableSigns(actwin)
-call s:LOG("SourceEnableSigns TOP")
-  let l:data = a:actwin.data
-  let l:sign = l:data.display.source.sign
+function! s:ScalaEnableSigns(instance)
+call s:LOG("s:ScalaEnableSigns TOP")
+  let l:data = a:instance.data
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:sign = l:data.display.scala.sign
   let l:category = l:sign.category
   for l:entry in l:data.entries
     let l:file = l:entry.file
@@ -1965,22 +1815,93 @@ call s:LOG("SourceEnableSigns TOP")
       let l:kind = l:entry.kind
       call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
     else
-call s:LOG("SourceEnableSigns not placed file=". l:file)
+call s:LOG("s:ScalaEnableSigns not placed file=". l:file)
     endif
   endfor
 
-  if exists("b:sign_toggle")
-    execute ":nnoremap <silent> <Leader>". b:sign_toggle ." :call g:ToggleSigns(". a:actwin.buffer_nr .")<CR>"
-    let b:is_toggle = 0
+  let l:toggle = l:sign.toggle
+  let l:funcname = "g:ScalaToggleSigns"
+
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+if 0 " OLD TOGGLE
+  if has_key(l:toggle, "actwin")
+    let l:actwin = l:toggle.actwin
+
+    if has_key(l:actwin, "map")
+      let l:value = l:actwin.map
+      execute ":nnoremap <silent> <buffer> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+      unlet l:value
+    endif
+    if has_key(l:actwin, "cmd")
+      let l:value = l:actwin.cmd
+      execute ":command -buffer ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+      unlet l:value
+    endif
+    if has_key(l:actwin, "abbr")
+      let l:value = l:actwin.abbr
+      execute "cabbrev <silent> <buffer> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
+      unlet l:value
+    endif
   endif
-call s:LOG("SourceEnableSigns BOTTOM")
+
+  if has_key(l:toggle, "scala")
+    let l:scala = l:toggle.scala
+
+    if has_key(l:scala, "map")
+      let l:value = l:scala.map
+      if (l:is_global)
+        execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+      else
+        execute 'silent '. l:scala_buffer_nr.'wincmd w'
+        execute ":nnoremap <silent> <buffer> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+        execute 'silent '. l:buffer_nr.'wincmd w'
+      endif
+      unlet l:value
+    endif
+    if has_key(l:scala, "cmd")
+      let l:value = l:scala.cmd
+      if (l:is_global)
+        execute ":command ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+      else
+        execute 'silent '. l:scala_buffer_nr.'wincmd w'
+        execute ":command -buffer ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
+        execute 'silent '. l:buffer_nr.'wincmd w'
+      endif
+      unlet l:value
+    endif
+    if has_key(l:scala, "abbr")
+      let l:value = l:scala.abbr
+      if (l:is_global)
+        execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
+      else
+        execute 'silent '. l:scala_buffer_nr.'wincmd w'
+        execute "cabbrev <silent> <buffer> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
+        execute 'silent '. l:buffer_nr.'wincmd w'
+      endif
+      unlet l:value
+    endif
+  endif
+
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleSigns(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
+  endif
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+    execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleSigns(". a:instance.buffer_nr .")'<CR>"
+  endif
+endif " OLD TOGGLE
+call s:LOG("s:ScalaEnableSigns BOTTOM")
 endfunction
 
-function! s:SourceEnableFileSigns(actwin, file, entrynos)
-call s:LOG("SourceEnableFileSigns TOP")
+function! s:ScalaEnableFileSigns(instance, file, entrynos)
+call s:LOG("s:ScalaEnableFileSigns TOP")
   let l:file = fnamemodify(a:file, ":p")
-  let l:data = a:actwin.data
-  let l:sign = a:actwin.data.display.source.sign
+  let l:data = a:instance.data
+  let l:sign = a:instance.data.display.scala.sign
   let l:category = l:sign.category
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
@@ -1989,81 +1910,110 @@ call s:LOG("SourceEnableFileSigns TOP")
     let l:line = l:entry.line
     let l:kind = l:entry.kind
     call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-call s:LOG("SourceEnableFileSigns placed file=". l:file)
+call s:LOG("s:ScalaEnableFileSigns placed file=". l:file)
   endif
-
-call s:LOG("SourceEnableFileSigns BOTTOM")
+call s:LOG("s:ScalaEnableFileSigns BOTTOM")
 endfunction
 
 
-function! g:ToggleSigns(buffer_nr)
-call s:LOG("ToggleSigns TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+function! g:ScalaToggleSigns(buffer_nr)
+call s:LOG("g:ScalaToggleSigns TOP")
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:ToggleSigns actwin not found")
+    call s:ERROR("s:ToggleSigns instance not found")
     return
   endif
 
-  let l:data = l:actwin.data
-  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'source') && has_key(l:data.display.source, 'sign')
+  let l:data = l:instance.data
+  let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'scala') && has_key(l:data.display.scala, 'sign')
   if l:has_data_sign
-    let l:sign = l:data.display.source.sign
-    let b:is_toggle = ! b:is_toggle
-    call vimside#sign#Toggle(l:sign.category, b:is_toggle)
+    let l:sign = l:data.display.scala.sign
+    let l:sign.is_one = ! l:sign.is_one
+    call vimside#sign#Toggle(l:sign.category, l:sign.is_one)
   endif
-call s:LOG("ToggleSigns BOTTOM")
+call s:LOG("g:ScalaToggleSigns BOTTOM")
 endfunction
 
-function! s:SourceDisableSigns(actwin)
-call s:LOG("SourceDisableSigns TOP")
-  let l:sign = a:actwin.data.display.source.sign
-  call vimside#sign#ClearCategory(l:sign.category)
-call s:LOG("SourceDisableSigns BOTTOM")
+function! s:ScalaDisableSigns(instance)
+call s:LOG("s:ScalaDisableSigns TOP")
+
+  let l:data = a:instance.data
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:sign = l:data.display.scala.sign
+  let l:toggle = l:sign.toggle
+  let l:funcname = "g:ScalaToggleSigns"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+  let l:category = l:sign.category
+  call vimside#sign#ClearCategory(l:category)
+
+call s:LOG("s:ScalaDisableSigns BOTTOM")
 endfunction
 
-function! s:SourceDestroySigns(actwin)
-call s:LOG("SourceDestroySigns TOP")
-  let l:sign = a:actwin.data.display.source.sign
+function! s:ScalaDestroySigns(instance)
+call s:LOG("s:ScalaDestroySigns TOP")
+  let l:sign = a:instance.data.display.scala.sign
   call vimside#sign#RemoveCategory(l:sign.category)
-call s:LOG("SourceDestroySigns BOTTOM")
+call s:LOG("s:ScalaDestroySigns BOTTOM")
 endfunction
 
 " ------------------------------
 " ColorLine {{{1
 " ------------------------------
 
-function! s:SourceDefineColorLine(actwin)
-call s:LOG("SourceDefineColorLine TOP")
-  let l:color_line = a:actwin.data.display.source.color_line
+function! s:ScalaDefineColorLine(instance)
+call s:LOG("s:ScalaDefineColorLine TOP")
+  let l:color_line = a:instance.data.display.scala.color_line
   let l:category = l:color_line.category
 
-  if has_key(l:color_line, 'toggle')
-" let b:sign_toggle = l:sign.toggle
-    let b:color_line_toggle = l:color_line.toggle
-    unlet l:color_line.toggle
-  endif
 
   if has_key(l:color_line, 'kinds') && ! vimside#sign#HasCategory(l:category)
     call vimside#sign#AddCategory(l:category, l:color_line)
   endif
-call s:LOG("SourceDefineColorLine BOTTOM")
+call s:LOG("s:ScalaDefineColorLine BOTTOM")
 endfunction
 
-function! s:SourceEnableColorLine(actwin)
-call s:LOG("SourceEnableColorLine TOP")
+function! s:ScalaEnableColorLine(instance)
+call s:LOG("s:ScalaEnableColorLine TOP")
 
-  if exists("b:color_line_toggle")
-    execute ":nnoremap <silent> <Leader>". b:color_line_toggle ." :call g:ToggleCursorLine(". a:actwin.buffer_nr .")<CR>"
-    let b:is_toggle_color_line = 0
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:color_line = a:instance.data.display.scala.color_line
+  let l:toggle = l:color_line.toggle
+  let l:funcname = "g:ScalaToggleColorLine"
+
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+
+if 0 " OLD TOGGLE
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleColorLine(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
   endif
-call s:LOG("SourceEnableColorLine BOTTOM")
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+"    execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
+    " execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleColorLine(". a:instance.buffer_nr .")'<CR>"
+    " execute "cabbrev <silent> ". l:value ." <c-r>='call g:ScalaToggleColorLine(". a:instance.buffer_nr .")'<CR>"
+    execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:ScalaToggleColorLine(".  a:instance.buffer_nr .")' : '' )<CR>"
+
+  endif
+endif " OLD TOGGLE
+
+call s:LOG("s:ScalaEnableColorLine BOTTOM")
 endfunction
 
-function! s:SourceEnableFileColorLine(actwin, file, entrynos)
-call s:LOG("SourceEnableFileColorLine TOP")
+function! s:ScalaEnableFileColorLine(instance, file, entrynos)
+call s:LOG("s:ScalaEnableFileColorLine TOP")
   let l:file = fnamemodify(a:file, ":p")
-  let l:data = a:actwin.data
-  let l:color_line = a:actwin.data.display.source.color_line
+  let l:data = a:instance.data
+  let l:color_line = a:instance.data.display.scala.color_line
   let l:category = l:color_line.category
 
   let l:bnr = bufnr(l:file)
@@ -2087,18 +2037,18 @@ call s:LOG("SourceEnableFileColorLine TOP")
     endif
 
     
-call s:LOG("SourceEnableFileSigns placed file=". l:file)
+call s:LOG("s:ScalaEnableFileSigns placed file=". l:file)
     if ! vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-      call s:ERROR("SourceEnableFileSigns placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
+      call s:ERROR("ScalaEnableFileSigns placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
     endif
   endif
-call s:LOG("SourceEnableFileColorLine BOTTOM")
+call s:LOG("s:ScalaEnableFileColorLine BOTTOM")
 endfunction
 
-function! s:SourceEntryEnterColorLine(actwin, entrynos)
-call s:LOG("SourceEntryEnterColorLine TOP")
-  let l:data = a:actwin.data
-  let l:color_line = l:data.display.source.color_line
+function! s:ScalaEntryEnterColorLine(instance, entrynos)
+call s:LOG("s:ScalaEntryEnterColorLine TOP")
+  let l:data = a:instance.data
+  let l:color_line = l:data.display.scala.color_line
   let l:category = l:color_line.category
 
   let l:entry = l:data.entries[a:entrynos]
@@ -2120,21 +2070,21 @@ call s:LOG("SourceEntryEnterColorLine TOP")
   endif
 
   let l:bnr = bufnr(l:file)
-call s:LOG("SourceEntryEnterColorLine file=". l:file)
-call s:LOG("SourceEntryEnterColorLine bnr=". l:bnr)
+call s:LOG("s:ScalaEntryEnterColorLine file=". l:file)
+call s:LOG("s:ScalaEntryEnterColorLine bnr=". l:bnr)
   if l:bnr > 0
     if ! vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
-      call s:ERROR("SourceEntryEnterColorLine placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
+      call s:ERROR("ScalaEntryEnterColorLine placed line=". l:line .", file=". l:file .", l:category=". l:category .", l:kind=". l:kind )
     endif
   endif
 
-call s:LOG("SourceEntryEnterColorLine BOTTOM")
+call s:LOG("s:ScalaEntryEnterColorLine BOTTOM")
 endfunction
 
-function! s:SourceEntryLeaveColorLine(actwin, entrynos)
-call s:LOG("SourceEntryLeaveColorLine TOP")
-  let l:data = a:actwin.data
-  let l:color_line = l:data.display.source.color_line
+function! s:ScalaEntryLeaveColorLine(instance, entrynos)
+call s:LOG("s:ScalaEntryLeaveColorLine TOP")
+  let l:data = a:instance.data
+  let l:color_line = l:data.display.scala.color_line
   let l:category = l:color_line.category
 
   let l:kind = 'marker'
@@ -2145,80 +2095,112 @@ call s:LOG("SourceEntryLeaveColorLine TOP")
 
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
-call s:LOG("SourceEntryLeaveColorLine file=". l:file)
+call s:LOG("s:ScalaEntryLeaveColorLine file=". l:file)
   let l:line = l:entry.line
   " call vimside#sign#UnPlaceFileByLine(l:file, l:category, l:kind, l:line)
   " call vimside#sign#UnPlaceFile(l:file, l:category, l:kind)
   call vimside#sign#ClearCategory(l:category)
 
-call s:LOG("SourceEntryLeaveColorLine BOTTOM")
+call s:LOG("s:ScalaEntryLeaveColorLine BOTTOM")
 endfunction
 
-function! g:ToggleColorLine(buffer_nr)
-call s:LOG("ToggleColorLine TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+function! g:ScalaToggleColorLine(buffer_nr)
+call s:LOG("g:ScalaToggleColorLine TOP")
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:ToggleColorLine actwin not found")
+    call s:ERROR("s:ToggleColorLine instance not found")
     return
   endif
 
-  let l:color_line = a:actwin.data.display.source.color_line
-  let b:is_toggle_color_line = ! b:is_toggle_color_line
-  call vimside#sign#Toggle(l:color_line.category, b:is_toggle_color_line)
-call s:LOG("ToggleColorLine BOTTOM")
+  let l:color_line = a:instance.data.display.scala.color_line
+  let l:color_line.is_on = ! l:color_line.is_on = 0
+  call vimside#sign#Toggle(l:color_line.category, l:color_line.is_on)
+call s:LOG("g:ScalaToggleColorLine BOTTOM")
 endfunction
 
-function! s:SourceDisableColorLine(actwin)
-call s:LOG("SourceDisableColorLine TOP")
-  let l:color_line = a:actwin.data.display.source.color_line
+function! s:ScalaDisableColorLine(instance)
+call s:LOG("s:ScalaDisableColorLine TOP")
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:color_line = a:instance.data.display.scala.color_line
+  let l:toggle = l:color_line.toggle
+  let l:funcname = "g:ScalaToggleColorLine"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+
   call vimside#sign#ClearCategory(l:color_line.category)
-call s:LOG("SourceDisableColorLine BOTTOM")
+
+call s:LOG("s:ScalaDisableColorLine BOTTOM")
 endfunction
 
-function! s:SourceDestroyColorLine(actwin)
-call s:LOG("SourceDestroyColorLine TOP")
-  let l:color_line = a:actwin.data.display.source.color_line
+function! s:ScalaDestroyColorLine(instance)
+call s:LOG("s:ScalaDestroyColorLine TOP")
+  let l:color_line = a:instance.data.display.scala.color_line
   call vimside#sign#RemoveCategory(l:color_line.category)
-call s:LOG("SourceDestroyColorLine BOTTOM")
+call s:LOG("s:ScalaDestroyColorLine BOTTOM")
 endfunction
 
 " ------------------------------
 " ColorColumn {{{1
 " ------------------------------
-function! s:SourceDefineColorColumn(actwin)
-call s:LOG("SourceDefineColorColumn TOP")
-  let l:color_line = a:actwin.data.display.source.color_line
-  let b:color_column_toggle = l:color_line.toggle
-  let l:color_column = a:actwin.data.display.source.color_column
-
-  if has_key(l:color_column, 'toggle')
-    let b:color_column_toggle = l:color_column.toggle
-    " unlet l:color_line.toggle
-  endif
-call s:LOG("SourceDefineColorColumn BOTTOM")
+function! s:ScalaDefineColorColumn(instance)
+call s:LOG("s:ScalaDefineColorColumn TOP")
+"  let l:color_line = a:instance.data.display.scala.color_line
+"  let b:color_column_toggle = l:color_line.toggle
+"  let l:color_column = a:instance.data.display.scala.color_column
+"
+"  if has_key(l:color_column, 'toggle')
+"    let b:color_column_toggle = l:color_column.toggle
+"    " unlet l:color_line.toggle
+"  endif
+call s:LOG("s:ScalaDefineColorColumn BOTTOM")
 endfunction
 
-function! s:SourceEnableColorColumn(actwin)
-call s:LOG("SourceEnableColorColumn TOP")
-  if exists("b:color_column_toggle")
-    execute ":nnoremap <silent> <Leader>". b:color_column_toggle ." :call g:ToggleColorColumn(". a:actwin.buffer_nr .")<CR>"
+function! s:ScalaEnableColorColumn(instance)
+call s:LOG("s:ScalaEnableColorColumn TOP")
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:color_column = a:instance.data.display.scala.color_column
+  let l:toggle = l:color_column.toggle
+  let l:funcname = "g:ScalaToggleColorColumn"
+
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+if 0 " OLD TOGGLE
+  let l:color_column = a:instance.data.display.scala.color_column
+  let l:toggle = l:color_column.toggle
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleColorColumn(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
   endif
-call s:LOG("SourceEnableColorColumn BOTTOM")
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+    execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleColorColumn(". a:instance.buffer_nr .")'<CR>"
+  endif
+endif " OLD TOGGLE
+call s:LOG("s:ScalaEnableColorColumn BOTTOM")
 endfunction
 
-function! s:SourceEnableFileColorColumn(actwin, file, entrynos)
-call s:LOG("SourceEnableFileColorColumn TOP")
+function! s:ScalaEnableFileColorColumn(instance, file, entrynos)
+call s:LOG("s:ScalaEnableFileColorColumn TOP")
 
-  let l:data = a:actwin.data
+  let l:data = a:instance.data
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
   let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
   let l:bnr = bufnr(l:file)
-call s:LOG("s:SourceEnableFileColorColumn: file=". l:file)
-call s:LOG("s:SourceEnableFileColorColumn: bnr=". l:bnr)
+call s:LOG("s:ScalaEnableFileColorColumn: file=". l:file)
+call s:LOG("s:ScalaEnableFileColorColumn: bnr=". l:bnr)
   if l:bnr > 0 && l:file == a:file
     let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SourceEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
+call s:LOG("s:ScalaEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
 
 
     if l:win_nr > 0
@@ -2230,26 +2212,26 @@ let s:buf_change = 0
       endif
 let s:buf_change = 1
 
-call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+call s:LOG("s:ScalaEntryEnterColorColumn: RETURN a:instance.win_nr=". a:instance.win_nr)
+      execute 'silent '. a:instance.win_nr.'wincmd w'
     endif
   endif
-call s:LOG("SourceEnableFileColorColumn BOTTOM")
+call s:LOG("s:ScalaEnableFileColorColumn BOTTOM")
 endfunction
 
-function! s:SourceEntryEnterColorColumn(actwin, entrynos)
-call s:LOG("SourceEntryEnterColorColumn TOP")
+function! s:ScalaEntryEnterColorColumn(instance, entrynos)
+call s:LOG("s:ScalaEntryEnterColorColumn TOP")
 
-  let l:data = a:actwin.data
+  let l:data = a:instance.data
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
   let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
   let l:bnr = bufnr(l:file)
-call s:LOG("s:SourceEntryEnterColorColumn: file=". l:file)
-call s:LOG("s:SourceEntryEnterColorColumn: bnr=". l:bnr)
+call s:LOG("s:ScalaEntryEnterColorColumn: file=". l:file)
+call s:LOG("s:ScalaEntryEnterColorColumn: bnr=". l:bnr)
   if l:bnr > 0 
     let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SourceEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
+call s:LOG("s:ScalaEntryEnterColorColumn: DO_COLOR file win_nr=". l:win_nr)
 
 
     if l:win_nr > 0
@@ -2261,73 +2243,83 @@ let s:buf_change = 0
       endif
 let s:buf_change = 1
 
-call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+call s:LOG("s:ScalaEntryEnterColorColumn: RETURN a:instance.win_nr=". a:instance.win_nr)
+      execute 'silent '. a:instance.win_nr.'wincmd w'
     endif
   endif
 
-call s:LOG("SourceEntryEnterColorColumn BOTTOM")
+call s:LOG("s:ScalaEntryEnterColorColumn BOTTOM")
 endfunction
 
-function! s:SourceEntryLeaveColorColumn(actwin, entrynos)
-call s:LOG("SourceEntryLeaveColorColumn TOP")
+function! s:ScalaEntryLeaveColorColumn(instance, entrynos)
+call s:LOG("s:ScalaEntryLeaveColorColumn TOP")
 
-  let l:data = a:actwin.data
+  let l:data = a:instance.data
   let l:entry = l:data.entries[a:entrynos]
   let l:file = l:entry.file
 
   let l:bnr = bufnr(l:file)
-call s:LOG("s:SourceEntryLeaveColorColumn: file=". l:file)
-call s:LOG("s:SourceEntryLeaveColorColumn: bnr=". l:bnr)
+call s:LOG("s:ScalaEntryLeaveColorColumn: file=". l:file)
+call s:LOG("s:ScalaEntryLeaveColorColumn: bnr=". l:bnr)
   if l:bnr > 0
     let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SourceEntryLeaveColorColumn: DO_COLOR file win_nr=". l:win_nr)
+call s:LOG("s:ScalaEntryLeaveColorColumn: DO_COLOR file win_nr=". l:win_nr)
 
     if l:win_nr > 0
-call s:LOG("s:SourceEntryLeaveColorColumn: CLEAR")
+call s:LOG("s:ScalaEntryLeaveColorColumn: CLEAR")
 let s:buf_change = 0
       execute 'silent '. l:win_nr.'wincmd w | :set colorcolumn='
 let s:buf_change = 1
 
-call s:LOG("s:SourceEntryEnterColorColumn: RETURN a:actwin.win_nr=". a:actwin.win_nr)
-      execute 'silent '. a:actwin.win_nr.'wincmd w'
+call s:LOG("s:ScalaEntryEnterColorColumn: RETURN a:instance.win_nr=". a:instance.win_nr)
+      execute 'silent '. a:instance.win_nr.'wincmd w'
     endif
   endif
 
 
-call s:LOG("SourceEntryLeaveColorColumn BOTTOM")
+call s:LOG("s:ScalaEntryLeaveColorColumn BOTTOM")
 endfunction
 
-function! s:SourceDisableColorColumn(actwin)
-call s:LOG("SourceDisableColorColumn TOP")
-call s:LOG("SourceDisableColorColumn BOTTOM")
+function! s:ScalaDisableColorColumn(instance)
+call s:LOG("s:ScalaDisableColorColumn TOP")
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:color_column = a:instance.data.display.scala.color_column
+  let l:toggle = l:color_column.toggle
+  let l:funcname = "g:ScalaToggleColorColumn"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+call s:LOG("s:ScalaDisableColorColumn BOTTOM")
 endfunction
 
-function! g:ToggleColorColumn(buffer_nr)
-call s:LOG("ToggleColorColumn TOP")
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+function! g:ScalaToggleColorColumn(buffer_nr)
+call s:LOG("g:ScalaToggleColorColumn TOP")
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:ToggleColorColumn actwin not found")
+    call s:ERROR("s:ToggleColorColumn instance not found")
     return
   endif
 
-  let l:data = l:actwin.data
-  let l:color_column = l:data.display.source.color_column
-  let l:color_column.is_on = ! l:color_column.is_on
+  let l:data = l:instance.data
+  let l:color_column = l:data.display.scala.color_column
 
-  let l:linenos = l:actwin.current_line
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
+  let l:linenos = l:instance.current_line
+  let l:linenos_to_entrynos = l:instance.linenos_to_entrynos
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
   let l:entry = l:data.entries[l:entrynos]
   let l:file = l:entry.file
   let l:bnr = bufnr(l:file)
   let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("g:ToggleColorColumn: file=". l:file)
-call s:LOG("g:ToggleColorColumn: bnr=". l:bnr)
-call s:LOG("g:ToggleColorColumn: win_nr=". l:win_nr)
+call s:LOG("g:ScalaToggleColorColumn: file=". l:file)
+call s:LOG("g:ScalaToggleColorColumn: bnr=". l:bnr)
+call s:LOG("g:ScalaToggleColorColumn: win_nr=". l:win_nr)
   if l:win_nr > 0
 
 let s:buf_change = 0
+    let l:color_column.is_on = ! l:color_column.is_on
     if l:color_column.is_on
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
 
@@ -2343,19 +2335,19 @@ let s:buf_change = 1
 
   endif
 
-call s:LOG("ToggleColorColumn BOTTOM")
+call s:LOG("g:ScalaToggleColorColumn BOTTOM")
 endfunction
 
 
-function! s:SourceDestroyColorColumn(actwin)
-call s:LOG("SourceDestroyColorColumn TOP")
-call s:LOG("s:SourceDestroyColorColumn: REMOVE COLOR source win_nr=". a:actwin.source_win_nr)
-  execute 'silent '. a:actwin.source_win_nr.'wincmd w | :set colorcolumn='
-call s:LOG("SourceDestroyColorColumn BOTTOM")
+function! s:ScalaDestroyColorColumn(instance)
+call s:LOG("s:ScalaDestroyColorColumn TOP")
+call s:LOG("s:ScalaDestroyColorColumn: REMOVE COLOR scala win_nr=". a:instance.scala_win_nr)
+  execute 'silent '. a:instance.scala_win_nr.'wincmd w | :set colorcolumn='
+call s:LOG("s:ScalaDestroyColorColumn BOTTOM")
 endfunction
 
 " ------------------------------
-" Display Window: {{{1
+" Display ActWin: {{{1
 "   Define
 "    Enter
 "    Leave
@@ -2368,55 +2360,103 @@ endfunction
 " ------------------------------
 
 " MUST be called from local buffer
-function! s:WindowDefineCursorLine(actwin)
-  let l:cursor_line = a:actwin.data.display.window.cursor_line
+function! s:ActWinDefineCursorLine(instance)
+  let l:cursor_line = a:instance.data.display.actwin.cursor_line
 
   if l:cursor_line.is_on
     setlocal modifiable
     setlocal cursorline
     setlocal nomodifiable
   endif
-
-  " execute ":nnoremap <silent> <Leader>". l:cursor_line.toggle ." :call g:ToggleCursorLine(". l:buffer_nr .")<CR>"
-  execute ":nnoremap <silent> <buffer> <Leader>". l:cursor_line.toggle ." :call g:ToggleCursorLine()<CR>"
-
 endfunction
 
-function! s:WindowEnterCursorLine(entrynos, actwin)
+function! s:ActWinEnableCursorLine(instance)
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:cursor_line = a:instance.data.display.actwin.cursor_line
+  let l:toggle = l:cursor_line.toggle
+  let l:funcname = "g:ActWinToggleCursorLine"
+
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+
+if 0 " OLD TOGGLE
+  let l:cursor_line = a:instance.data.display.actwin.cursor_line
+  let l:toggle = l:cursor_line.toggle
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
+  endif
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+    " execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
+
+
+
+"    execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
+    " execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
+    " execute "cabbrev <silent> ". l:value ." <c-r>='call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
+    execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:ActWinToggleCursorLine(".  a:instance.buffer_nr .")' : '' )<CR>"
+  endif
+endif " OLD TOGGLE
+endfunction
+
+function! s:ActWinEnterCursorLine(entrynos, instance)
   " emtpy
 endfunction
 
-function! s:WindowLeaveCursorLine(entrynos, actwin)
+function! s:ActWinLeaveCursorLine(entrynos, instance)
   " emtpy
 endfunction
 
 
-function! g:ToggleCursorLine()
-call s:LOG("ToggleCursorLine TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+function! g:ActWinToggleCursorLine(buffer_nr)
+call s:LOG("g:0ctWinToggleCursorLine TOP")
+  " let [l:found, l:instance] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:ToggleCursorLine actwin not found")
+    call s:ERROR("s:ToggleCursorLine instance not found")
     return
   endif
+  let l:current_buffer_nr = bufnr("%")
 
-  let l:cursor_line = l:actwin.data.display.window.cursor_line
-  let l:cursor_line.is_enable = ! l:cursor_line.is_enable
+  let l:cursor_line = l:instance.data.display.actwin.cursor_line
+  let l:cursor_line.is_on = ! l:cursor_line.is_on
 
+let s:buf_change = 0
+execute 'silent '. a:buffer_nr.'wincmd w'
   setlocal modifiable
-  if l:cursor_line.is_enable
+  if l:cursor_line.is_on
     setlocal cursorline
   else
     setlocal nocursorline
   endif
   setlocal nomodifiable
+execute 'silent '. l:current_buffer_nr.'wincmd w'
+let s:buf_change = 0
 
-call s:LOG("ToggleCursorLine BOTTOM")
+call s:LOG("g:ActWinToggleCursorLine BOTTOM")
+endfunction
+
+function! s:ActWinDisableCursorLine(instance)
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:cursor_line = a:instance.data.display.actwin.cursor_line
+  let l:toggle = l:cursor_line.toggle
+  let l:funcname = "g:ActWinToggleCursorLine"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 endfunction
 
 
-
 " MUST be called from local buffer
-function! s:WindowDestroyCursorLine(actwin)
+function! s:ActWinDestroyCursorLine(instance)
   " empty
 endfunction
 
@@ -2425,14 +2465,12 @@ endfunction
 " ------------------------------
 
 " MUST be called from local buffer
-function! s:WindowDefineHighlightLine(actwin)
-  let l:highlight_line = a:actwin.data.display.window.highlight_line
-
-  execute ":nnoremap <silent> <buffer> <Leader>". l:highlight_line.toggle ." :call g:ToggleHighlightLine()<CR>"
+function! s:ActWinDefineHighlightLine(instance)
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
 
   if l:highlight_line.is_full
-    let l:currentline = a:actwin.current_line
-" call s:LOG("s:WindowDefineHighlightLine currentline=". l:currentline)
+    let l:currentline = a:instance.current_line
+" call s:LOG("s:ActWinDefineHighlightLine currentline=". l:currentline)
     let l:winWidth = winwidth(0)
     let l:winHeight = line('$')
 
@@ -2448,37 +2486,63 @@ function! s:WindowDefineHighlightLine(actwin)
     execute "normal! ".l:currentline."G"
     setlocal nomodifiable
   endif
-
 endfunction
 
-function! s:EnterHighlightLine(entrynos, actwin)
-call s:LOG("WindowEnterHighlightLine TOP")
-  let l:highlight_line = a:actwin.data.display.window.highlight_line
+function! s:ActWinEnableHighlightLine(instance)
 
-" call s:LOG("s:WindowEnterHighlightLine entrynos=". a:entrynos)
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
+  let l:toggle = l:highlight_line.toggle
+  let l:funcname = "g:ActWinToggleHighlightLine"
 
-  let l:entry = a:actwin.data.entries[a:entrynos]
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+if 0 " OLD TOGGLE
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
+  let l:toggle = l:highlight_line.toggle
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleHighlightLine(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
+  endif
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+    execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleHighlightLine(". a:instance.buffer_nr .")'<CR>"
+  endif
+endif " OLD TOGGLE
+endfunction
+
+function! s:EnterHighlightLine(entrynos, instance)
+call s:LOG("s:ActWinEnterHighlightLine TOP")
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
+
+" call s:LOG("s:ActWinEnterHighlightLine entrynos=". a:entrynos)
+
+  let l:entry = a:instance.data.entries[a:entrynos]
   let l:content = l:entry.content
   let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
   if l:highlight_line.all_text
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
   else
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
     let l:nos_lines = 0
   endif
   let l:nos_columns = l:highlight_line.nos_columns
 
-" call s:LOG("s:WindowEnterHighlightLine line_start=". l:line_start)
-" call s:LOG("s:WindowEnterHighlightLine nos_lines=". l:nos_lines)
+" call s:LOG("s:ActWinEnterHighlightLine line_start=". l:line_start)
+" call s:LOG("s:ActWinEnterHighlightLine nos_lines=". l:nos_lines)
   let l:highlight_line.sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines, l:nos_columns)
 
   let l:highlight_line.is_on = 1
 
 endfunction
 
-function! s:WindowLeaveHighlightLine(entrynos, actwin)
-call s:LOG("s:WindowLeaveHighlightLine entrynos=". a:entrynos)
-  let l:highlight_line = a:actwin.data.display.window.highlight_line
+function! s:ActWinLeaveHighlightLine(entrynos, instance)
+call s:LOG("s:ActWinLeaveHighlightLine entrynos=". a:entrynos)
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
 
   if has_key(l:highlight_line, 'sids')
     call s:HighlightClear(l:highlight_line.sids)
@@ -2487,34 +2551,45 @@ call s:LOG("s:WindowLeaveHighlightLine entrynos=". a:entrynos)
 
 endfunction
 
-function! g:ToggleHighlightLine()
-call s:LOG("ToggleHighlightLine TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+function! g:ActWinToggleHighlightLine()
+call s:LOG("g:ActWinToggleHighlightLine TOP")
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:ToggleHighlightLine actwin not found")
+    call s:ERROR("s:ToggleHighlightLine instance not found")
     return
   endif
 
-call s:LOG("ToggleHighlightLine l:actwin.current_line=". l:actwin.current_line)
-  let l:linenos = l:actwin.current_line
-  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("g:ActWinToggleHighlightLine l:instance.current_line=". l:instance.current_line)
+  let l:linenos = l:instance.current_line
+  let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 
-  let l:highlight_line = l:actwin.data.display.window.highlight_line
-  let l:highlight_line.is_enable = ! l:highlight_line.is_enable
-
-  if l:highlight_line.is_enable
-    call s:WindowEnterHighlightLine(l:entrynos, l:actwin)
+  let l:highlight_line = l:instance.data.display.actwin.highlight_line
+  let l:highlight_line.is_on = ! l:highlight_line.is_on
+  if l:highlight_line.is_on
+    call s:ActWinEnterHighlightLine(l:entrynos, l:instance)
   else
-    call s:WindowLeaveHighlightLine(l:entrynos, l:actwin)
+    call s:ActWinLeaveHighlightLine(l:entrynos, l:instance)
   endif
 
-call s:LOG("ToggleHighlightLine BOTTOM")
+call s:LOG("g:ActWinToggleHighlightLine BOTTOM")
+endfunction
+
+function! s:ActWinDisableHighlightLine(instance)
+call s:LOG("s:ActWinDisableHighlightLine TOP")
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
+  let l:toggle = l:highlight_line.toggle
+  let l:funcname = "g:ActWinToggleHighlightLine"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 endfunction
 
 " MUST be called from local buffer
-function! s:WindowDestroyHighlightLine(actwin)
-call s:LOG("WindowDestroyHighlightLine TOP")
-  let l:highlight_line = a:actwin.data.display.window.highlight_line
+function! s:ActWinDestroyHighlightLine(instance)
+call s:LOG("s:ActWinDestroyHighlightLine TOP")
+  let l:highlight_line = a:instance.data.display.actwin.highlight_line
 
   if has_key(l:highlight_line, 'sids')
     call s:HighlightClear(l:highlight_line.sids)
@@ -2522,7 +2597,7 @@ call s:LOG("WindowDestroyHighlightLine TOP")
   endif
 
   if l:highlight_line.is_full
-    let l:currentline = a:actwin.current_line
+    let l:currentline = a:instance.current_line
     let l:winHeight = line('$')
 
     let l:cnt = 1
@@ -2549,11 +2624,9 @@ endfunction
 " Sign {{{1
 " ------------------------------
 
-function! s:WindowDefineSign(actwin)
-call s:LOG("WindowDefineSign TOP")
-  let l:sign = a:actwin.data.display.window.sign
-
-  execute ":nnoremap <silent> <buffer> <Leader>". l:sign.toggle ." :call g:ToggleSign()<CR>"
+function! s:ActWinDefineSign(instance)
+call s:LOG("s:ActWinDefineSign TOP")
+  let l:sign = a:instance.data.display.actwin.sign
 
   let l:category = l:sign.category
 
@@ -2562,13 +2635,40 @@ call s:LOG("WindowDefineSign TOP")
   endif
 endfunction
 
-function! s:WindowEnterSign(entrynos, actwin)
-call s:LOG("WindowEnterSign TOP")
-call s:LOG("WindowEnterSign entrynos=". a:entrynos)
-  let l:sign = a:actwin.data.display.window.sign
-  let l:buffer_nr = a:actwin.buffer_nr
+function! s:ActWinEnableSign(instance)
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:sign = a:instance.data.display.actwin.sign
+  let l:toggle = l:sign.toggle
+  let l:funcname = "g:ActWinToggleSign"
+
+  call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+if 0 " OLD TOGGLE
+  let l:sign = a:instance.data.display.actwin.sign
+  let l:toggle = l:sign.toggle
+  if has_key(l:toggle, "map")
+    let l:value = l:toggle.map
+    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleSign(". a:instance.buffer_nr .")<CR>"
+    unlet l:value
+  endif
+  " TODO cmd { user and builtin }
+  if has_key(l:toggle, "cmd")
+    let l:value = l:toggle.cmd
+    execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleSign(". a:instance.buffer_nr .")'<CR>"
+  endif
+endif " OLD TOGGLE
+endfunction
+
+function! s:ActWinEnterSign(entrynos, instance)
+call s:LOG("s:ActWinEnterSign TOP")
+call s:LOG("s:ActWinEnterSign entrynos=". a:entrynos)
+  let l:sign = a:instance.data.display.actwin.sign
+  let l:buffer_nr = a:instance.buffer_nr
   let l:category = l:sign.category
-  let l:entry = a:actwin.data.entries[a:entrynos]
+  let l:entry = a:instance.data.entries[a:entrynos]
 
   let l:kind = l:entry.kind
   let l:kinds = l:sign.kinds
@@ -2583,21 +2683,21 @@ call s:LOG("WindowEnterSign entrynos=". a:entrynos)
       endfor
     endif
   endif
-call s:LOG("WindowEnterSign kind=". l:kind)
+call s:LOG("s:ActWinEnterSign kind=". l:kind)
 
   let l:content = l:entry.content
   let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
-  " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+  " let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
   "
   if l:sign.all_text
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
     let l:cnt = 0
     while l:cnt <= l:nos_lines
       call vimside#sign#PlaceBuffer(l:line_start+l:cnt, l:buffer_nr, l:category, l:kind)
       let l:cnt += 1
     endwhile
   else
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
     call vimside#sign#PlaceBuffer(l:line_start, l:buffer_nr, l:category, l:kind)
   endif
 
@@ -2608,16 +2708,16 @@ if 0 " example of text file sign
   call vimside#sign#PlaceFile(l:line, l:file, l:category, l:kind)
 endif " example of text file sign
 
-call s:LOG("WindowEnterSign BOTTOM")
+call s:LOG("s:ActWinEnterSign BOTTOM")
 endfunction
 
-function! s:WindowLeaveSign(entrynos, actwin)
-call s:LOG("WindowLeaveSign TOP")
-call s:LOG("WindowLeaveSign entrynos=". a:entrynos)
-  let l:sign = a:actwin.data.display.window.sign
-  let l:buffer_nr = a:actwin.buffer_nr
+function! s:ActWinLeaveSign(entrynos, instance)
+call s:LOG("s:ActWinLeaveSign TOP")
+call s:LOG("s:ActWinLeaveSign entrynos=". a:entrynos)
+  let l:sign = a:instance.data.display.actwin.sign
+  let l:buffer_nr = a:instance.buffer_nr
   let l:category = l:sign.category
-  let l:entry = a:actwin.data.entries[a:entrynos]
+  let l:entry = a:instance.data.entries[a:entrynos]
   let l:file = l:entry.file
 
   let l:kind = l:entry.kind
@@ -2633,20 +2733,20 @@ call s:LOG("WindowLeaveSign entrynos=". a:entrynos)
       endfor
     endif
   endif
-call s:LOG("WindowLeaveSign kind=". l:kind)
+call s:LOG("s:ActWinLeaveSign kind=". l:kind)
 
   let l:content = l:entry.content
   let l:nos_lines = (type(l:content) == type("")) ? 0 : (len(l:content)-1)
-  " let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+  " let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
   if l:sign.all_text
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
     let l:cnt = 0
     while l:cnt <= l:nos_lines
       call vimside#sign#UnPlaceBuffer(l:buffer_nr, l:category, l:kind, l:line_start+l:cnt)
       let l:cnt += 1
     endwhile
   else
-    let l:line_start = a:actwin.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:actwin.first_buffer_line - 1
+    let l:line_start = a:instance.entrynos_to_linenos[a:entrynos]  - l:nos_lines + a:instance.first_buffer_line - 1
     call vimside#sign#UnPlaceBuffer(l:buffer_nr, l:category, l:kind, l:line_start)
   endif
 
@@ -2657,41 +2757,164 @@ if 0 " example of text file sign
   call vimside#sign#UnPlaceFileByLine(l:line, l:file, l:category, l:kind)
 endif " example of text file sign
 
-call s:LOG("WindowLeaveSign BOTTOM")
+call s:LOG("s:ActWinLeaveSign BOTTOM")
 endfunction
 
-function! g:ToggleSign()
-call s:LOG("ToggleSign TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+function! g:ActWinToggleSign()
+call s:LOG("g:ActWinToggleSign TOP")
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:ToggleSign actwin not found")
+    call s:ERROR("s:ToggleSign instance not found")
     return
   endif
 
-call s:LOG("ToggleSign l:actwin.current_line=". l:actwin.current_line)
-  let l:linenos = l:actwin.current_line
-  let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+call s:LOG("g:ActWinToggleSign l:instance.current_line=". l:instance.current_line)
+  let l:linenos = l:instance.current_line
+  let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 
-  let l:sign = l:actwin.data.display.window.sign
-  let l:sign.is_enable = ! l:sign.is_enable
-
-  if l:sign.is_enable
-    call s:WindowEnterSign(l:entrynos, l:actwin)
+  let l:sign = l:instance.data.display.actwin.sign
+  let l:sign.is_on = ! l:sign.is_on
+  if l:sign.is_on
+    call s:ActWinEnterSign(l:entrynos, l:instance)
   else
-    call s:WindowLeaveSign(l:entrynos, l:actwin)
+    call s:ActWinLeaveSign(l:entrynos, l:instance)
   endif
 
-call s:LOG("ToggleSign BOTTOM")
+call s:LOG("g:ActWinToggleSign BOTTOM")
 endfunction
 
-function! s:WindowDestroySign(actwin)
-call s:LOG("WindowDestroySign TOP")
-  let l:sign = a:actwin.data.display.window.sign
+function! s:ActWinDisableSign(instance)
+call s:LOG("s:ActWinDisableSign TOP")
+
+  let l:is_global = a:instance.is_global
+  let l:buffer_nr = a:instance.buffer_nr
+  let l:scala_buffer_nr = a:instance.scala_buffer_nr
+  let l:sign = a:instance.data.display.actwin.sign
+  let l:toggle = l:sign.toggle
+  let l:funcname = "g:ActWinToggleSign"
+
+  call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+endfunction
+
+function! s:ActWinDestroySign(instance)
+call s:LOG("s:ActWinDestroySign TOP")
+  let l:sign = a:instance.data.display.actwin.sign
   let l:category = l:sign.category
 
   call vimside#sign#RemoveCategory(l:category)
 endfunction
 
+" ============================================================================
+" Toggle Util: {{{1
+" ============================================================================
+
+function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, funcname)
+  if has_key(a:toggle, "actwin")
+    let l:actwin = a:toggle.actwin
+
+    if has_key(l:actwin, "map")
+      let l:value = l:actwin.map
+      if a:create
+        execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
+      else
+        execute ":nunmap <buffer> ". l:value 
+      endif
+      unlet l:value
+    endif
+    if has_key(l:actwin, "cmd")
+      let l:value = l:actwin.cmd
+      if a:create
+        execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
+      else
+        execute ":delcommand ". l:value 
+      endif
+      " execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")<CR>"
+      " execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
+      unlet l:value
+    endif
+    if has_key(l:actwin, "abbr")
+      let l:value = l:actwin.abbr
+      if a:create
+        execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
+      else
+        execute "cunabbrev  ". l:value
+      endif
+      unlet l:value
+    endif
+  endif
+
+  if has_key(a:toggle, "scala")
+    let l:scala = a:toggle.scala
+
+    if has_key(l:scala, "map")
+      let l:value = l:scala.map
+      if (a:is_global)
+        if a:create
+          execute ":nnoremap <silent> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
+        else
+          execute ":nunmap ". l:value 
+        endif
+      else
+
+        execute 'silent '. a:scala_buffer_nr.'wincmd w'
+        if a:create
+          execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
+        else
+          execute ":nunmap <buffer> ". l:value 
+        endif
+        execute 'silent '. a:buffer_nr.'wincmd w'
+
+      endif
+      unlet l:value
+    endif
+    if has_key(l:scala, "cmd")
+      let l:value = l:scala.cmd
+      if (a:is_global)
+        " execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")<CR>"
+        if a:create
+          execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
+        else
+          execute ":delcommand ". l:value 
+        endif
+      else
+
+        execute 'silent '. a:scala_buffer_nr.'wincmd w'
+        " execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")<CR>"
+        if a:create
+          execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
+        else
+          execute ":delcommand ". l:value 
+        endif
+        execute 'silent '. a:buffer_nr.'wincmd w'
+
+      endif
+      unlet l:value
+    endif
+    if has_key(l:scala, "abbr")
+      let l:value = l:scala.abbr
+      if (a:is_global)
+        if a:create
+          " execute "cabbrev <silent> ". l:value ." 'call ". a:funcname ."(". a:buffer_nr .")'<CR>"
+          execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
+        else
+          execute "cunabbrev  ". l:value
+        endif
+      else
+
+        execute 'silent '. a:scala_buffer_nr.'wincmd w'
+        if a:create
+          execute "cabbrev <silent> <buffer> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
+        else
+          execute "cunabbrev  <silent> <buffer> ". l:value
+        endif
+        execute 'silent '. a:buffer_nr.'wincmd w'
+
+      endif
+      unlet l:value
+    endif
+  endif
+
+endfunction
 
 " ============================================================================
 " Util {{{1
@@ -2699,9 +2922,9 @@ endfunction
 
 if 0 " NOT USED
 " return [line, ...]
-function! s:GetLines(actwin)
+function! s:GetLines(instance)
   let l:lines = []
-  for entry in a:actwin.data.entries
+  for entry in a:instance.data.entries
     let l:content = entry.content
     call add(l:lines, l:content)
   endfor
@@ -2711,11 +2934,11 @@ endfunction
 endif " NOT USED
 
 " return [found, line]
-function! s:GetEntry(entrynos, actwin)
+function! s:GetEntry(entrynos, instance)
   if a:entrynos < 0
     return [0, {}]
   else
-    let l:entries = a:actwin.data.entries
+    let l:entries = a:instance.data.entries
     if a:entrynos < len(l:entries)
       return [1, l:entries[a:entrynos]]
     else
@@ -2731,68 +2954,68 @@ endfunction
 " MUST be called from local buffer
 function! vimside#actwin#Close()
 call s:LOG("vimside#actwin#Close TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("vimside#actwin#Close: actwin not found")
+    call s:ERROR("vimside#actwin#Close: instance not found")
     return
   endif
-  call s:Close(l:actwin)
+  call s:Close(l:instance)
 endfunction
 
 function! s:OnClose()
 call s:LOG("s:OnClose TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnClose: actwin not found")
+    call s:ERROR("s:OnClose: instance not found")
     return
   endif
 
-  call s:Close(l:actwin)
+  call s:Close(l:instance)
 call s:LOG("s:OnClose BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:Close(actwin)
-  let l:actwin = a:actwin
-call s:LOG("s:Close l:actwin.buffer_nr=". l:actwin.buffer_nr)
+function! s:Close(instance)
+  let l:instance = a:instance
+call s:LOG("s:Close l:instance.buffer_nr=". l:instance.buffer_nr)
 
-  call s:DisplayDisable(l:actwin)
+  call s:DisplayDisable(l:instance)
 
-  call s:DisplayDestroy(l:actwin)
+  call s:DisplayDestroy(l:instance)
 
-  call s:ClearCmds(l:actwin)
+  call s:ClearCmds(l:instance)
 
-  " If we needed to split the main window, close the split one.
-  let l:window = l:actwin.data.window
-  if has_key(l:window, 'split')
+  " If we needed to split the main actwin, close the split one.
+  let l:actwin = l:instance.data.actwin
+  if has_key(l:actwin, 'split')
 call s:LOG("s:Close split")
-execute 'silent '. l:actwin.win_nr.'wincmd w'
+execute 'silent '. l:instance.win_nr.'wincmd w'
     exec "wincmd c"
-" execute 'silent '. l:actwin.win_nr.'wincmd w'
-  elseif has_key(l:window, 'edit')
+" execute 'silent '. l:instance.win_nr.'wincmd w'
+  elseif has_key(l:actwin, 'edit')
 call s:LOG("s:Close edit")
-    let l:source_buffer_nr = l:actwin.source_buffer_nr
-call s:LOG("s:Close source_buffer_nr=". l:source_buffer_nr)
-    execute "buffer ". l:source_buffer_nr
+    let l:scala_buffer_nr = l:instance.scala_buffer_nr
+call s:LOG("s:Close scala_buffer_nr=". l:scala_buffer_nr)
+    execute "buffer ". l:scala_buffer_nr
     " exec "e!#"
-  elseif has_key(l:window, 'tab')
+  elseif has_key(l:actwin, 'tab')
 call s:LOG("s:Close tab")
-execute 'silent '. l:actwin.win_nr.'wincmd w'
+execute 'silent '. l:instance.win_nr.'wincmd w'
     exec "e!#"
-" execute 'silent '. l:actwin.buffer_nr.'wincmd w'
+" execute 'silent '. l:instance.buffer_nr.'wincmd w'
     " exec "wincmd c"
   endif
 
-  execute "bwipeout ". l:actwin.buffer_nr 
-  call s:CloseAutoCmds(l:actwin)
-execute 'silent '. l:actwin.source_win_nr.'wincmd w'
+  execute "bwipeout ". l:instance.buffer_nr 
+  call s:CloseAutoCmds(l:instance)
+execute 'silent '. l:instance.scala_win_nr.'wincmd w'
 
-  call s:CallOnCloseHandlers(l:actwin)
+  call s:CallOnCloseHandlers(l:instance)
 
   " Clear any messages.
   "  echo ""
 
-  unlet s:actwin_buffer_nr_to_actwin[l:actwin.buffer_nr]
+  unlet s:actwin_buffer_nr_to_actwin[l:instance.buffer_nr]
 call s:LOG("Close BOTTOM")
 endfunction
 
@@ -2803,13 +3026,13 @@ endfunction
 " MUST be called from local buffer
 function! s:OnHelp()
 call s:LOG("OnHelp TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnHelp: actwin not found")
+    call s:ERROR("s:OnHelp: instance not found")
     return
   endif
 
-  let l:help = l:actwin.data.help
+  let l:help = l:instance.data.help
 
   if l:help.do_show
     " TODO remove is_open   
@@ -2821,27 +3044,27 @@ call s:LOG("OnHelp BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:ToggleWindowKeyMapInfo()
-  call s:Toggle('window_key_map_show', 'window', 'key_map', s:cmds_window_defs)
+function! s:ToggleActWinKeyMapInfo()
+  call s:Toggle('actwin_key_map_show', 'actwin', 'map', s:cmds_actwin_defs)
 endfunction
 
-function! s:ToggleSourceBuiltinCmdInfo()
-  call s:Toggle('source_builtin_cmd_show', 'source', 'builtin_cmd', s:cmds_source_defs)
+function! s:ToggleScalaBuiltinCmdInfo()
+  call s:Toggle('scala_cmd_show', 'scala', 'cmd', s:cmds_scala_defs)
 endfunction
 
-function! s:ToggleSourceKeyMapInfo()
-  call s:Toggle('source_key_map_show', 'source', 'key_map', s:cmds_source_defs)
+function! s:ToggleScalaKeyMapInfo()
+  call s:Toggle('scala_key_map_show', 'scala', 'map', s:cmds_scala_defs)
 endfunction
 
 function! s:Toggle(key_name, data_win, data_element, defs)
 call s:LOG("Toggle TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:Toggle: actwin not found")
+    call s:ERROR("s:Toggle: instance not found")
     return
   endif
 
-  let l:key_value = l:actwin.data.cmds.window.key_map[a:key_name]
+  let l:key_value = l:instance.data.cmds.actwin.map[a:key_name]
 
   setlocal modifiable
 
@@ -2849,12 +3072,12 @@ call s:LOG("Toggle TOP")
   normal! ma
     
   " Remove existing help
-  if (l:actwin.first_buffer_line > 1)
+  if (l:instance.first_buffer_line > 1)
 call s:LOG("Toggle delete")
-    exec "keepjumps 1,".(l:actwin.first_buffer_line - 1) "d _"
+    exec "keepjumps 1,".(l:instance.first_buffer_line - 1) "d _"
   endif
     
-  call append(0, s:CreateToggleInfo(a:data_win, a:data_element, l:key_value, a:defs, l:actwin))
+  call append(0, s:CreateToggleInfo(a:data_win, a:data_element, l:key_value, a:defs, l:instance))
 
   silent! normal! g`a
   delmarks a
@@ -2865,43 +3088,43 @@ call s:LOG("Toggle BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:EnterCurrentEntry(actwin)
-  let l:current_line = a:actwin.current_line
-  let l:current_entrynos = a:actwin.linenos_to_entrynos[l:current_line-1]
-  call s:EnterEntry(l:current_entrynos, a:actwin)
+function! s:EnterCurrentEntry(instance)
+  let l:current_line = a:instance.current_line
+  let l:current_entrynos = a:instance.linenos_to_entrynos[l:current_line-1]
+  call s:EnterEntry(l:current_entrynos, a:instance)
 endfunction
 
 
 " MUST be called from local buffer
 " cursor entering given entrynos
-function! s:EnterEntry(entrynos, actwin)
+function! s:EnterEntry(entrynos, instance)
 call s:LOG("s:EnterEntry TOP entrynos=". a:entrynos)
 
-  call s:DisplayEntryEnter(a:entrynos, a:actwin)
-  call a:actwin.data.actions.enter(a:entrynos, a:actwin)
+  call s:DisplayEntryEnter(a:entrynos, a:instance)
+  call a:instance.data.actions.enter(a:entrynos, a:instance)
 
 call s:LOG("s:EnterEntry BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:SelectEntry(entrynos, actwin)
-  call a:actwin.data.actions.select(a:entrynos, a:actwin)
+function! s:SelectEntry(entrynos, instance)
+  call a:instance.data.actions.select(a:entrynos, a:instance)
 endfunction
 
 " MUST be called from local buffer
-function! s:LeaveCurrentEntry(actwin)
-  let l:current_line = a:actwin.current_line
-  let l:current_entrynos = a:actwin.linenos_to_entrynos[l:current_line-1]
-  call s:LeaveEntry(l:current_entrynos, a:actwin)
+function! s:LeaveCurrentEntry(instance)
+  let l:current_line = a:instance.current_line
+  let l:current_entrynos = a:instance.linenos_to_entrynos[l:current_line-1]
+  call s:LeaveEntry(l:current_entrynos, a:instance)
 endfunction
 
 " MUST be called from local buffer
 " cursor leaving given entrynos
-function! s:LeaveEntry(entrynos, actwin)
+function! s:LeaveEntry(entrynos, instance)
 call s:LOG("s:LeaveEntry TOP entrynos=". a:entrynos)
 
-  call a:actwin.data.actions.leave(a:entrynos, a:actwin)
-  call s:DisplayEntryLeave(a:entrynos, a:actwin)
+  call a:instance.data.actions.leave(a:entrynos, a:instance)
+  call s:DisplayEntryLeave(a:entrynos, a:instance)
 
 call s:LOG("s:LeaveEntry BOTTOM")
 endfunction
@@ -2913,24 +3136,24 @@ endfunction
 " MUST be called from local buffer
 function! s:OnEnterMouse()
 call s:LOG("s:OnEnterMouse: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnEnterMouse: actwin not found")
+    call s:ERROR("s:OnEnterMouse: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:current_line = l:actwin.current_line
-    let l:current_entrynos = l:actwin.linenos_to_entrynos[l:current_line-1]
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:current_line = l:instance.current_line
+    let l:current_entrynos = l:instance.linenos_to_entrynos[l:current_line-1]
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 
     if l:entrynos != l:current_entrynos
-      call s:LeaveEntry(l:current_entrynos, l:actwin)
-      call s:EnterEntry(l:entrynos, l:actwin)
-      let l:actwin.current_line = l:linenos
+      call s:LeaveEntry(l:current_entrynos, l:instance)
+      call s:EnterEntry(l:entrynos, l:instance)
+      let l:instance.current_line = l:linenos
     endif
   endif
 
@@ -2940,20 +3163,20 @@ endfunction
 " MUST be called from local buffer <CR> -> OnSelect
 function! s:OnSelect()
 call s:LOG("s:OnSelect: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnSelect: actwin not found")
+    call s:ERROR("s:OnSelect: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 
-    call s:SelectEntry(l:entrynos, l:actwin)
-    let l:actwin.current_line = l:linenos
+    call s:SelectEntry(l:entrynos, l:instance)
+    let l:instance.current_line = l:linenos
   else
     call feedkeys("\<CR>", 'n')
   endif
@@ -2964,20 +3187,20 @@ endfunction
 " MUST be called from local buffer
 function! s:OnTop()
 call s:LOG("s:OnTop: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnTop: actwin not found")
+    call s:ERROR("s:OnTop: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnTop l:entrynos=". l:entrynos)
 
-    call s:LeaveEntry(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:instance)
 
     let l:nos_of_linenos = l:linenos
     if l:nos_of_linenos == 1
@@ -2987,9 +3210,9 @@ call s:LOG("s:OnTop l:entrynos=". l:entrynos)
     endif
 
 
-    call s:EnterEntry(0, l:actwin)
-    let l:actwin.current_line = 1
-call s:LOG("s:OnTop l:actwin.current_line=". l:actwin.current_line)
+    call s:EnterEntry(0, l:instance)
+    let l:instance.current_line = 1
+call s:LOG("s:OnTop l:instance.current_line=". l:instance.current_line)
   endif
 call s:LOG("s:OnTop: BOTTOM")
 endfunction
@@ -2997,31 +3220,31 @@ endfunction
 " MUST be called from local buffer
 function! s:OnBottom()
 call s:LOG("s:OnBottom: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnBottom: actwin not found")
+    call s:ERROR("s:OnBottom: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnBottom l:entrynos=". l:entrynos)
 
     let l:len = len(l:entrynos_to_linenos)
 call s:LOG("s:OnBottom l:len=". l:len)
     if l:entrynos < l:len - 1
-      call s:LeaveEntry(l:entrynos, l:actwin)
+      call s:LeaveEntry(l:entrynos, l:instance)
 
-      let l:entries = l:actwin.data.entries
+      let l:entries = l:instance.data.entries
       let l:entries_len = len(l:entries)
       let l:delta_lines = 0
       let l:cnt = l:entrynos
       while l:cnt < l:entries_len
-        let l:delta_lines += l:actwin.entrynos_to_nos_of_lines[l:cnt]
+        let l:delta_lines += l:instance.entrynos_to_nos_of_lines[l:cnt]
         let l:cnt += 1
       endwhile
       let l:nos_of_linenos = l:delta_lines
@@ -3032,9 +3255,9 @@ call s:LOG("s:OnBottom l:len=". l:len)
       endif
 
 
-      call s:EnterEntry(l:entries_len-1, l:actwin)
-      let l:actwin.current_line += l:delta_lines
-call s:LOG("s:OnBottom l:actwin.current_line=". l:actwin.current_line)
+      call s:EnterEntry(l:entries_len-1, l:instance)
+      let l:instance.current_line += l:delta_lines
+call s:LOG("s:OnBottom l:instance.current_line=". l:instance.current_line)
     endif
   endif
 
@@ -3044,23 +3267,23 @@ endfunction
 " MUST be called from local buffer
 function! s:OnUp()
 call s:LOG("s:OnUp: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnUp: actwin not found")
+    call s:ERROR("s:OnUp: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnUp l:entrynos=". l:entrynos)
 
-    call s:LeaveEntry(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:instance)
 
-    let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos-1] 
-    let l:new_linenos = l:actwin.entrynos_to_linenos[l:entrynos-1] 
+    let l:nos_of_linenos = l:instance.entrynos_to_nos_of_lines[l:entrynos-1] 
+    let l:new_linenos = l:instance.entrynos_to_linenos[l:entrynos-1] 
 call s:LOG("s:OnUp l:nos_of_linenos=". l:nos_of_linenos)
     if l:nos_of_linenos == 1
       call feedkeys('k', 'n')
@@ -3069,9 +3292,9 @@ call s:LOG("s:OnUp l:nos_of_linenos=". l:nos_of_linenos)
     endif
 
 
-    call s:EnterEntry(l:entrynos-1, l:actwin)
-    let l:actwin.current_line = l:new_linenos
-call s:LOG("s:OnUp l:actwin.current_line=". l:actwin.current_line)
+    call s:EnterEntry(l:entrynos-1, l:instance)
+    let l:instance.current_line = l:new_linenos
+call s:LOG("s:OnUp l:instance.current_line=". l:instance.current_line)
   else
     call feedkeys('k', 'n')
   endif
@@ -3082,26 +3305,26 @@ endfunction
 " MUST be called from local buffer
 function! s:OnDown()
 call s:LOG("s:OnDown: TOP")
-  let [l:found, l:actwin] = s:GetBufferActWin()
+  let [l:found, l:instance] = s:GetBufferActWin()
   if ! l:found
-    call s:ERROR("s:OnDown: actwin not found")
+    call s:ERROR("s:OnDown: instance not found")
     return
   endif
 
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnDown l:entrynos=". l:entrynos)
 
     let l:len = len(l:entrynos_to_linenos)
 call s:LOG("s:OnDown l:len=". l:len)
     if l:entrynos < l:len - 1
-      call s:LeaveEntry(l:entrynos, l:actwin)
+      call s:LeaveEntry(l:entrynos, l:instance)
 
-      let l:nos_of_linenos = l:actwin.entrynos_to_nos_of_lines[l:entrynos] 
+      let l:nos_of_linenos = l:instance.entrynos_to_nos_of_lines[l:entrynos] 
       let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
 call s:LOG("s:OnDown l:nos_of_linenos=". l:nos_of_linenos)
       let l:nos_of_linenos -= 1
@@ -3112,9 +3335,9 @@ call s:LOG("s:OnDown l:nos_of_linenos=". l:nos_of_linenos)
       endif
 
 
-      call s:EnterEntry(l:entrynos+1, l:actwin)
-      let l:actwin.current_line = l:new_linenos
-call s:LOG("s:OnDown l:actwin.current_line=". l:actwin.current_line)
+      call s:EnterEntry(l:entrynos+1, l:instance)
+      let l:instance.current_line = l:new_linenos
+call s:LOG("s:OnDown l:instance.current_line=". l:instance.current_line)
     endif
 
 if 0 " IS_THIS_NEEDED
@@ -3140,7 +3363,7 @@ call s:LOG("s:OnLeft: BOTTOM")
 endfunction
 
 " ============================================================================
-" Source Commands: {{{1
+" Scala Commands: {{{1
 " ============================================================================
 
 function! g:VimsideActWinFirst(buffer_nr)
@@ -3152,9 +3375,9 @@ call s:LOG("g:VimsideActWinFirst: TOP")
     return
   endif
 
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinFirst: actwin not found")
+    call s:ERROR("s:VimsideActWinFirst: instance not found")
     return
   endif
 
@@ -3166,16 +3389,16 @@ let s:buf_change = 0
   execute 'silent '. l:win_nr.'wincmd w'
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnTop l:entrynos=". l:entrynos)
 
-    call s:LeaveEntry(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:instance)
 
     let l:nos_of_linenos = l:linenos
 execute 'silent '. l:win_nr.'wincmd w'
-    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    let l:line = line(".") - l:instance.first_buffer_line + 1
     if l:nos_of_linenos == 1
       execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
     else
@@ -3183,11 +3406,11 @@ execute 'silent '. l:win_nr.'wincmd w'
     endif
 
 
-    call s:EnterEntry(0, l:actwin)
+    call s:EnterEntry(0, l:instance)
     redraw
 
-    let l:actwin.current_line = 1
-call s:LOG("s:OnTop l:actwin.current_line=". l:actwin.current_line)
+    let l:instance.current_line = 1
+call s:LOG("s:OnTop l:instance.current_line=". l:instance.current_line)
   endif
 
   execute 'silent '. b:return_win_nr.'wincmd w'
@@ -3208,9 +3431,9 @@ call s:LOG("g:VimsideActWinLast: TOP")
     return
   endif
 
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinLast: actwin not found")
+    call s:ERROR("s:VimsideActWinLast: instance not found")
     return
   endif
 
@@ -3222,33 +3445,33 @@ let s:buf_change = 0
   execute 'silent '. l:win_nr.'wincmd w'
   let l:line = line(".")
 
-  if l:line > (l:actwin.first_buffer_line - 1)
-    let l:linenos = l:line - l:actwin.first_buffer_line + 1
-    let l:entrynos = l:actwin.linenos_to_entrynos[l:linenos-1]
-    let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
+  if l:line > (l:instance.first_buffer_line - 1)
+    let l:linenos = l:line - l:instance.first_buffer_line + 1
+    let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
+    let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
 call s:LOG("s:OnTop l:entrynos=". l:entrynos)
 
     let l:len = len(l:entrynos_to_linenos)
 call s:LOG("s:VimsideActWinLast l:len=". l:len)
     if l:entrynos < l:len - 1
-      call s:LeaveEntry(l:entrynos, l:actwin)
+      call s:LeaveEntry(l:entrynos, l:instance)
 
-      let l:entries = l:actwin.data.entries
+      let l:entries = l:instance.data.entries
       let l:entries_len = len(l:entries)
       let l:delta_lines = 0
       let l:cnt = l:entrynos
       while l:cnt < l:entries_len
-        let l:delta_lines += l:actwin.entrynos_to_nos_of_lines[l:cnt]
+        let l:delta_lines += l:instance.entrynos_to_nos_of_lines[l:cnt]
         let l:cnt += 1
       endwhile
 
       let l:nos_of_linenos = l:line+l:delta_lines -1
       call cursor(l:nos_of_linenos, 1)
 
-      call s:EnterEntry(l:entries_len-1, l:actwin)
-      let l:actwin.current_line = l:nos_of_linenos
+      call s:EnterEntry(l:entries_len-1, l:instance)
+      let l:instance.current_line = l:nos_of_linenos
       redraw
-call s:LOG("s:VimsideActWinLast l:actwin.current_line=". l:actwin.current_line)
+call s:LOG("s:VimsideActWinLast l:instance.current_line=". l:instance.current_line)
 
     endif
   endif
@@ -3271,9 +3494,9 @@ call s:LOG("g:VimsideActWinUp: TOP")
     return
   endif
 
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinUp: actwin not found")
+    call s:ERROR("s:VimsideActWinUp: instance not found")
     return
   endif
 
@@ -3281,35 +3504,35 @@ call s:LOG("g:VimsideActWinUp: TOP")
 let b:return_win_nr = l:current_win_nr 
   let l:win_nr = bufwinnr(a:buffer_nr)
 
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+  let l:linenos_to_entrynos = l:instance.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+  let l:entrynos_to_nos_of_lines = l:instance.entrynos_to_nos_of_lines
 
-  let l:linenos = l:actwin.current_line
+  let l:linenos = l:instance.current_line
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
 
-  " let l:len = len(l:actwin.data.entries)
+  " let l:len = len(l:instance.data.entries)
   if l:entrynos > 0
 let s:buf_change = 0
 
 execute 'silent '. l:win_nr.'wincmd w'
-    call s:LeaveEntry(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:instance)
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos-1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos-1] 
 
     " TODO Selection is not Entry
-    " call s:SelectEntry(l:entrynos-1, l:actwin)
+    " call s:SelectEntry(l:entrynos-1, l:instance)
 
 execute 'silent '. l:win_nr.'wincmd w'
-    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    let l:line = line(".") - l:instance.first_buffer_line + 1
     if l:nos_of_linenos == 1
       execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-1),1)'
     else
       execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'-'. l:nos_of_linenos .'),1)'
     endif
 
-    call s:EnterEntry(l:entrynos-1, l:actwin)
+    call s:EnterEntry(l:entrynos-1, l:instance)
 redraw
 " execute 'silent '. l:current_win_nr.'wincmd w'
 execute 'silent '. b:return_win_nr.'wincmd w'
@@ -3317,7 +3540,7 @@ execute 'silent '. b:return_win_nr.'wincmd w'
 
 let s:buf_change = 1
 
-    let l:actwin.current_line = l:new_linenos
+    let l:instance.current_line = l:new_linenos
   endif
 call histdel(":", "VimsideActWinUp")
 echo ""
@@ -3334,30 +3557,30 @@ call s:LOG("g:VimsideActWinDown: TOP")
     return
   endif
 
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinDown: actwin not found")
+    call s:ERROR("s:VimsideActWinDown: instance not found")
     return
   endif
 
 let b:return_win_nr = bufwinnr(l:current_buffer_nr)
   let l:win_nr = bufwinnr(a:buffer_nr)
 
-  let l:linenos_to_entrynos = l:actwin.linenos_to_entrynos
-  let l:entrynos_to_linenos = l:actwin.entrynos_to_linenos
-  let l:entrynos_to_nos_of_lines = l:actwin.entrynos_to_nos_of_lines
+  let l:linenos_to_entrynos = l:instance.linenos_to_entrynos
+  let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+  let l:entrynos_to_nos_of_lines = l:instance.entrynos_to_nos_of_lines
 
-  let l:linenos = l:actwin.current_line
+  let l:linenos = l:instance.current_line
   let l:entrynos = l:linenos_to_entrynos[l:linenos-1]
 call s:LOG("g:VimsideActWinDown l:linenos=". l:linenos)
 call s:LOG("g:VimsideActWinDown l:entrynos=". l:entrynos)
 
-  let l:len = len(l:actwin.data.entries)
+  let l:len = len(l:instance.data.entries)
   if l:entrynos < l:len - 1
 let s:buf_change = 0
 
 execute 'silent '. l:win_nr.'wincmd w'
-    call s:LeaveEntry(l:entrynos, l:actwin)
+    call s:LeaveEntry(l:entrynos, l:instance)
 
     let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
     let l:nos_of_linenos = l:entrynos_to_nos_of_lines[l:entrynos] 
@@ -3365,10 +3588,10 @@ call s:LOG("g:VimsideActWinDown l:new_linenos=". l:new_linenos)
 call s:LOG("g:VimsideActWinDown l:nos_of_linenos=". l:nos_of_linenos)
 
     " TODO Selection is not Entry
-    " call s:SelectEntry(l:entrynos+1, l:actwin)
+    " call s:SelectEntry(l:entrynos+1, l:instance)
 
 execute 'silent '. l:win_nr.'wincmd w'
-    let l:line = line(".") - l:actwin.first_buffer_line + 1
+    let l:line = line(".") - l:instance.first_buffer_line + 1
 call s:LOG("g:VimsideActWinDown l:line=". l:line)
     if l:nos_of_linenos == 1
       execute 'silent '. l:win_nr.'wincmd w | :call cursor(('. l:line .'+1),1)'
@@ -3377,13 +3600,13 @@ call s:LOG("g:VimsideActWinDown l:line=". l:line)
     endif
 
 
-    call s:EnterEntry(l:entrynos+1, l:actwin)
+    call s:EnterEntry(l:entrynos+1, l:instance)
 redraw
 execute 'silent '. b:return_win_nr.'wincmd w'
 
 let s:buf_change = 1
 
-    let l:actwin.current_line = l:new_linenos
+    let l:instance.current_line = l:new_linenos
   endif
 call histdel(":", "VimsideActWinDown")
 echo ""
@@ -3398,13 +3621,13 @@ call s:LOG("g:VimsideActWinEnter: TOP buffer_nr=". a:buffer_nr)
     return
   endif
 
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinEnter: actwin not found")
+    call s:ERROR("s:VimsideActWinEnter: instance not found")
     return
   endif
 
-  execute 'silent '. l:actwin.win_nr.'wincmd w'
+  execute 'silent '. l:instance.win_nr.'wincmd w'
 
 call histdel(":", "VimsideActWinEnter")
 call s:LOG("g:VimsideActWinEnter: BOTTOM")
@@ -3413,17 +3636,21 @@ endfunction
 " Called from external buffer
 function! g:VimsideActWinClose(buffer_nr)
 call s:LOG("g:VimsideActWinClose: TOP buffer_nr=". a:buffer_nr)
-  let [l:found, l:actwin] = s:GetActWin(a:buffer_nr)
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
   if ! l:found
-    call s:ERROR("s:VimsideActWinClose: actwin not found")
+    call s:ERROR("s:VimsideActWinClose: instance not found")
     return
   endif
 
   let b:return_win_nr = bufwinnr(bufnr("%"))
 
-  execute 'silent '. l:actwin.win_nr.'wincmd w'
-  call s:Close(l:actwin)
-  execute 'silent '. b:return_win_nr.'wincmd w'
+  execute 'silent '. l:instance.win_nr.'wincmd w'
+  call s:Close(l:instance)
+  if exists("b:return_win_nr")
+    execute 'silent '. b:return_win_nr.'wincmd w'
+  else
+    execute 'silent '. l:instance.scala_win_nr.'wincmd w'
+  endif
 
 call histdel(":", "VimsideActWinClose")
 echo ""
@@ -3475,20 +3702,20 @@ call s:LOG("s:BufLeave: BOTTOM")
   endif
 endfunction
 
-" called when buffer is displayed in window
+" called when buffer is displayed in actwin
 " when loaded or no longer hidden
 function! s:BufWinEnter()
 call s:LOG("s:BufWinEnter: buffer_nr=". bufnr("%"))
-  let [l:found, l:actwin] = s:GetActWin(bufnr("%"))
+  let [l:found, l:instance] = s:GetActWin(bufnr("%"))
   if ! l:found
-    call s:ERROR("s:BufWinEnter actwin not found")
+    call s:ERROR("s:BufWinEnter instance not found")
     return
   endif
 
-  call s:EnterCurrentEntry(l:actwin)
+  call s:EnterCurrentEntry(l:instance)
 endfunction
 
-" called before buffer is removed from window
+" called before buffer is removed from actwin
 " Note that buffer "%" may not be buffer being unloaded
 function! s:BufWinLeave()
 " call s:LOG("s:BufWinLeave: buffer_nr=". bufnr("%"))
@@ -3496,13 +3723,13 @@ function! s:BufWinLeave()
 call s:LOG("s:BufWinLeave: afile nr=". bufnr(expand('<afile>'))) 
   " call s:DisplayDestroy()
   
-  let [l:found, l:actwin] = s:GetActWin(bufnr(expand('<afile>')))
+  let [l:found, l:instance] = s:GetActWin(bufnr(expand('<afile>')))
   if ! l:found
-    call s:ERROR("s:BufWinLeave actwin not found")
+    call s:ERROR("s:BufWinLeave instance not found")
     return
   endif
 
-  call s:LeaveCurrentEntry(l:actwin)
+  call s:LeaveCurrentEntry(l:instance)
 endfunction
 
 " ============================================================================
@@ -3529,17 +3756,17 @@ endfunction
 " --------------------------------------------
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionDoNothing(entrynos, actwin)
+function! s:EnterActionDoNothing(entrynos, instance)
 call s:LOG("s:EnterActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionDoNothing(entrynos, actwin)
+function! s:SelectActionDoNothing(entrynos, instance)
 call s:LOG("s:SelectActionDoNothing")
 endfunction
 
 " Do Nothing
-function! s:LeaveActionDoNothing(entrynos, actwin)
+function! s:LeaveActionDoNothing(entrynos, instance)
 call s:LOG("s:LeaveActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
@@ -3547,28 +3774,28 @@ endfunction
 " Behavior: QuickFix
 " --------------------------------------------
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionQuickFix(entrynos, actwin)
+function! s:EnterActionQuickFix(entrynos, instance)
 call s:LOG("s:EnterActionQuickFix: TOP entrynos=". a:entrynos)
-  call s:SourceSetAtEntry(a:entrynos, a:actwin)
+  call s:ScalaSetAtEntry(a:entrynos, a:instance)
 call s:LOG("s:EnterActionQuickFix: BOTTOM")
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionQuickFix(entrynos, actwin)
+function! s:SelectActionQuickFix(entrynos, instance)
 call s:LOG("s:SelectActionQuickFix TOP")
-  call s:SourceGoToEntry(a:entrynos, a:actwin)
+  call s:ScalaGoToEntry(a:entrynos, a:instance)
 call s:LOG("s:SelectActionQuickFix BOTTOM")
 endfunction
 
 " Do Nothing
-function! s:LeaveActionQuickFix(entrynos, actwin)
+function! s:LeaveActionQuickFix(entrynos, instance)
 call s:LOG("s:LeaveActionQuickFix: TOP entrynos=". a:entrynos)
-  call s:RemoveAtEntry(a:entrynos, a:actwin)
+  call s:RemoveAtEntry(a:entrynos, a:instance)
 call s:LOG("s:LeaveActionQuickFix: BOTTOM")
 endfunction
 
 " --------------------------------------------
-" Behavior: History/Search Command Window
+" Behavior: History/Search Command ActWin
 " --------------------------------------------
 
 " --------------------------------------------
@@ -3586,28 +3813,28 @@ endfunction
 
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:SourceSetAtEntry(entrynos, actwin)
+function! s:ScalaSetAtEntry(entrynos, instance)
 let s:buf_change = 0
-call s:LOG("s:SourceSetAtEntry: entrynos=". a:entrynos)
-  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
+call s:LOG("s:ScalaSetAtEntry: entrynos=". a:entrynos)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:instance)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:bnr = bufnr(l:file)
-call s:LOG("s:SourceSetAtEntry: bnr=". l:bnr)
+call s:LOG("s:ScalaSetAtEntry: bnr=". l:bnr)
     let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SourceSetAtEntry: file=". l:file)
-call s:LOG("s:SourceSetAtEntry: win_nr=". l:win_nr)
-call s:LOG("s:SourceSetAtEntry: source_buffer_nr bufwinnr=". bufwinnr(a:actwin.source_buffer_nr))
+call s:LOG("s:ScalaSetAtEntry: file=". l:file)
+call s:LOG("s:ScalaSetAtEntry: win_nr=". l:win_nr)
+call s:LOG("s:ScalaSetAtEntry: scala_buffer_nr bufwinnr=". bufwinnr(a:instance.scala_buffer_nr))
 
     let l:new_file = 0
     if l:win_nr == -1
-execute 'silent '. a:actwin.source_win_nr.'wincmd w'
+execute 'silent '. a:instance.scala_win_nr.'wincmd w'
       execute "edit ". l:file
-execute 'silent '. bufwinnr(a:actwin.win_nr).'wincmd w'
+execute 'silent '. bufwinnr(a:instance.win_nr).'wincmd w'
       let l:bnr = bufnr(l:file)
-call s:LOG("s:SourceSetAtEntry: bnr=". l:bnr)
+call s:LOG("s:ScalaSetAtEntry: bnr=". l:bnr)
       let l:win_nr = bufwinnr(l:bnr)
-call s:LOG("s:SourceSetAtEntry: win_nr=". l:win_nr)
+call s:LOG("s:ScalaSetAtEntry: win_nr=". l:win_nr)
       let l:new_file = 1
     endif
 
@@ -3615,8 +3842,8 @@ call s:LOG("s:SourceSetAtEntry: win_nr=". l:win_nr)
 let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
-call s:LOG("s:SourceSetAtEntry: linenos=". l:linenos)
-call s:LOG("s:SourceSetAtEntry: colnos=". l:colnos)
+call s:LOG("s:ScalaSetAtEntry: linenos=". l:linenos)
+call s:LOG("s:ScalaSetAtEntry: colnos=". l:colnos)
       if l:colnos > 1
         execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . (l:colnos-1) . "l"
       else
@@ -3624,7 +3851,7 @@ call s:LOG("s:SourceSetAtEntry: colnos=". l:colnos)
       endif
 
       if l:new_file 
-        call s:CallNewFileHandlers(a:actwin, l:file, a:entrynos)
+        call s:CallNewFileHandlers(a:instance, l:file, a:entrynos)
       endif
 
 
@@ -3637,17 +3864,17 @@ if s:is_color_column_enabled
 endif
 
       " execute 'keepjumps silent '. actwin_buffer.'wincmd 2'
-execute 'silent '. a:actwin.win_nr.'wincmd w'
+execute 'silent '. a:instance.win_nr.'wincmd w'
     endif
   endif
-call s:LOG("s:SourceSetAtEntry: BOTTOM")
+call s:LOG("s:ScalaSetAtEntry: BOTTOM")
 let s:buf_change = 1
 endfunction
 
-function! s:RemoveAtEntry(entrynos, actwin)
+function! s:RemoveAtEntry(entrynos, instance)
 let s:buf_change = 0
 call s:LOG("s:RemoveAtEntry: entrynos=". a:entrynos)
-  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:instance)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
@@ -3658,19 +3885,19 @@ let s:buf_change = 1
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SourceGoToEntry(entrynos, actwin)
-call s:LOG("s:SourceGoToEntry: in Non-ActWin entrynos=". a:entrynos)
-  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:actwin)
+function! s:ScalaGoToEntry(entrynos, instance)
+call s:LOG("s:ScalaGoToEntry: in Non-ActWin entrynos=". a:entrynos)
+  let [l:found, l:entry] = s:GetEntry(a:entrynos, a:instance)
   if l:found && has_key(l:entry, 'file')
     let l:file = l:entry.file
     let l:win_nr = bufwinnr(l:file)
-call s:LOG("s:SourceGoToEntry: win_nr=". l:win_nr)
+call s:LOG("s:ScalaGoToEntry: win_nr=". l:win_nr)
     if l:win_nr > 0
 let b:return_win_nr = l:win_nr
       let l:linenos = has_key(l:entry, 'line') ? l:entry.line : 1
       let l:colnos = has_key(l:entry, 'col') ? l:entry.col : -1
-call s:LOG("s:SourceGoToEntry: linenos=". l:linenos)
-call s:LOG("s:SourceGoToEntry: colnos=". l:colnos)
+call s:LOG("s:ScalaGoToEntry: linenos=". l:linenos)
+call s:LOG("s:ScalaGoToEntry: colnos=". l:colnos)
       if l:colnos > 1
         execute 'silent '. l:win_nr.'wincmd w | :normal! '. l:linenos .'G' . l:colnos . "l"
       else
@@ -3687,7 +3914,7 @@ endif
 
     endif
   endif
-call s:LOG("s:SourceGoToEntry: BOTTOM")
+call s:LOG("s:ScalaGoToEntry: BOTTOM")
 endfunction
 
 " ============================================================================
@@ -3858,9 +4085,9 @@ function! vimside#actwin#TestQuickFix()
 "     is_open: 0
 "     .....
 "   }
-"   builtin_cmd: {
+"   cmd: {
 "   }
-"   key_map: {
+"   map: {
 "   }
 "   sign: {
 "     category: QuickFix
@@ -3875,14 +4102,14 @@ function! vimside#actwin#TestQuickFix()
   let l:helpdata = {
         \ "title": "Help Window",
         \ "winname": "Help",
-        \ "window": {
+        \ "actwin": {
           \ "edit": {
           \ "cmd": "enew"
           \ }
         \ },
         \ "cmds": {
-          \ "window": {
-            \ "key_map": {
+          \ "actwin": {
+            \ "map": {
               \ "close": "q"
             \ }
           \ }
@@ -3915,8 +4142,8 @@ function! vimside#actwin#TestQuickFix()
           \ "data": l:helpdata,
         \ },
         \ "cmds": {
-          \ "source": {
-            \ "builtin_cmd": {
+          \ "scala": {
+            \ "cmd": {
               \ "first": "cr",
               \ "last": "cl",
               \ "previous": "cp",
@@ -3924,7 +4151,7 @@ function! vimside#actwin#TestQuickFix()
               \ "enter": "ce",
               \ "close": "ccl"
             \ },
-            \ "key_map": {
+            \ "map": {
               \ "first": "<Leader>cr",
               \ "last": "<Leader>cl",
               \ "previous": "<Leader>cp",
@@ -3933,11 +4160,11 @@ function! vimside#actwin#TestQuickFix()
               \ "close": "<Leader>ccl"
             \ },
           \ },
-          \ "window": {
-            \ "key_map": {
-              \ "window_key_map_show": "<F2>",
-              \ "source_builtin_cmd_show": "<F3>",
-              \ "source_key_map_show": "<F4>",
+          \ "actwin": {
+            \ "map": {
+              \ "actwin_key_map_show": "<F2>",
+              \ "scala_cmd_show": "<F3>",
+              \ "scala_key_map_show": "<F4>",
               \ "help": "<F1>",
               \ "select": [ "<CR>", "<2-LeftMouse>"],
               \ "enter_mouse": "<LeftMouse> <LeftMouse>",
@@ -3950,12 +4177,23 @@ function! vimside#actwin#TestQuickFix()
           \ },
         \ },
         \ "display": {
-          \ "source": {
+          \ "scala": {
             \ "sign": {
               \ "is_enable": 0,
               \ "category": "TestWindow",
               \ "abbreviation": "tw",
-              \ "toggle": "tw",
+              \ "toggle": {
+                \ "actwin": {
+                  \ "map": "tw",
+                  \ "cmd": "TW",
+                  \ "abbr": "tw"
+                \ },
+                \ "scala": {
+                  \ "map": "tw",
+                  \ "cmd": "TW",
+                  \ "abbr": "tw"
+                \ }
+              \ },
               \ "default_kind": "marker",
               \ "kinds": {
                 \ "error": {
@@ -3984,7 +4222,18 @@ function! vimside#actwin#TestQuickFix()
               \ "is_enable": 0,
               \ "is_on": 0,
               \ "category": "ColorLine",
-              \ "toggle": "cl",
+              \ "toggle": {
+                \ "actwin": {
+                  \ "map": "tc",
+                  \ "cmd": "TC",
+                  \ "abbr": "tc"
+                \ },
+                \ "scala": {
+                  \ "map": "tc",
+                  \ "cmd": "TC",
+                  \ "abbr": "tc"
+                \ }
+              \ },
               \ "abbreviation": "cl",
               \ "default_kind": "marker",
               \ "kinds": {
@@ -4005,26 +4254,54 @@ function! vimside#actwin#TestQuickFix()
               \ "is_on": 0,
             \ }
           \ },
-          \ "window": {
+          \ "actwin": {
             \ "cursor_line": {
-              \ "toggle": "wcl",
               \ "is_enable": 1,
-              \ "is_on": 0
+              \ "is_on": 0,
+              \ "toggle": {
+                \ "scala": {
+                  \ "map": "wc",
+                  \ "cmd": "WC",
+                  \ "abbr": "wc"
+                \ }
+              \ }
             \ },
             \ "highlight_line": {
-              \ "toggle": "whl",
               \ "is_enable": 0,
               \ "is_on": 0,
               \ "is_full": 1,
               \ "nos_columns": 0,
-              \ "all_text": 1
+              \ "all_text": 1,
+              \ "toggle": {
+                \ "actwin": {
+                  \ "map": "wh",
+                  \ "cmd": "WH",
+                  \ "abbr": "wh"
+                \ },
+                \ "scala": {
+                  \ "map": "wh",
+                  \ "cmd": "WH",
+                  \ "abbr": "wh"
+                \ }
+              \ }
             \ },
             \ "sign": {
               \ "is_enable": 0,
               \ "all_text": 1,
-              \ "category": "SourceWindow",
+              \ "category": "ScalaWindow",
               \ "abbreviation": "sw",
-              \ "toggle": "sw",
+              \ "toggle": {
+                \ "actwin": {
+                  \ "map": "ws",
+                  \ "cmd": "WS",
+                  \ "abbr": "ws"
+                \ },
+                \ "scala": {
+                  \ "map": "ws",
+                  \ "cmd": "WS",
+                  \ "abbr": "ws"
+                \ }
+              \ },
               \ "default_kind": "marker",
               \ "kinds": {
                 \ "error": {
@@ -4140,8 +4417,8 @@ function! vimside#actwin#TestHelp()
         \ "title": "Help Window",
         \ "winname": "Help",
         \ "cmds": {
-          \ "window": {
-            \ "key_map": {
+          \ "actwin": {
+            \ "map": {
               \ "close": "q"
             \ }
           \ }
