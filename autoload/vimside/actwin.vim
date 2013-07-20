@@ -2809,11 +2809,14 @@ endfunction
 " ============================================================================
 
 function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, funcname)
+call s:LOG("s:DoToggleCmds TOP: funcname=". a:funcname)
+let s:buf_change = 0
   if has_key(a:toggle, "actwin")
     let l:actwin = a:toggle.actwin
 
     if has_key(l:actwin, "map")
       let l:value = l:actwin.map
+call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
       if a:create
         execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
       else
@@ -2834,10 +2837,11 @@ function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, 
     endif
     if has_key(l:actwin, "abbr")
       let l:value = l:actwin.abbr
+call s:LOG("s:DoToggleCmds actwin.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
       if a:create
-        execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
+        execute "cabbrev <silent> <buffer> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
       else
-        execute "cunabbrev  ". l:value
+        execute "cunabbrev <buffer> ". l:value
       endif
       unlet l:value
     endif
@@ -2848,6 +2852,7 @@ function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, 
 
     if has_key(l:scala, "map")
       let l:value = l:scala.map
+call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
       if (a:is_global)
         if a:create
           execute ":nnoremap <silent> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
@@ -2892,6 +2897,7 @@ function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, 
     endif
     if has_key(l:scala, "abbr")
       let l:value = l:scala.abbr
+call s:LOG("s:DoToggleCmds scala.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
       if (a:is_global)
         if a:create
           " execute "cabbrev <silent> ". l:value ." 'call ". a:funcname ."(". a:buffer_nr .")'<CR>"
@@ -2914,6 +2920,8 @@ function! s:DoToggleCmds(create, is_global, toggle, buffer_nr, scala_buffer_nr, 
     endif
   endif
 
+let s:buf_change = 1
+call s:LOG("s:DoToggleCmds BOTTOM")
 endfunction
 
 " ============================================================================
@@ -4260,6 +4268,11 @@ function! vimside#actwin#TestQuickFix()
               \ "is_on": 0,
               \ "toggle": {
                 \ "scala": {
+                  \ "map": "wc",
+                  \ "cmd": "WC",
+                  \ "abbr": "wc"
+                \ },
+                \ "actwin": {
                   \ "map": "wc",
                   \ "cmd": "WC",
                   \ "abbr": "wc"

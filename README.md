@@ -35,6 +35,9 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Clean up DoToggleCmds function so that on exit mappings, commands 
+and abbrs are removed.
+
 Fixed property file reader so that values can be Dictionaries.
 Toggling Actwin "scala" and "actwin" features can now be done 
 with Option based :map, :cabbr and :command.
