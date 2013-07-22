@@ -1824,76 +1824,6 @@ call s:LOG("s:ScalaEnableSigns not placed file=". l:file)
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-if 0 " OLD TOGGLE
-  if has_key(l:toggle, "actwin")
-    let l:actwin = l:toggle.actwin
-
-    if has_key(l:actwin, "map")
-      let l:value = l:actwin.map
-      execute ":nnoremap <silent> <buffer> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-      unlet l:value
-    endif
-    if has_key(l:actwin, "cmd")
-      let l:value = l:actwin.cmd
-      execute ":command -buffer ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-      unlet l:value
-    endif
-    if has_key(l:actwin, "abbr")
-      let l:value = l:actwin.abbr
-      execute "cabbrev <silent> <buffer> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
-      unlet l:value
-    endif
-  endif
-
-  if has_key(l:toggle, "scala")
-    let l:scala = l:toggle.scala
-
-    if has_key(l:scala, "map")
-      let l:value = l:scala.map
-      if (l:is_global)
-        execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-      else
-        execute 'silent '. l:scala_buffer_nr.'wincmd w'
-        execute ":nnoremap <silent> <buffer> ". l:value ." :call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-        execute 'silent '. l:buffer_nr.'wincmd w'
-      endif
-      unlet l:value
-    endif
-    if has_key(l:scala, "cmd")
-      let l:value = l:scala.cmd
-      if (l:is_global)
-        execute ":command ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-      else
-        execute 'silent '. l:scala_buffer_nr.'wincmd w'
-        execute ":command -buffer ". l:value ." call g:ScalaToggleSigns(". l:buffer_nr .")<CR>"
-        execute 'silent '. l:buffer_nr.'wincmd w'
-      endif
-      unlet l:value
-    endif
-    if has_key(l:scala, "abbr")
-      let l:value = l:scala.abbr
-      if (l:is_global)
-        execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
-      else
-        execute 'silent '. l:scala_buffer_nr.'wincmd w'
-        execute "cabbrev <silent> <buffer> ". l:value ." 'call g:ScalaToggleSigns(". l:buffer_nr .")'<CR>"
-        execute 'silent '. l:buffer_nr.'wincmd w'
-      endif
-      unlet l:value
-    endif
-  endif
-
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleSigns(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-    execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleSigns(". a:instance.buffer_nr .")'<CR>"
-  endif
-endif " OLD TOGGLE
 call s:LOG("s:ScalaEnableSigns BOTTOM")
 endfunction
 
@@ -1988,23 +1918,6 @@ call s:LOG("s:ScalaEnableColorLine TOP")
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-
-if 0 " OLD TOGGLE
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleColorLine(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-"    execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
-    " execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleColorLine(". a:instance.buffer_nr .")'<CR>"
-    " execute "cabbrev <silent> ". l:value ." <c-r>='call g:ScalaToggleColorLine(". a:instance.buffer_nr .")'<CR>"
-    execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:ScalaToggleColorLine(".  a:instance.buffer_nr .")' : '' )<CR>"
-
-  endif
-endif " OLD TOGGLE
 
 call s:LOG("s:ScalaEnableColorLine BOTTOM")
 endfunction
@@ -2171,20 +2084,6 @@ call s:LOG("s:ScalaEnableColorColumn TOP")
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-if 0 " OLD TOGGLE
-  let l:color_column = a:instance.data.display.scala.color_column
-  let l:toggle = l:color_column.toggle
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ScalaToggleColorColumn(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-    execute "cabbrev <silent> ". l:value ." 'call g:ScalaToggleColorColumn(". a:instance.buffer_nr .")'<CR>"
-  endif
-endif " OLD TOGGLE
 call s:LOG("s:ScalaEnableColorColumn BOTTOM")
 endfunction
 
@@ -2381,28 +2280,6 @@ function! s:ActWinEnableCursorLine(instance)
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-
-if 0 " OLD TOGGLE
-  let l:cursor_line = a:instance.data.display.actwin.cursor_line
-  let l:toggle = l:cursor_line.toggle
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-    " execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
-
-
-
-"    execute "cabbrev <silent> ". l:v ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". l:fn ."(". l:buffer_nr .")' : '". l:v ."')<CR>"
-    " execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
-    " execute "cabbrev <silent> ". l:value ." <c-r>='call g:ActWinToggleCursorLine(". a:instance.buffer_nr .")'<CR>"
-    execute "cabbrev <silent> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call g:ActWinToggleCursorLine(".  a:instance.buffer_nr .")' : '' )<CR>"
-  endif
-endif " OLD TOGGLE
 endfunction
 
 function! s:ActWinEnterCursorLine(entrynos, instance)
@@ -2499,20 +2376,6 @@ function! s:ActWinEnableHighlightLine(instance)
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-if 0 " OLD TOGGLE
-  let l:highlight_line = a:instance.data.display.actwin.highlight_line
-  let l:toggle = l:highlight_line.toggle
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleHighlightLine(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-    execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleHighlightLine(". a:instance.buffer_nr .")'<CR>"
-  endif
-endif " OLD TOGGLE
 endfunction
 
 function! s:EnterHighlightLine(entrynos, instance)
@@ -2646,20 +2509,6 @@ function! s:ActWinEnableSign(instance)
 
   call s:DoToggleCmds(1, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
-if 0 " OLD TOGGLE
-  let l:sign = a:instance.data.display.actwin.sign
-  let l:toggle = l:sign.toggle
-  if has_key(l:toggle, "map")
-    let l:value = l:toggle.map
-    execute ":nnoremap <silent> ". l:value ." :call g:ActWinToggleSign(". a:instance.buffer_nr .")<CR>"
-    unlet l:value
-  endif
-  " TODO cmd { user and builtin }
-  if has_key(l:toggle, "cmd")
-    let l:value = l:toggle.cmd
-    execute "cabbrev <silent> ". l:value ." 'call g:ActWinToggleSign(". a:instance.buffer_nr .")'<CR>"
-  endif
-endif " OLD TOGGLE
 endfunction
 
 function! s:ActWinEnterSign(entrynos, instance)
@@ -4187,6 +4036,7 @@ function! vimside#actwin#TestQuickFix()
         \ "display": {
           \ "scala": {
             \ "sign": {
+              \ "info": "use sign to note all entry line/col kind",
               \ "is_enable": 0,
               \ "category": "TestWindow",
               \ "abbreviation": "tw",
@@ -4227,6 +4077,7 @@ function! vimside#actwin#TestQuickFix()
               \ }
             \ },
             \ "color_line": {
+              \ "info": "use sign to note current entry line kind",
               \ "is_enable": 0,
               \ "is_on": 0,
               \ "category": "ColorLine",
@@ -4258,14 +4109,18 @@ function! vimside#actwin#TestQuickFix()
               \ }
             \ },
             \ "color_column": {
+              \ "info": "use colorcolumn to note current entry col",
               \ "is_enable": 1,
               \ "is_on": 0,
+              \ "colorcolumn": "cterm=reverse"
             \ }
           \ },
           \ "actwin": {
             \ "cursor_line": {
+              \ "info": "use cursorline to note current line",
               \ "is_enable": 1,
               \ "is_on": 0,
+              \ "cursorline": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan"
               \ "toggle": {
                 \ "scala": {
                   \ "map": "wc",
@@ -4280,6 +4135,7 @@ function! vimside#actwin#TestQuickFix()
               \ }
             \ },
             \ "highlight_line": {
+              \ "info": "use pattern to note current line",
               \ "is_enable": 0,
               \ "is_on": 0,
               \ "is_full": 1,
@@ -4299,6 +4155,7 @@ function! vimside#actwin#TestQuickFix()
               \ }
             \ },
             \ "sign": {
+              \ "info": "use sign to note current line",
               \ "is_enable": 0,
               \ "all_text": 1,
               \ "category": "ScalaWindow",
