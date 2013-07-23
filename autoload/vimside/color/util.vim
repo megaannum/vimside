@@ -37,6 +37,7 @@
 "              Number (0 <= n < 256)
 "              Float (0.0 <= f < 256.0)
 " ------------------------------------------------------------ 
+" return [0, errormsg] or [1, [r,g,b]]
 function! vimside#color#util#ParseRGB(rgb, ...)
 "call vimside#log("ParseRGB: TOP rgb=". string(a:rgb) . " a:0=" . a:0)
 "let start = reltime()
@@ -60,13 +61,13 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let bn = str2nr(bs, 16)
 
     else
-      throw "vimside#color#util.ParseRGB Bad String rgb value: ".  string(a:rgb)
+      return [0, "Bad String rgb value: ".  string(a:rgb) ]
     endif
 
   elseif type(a:rgb) == g:self#LIST_TYPE
     let rgb = a:rgb
     if len(rgb) != 3
-      throw "vimside#color#util.ParseRGB Bad List rgb value: ".  string(rgb)
+      return [0, "Bad List rgb value: ".  string(rgb)]
     endif
 
     let rx = rgb[0]
@@ -78,7 +79,7 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let rs = rx
       let rn = str2nr(rs, 16)
     else
-      throw "vimside#color#util.ParseRGB Bad List r type: ".  string(rgb)
+      return [0, "Bad List r type: ".  string(rgb)]
     endif
 
     let gx = rgb[1]
@@ -90,7 +91,7 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let gs = gx
       let gn = str2nr(gs, 16)
     else
-      throw "vimside#color#util.ParseRGB Bad List g type: " . string(rgb)
+      return [0, "Bad List g type: " . string(rgb)]
     endif
 
     let bx = rgb[2]
@@ -102,7 +103,7 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let bs = bx
       let bn = str2nr(bs, 16)
     else
-      throw "vimside#color#util.ParseRGB Bad List b type: " . string(rgb)
+      return [0, "Bad List b type: " . string(rgb)]
     endif
 
   elseif type(a:rgb) == g:self#NUMBER_TYPE
@@ -114,12 +115,12 @@ function! vimside#color#util#ParseRGB(rgb, ...)
     let needs_extra_args = 1
 
   else
-    throw "vimside#color#util.ParseRGB Bad rgb type: " . string(a:rgb)
+    return [0, "Bad rgb type: " . string(a:rgb)]
   endif
 
   if needs_extra_args == 1
     if a:0 != 2
-      throw "vimside#color#util.ParseRGB requires 2 additional arugments: a:0=".  a:0)
+      return [0, "Bad requires 2 additional arugments: a:0=".  a:0)]
     endif
 
     let gx = a:1
@@ -131,7 +132,7 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let gs = gx
       let gn = str2nr(gs, 16)
     else
-      throw "vimside#color#util.ParseRGB Bad g type: ".  string(gx)
+      return [0, "Bad g type: ".  string(gx)]
     endif
 
     let bx = a:2
@@ -143,12 +144,12 @@ function! vimside#color#util#ParseRGB(rgb, ...)
       let bs = bx
       let bn = str2nr(bs, 16)
     else
-      throw "vimside#color#util.ParseRGB Bad b type: " . string(bx)
+      return [0, "Bad b type: " . string(bx)]
     endif
 
   endif
 "call vimside#log("ParseRGB: time=". reltimestr(reltime(start)))
-  return [rn,gn,bn]
+  return [1, [rn,gn,bn]]
 endfunction
 
 " ------------------------------------------------------------ 
@@ -1880,10 +1881,125 @@ let s:Name_2_RGB['lightgreen'] = '90ee90'
 function! vimside#color#util#ConvertName_2_RGB(name) 
   let namelc = tolower(a:name)
   if has_key(s:Name_2_RGB, namelc)
-    return s:Name_2_RGB[namelc]
+    return [1, s:Name_2_RGB[namelc]]
   else
-    return ''
+    return [0, ""]
   endif
+endfunction
+
+" ------------------------------------------------------------ 
+" ParseHighlight: {{{2
+" ------------------------------------------------------------ 
+" return [0, ""] or [1, dic]
+function! vimside#color#util#ParseHighlight(hi) 
+  let l:parts = split(a:hi)
+  if empty(l:parts)
+    return [0, "Empty highlights"]
+  else
+    let l:dic = {}
+    for l:part in l:parts
+      let l:arg = split(l:part, "=")
+      if len(l:arg) != 2
+        return [0, "Bad highlight part: ". string(l:part)]
+      endif
+      let [l:key, l:value] = l:arg
+      let l:dic[l:key] = l:value
+    endfor
+
+    return l:dic
+  endif
+endfunction
+
+" ------------------------------------------------------------ 
+" AdjustHighlightArgs: {{{2
+" ------------------------------------------------------------ 
+" return error string or "" and modifies dic parameter
+function! vimside#color#util#AdjustHighlightArgs(dic) 
+  let l:errorStr = ""
+  for [l:key, l:value] in items(a:dic)
+    if l:key == "term"
+      let l:parts = split(l:value, ",")
+      let l:errorStr .= vimside#color#util#CheckHighlightAttrList(l:parts) 
+
+    elseif l:key == "cterm"
+      let l:parts = split(l:value, ",")
+      let l:errorStr .= vimside#color#util#CheckHighlightAttrList(l:parts) 
+
+    elseif l:key == "ctermfg"
+      let [l:n, l:es] = vimside#color#util#GetHighlightCTermNumber(l:value) 
+      let a:dic[l:key] = l:n
+      let l:errorStr .= l:es
+
+    elseif l:key == "ctermbg"
+      let [l:n, l:es] = vimside#color#util#GetHighlightCTermNumber(l:value) 
+      let a:dic[l:key] = l:n
+      let l:errorStr .= l:es
+
+    elseif l:key == "gui"
+      let l:parts = split(l:value, ",")
+      let l:errorStr .= vimside#color#util#CheckHighlightAttrList(l:parts) 
+
+    elseif l:key == "guifg"
+      " TODO not checked yet
+      
+    elseif l:key == "guibg"
+      " TODO not checked yet
+      
+    else
+      echo "Not supported: ". l:key
+    endif
+    unlet l:value
+  endfor
+  return l:errorStr
+endfunction
+
+" ------------------------------------------------------------ 
+" GetHighlightCTermNumber: {{{2
+" ------------------------------------------------------------ 
+" return []
+function! vimside#color#util#GetHighlightCTermNumber(value) 
+  let l:errorStr = ""
+  if a:value[0] == "#"
+    let l:rgb = a:value[1:]
+  else
+    let [l:found, l:rgb] = vimside#color#util#ConvertName_2_RGB(a:value)
+    if ! l:found
+      let l:errorStr .= "Bad color name: '". a:value ."'"
+      let l:rgb = "90ee90"
+    endif
+  endif
+  return [ vimside#color#term#ConvertRGBTxt_2_Int(l:rgb), l:errorStr ]
+endfunction
+
+" ------------------------------------------------------------ 
+" CheckHighlightAttrList: {{{2
+" ------------------------------------------------------------ 
+" return []
+function! vimside#color#util#CheckHighlightAttrList(parts) 
+  let l:errorStr = ""
+  for l:part in a:parts
+    if l:part != 'bold' && 
+          \ l:part != 'underline' &&
+          \ l:part != 'undercurl' &&
+          \ l:part != 'reverse' &&
+          \ l:part != 'inverse' &&
+          \ l:part != 'italic' &&
+          \ l:part != 'standout' &&
+          \ l:part != 'NONE' 
+      let l:errorStr .= "Error: unrecogninzed attr=". l:part
+    endif
+  return l:errorStr
+endfunction
+
+
+
+function! vimside#color#util#DoHighlightTest() 
+  let hi="term=bold,underline cterm=NONE ctermfg=Red ctermbg=#334455 guifg=#001100 guibg=#330033"
+
+  let dic = vimside#color#util#ParseHighlight(hi) 
+  echo string(dic)
+  echo vimside#color#util#AdjustHighlightArgs(dic) 
+  echo string(dic)
 endfunction
 
 " ================

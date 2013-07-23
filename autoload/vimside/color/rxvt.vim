@@ -159,13 +159,14 @@ endfunction
 "    nr : String or Number or rxvt 8 value
 "           value must be 0 <= value <= 8
 " ------------------------------------------------------------ 
+" return [0, errormsg] or [1, rgb]
 function! vimside#color#rxvt#ConvertInt_2_RGB(nr)
   if (type(a:nr) == g:self#NUMBER_TYPE)
-    return s:Int_2_RGB[a:nr]
+    return [1, s:Int_2_RGB[a:nr]]
   elseif (type(a:nr) == g:self#STRING_TYPE)
-    return s:Int_2_RGB[a:nr]
+    return [1, s:Int_2_RGB[a:nr]]
   else
-    throw "FORMS_COLOR_UTIL_ConvertInt_2_RGB: Bad number: " . string(a:nsstr)
+    return [0, "Bad number: " . string(a:nsstr)]
   endif
 endfunction
 

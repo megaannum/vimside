@@ -35,6 +35,8 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Added highlight parsing code.
+
 Added cterm/gui color management code.
 
 Clean up DoToggleCmds function so that on exit mappings, commands 

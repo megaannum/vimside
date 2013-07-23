@@ -140,14 +140,20 @@ elseif &t_Co == 8
 endif
 
 function! vimside#color#term#ConvertRGBTxt_2_Int(rgbtxt)
-  let [r,g,b] = vimside#color#util#ParseRGB(a:rgbtxt)
-  return g:FORMS_COLOR_TERM_CONVERT_RGB_2_INT(r, g, b)
+  let [l:found, l:value] = vimside#color#util#ParseRGB(a:rgbtxt)
+  if l:found
+    let [r,g,b] = l:value
+    return g:FORMS_COLOR_TERM_CONVERT_RGB_2_INT(r, g, b)
+  else
+    return 1
+  endif
 endfunction
 
 function! vimside#color#term#ConvertRGB_2_Int(rn, gn, bn)
   return g:FORMS_COLOR_TERM_CONVERT_RGB_2_INT(a:rn, a:gn, a:bn)
 endfunction
 
+" return [0, errormsg] or [1, rgb]
 function! vimside#color#term#ConvertInt_2_RGB(n)
   return g:FORMS_COLOR_TERM_CONVERT_INT_2_RGB(a:n)
 endfunction

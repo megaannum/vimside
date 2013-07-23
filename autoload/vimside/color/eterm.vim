@@ -399,13 +399,14 @@ endfunction
 "    nr : String or Number or eterm 256 value
 "           value must be 0 <= value <= 255
 " ------------------------------------------------------------ 
+" return [0, errormsg] or [1, rgb]
 function! vimside#color#eterm#ConvertInt256_2_RGB(nr)
   if (type(a:nr) == g:self#NUMBER_TYPE)
-    return s:Int256_2_RGB[a:nr]
+    return [1, s:Int256_2_RGB[a:nr]]
   elseif (type(a:nr) == g:self#STRING_TYPE)
-    return s:Int256_2_RGB[a:nr]
+    return [1, s:Int256_2_RGB[a:nr]]
   else
-    throw "vimside#color#eterm#ConvertInt256_2_RGB: Bad number: " . string(a:nsstr)
+    return [0, "Bad number: " . string(a:nsstr)]
   endif
 endfunction
 
