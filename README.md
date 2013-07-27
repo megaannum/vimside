@@ -35,7 +35,10 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Merged the options default.vim file into the defined.vim file.
+
 Added highlight parsing code.
+Changed functions to return error message rather than throw exceptions.
 
 Added cterm/gui color management code.
 

@@ -306,6 +306,8 @@ call s:LOG("vimside#options#manager#LoadUser: TOP")
     elseif has_key(l:default.keyvals, a:key)
       " TODO when OPTION_KEY_KIND templates carries type/kind info, checkit
     else
+call s:LOG("vimside#options#manager#LoadUser.CheckDefinedFunc: key=". a:key)
+      throw "XXXXXXXXXXXXXXX"
       call add(g:vimside.errors, "Undefined User option: '". a:key . "'")
     endif
   endfunction
@@ -485,7 +487,27 @@ call s:LOG("vimside#options#manager#Load: TOP")
 
   " This file loads default options values from "default.vim"
   " at g:vimside.options.default.options
-  call vimside#options#default#Load(g:vimside.options.default)
+
+  " REMOVE OLD
+  " call vimside#options#default#Load(g:vimside.options.default)
+
+
+
+  " Now load the defaults from the Option definitions
+  let l:keyvals = g:vimside.options.default.keyvals
+  for [l:key, l:definition] in items(g:vimside.options.defined)
+    if type(l:definition) == type({})
+      if has_key(l:definition, 'value')
+        let l:keyvals[l:key] = l:definition.value
+      endif
+    else
+      echoerr "Bad define type for ". l;key
+    endif
+  endfor
+  call vimside#options#defined#SetUndefined(l:keyvals)
+
+call s:LOG("vimside#options#manager#Load: tailor-browser-unix-commands =". string(l:keyvals['tailor-browser-unix-commands']))
+
 
   " Global user overrides of default values
   call vimside#options#manager#LoadUser()

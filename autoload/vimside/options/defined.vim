@@ -1,3 +1,9 @@
+function! s:LOG(msg)
+    execute "redir >> ". "DEFINED_LOG"
+    silent echo "INFO: ". a:msg
+    execute "redir END"
+endfunction
+
 
 " types
 let g:OPTION_BOOLEAN_TYPE    = type(0)
@@ -105,7 +111,7 @@ endfunction
 "
 
 
-function! vimside#options#defined#CheckValue(def, value, errors)
+function! vimside#options#defined#CheckValue(def, value, errors)", ['xdg-open', 'firefox', 'opera'],
   let def = a:def
   let value = a:value
   let errors = a:errors
@@ -315,6 +321,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['1.5', '1.6', '1.7'],
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "1.6",
         \ 'description': [
             \ 'Supported Java versions.'
         \ ]
@@ -325,15 +332,17 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['2.9.2', '2.10.0', '2.10.1'],
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "2.9.2",
         \ 'description': [
             \ 'Supported Scala versions.'
         \ ]
       \ }
 
-  let l:options['vimside-project-options--enabled'] = {
-        \ 'name': 'vimside-project-options--enabled', 
+  let l:options['vimside-project-options-enabled'] = {
+        \ 'name': 'vimside-project-options-enabled', 
         \ 'type': g:OPTION_BOOLEAN_TYPE,
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1, 
         \ 'description': [
             \ 'Load a project-local user options file.'
         \ ]
@@ -343,6 +352,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE,
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "options_project.vim",
         \ 'description': [
             \ 'File name of a project-local options file.'
         \ ]
@@ -352,6 +362,7 @@ function! s:MakeOptions()
         \ 'name': 'vimside-log-enabled', 
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ 'Used to enable/disable Vimside logging.'
         \ ]
@@ -374,6 +385,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "VIMSIDE_LOG",
         \ 'description': [
             \ 'File name of Vimside Log File.',
             \ 'If "vimside_log_file_path" is set, then this option',
@@ -384,6 +396,7 @@ function! s:MakeOptions()
         \ 'name': 'vimside-log-file-use-pid',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ 'The Vim log file has the current process id (pid) as a prefix.'
           \ ]
@@ -393,6 +406,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 4,
         \ 'description': [
             \ "How long to wait after starting the Ensime Server before",
             \ "attempting to read the file containing the port number."
@@ -403,17 +417,41 @@ function! s:MakeOptions()
         \ 'name': 'vimside-use-cwd-as-output-dir',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ 'If the option "vimside_log_file_path", then if true (1),',
             \ 'the Current Working Directory is used and if false (0), then',
             \ 'the Directory containing the Ensime Config File is used.'
           \ ]
       \ }
+
+
+
+
+  let l:ensime_install_path = ''
+  let l:ensime_config_file_name = ''
+  if g:vimside.os.is_mswin 
+    let l:tmp =  $HOME . "/vimfiles/vim-addons/ensime"
+    if isdirectory(l:tmp)
+      let l:ensime_install_path =  l:tmp
+    endif
+
+    let l:ensime_config_file_name = '_ensime'
+  else
+    let l:tmp = $HOME . "/.vim/vim-addons/ensime"
+    if isdirectory(l:tmp)
+      let l:ensime_install_path =  l:tmp
+    endif
+
+    let l:ensime_config_file_name = '.ensime'
+  endif
+
   let l:options['ensime-config-file-name'] = {
         \ 'name': 'ensime-config-file-name',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': l:ensime_config_file_name,
         \ 'description': [
             \ 'The name of the Ensime Config File.',
             \ 'Generally, the name will be: "\.ensime", "_ensime", or',
@@ -428,6 +466,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_PATH_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value':  l:ensime_install_path,
         \ 'description': [
             \ 'Directory where Ensime is installed.',
             \ 'Vimside provides default values, assuming VAM is used, of: ',
@@ -442,6 +481,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_DIR_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "ensime_2.9.2-0.9.8.9",
         \ 'description': [
             \ 'Name of SubDirectory of the Option "ensime_path" Directory',
             \ 'values, This Directory name will generally indicate which',
@@ -478,6 +518,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '_ensime_port',
         \ 'description': [
             \ 'If the option "ensime_port_file_path" is not set, then this',
             \ 'is the name of the file where Ensime will write its',
@@ -492,6 +533,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_HOST_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "localhost",
         \ 'description': [
             \ 'The host name of the machine where the Ensime Server is.',
             \ 'running. The default value is "localhost".'
@@ -501,6 +543,7 @@ function! s:MakeOptions()
         \ 'name': 'ensime-shutdown-on-vim-exit',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ 'If set to true (1), then when Vim stops, a call is made',
             \ 'to shutdown its associated Ensime Server. If set to false (0),',
@@ -513,6 +556,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 5,
         \ 'description': [
             \ 'How long in seconds will Vimside wait for the Ensime',
             \ 'Server. to write its socket server port number to',
@@ -523,6 +567,7 @@ function! s:MakeOptions()
         \ 'name': 'ensime-log-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ 'Will the standard and error output of the Ensime Server',
             \ 'process be captured in a log file.'
@@ -541,6 +586,7 @@ function! s:MakeOptions()
         \ 'name': 'ensime-log-file-use-pid',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ 'The Ensime log file has the process id (pid) as a prefix',
             \ 'of the Vim process that started it.'
@@ -551,6 +597,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FILE_NAME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "ENSIME_LOG",
         \ 'description': [
             \ 'If the option "ensime_log_file_path" is not set, then this',
             \ 'is the name of the file where Ensime output will be written.',
@@ -565,6 +612,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['cmdline', 'preview', 'tab_window', 'form' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'preview',
         \ 'description': [
             \ 'If an Ensime RPC call returns values than can be displayed',
             \ 'as text information and the particular RPC call does not',
@@ -578,6 +626,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'same_window',
         \ 'description': [
             \ 'If an Ensime RPC call returns values with file/position',
             \ 'values that would allow the user to go-to the specific',
@@ -594,6 +643,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'same_window',
         \ 'description': [
             \ 'If an Ensime RPC call returns values with file/position values',
             \ 'that would allow the user to go-to the specific location',
@@ -612,6 +662,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "Not expecting anything RPC socket read timeout."
           \ ]
@@ -621,6 +672,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 10000,
         \ 'description': [
             \ "Not expecting anything CursorHold updatetime before ping."
           \ ]
@@ -630,6 +682,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value':  100,
         \ 'description': [
             \ "Not expecting anything CursorMoved number of characters",
             \ "before ping."
@@ -640,6 +693,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value':  200,
         \ 'description': [
             \ "Expecting RPC response socket read timeout."
           \ ]
@@ -649,6 +703,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 200,
         \ 'description': [
             \ "Expecting RPC response CursorHold updatetime before ping"
           \ ]
@@ -658,6 +713,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 100,
         \ 'description': [
             \ "Expecting RPC response CursorMoved number of characters",
             \ "before ping."
@@ -668,6 +724,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 50,
         \ 'description': [
             \ "Expecting known number of events socket read timeout."
           \ ]
@@ -677,6 +734,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 500,
         \ 'description': [
             \ "Expecting known number of events CursorHold updatetime",
             \ "before ping."
@@ -687,6 +745,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 10,
         \ 'description': [
             \ "Expecting known number of events CursorMoved number of",
             \ "characters before ping."
@@ -697,6 +756,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 100,
         \ 'description': [
             \ "Expecting many events socket read timeout."
           \ ]
@@ -706,6 +766,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 2000,
         \ 'description': [
             \ "Expecting many events CursorHold updatetime before ping"
           \ ]
@@ -715,6 +776,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 20,
         \ 'description': [
             \ "Expecting many events CursorMoved number of characters",
             \ "before ping."
@@ -725,6 +787,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 50,
         \ 'description': [
             \ 'If events is set to many, how many ping occur without',
             \ 'any events being received before events is set to 0.'
@@ -735,6 +798,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 50,
         \ 'description': [
             \ 'If events is set to number of events expected,',
             \ 'how many pings occur without any events being',
@@ -749,6 +813,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderAddFilesHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:builder-add-files'."
           \ ]
@@ -759,6 +824,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderAddFilesCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:builder-add-files'."
           \ ]
@@ -769,6 +835,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderInitHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:builder-init'."
           \ ]
@@ -779,6 +846,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderInitCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:builder-init'."
           \ ]
@@ -789,6 +857,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderRemoveFilesHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:builder-remove-files'."
           \ ]
@@ -799,6 +868,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderRemoveFilesCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:builder-remove-files'."
           \ ]
@@ -809,6 +879,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderUpdateFilesHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:builder-update-files'."
           \ ]
@@ -819,6 +890,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:BuilderUpdateFilesCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:builder-update-files'."
           \ ]
@@ -829,6 +901,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CallCompletionHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:call-completion'."
           \ ]
@@ -839,6 +912,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CallCompletionCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:call-completion'."
           \ ]
@@ -849,6 +923,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CancelRefactorHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:cancel-refactor'."
           \ ]
@@ -859,6 +934,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CancelRefactorCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:cancel-refactor'."
           \ ]
@@ -869,6 +945,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CompletionsHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:completions'."
           \ ]
@@ -879,6 +956,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:CompletionsCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:completions'."
           \ ]
@@ -889,6 +967,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ConnectionInfoHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:connection-info'."
           \ ]
@@ -899,6 +978,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ConnectionInfoCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:connection-info'."
           \ ]
@@ -909,6 +989,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugActiveVMHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-active-vm'."
           \ ]
@@ -919,6 +1000,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugActiveVMCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-active-vm'."
           \ ]
@@ -929,6 +1011,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugAttachHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-attach'."
           \ ]
@@ -939,6 +1022,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugAttachCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-attach'."
           \ ]
@@ -949,6 +1033,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugBacktraceHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-backtrace'."
           \ ]
@@ -959,6 +1044,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugBacktraceCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-backtrace'."
           \ ]
@@ -969,6 +1055,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugClearAllBreaksHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-clear-all-breaks'."
           \ ]
@@ -979,6 +1066,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugClearAllBreaksCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-clear-all-breaks'."
           \ ]
@@ -989,6 +1077,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugClearBreakHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-clear-break'."
           \ ]
@@ -999,6 +1088,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugClearBreakCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-clear-break'."
           \ ]
@@ -1009,6 +1099,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugContinueHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-continue'."
           \ ]
@@ -1019,6 +1110,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugContinueCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-continue'."
           \ ]
@@ -1029,6 +1121,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugListBreakpointsHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-list-breakpoints'."
           \ ]
@@ -1039,6 +1132,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugListBreakpointsCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-list-breakpoints'."
           \ ]
@@ -1049,6 +1143,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugLocateNameHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-locate-name'."
           \ ]
@@ -1059,6 +1154,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugLocateNameCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-locate-name'."
           \ ]
@@ -1069,6 +1165,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugNextHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-next'."
           \ ]
@@ -1079,6 +1176,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugNextCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-next'."
           \ ]
@@ -1089,6 +1187,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugRunHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-run'."
           \ ]
@@ -1099,6 +1198,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugRunCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-run'."
           \ ]
@@ -1109,6 +1209,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugSetBreakHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-set-break'."
           \ ]
@@ -1119,6 +1220,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugSetBreakCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-set-break'."
           \ ]
@@ -1129,6 +1231,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugSetValueHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-set-value'."
           \ ]
@@ -1139,6 +1242,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugSetValueCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-set-value'."
           \ ]
@@ -1149,6 +1253,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStartHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-start'."
           \ ]
@@ -1159,6 +1264,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStartCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-start'."
           \ ]
@@ -1169,6 +1275,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStepOutHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-step-out'."
           \ ]
@@ -1179,6 +1286,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStepOutCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-step-out'."
           \ ]
@@ -1189,6 +1297,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStepHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-step'."
           \ ]
@@ -1199,6 +1308,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStepCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-step'."
           \ ]
@@ -1209,6 +1319,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStopHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-stop'."
           \ ]
@@ -1219,6 +1330,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugStopCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-stop'."
           \ ]
@@ -1229,6 +1341,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugToStringHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-to-string'."
           \ ]
@@ -1239,6 +1352,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugToStringCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-to-string'."
           \ ]
@@ -1249,6 +1363,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugValueHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:debug-value'."
           \ ]
@@ -1259,6 +1374,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:DebugValueCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:debug-value'."
           \ ]
@@ -1269,6 +1385,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExecRefactorHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:exec-refactor'."
           \ ]
@@ -1279,6 +1396,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExecRefactorCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:exec-refactor'."
           \ ]
@@ -1289,6 +1407,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExecUndoHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:exec-undo'."
           \ ]
@@ -1299,6 +1418,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExecUndoCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:exec-undo'."
           \ ]
@@ -1309,6 +1429,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExpandSelectionHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:expand-selection'."
           \ ]
@@ -1319,6 +1440,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ExpandSelectionCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:expand-selection'."
           \ ]
@@ -1329,6 +1451,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:FormatSourceHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:format-source'."
           \ ]
@@ -1339,6 +1462,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:FormatSourceCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:format-source'."
           \ ]
@@ -1349,6 +1473,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ImportSuggestionsHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:import-suggestions'."
           \ ]
@@ -1359,6 +1484,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ImportSuggestionsCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:import-suggestions'."
           \ ]
@@ -1369,6 +1495,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InitProjectHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:init-project'."
           \ ]
@@ -1379,6 +1506,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InitProjectCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:init-project'."
           \ ]
@@ -1389,6 +1517,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectPackageByPathHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:inspect-package-by-path'."
           \ ]
@@ -1399,6 +1528,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectPackageByPathCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:inspect-package-by-path'."
           \ ]
@@ -1409,6 +1539,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectTypeAtPointHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:inspect-type-at_point'."
           \ ]
@@ -1419,6 +1550,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectTypeAtPointCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:inspect-type-at_point'."
           \ ]
@@ -1429,6 +1561,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectTypeByIdHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:inspect-type-by-id'."
           \ ]
@@ -1439,6 +1572,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:InspectTypeByIdCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:inspect-type-by-id'."
           \ ]
@@ -1449,6 +1583,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:MethodBytecodeHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:method-bytecode'."
           \ ]
@@ -1459,6 +1594,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:MethodBytecodeCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:method-bytecode'."
           \ ]
@@ -1469,6 +1605,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PackageMemberCompletionHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:package-member-completion'."
           \ ]
@@ -1479,6 +1616,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PackageMemberCompletionCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:package-member-completion'."
           \ ]
@@ -1489,6 +1627,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PatchSourceHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:patch-source'."
           \ ]
@@ -1499,6 +1638,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PatchSourceCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:patch-source'."
           \ ]
@@ -1509,6 +1649,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PeekUndoHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:peek-undo'."
           \ ]
@@ -1519,6 +1660,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PeekUndoCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:peek-undo'."
           \ ]
@@ -1529,6 +1671,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PrepareRefactorHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:prepare-refactor'."
           \ ]
@@ -1539,6 +1682,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PrepareRefactorCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:prepare-refactor'."
           \ ]
@@ -1549,6 +1693,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PublicSymbolSearchHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:public-symbol-search'."
           \ ]
@@ -1559,6 +1704,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:PublicSymbolSearchCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:public-symbol-search'."
           \ ]
@@ -1569,6 +1715,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:RemoveFileHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:remove-file'."
           \ ]
@@ -1579,6 +1726,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:RemoveFileCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:remove-file'."
           \ ]
@@ -1589,6 +1737,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ReplConfigHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:repl-config'."
           \ ]
@@ -1599,6 +1748,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ReplConfigCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:repl-config'."
           \ ]
@@ -1609,6 +1759,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ShutdownServerHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:shutdown-server'."
           \ ]
@@ -1619,6 +1770,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:ShutdownServerCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:shutdown-server'."
           \ ]
@@ -1629,6 +1781,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:SymbolAtPointHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:symbol-at-point'."
           \ ]
@@ -1639,6 +1792,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:SymbolAtPointCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:symbol-at-point'."
           \ ]
@@ -1649,6 +1803,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:SymbolDesignationsHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:symbol-designations'."
           \ ]
@@ -1659,6 +1814,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:SymbolDesignationsCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:symbol-designations'."
           \ ]
@@ -1669,6 +1825,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeAtPointHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:type-at-point'."
           \ ]
@@ -1679,6 +1836,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeAtPointCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:type-at-point'."
           \ ]
@@ -1689,6 +1847,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByIdHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:type-by-id'."
           \ ]
@@ -1699,6 +1858,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByIdCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:type-by-id'."
           \ ]
@@ -1709,6 +1869,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByNameAtPointHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:type-by-name_at_point'."
           \ ]
@@ -1719,6 +1880,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByNameAtPointCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:type-by-name_at_point'."
           \ ]
@@ -1729,6 +1891,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByNameHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:type-by-name'."
           \ ]
@@ -1739,6 +1902,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypeByNameCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:type-by-name'."
           \ ]
@@ -1749,6 +1913,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckAllHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:typecheck-all'."
           \ ]
@@ -1759,6 +1924,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckAllCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:typecheck-all'."
           \ ]
@@ -1769,6 +1935,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckFilesHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:typecheck-files'."
           \ ]
@@ -1779,6 +1946,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckFilesCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:typecheck-files'."
           \ ]
@@ -1789,6 +1957,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckFileHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:typecheck-file'."
           \ ]
@@ -1799,6 +1968,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:TypecheckFileCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:typecheck-file'."
           \ ]
@@ -1809,6 +1979,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:UsesOfSymbolAtPointHandler',
         \ 'description': [
             \ "RPC Handler for 'swank:uses-of-symbol-at-point'."
           \ ]
@@ -1819,6 +1990,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'g:UsesOfSymbolAtPointCaller',
         \ 'description': [
             \ "RPC Caller for 'swank:uses-of-symbol-at-point'."
           \ ]
@@ -1836,6 +2008,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-symbol-search-close-empty-display',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "For 'swank:public-symbol-search' close quickfix window",
             \ "if there are no search results."
@@ -1845,6 +2018,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-symbol-search-do-incremental',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "For 'swank:public-symbol-search' do incremental search.",
             \ "As search terms are entered, search results are displayed."
@@ -1854,6 +2028,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-symbol-search-maximum-return',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 50,
         \ 'description': [
             \ "For 'swank:public-symbol-search' do incremental search.",
             \ "Maximum search results returned by Ensime."
@@ -1866,6 +2041,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['visual', 'highlight' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'highlight',
         \ 'description': [
             \ "RPC handler for 'swank:expand-selection' information.",
             \ "Use either Vim visual mode or highlighting."
@@ -1876,6 +2052,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': '5fffff',
         \ 'description': [
             \ "RPC handler for 'swank:expand-selection' highlight color.",
             \ "when background is dark."
@@ -1886,6 +2063,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': '5fffff',
         \ 'description': [
             \ "RPC handler for 'swank:expand-selection' highlight color.",
             \ "when background is light."
@@ -1917,9 +2095,10 @@ function! s:MakeOptions()
           \ ]
       \ }
   let l:options['tailor-sbt-compile-error-long-line-quickfix'] = {
-        \ 'name': 'tailor-sbt-compile-error-multiline-quickfix',
+        \ 'name': 'tailor-sbt-compile-error-long-line-quickfix',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Display all of the compiler error messages in quickfix window",
             \ "if set to true. If false, then for each error, only first",
@@ -1931,6 +2110,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_POSITIVE_NUMBER_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 10000,
         \ 'description': [
             \ 'Size of Ensime socket read buffer when getting the results',
             \ 'of an SBT compiliation. This should be large because there',
@@ -1951,6 +2131,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-show-errors-and-warnings-use-signs',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ 'Whether or not to use signs when compiler is displaying compile errors.'
           \ ]
@@ -1959,6 +2140,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-full-typecheck-finished-use-signs',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ 'Whether or not to use signs when type check finished is displaying compile errors.'
           \ ]
@@ -2018,6 +2200,7 @@ function! s:MakeOptions()
         \ 'kind': g:OPTION_ENUM_KIND, 
         \ 'enum': ['quickfix', 'mixed' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'quickfix',
         \ 'description': [
             \ 'Whether to use the quickfix window to display uses or if all',
             \ 'of the uses are in the same window use the locationlist ',
@@ -2028,6 +2211,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-uses-of-symbol-at-point-use-signs',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
         \ 'description': [
             \ 'Whether or not to use signs when displaying uses.'
           \ ]
@@ -2036,6 +2220,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-uses-of-symbol-at-point-use-sign-kind-marker',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
         \ 'description': [
             \ 'Whether or not to use sign kind "marker" for current line.'
           \ ]
@@ -2046,6 +2231,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-error-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Error',
         \ 'description': [
             \ 'Quickfix Error linehl.'
           \ ]
@@ -2055,6 +2241,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-error-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'E>',
         \ 'description': [
             \ 'Quickfix Error text'
           \ ]
@@ -2064,6 +2251,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-error-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Todo',
         \ 'description': [
             \ 'Quickfix Error texthl.'
           \ ]
@@ -2073,6 +2261,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-warn-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'StatusLine',
         \ 'description': [
             \ 'Quickfix Warn linehl.'
           \ ]
@@ -2082,6 +2271,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-warn-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'W>',
         \ 'description': [
             \ 'Quickfix Warn text'
           \ ]
@@ -2091,6 +2281,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-warn-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Todo',
         \ 'description': [
             \ 'Quickfix Warn texthl'
           \ ]
@@ -2100,6 +2291,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-info-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'DiffAdd',
         \ 'description': [
             \ 'Quickfix Info linehl.'
           \ ]
@@ -2109,6 +2301,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-info-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'I>',
         \ 'description': [
             \ 'Quickfix Info text'
           \ ]
@@ -2118,6 +2311,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-info-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'TODO',
         \ 'description': [
             \ 'Quickfix Info texthl.'
           \ ]
@@ -2127,6 +2321,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-marker-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Search',
         \ 'description': [
             \ 'Quickfix Marker linehl.'
           \ ]
@@ -2136,6 +2331,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-marker-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'M>',
         \ 'description': [
             \ 'Quickfix Marker text'
           \ ]
@@ -2145,6 +2341,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-quickfix-marker-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Ignore',
         \ 'description': [
             \ 'Quickfix Marker texthl.'
           \ ]
@@ -2154,6 +2351,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-info-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'DiffAdd',
         \ 'description': [
             \ 'LocationList Info linehl.'
           \ ]
@@ -2163,6 +2361,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-info-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'I>',
         \ 'description': [
             \ 'LocationList Info text'
           \ ]
@@ -2172,6 +2371,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-info-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'TODO',
         \ 'description': [
             \ 'LocationList Info texthl.'
           \ ]
@@ -2181,6 +2381,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-marker-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Search',
         \ 'description': [
             \ 'LocationList Marker linehl.'
           \ ]
@@ -2190,6 +2391,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-marker-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'M>',
         \ 'description': [
             \ 'LocationList Marker text'
           \ ]
@@ -2199,6 +2401,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-locationlist-marker-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Ignore',
         \ 'description': [
             \ 'LocationList Marker texthl'
           \ ]
@@ -2208,6 +2411,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-active-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'DiffText',
         \ 'description': [
             \ 'Debug Active linehl.'
           \ ]
@@ -2217,6 +2421,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-active-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'A>',
         \ 'description': [
             \ 'Debug Active text'
           \ ]
@@ -2226,6 +2431,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-active-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'SpellCap',
         \ 'description': [
             \ 'Debug Active texthl'
           \ ]
@@ -2235,6 +2441,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-pending-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'DiffAdd',
         \ 'description': [
             \ 'Debug Pending linehl.'
           \ ]
@@ -2244,6 +2451,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-pending-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'P>',
         \ 'description': [
             \ 'Debug Pending text'
           \ ]
@@ -2253,6 +2461,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-pending-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'DiffDelete',
         \ 'description': [
             \ 'Debug Pending texthl'
           \ ]
@@ -2262,6 +2471,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-marker-linehl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Search',
         \ 'description': [
             \ 'Debug Marker linehl.'
           \ ]
@@ -2271,6 +2481,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-marker-text',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'M>',
         \ 'description': [
             \ 'Debug Marker text'
           \ ]
@@ -2280,6 +2491,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-debug-marker-texthl',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'Ignore',
         \ 'description': [
             \ 'Debug Marker texthl'
           \ ]
@@ -2289,6 +2501,7 @@ function! s:MakeOptions()
         \ 'name': 'sign-start-place-id',
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 2656,
         \ 'description': [
             \ 'The value of the first sign id. Each subsequent sign',
             \ 'id has a value one more than its predecessor'
@@ -2302,6 +2515,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#compiler_ready#Handle',
         \ 'description': [
             \ "RPC event trigger for ':compiler-ready'."
         \ ]
@@ -2320,6 +2534,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#full_typecheck_finished#Handle',
         \ 'description': [
             \ "RPC event trigger for ':indexer-ready'."
         \ ]
@@ -2329,6 +2544,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#scala_notes#Handle',
         \ 'description': [
             \ "RPC event trigger for ':scala-notes'."
         \ ]
@@ -2338,6 +2554,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#java_notes#Handle',
         \ 'description': [
             \ "RPC event trigger for ':java-notes'."
         \ ]
@@ -2347,6 +2564,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#clear_all_scala_notes#Handle',
         \ 'description': [
             \ "RPC event trigger for ':clear-all-scala-notes'."
         \ ]
@@ -2356,6 +2574,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#clear_all_java_notes#Handle',
         \ 'description': [
             \ "RPC event trigger for ':clear-all-java-notes'."
         \ ]
@@ -2367,6 +2586,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#OutputEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == output'."
         \ ]
@@ -2376,6 +2596,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#StopEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == stop'."
         \ ]
@@ -2385,6 +2606,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#BreakPointEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == breakpoint'."
         \ ]
@@ -2394,6 +2616,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#DeathEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == death'."
         \ ]
@@ -2403,6 +2626,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#StartEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == start'."
         \ ]
@@ -2412,6 +2636,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#DisconnectEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == disconnect'."
         \ ]
@@ -2421,6 +2646,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#ExceptionEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == exception'."
         \ ]
@@ -2430,6 +2656,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#ThreadStartEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == threadStart'."
         \ ]
@@ -2439,6 +2666,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#command#debug#ThreadDeathEvent',
         \ 'description': [
             \ "RPC debut trigger for ':type == threadDeath'."
         \ ]
@@ -2450,6 +2678,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 600,
         \ 'description': [
             \ "How long in milliseconds before Hover CursorHold event called."
         \ ]
@@ -2459,6 +2688,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_CHAR_COUNT_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "How many characters entered before Hover CurosrMoved",
             \ "event called."
@@ -2468,6 +2698,7 @@ function! s:MakeOptions()
         \ 'name': 'vimside-hover-balloon-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Is the GVim Symbol-name balloon enabled."
         \ ]
@@ -2477,6 +2708,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 300,
         \ 'description': [
             \ "Job time in milliseconds for Hover Command Line execution."
         \ ]
@@ -2485,6 +2717,7 @@ function! s:MakeOptions()
         \ 'name': 'vimside-hover-term-balloon-enabled',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Is the Vim Symbol-name term balloon enabled."
         \ ]
@@ -2494,6 +2727,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': "red",
         \ 'description': [
             \ "Foreground color for term balloon (symbolic name",
             \ "or hex-value)."
@@ -2504,6 +2738,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_COLOR_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': "white",
         \ 'description': [
             \ "Background color for term balloon (symbolic name",
             \ "or hex-value)."
@@ -2514,6 +2749,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 300,
         \ 'description': [
             \ "Job time in milliseconds for Hover Term execution."
         \ ]
@@ -2529,6 +2765,7 @@ function! s:MakeOptions()
                 \ 'url_funcs': 'tailor-browser-{key}-url-funcname'
                 \ }, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': ['unix', 'cygwin', 'mswin', 'macunix'],
         \ 'description': [
             \ "Keys for generating Browser Component Options."
         \ ]
@@ -2550,6 +2787,7 @@ function! s:MakeOptions()
                 \ 'funcref': 'tailor-show-doc-{key}-func-ref'
                 \ }, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': ['java', 'scala', 'scala-compiler', 'scala-reflect', 'android'],
         \ 'description': [
             \ "Keys for generating Browser Component Options."
         \ ]
@@ -2560,6 +2798,7 @@ function! s:MakeOptions()
         \ 'name': 'forms-use',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "When there are multiple implementations, use the",
             \ "Forms-based one if available otherwise use the",
@@ -2571,6 +2810,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-forms-sourcebrowser-open-in-tab',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Open the Forms sourcebrowser in its own tab."
         \ ]
@@ -2581,6 +2821,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-type-check-file-on-write',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 0,
         \ 'description': [
             \ "Typecheck a file when it is written."
         \ ]
@@ -2591,6 +2832,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-rename-pattern-enable',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Refactor rename identifier matching pattern enable."
         \ ]
@@ -2599,6 +2841,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-rename-pattern',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': '[^ =:;()[\]]\+',
         \ 'description': [
             \ "Refactor rename identifier matching pattern."
         \ ]
@@ -2609,6 +2852,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-extract-local-pattern-enable',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Refactor extract local identifier matching pattern enable."
         \ ]
@@ -2617,6 +2861,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-extract-local-pattern',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': '[^ =:;()[\]]\+',
         \ 'description': [
             \ "Refactor extract local identifier matching pattern."
         \ ]
@@ -2627,6 +2872,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-extract-method-pattern-enable',
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 1,
         \ 'description': [
             \ "Refactor extract method identifier matching pattern enable."
         \ ]
@@ -2635,6 +2881,7 @@ function! s:MakeOptions()
         \ 'name': 'tailor-refactor-extract-method-pattern',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': '[^ =:;()[\]]\+',
         \ 'description': [
             \ "Refactor extract method identifier matching pattern."
         \ ]
@@ -2651,4 +2898,45 @@ function! vimside#options#defined#Load(options)
     endif
     let a:options['defined'] = s:defined_options
   endif
+endfunction
+
+function! vimside#options#defined#SetUndefined(options)
+call s:LOG("vimside#options#defined#SetUndefined: TOP")
+  let l:FuncrefJava = function("vimside#command#show_doc_symbol_at_point#MakeUrlJava")
+  let l:FuncrefScala = function("vimside#command#show_doc_symbol_at_point#MakeUrlScala")
+
+call s:LOG("vimside#options#defined#SetUndefined: type(a:options)". type(a:options))
+
+  let a:options["tailor-browser-unix-commands"] = ['xdg-open', 'firefox', 'opera']
+  let a:options["tailor-browser-unix-url-funcname"] = ['shellescape', 'shellescape', 'shellescape']
+  let a:options["tailor-browser-cygwin-commands"] = ['cygstart']
+  let a:options["tailor-browser-cygwin-url-funcname"] = ['shellescape']
+  let a:options["tailor-browser-mswin-commands"] = ['cmd.exe', 'firefox']
+  let a:options["tailor-browser-mswin-url-funcname"] = ['shellescape', 'shellescape']
+  let a:options["tailor-browser-macunix-commands"] = ['open']
+  let a:options["tailor-browser-macunix-url-funcname"] = ['shellescape']
+
+  let a:options['tailor-show-doc-java1.5-url-base'] = "http://docs.oracle.com/javase/5/docs/api/"
+  let a:options['tailor-show-doc-java1.6-url-base'] = "http://docs.oracle.com/javase/6/docs/api/"
+  let a:options['tailor-show-doc-java1.7-url-base'] = "http://docs.oracle.com/javase/7/docs/api/"
+  let a:options['tailor-show-doc-java-regex'] = '^java.'
+  let a:options['tailor-show-doc-java-func-ref'] = l:FuncrefJava
+
+
+  let a:options['tailor-show-doc-scala2.9.2-url-base'] = 'http://www.scala-lang.org/api/current/index.html'
+  let a:options['tailor-show-doc-scala2.10.0-url-base'] = 'http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/index.html'
+  let a:options['tailor-show-doc-scala-regex'] = '^scala.'
+  let a:options['tailor-show-doc-scala-func-ref'] = l:FuncrefScala
+  let a:options['tailor-show-doc-scala-compiler2.10.0-url-base'] = 'http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/compiler/index.html'
+  let a:options['tailor-show-doc-scala-compiler-regex'] = '^scala.tools.'
+  let a:options['tailor-show-doc-scala-compiler-func-ref'] = l:FuncrefScala
+  let a:options['tailor-show-doc-scala-reflect2.10.0-url-base'] = 'http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/compiler/index.html'
+  let a:options['tailor-show-doc-scala-reflect-regex'] = '^scala.reflect.'
+  let a:options['tailor-show-doc-scala-reflect-func-ref'] = l:FuncrefScala
+  let a:options['tailor-show-doc-android-url-base'] = "http://developer.android.com/reference/"
+  let a:options['tailor-show-doc-android-regex'] = '^android.'
+  let a:options['tailor-show-doc-android-func-ref'] = l:FuncrefJava
+  let a:options['tailor-sbt-use-signs'] = 1
+
+call s:LOG("vimside#options#defined#SetUndefined: BOTTOM")
 endfunction
