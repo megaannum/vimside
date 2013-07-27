@@ -1,9 +1,3 @@
-function! s:LOG(msg)
-    execute "redir >> ". "DEFINED_LOG"
-    silent echo "INFO: ". a:msg
-    execute "redir END"
-endfunction
-
 
 " types
 let g:OPTION_BOOLEAN_TYPE    = type(0)
@@ -2901,11 +2895,9 @@ function! vimside#options#defined#Load(options)
 endfunction
 
 function! vimside#options#defined#SetUndefined(options)
-call s:LOG("vimside#options#defined#SetUndefined: TOP")
   let l:FuncrefJava = function("vimside#command#show_doc_symbol_at_point#MakeUrlJava")
   let l:FuncrefScala = function("vimside#command#show_doc_symbol_at_point#MakeUrlScala")
 
-call s:LOG("vimside#options#defined#SetUndefined: type(a:options)". type(a:options))
 
   let a:options["tailor-browser-unix-commands"] = ['xdg-open', 'firefox', 'opera']
   let a:options["tailor-browser-unix-url-funcname"] = ['shellescape', 'shellescape', 'shellescape']
@@ -2938,5 +2930,4 @@ call s:LOG("vimside#options#defined#SetUndefined: type(a:options)". type(a:optio
   let a:options['tailor-show-doc-android-func-ref'] = l:FuncrefJava
   let a:options['tailor-sbt-use-signs'] = 1
 
-call s:LOG("vimside#options#defined#SetUndefined: BOTTOM")
 endfunction
