@@ -35,6 +35,8 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+Added delete entry commands to ActWin.
+
 Merged the options default.vim file into the defined.vim file.
 
 Added highlight parsing code.

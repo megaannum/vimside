@@ -296,6 +296,7 @@ let s:cmds_actwin_defs = {
       \ "up": [ "OnUp", "Move up to next line" ],
       \ "left": [ "OnLeft", "Move left one postion" ],
       \ "right": [ "OnRight", "Move right one postion" ],
+      \ "delete": [ "OnDelete", "Delete current entry" ],
       \ "close": [ "OnClose", "Close actwin"]
       \ }
 
@@ -306,6 +307,7 @@ let s:cmds_scala_defs = {
       \ "previous": [ "g:VimsideActWinUp", "Move up to next line" ],
       \ "next": [ "g:VimsideActWinDown", "Move down to next line" ],
       \ "enter": [ "g:VimsideActWinEnter", "Enter actwin" ],
+      \ "delete": [ "g:VimsideActWinDelete", "Delete Current Entry" ],
       \ "close": [ "g:VimsideActWinClose", "Close actwin" ]
       \ }
 
@@ -1334,7 +1336,7 @@ function! s:AdjustInput()
 endfunction
 
 function! s:LoadDisplay(instance)
-call s:LOG("LoadDisplay current buffer=". bufnr("%"))
+call s:LOG("LoadDisplay TOP current buffer=". bufnr("%"))
   setlocal buftype=nofile
   setlocal modifiable
   setlocal noswapfile
@@ -1347,6 +1349,7 @@ call s:LOG("LoadDisplay current buffer=". bufnr("%"))
   let a:instance.current_line = a:instance.first_buffer_line
 
  setlocal nomodifiable
+call s:LOG("LoadDisplay BOTTOM")
 endfunction
 
 " --------------------------------------------
@@ -1478,6 +1481,7 @@ endfunction
 "     Entry
 "       Enter
 "       Leave
+"       Delete
 "     DisableFile
 "     Disable
 "     Destroy
@@ -1692,6 +1696,38 @@ call s:LOG("s:DisplayEntryLeave TOP")
 call s:LOG("s:DisplayEntryLeave BOTTOM")
 endfunction
 
+function! s:DisplayEntryDelete(entrynos, instance)
+call s:LOG("s:DisplayEntryDelete TOP")
+  let l:display = a:instance.data.display
+
+  " scala
+  let l:scala = l:display.scala
+  if l:scala.sign.is_enable
+    call s:ScalaEntryDeleteSigns(a:instance, a:entrynos)
+  endif
+  if l:scala.color_line.is_enable
+    call s:ScalaEntryDeleteColorLine(a:instance, a:entrynos)
+  endif
+  if l:scala.color_column.is_enable
+    call s:ScalaEntryDeleteColorColumn(a:instance, a:entrynos)
+  endif
+
+
+  " actwin
+  let l:actwin = l:display.actwin
+
+  if l:actwin.cursor_line.is_enable
+    call s:ActWinDeleteCursorLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.highlight_line.is_enable
+    call s:ActWinDeleteHighlightLine(a:entrynos, a:instance)
+  endif
+  if l:actwin.sign.is_enable
+    call s:ActWinDeleteSign(a:entrynos, a:instance)
+  endif
+call s:LOG("s:DisplayEntryDelete BOTTOM")
+endfunction
+
 " MUST be called from local buffer
 function! s:DisplayDisableFile(instance, file)
   let l:display = a:instance.data.display
@@ -1864,6 +1900,24 @@ call s:LOG("g:ScalaToggleSigns TOP")
 call s:LOG("g:ScalaToggleSigns BOTTOM")
 endfunction
 
+function! s:ScalaEntryDeleteSigns(instance, entrynos)
+call s:LOG("g:ScalaEntryDeleteSigns TOP")
+  let l:data = a:instance.data
+  let l:sign = a:instance.data.display.scala.sign
+  let l:category = l:sign.category
+  let l:entry = l:data.entries[a:entrynos]
+  let l:file = l:entry.file
+  let l:bnr = bufnr(l:file)
+  if l:bnr > 0 
+    let l:line = l:entry.line
+    let l:kind = l:entry.kind
+    call vimside#sign#UnPlaceFile(l:file, l:category, l:kind, l:line)
+call s:LOG("s:ScalaEntryDeleteSigns unplaced file=". l:file .", line=". l:line)
+  endif
+
+call s:LOG("g:ScalaEntryDeleteSigns BOTTOM")
+endfunction
+
 function! s:ScalaDisableSigns(instance)
 call s:LOG("s:ScalaDisableSigns TOP")
 
@@ -2029,6 +2083,11 @@ call s:LOG("g:ScalaToggleColorLine TOP")
   let l:color_line.is_on = ! l:color_line.is_on = 0
   call vimside#sign#Toggle(l:color_line.category, l:color_line.is_on)
 call s:LOG("g:ScalaToggleColorLine BOTTOM")
+endfunction
+
+function! s:ScalaEntryDeleteColorLine(instance, entrynos)
+call s:LOG("g:ScalaEntryDeleteColorLine TOP")
+call s:LOG("g:ScalaEntryDeleteColorLine BOTTOM")
 endfunction
 
 function! s:ScalaDisableColorLine(instance)
@@ -2237,6 +2296,10 @@ let s:buf_change = 1
 call s:LOG("g:ScalaToggleColorColumn BOTTOM")
 endfunction
 
+function! s:ScalaEntryDeleteColorColumn(instance, entrynos)
+call s:LOG("g:ScalaEntryDeleteColorColumn TOP")
+call s:LOG("g:ScalaEntryDeleteColorColumn BOTTOM")
+endfunction
 
 function! s:ScalaDestroyColorColumn(instance)
 call s:LOG("s:ScalaDestroyColorColumn TOP")
@@ -2290,7 +2353,6 @@ function! s:ActWinLeaveCursorLine(entrynos, instance)
   " emtpy
 endfunction
 
-
 function! g:ActWinToggleCursorLine(buffer_nr)
 call s:LOG("g:0ctWinToggleCursorLine TOP")
   " let [l:found, l:instance] = s:GetBufferActWin()
@@ -2317,6 +2379,12 @@ execute 'silent '. l:current_buffer_nr.'wincmd w'
 let s:buf_change = 0
 
 call s:LOG("g:ActWinToggleCursorLine BOTTOM")
+endfunction
+
+function! s:ActWinDeleteCursorLine(entrynos, instance)
+call s:LOG("g:ActWinDeleteCursorLine TOP")
+  " emtpy
+call s:LOG("g:ActWinDeleteCursorLine BOTTOM")
 endfunction
 
 function! s:ActWinDisableCursorLine(instance)
@@ -2378,7 +2446,7 @@ function! s:ActWinEnableHighlightLine(instance)
 
 endfunction
 
-function! s:EnterHighlightLine(entrynos, instance)
+function! s:ActWinEnterHighlightLine(entrynos, instance)
 call s:LOG("s:ActWinEnterHighlightLine TOP")
   let l:highlight_line = a:instance.data.display.actwin.highlight_line
 
@@ -2436,6 +2504,13 @@ call s:LOG("g:ActWinToggleHighlightLine l:instance.current_line=". l:instance.cu
 
 call s:LOG("g:ActWinToggleHighlightLine BOTTOM")
 endfunction
+
+function! s:ActWinDeleteHighlightLine(entrynos, instance)
+call s:LOG("g:ActWinDeleteHighlightLine TOP")
+  " emtpy
+call s:LOG("g:ActWinDeleteHighlightLine BOTTOM")
+endfunction
+
 
 function! s:ActWinDisableHighlightLine(instance)
 call s:LOG("s:ActWinDisableHighlightLine TOP")
@@ -2630,6 +2705,12 @@ call s:LOG("g:ActWinToggleSign l:instance.current_line=". l:instance.current_lin
   endif
 
 call s:LOG("g:ActWinToggleSign BOTTOM")
+endfunction
+
+function! s:ActWinDeleteSign(entrynos, instance)
+call s:LOG("g:ActWinDeleteSign TOP")
+  " emtpy
+call s:LOG("g:ActWinDeleteSign BOTTOM")
 endfunction
 
 function! s:ActWinDisableSign(instance)
@@ -2963,6 +3044,36 @@ call s:LOG("s:EnterEntry TOP entrynos=". a:entrynos)
 call s:LOG("s:EnterEntry BOTTOM")
 endfunction
 
+function! s:DeleteEntry(entrynos, instance)
+  let l:entrynos = a:entrynos
+call s:LOG("s:DeleteEntry TOP entrynos=". l:entrynos)
+call s:LOG("s:DeleteEntry current_line=". a:instance.current_line)
+
+  let l:current_line = a:instance.current_line
+
+  call s:DisplayEntryDelete(l:entrynos, a:instance)
+
+  let l:entries = a:instance.data.entries
+call s:LOG("s:DeleteEntry BEFORE nos entries=". len(l:entries))
+  let l:entry = remove(l:entries, l:entrynos)
+call s:LOG("s:DeleteEntry AFTER nos entries=". len(l:entries))
+
+  call s:LoadDisplay(a:instance)
+
+  " let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+
+  if l:entrynos == len(l:entries)
+    let a:instance.current_line = l:current_line - 1
+  else
+    let a:instance.current_line = l:current_line
+  endif
+  call cursor(a:instance.current_line, 1)
+
+call s:LOG("s:DeleteEntry current_line=". a:instance.current_line)
+call s:LOG("s:DeleteEntry BOTTOM")
+endfunction
+
+
 " MUST be called from local buffer
 function! s:SelectEntry(entrynos, instance)
   call a:instance.data.actions.select(a:entrynos, a:instance)
@@ -3129,10 +3240,13 @@ call s:LOG("s:OnUp: TOP")
     call s:ERROR("s:OnUp: instance not found")
     return
   endif
+call s:LOG("s:OnUp l:instance.current_line=". l:instance.current_line)
 
   let l:line = line(".")
+call s:LOG("s:OnUp l:line=". l:line)
+call s:LOG("s:OnUp l:instance.first_buffer_line=". l:instance.first_buffer_line)
 
-  if l:line > (l:instance.first_buffer_line - 1)
+  if l:line > l:instance.first_buffer_line
     let l:linenos = l:line - l:instance.first_buffer_line + 1
     let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 call s:LOG("s:OnUp l:entrynos=". l:entrynos)
@@ -3150,7 +3264,8 @@ call s:LOG("s:OnUp l:nos_of_linenos=". l:nos_of_linenos)
 
 
     call s:EnterEntry(l:entrynos-1, l:instance)
-    let l:instance.current_line = l:new_linenos
+    " let l:instance.current_line = l:new_linenos
+    let l:instance.current_line -= l:nos_of_linenos
 call s:LOG("s:OnUp l:instance.current_line=". l:instance.current_line)
   else
     call feedkeys('k', 'n')
@@ -3183,8 +3298,10 @@ call s:LOG("s:OnDown l:len=". l:len)
 
       let l:nos_of_linenos = l:instance.entrynos_to_nos_of_lines[l:entrynos] 
       let l:new_linenos = l:entrynos_to_linenos[l:entrynos+1] 
+call s:LOG("s:OnDown l:instance.current_line=". l:instance.current_line)
 call s:LOG("s:OnDown l:nos_of_linenos=". l:nos_of_linenos)
-      let l:nos_of_linenos -= 1
+call s:LOG("s:OnDown l:new_linenos=". l:new_linenos)
+      " let l:nos_of_linenos -= 1
       if l:nos_of_linenos == 1
         call feedkeys('j', 'n')
       elseif l:nos_of_linenos > 1
@@ -3193,14 +3310,11 @@ call s:LOG("s:OnDown l:nos_of_linenos=". l:nos_of_linenos)
 
 
       call s:EnterEntry(l:entrynos+1, l:instance)
-      let l:instance.current_line = l:new_linenos
+      " let l:instance.current_line = l:new_linenos
+      let l:instance.current_line += l:nos_of_linenos
+
 call s:LOG("s:OnDown l:instance.current_line=". l:instance.current_line)
     endif
-
-if 0 " IS_THIS_NEEDED
-  else
-    call feedkeys('j', 'n')
-endif " IS_THIS_NEEDED
 
   endif
 
@@ -3216,7 +3330,50 @@ endfunction
 function! s:OnRight()
 call s:LOG("s:OnRight: TOP")
   call feedkeys('l', 'n')
-call s:LOG("s:OnLeft: BOTTOM")
+call s:LOG("s:OnRight: BOTTOM")
+endfunction
+
+function! s:OnDelete()
+call s:LOG("s:OnDelete: TOP")
+  let [l:found, l:instance] = s:GetBufferActWin()
+  if ! l:found
+    call s:ERROR("s:OnDown: instance not found")
+    return
+  endif
+
+  " are we deleting the last entry
+  if len(l:instance.data.entries)  <= 1
+    let s:buf_change = 0
+    call s:Close(l:instance)
+    let s:buf_change = 1
+  else
+    let l:line = line(".")
+
+    if l:line > (l:instance.first_buffer_line - 1)
+      let l:entrynos_to_linenos = l:instance.entrynos_to_linenos
+      let l:linenos = l:line - l:instance.first_buffer_line + 1
+      let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
+  call s:LOG("s:OnDelete l:entrynos=". l:entrynos)
+
+      let l:len = len(l:entrynos_to_linenos)
+  call s:LOG("s:OnDelete l:len=". l:len)
+      if l:entrynos < l:len 
+        call s:LeaveEntry(l:entrynos, l:instance)
+
+        call s:DeleteEntry(l:entrynos, l:instance)
+
+        let l:entries = l:instance.data.entries
+        if l:entrynos == len(l:entries)
+          call s:EnterEntry(l:entrynos-1, l:instance)
+        else
+          call s:EnterEntry(l:entrynos, l:instance)
+        endif
+
+      endif
+    endif
+  endif
+
+call s:LOG("s:OnDelete: BOTTOM")
 endfunction
 
 " ============================================================================
@@ -3491,6 +3648,33 @@ call s:LOG("g:VimsideActWinEnter: BOTTOM")
 endfunction
 
 " Called from external buffer
+function! g:VimsideActWinDelete(buffer_nr)
+call s:LOG("g:VimsideActWinDelete: TOP buffer_nr=". a:buffer_nr)
+  " If called from ActWin
+  let l:current_buffer_nr = bufnr("%")
+  if a:buffer_nr == l:current_buffer_nr
+    call s:OnDelete()
+    return
+  endif
+
+  let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
+  if ! l:found
+    call s:ERROR("s:VimsideActWinDelete: instance not found")
+    return
+  endif
+
+  let b:return_win_nr = bufwinnr(l:current_buffer_nr)
+  let l:win_nr = bufwinnr(a:buffer_nr)
+
+  execute 'silent '. l:win_nr.'wincmd w'
+  call s:OnDelete()
+  execute 'silent '. b:return_win_nr.'wincmd w'
+
+call histdel(":", "VimsideActWinDelete")
+call s:LOG("g:VimsideActWinDelete: BOTTOM")
+endfunction
+
+" Called from external buffer
 function! g:VimsideActWinClose(buffer_nr)
 call s:LOG("g:VimsideActWinClose: TOP buffer_nr=". a:buffer_nr)
   let [l:found, l:instance] = s:GetActWin(a:buffer_nr)
@@ -3562,31 +3746,35 @@ endfunction
 " called when buffer is displayed in actwin
 " when loaded or no longer hidden
 function! s:BufWinEnter()
+  if s:buf_change
 call s:LOG("s:BufWinEnter: buffer_nr=". bufnr("%"))
-  let [l:found, l:instance] = s:GetActWin(bufnr("%"))
-  if ! l:found
-    call s:ERROR("s:BufWinEnter instance not found")
-    return
-  endif
+    let [l:found, l:instance] = s:GetActWin(bufnr("%"))
+    if ! l:found
+      call s:ERROR("s:BufWinEnter instance not found")
+      return
+    endif
 
-  call s:EnterCurrentEntry(l:instance)
+    call s:EnterCurrentEntry(l:instance)
+  endif
 endfunction
 
 " called before buffer is removed from actwin
 " Note that buffer "%" may not be buffer being unloaded
 function! s:BufWinLeave()
+  if s:buf_change
 " call s:LOG("s:BufWinLeave: buffer_nr=". bufnr("%"))
 " call s:LOG("s:BufWinLeave: afile=". expand('<afile>')) 
 call s:LOG("s:BufWinLeave: afile nr=". bufnr(expand('<afile>'))) 
-  " call s:DisplayDestroy()
+    " call s:DisplayDestroy()
   
-  let [l:found, l:instance] = s:GetActWin(bufnr(expand('<afile>')))
-  if ! l:found
-    call s:ERROR("s:BufWinLeave instance not found")
-    return
-  endif
+    let [l:found, l:instance] = s:GetActWin(bufnr(expand('<afile>')))
+    if ! l:found
+      call s:ERROR("s:BufWinLeave instance not found")
+      return
+    endif
 
-  call s:LeaveCurrentEntry(l:instance)
+    call s:LeaveCurrentEntry(l:instance)
+  endif
 endfunction
 
 " ============================================================================
@@ -3991,14 +4179,7 @@ function! vimside#actwin#TestQuickFix()
         \ ]
     \ }
 
-  let l:data = {
-        \ "title": "Test Window",
-        \ "winname": "Test",
-        \ "help": {
-          \ "do_show": 1,
-          \ "data": l:helpdata,
-        \ },
-        \ "cmds": {
+  let l:cmds = {
           \ "scala": {
             \ "cmd": {
               \ "first": "cr",
@@ -4006,6 +4187,7 @@ function! vimside#actwin#TestQuickFix()
               \ "previous": "cp",
               \ "next": "cn",
               \ "enter": "ce",
+              \ "delete": "ccd",
               \ "close": "ccl"
             \ },
             \ "map": {
@@ -4014,8 +4196,9 @@ function! vimside#actwin#TestQuickFix()
               \ "previous": "<Leader>cp",
               \ "next": "<Leader>cn",
               \ "enter": "<Leader>ce",
+              \ "delete": "<Leader>ccd",
               \ "close": "<Leader>ccl"
-            \ },
+            \ }
           \ },
           \ "actwin": {
             \ "map": {
@@ -4029,12 +4212,13 @@ function! vimside#actwin#TestQuickFix()
               \ "bottom": [ "G", "<PageDown>"],
               \ "down": [ "j", "<Down>"],
               \ "up": [ "k", "<Up>"],
+              \ "delete": "dd",
               \ "close": "q"
-            \ },
-          \ },
-        \ },
-        \ "display": {
-          \ "scala": {
+            \ }
+          \ }
+        \ }
+
+  let l:scala = {
             \ "sign": {
               \ "info": "use sign to note all entry line/col kind",
               \ "is_enable": 0,
@@ -4078,7 +4262,7 @@ function! vimside#actwin#TestQuickFix()
             \ },
             \ "color_line": {
               \ "info": "use sign to note current entry line kind",
-              \ "is_enable": 0,
+              \ "is_enable": 1,
               \ "is_on": 0,
               \ "category": "ColorLine",
               \ "toggle": {
@@ -4110,17 +4294,18 @@ function! vimside#actwin#TestQuickFix()
             \ },
             \ "color_column": {
               \ "info": "use colorcolumn to note current entry col",
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "is_on": 0,
               \ "colorcolumn": "cterm=reverse"
             \ }
-          \ },
-          \ "actwin": {
+          \ }
+
+  let l:actwin = {
             \ "cursor_line": {
               \ "info": "use cursorline to note current line",
-              \ "is_enable": 1,
+              \ "is_enable": 0,
               \ "is_on": 0,
-              \ "cursorline": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan"
+              \ "cursorline": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan",
               \ "toggle": {
                 \ "scala": {
                   \ "map": "wc",
@@ -4156,7 +4341,7 @@ function! vimside#actwin#TestQuickFix()
             \ },
             \ "sign": {
               \ "info": "use sign to note current line",
-              \ "is_enable": 0,
+              \ "is_enable": 1,
               \ "all_text": 1,
               \ "category": "ScalaWindow",
               \ "abbreviation": "sw",
@@ -4191,7 +4376,21 @@ function! vimside#actwin#TestQuickFix()
               \ }
             \ }
           \ }
+
+  let l:display = {
+          \ "scala": l:scala,
+          \ "actwin": l:actwin
+          \ }
+
+  let l:data = {
+        \ "title": "Test Window",
+        \ "winname": "Test",
+        \ "help": {
+          \ "do_show": 1,
+          \ "data": l:helpdata,
         \ },
+        \ "cmds": l:cmds,
+        \ "display": l:display,
         \ "actions": {
           \ "enter": function("s:EnterActionQuickFix"),
           \ "select": function("s:SelectActionQuickFix"),

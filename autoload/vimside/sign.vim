@@ -141,10 +141,19 @@ call s:LOG("s:LoadCategory cmd=". cmd)
 
   if has_key(l:cdata, 'toggle')
     let l:toggle = l:cdata.toggle
-    let l:category = l:cdata.category
-    execute ":nmap <silent> <Leader>" . l:toggle . " :call vimside#sign#Toggle('". l:category ."')<CR>"
-    let l:cdata['is_toggle'] = 0
+    if type(l:toggle) == type("")
+      let l:category = l:cdata.category
+
+" call s:LOG("s:LoadCategory: toggle=" . l:toggle)
+" call s:LOG("s:LoadCategory: category=" . l:category)
+
+" call s:LOG("s:LoadCategory: map= :nnoremap <silent> <Leader>" . l:toggle . " :call vimside#sign#Toggle('". l:category ."')<CR>")
+
+      execute ":nnoremap <silent> <Leader>" . l:toggle . " :call vimside#sign#Toggle('". l:category ."')<CR>"
+
+      let l:cdata['is_toggle'] = 0
 call s:LOG("s:LoadCategory: toggle mapping made")
+    endif
   endif
 
 call s:LOG("s:LoadCategory: BOTTOM")
@@ -294,14 +303,14 @@ endfunction
 " return 0 or 1
 function! vimside#sign#UnPlaceFile(filename, category, kind, ...)
   let l:filename = fnamemodify(a:filename, ":p")
-  if a:0 > 1
+  if a:0 > 0
     return s:UnPlaceTag('file', l:filename, a:category, a:kind, a:1)
   else
     return s:UnPlaceTag('file', l:filename, a:category, a:kind)
   endif
 endfunction
 function! vimside#sign#UnPlaceBuffer(buffer, category, kind, ...)
-  if a:0 > 1
+  if a:0 > 0
     return s:UnPlaceTag('buffer', a:buffer, a:category, a:kind, a:1)
   else
     return s:UnPlaceTag('buffer', a:buffer, a:category, a:kind)
@@ -326,22 +335,23 @@ call s:LOG("s:UnPlaceTag: a:tagtype=". a:tagtype)
 call s:LOG("s:UnPlaceTag: a:tag=". a:tag)
 call s:LOG("s:UnPlaceTag: a:category=". a:category)
 
-  if a:0 > 1
+  if a:0 > 0
     let l:linenos = a:1
     let l:ids = l:cdata.ids
 call s:LOG("s:UnPlaceTag: l:linenos=". l:linenos)
 
-    let [l:found, id] = s:GetId(,:linenos, a:tag, l:ids)
+    let [l:found, id] = s:GetId(l:linenos, a:tag, l:ids)
     if l:found 
 call s:LOG("s:UnPlaceTag: l:id=". l:id)
       execute ':sign unplace '. id .' '. a:tagtype .'='. a:tag
       unlet l:ids[id]
       return 1
     else
-      echo "Bad tag: ". a:tag ." and linenos: ". ,:linenos
+      echo "Bad tag: ". a:tag ." and linenos: ". l:linenos
       return 0
     endif
   else
+call s:LOG("s:UnPlaceTag: all for =". a:tag)
     execute ':sign unplace * '. a:tagtype .'='. a:tag
     let l:cdata['ids'] = {}
   endif
@@ -646,12 +656,14 @@ function! vimside#sign#ClearCategory(category)
   " Remove the toggle key map if it exists
   if has_key(l:cdata, 'toggle')
     let l:toggle = l:cdata.toggle
-    let l:key = g:mapleader . l:toggle
-    let l:category = l:cdata.category
+    if type(l:toggle) == type("")
+      let l:key = g:mapleader . l:toggle
+      let l:category = l:cdata.category
 call s:LOG("vimside#sign#ClearCategory: mapping=" . l:key ."<CR>")
-    if ! empty(maparg(l:key, 'n'))
+      if ! empty(maparg(l:key, 'n'))
 call s:LOG("vimside#sign#ClearCategory: mapping removed")
-      execute ":nunmap ". l:key
+        execute ":nunmap ". l:key
+      endif
     endif
   endif
 
