@@ -381,12 +381,17 @@ call s:LOG("vimside#StartEnsimeServer portFileExists=". portFileExists)
         \ 'Date: ' . strftime("%Y%m%d %T"),
         \ separator
         \ ]
-
+  
       for line in l:lines
         execute "silent !echo \"". line . "\" >> ". l:logfile 
       endfor
 
-      execute "silent !" . cmd . " &>> " . l:logfile . " &"
+      " bash pre-4.0
+      " cmd >> outfile 2>&1
+      execute "silent !" . cmd . " >> " . l:logfile . " 2>&1 &"
+
+      " bash post-4.0
+      " execute "silent !" . cmd . " &>> " . l:logfile . " &"
 
     else
       
