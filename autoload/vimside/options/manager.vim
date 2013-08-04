@@ -506,9 +506,6 @@ call s:LOG("vimside#options#manager#Load: TOP")
   endfor
   call vimside#options#defined#SetUndefined(l:keyvals)
 
-call s:LOG("vimside#options#manager#Load: tailor-browser-unix-commands =". string(l:keyvals['tailor-browser-unix-commands']))
-
-
   " Global user overrides of default values
   call vimside#options#manager#LoadUser()
 

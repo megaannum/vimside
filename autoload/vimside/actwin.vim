@@ -10,9 +10,10 @@
 " Intro: {{{1
 " ============================================================================
 
-" let s:LOG = function("vimside#log#log")
-" let s:ERROR = function("vimside#log#error")
-
+if 1 
+let s:LOG = function("vimside#log#log")
+let s:ERROR = function("vimside#log#error")
+else
 function! s:LOG(msg)
   execute "redir >> ". "AW_LOG"
   silent echo "INFO: ". a:msg
@@ -23,6 +24,7 @@ function! s:ERROR(msg)
   silent echo "ERROR: ". a:msg
   execute "redir END"
 endfunction
+endif
 
 " TODO
 " color_column :hi ColorColumn ctermbg=lightgrey guibg=lightgrey
@@ -815,6 +817,7 @@ call s:LOG("Display actwin_buffer=". l:instance.buffer_nr)
 
 let s:buf_change = 1
 
+
  echo  "Show cmds: <F2>"
 
 call s:LOG("DisplayLocal BOTTOM")
@@ -1198,19 +1201,19 @@ call s:LOG("Adjust  TOP")
 
   if ! has_key(a:data, 'actions')
     let a:data['actions'] = {
-      \ "enter": function("s:EnterActionDoNothing"),
-      \ "select": function("s:SelectActionDoNothing"),
-      \ "leave": function("s:LeaveActionDoNothing")
+      \ "enter": function("vimside#actwin#EnterActionDoNothing"),
+      \ "select": function("vimside#actwin#SelectActionDoNothing"),
+      \ "leave": function("vimside#actwin#LeaveActionDoNothing")
       \ }
   else
     if ! has_key(a:data.actions, 'enter')
-      let a:data.actions['enter'] = function("s:EnterActionDoNothing")
+      let a:data.actions['enter'] = function("vimside#actwin#EnterActionDoNothing")
     endif
     if ! has_key(a:data.actions, 'select')
-      let a:data.actions['select'] = function("s:SelectActionDoNothing")
+      let a:data.actions['select'] = function("vimside#actwin#SelectActionDoNothing")
     endif
     if ! has_key(a:data.actions, 'leave')
-      let a:data.actions['leave'] = function("s:LeaveActionDoNothing")
+      let a:data.actions['leave'] = function("vimside#actwin#LeaveActionDoNothing")
     endif
   endif
   if ! has_key(a:data, 'formatter')
@@ -1318,19 +1321,19 @@ endfunction
 function! s:AdjustInput()
   if ! has_key(s:dic, 'actions')
     let s:dic['actions'] = {
-      \ "enter": function("s:EnterActionDoNothing"),
-      \ "select": function("s:SelectActionDoNothing"),
-      \ "leave": function("s:LeaveActionDoNothing")
+      \ "enter": function("vimside#actwin#EnterActionDoNothing"),
+      \ "select": function("vimside#actwin#SelectActionDoNothing"),
+      \ "leave": function("vimside#actwin#LeaveActionDoNothing")
       \ }
   else
     if ! has_key(s:dic.actions, 'enter')
-      let s:dic.actions['enter'] = function("s:EnterActionDoNothing")
+      let s:dic.actions['enter'] = function("vimside#actwin#EnterActionDoNothing")
     endif
     if ! has_key(s:dic.actions, 'select')
-      let s:dic.actions['select'] = function("s:SelectActionDoNothing")
+      let s:dic.actions['select'] = function("vimside#actwin#SelectActionDoNothing")
     endif
     if ! has_key(s:dic.actions, 'leave')
-      let s:dic.actions['leave'] = function("s:LeaveActionDoNothing")
+      let s:dic.actions['leave'] = function("vimside#actwin#LeaveActionDoNothing")
     endif
   endif
 endfunction
@@ -2750,7 +2753,9 @@ call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "
       if a:create
         execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
       else
-        execute ":nunmap <buffer> ". l:value 
+        if hasmapto(a:funcname, "n")
+          execute ":nunmap <buffer> ". l:value 
+        endif
       endif
       unlet l:value
     endif
@@ -2759,7 +2764,7 @@ call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "
       if a:create
         execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
       else
-        execute ":delcommand ". l:value 
+        execute "silent delcommand ". l:value 
       endif
       " execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")<CR>"
       " execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
@@ -2787,7 +2792,9 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":nnoremap <silent> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
         else
-          execute ":nunmap ". l:value 
+          if hasmapto(a:funcname, "n")
+            execute ":nunmap ". l:value 
+          endif
         endif
       else
 
@@ -2795,7 +2802,9 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
         else
-          execute ":nunmap <buffer> ". l:value 
+          if hasmapto(a:funcname, "n")
+            execute ":nunmap <buffer> ". l:value 
+          endif
         endif
         execute 'silent '. a:buffer_nr.'wincmd w'
 
@@ -2809,7 +2818,7 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
         else
-          execute ":delcommand ". l:value 
+          execute "silent delcommand ". l:value 
         endif
       else
 
@@ -2818,7 +2827,7 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
         else
-          execute ":delcommand ". l:value 
+          execute "silent delcommand ". l:value 
         endif
         execute 'silent '. a:buffer_nr.'wincmd w'
 
@@ -2949,9 +2958,6 @@ execute 'silent '. l:instance.win_nr.'wincmd w'
 execute 'silent '. l:instance.scala_win_nr.'wincmd w'
 
   call s:CallOnCloseHandlers(l:instance)
-
-  " Clear any messages.
-  "  echo ""
 
   unlet s:actwin_buffer_nr_to_actwin[l:instance.buffer_nr]
 call s:LOG("Close BOTTOM")
@@ -3431,7 +3437,6 @@ call s:LOG("s:OnTop l:instance.current_line=". l:instance.current_line)
 let s:buf_change = 1
 
 call histdel(":", "VimsideActWinFirst")
-echo ""
 
 call s:LOG("g:VimsideActWinFirst: BOTTOM")
 endfunction
@@ -3801,42 +3806,42 @@ endfunction
 " --------------------------------------------
 
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionDoNothing(entrynos, instance)
-call s:LOG("s:EnterActionDoNothing: entrynos=". a:entrynos)
+function! vimside#actwin#EnterActionDoNothing(entrynos, instance)
+call s:LOG("vimside#actwin#EnterActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionDoNothing(entrynos, instance)
-call s:LOG("s:SelectActionDoNothing")
+function! vimside#actwin#SelectActionDoNothing(entrynos, instance)
+call s:LOG("vimside#actwin#SelectActionDoNothing")
 endfunction
 
 " Do Nothing
-function! s:LeaveActionDoNothing(entrynos, instance)
-call s:LOG("s:LeaveActionDoNothing: entrynos=". a:entrynos)
+function! vimside#actwin#LeaveActionDoNothing(entrynos, instance)
+call s:LOG("vimside#actwin#LeaveActionDoNothing: entrynos=". a:entrynos)
 endfunction
 
 " --------------------------------------------
 " Behavior: QuickFix
 " --------------------------------------------
 " Set Non-ActWin cursor file and postion but stay in ActWin
-function! s:EnterActionQuickFix(entrynos, instance)
-call s:LOG("s:EnterActionQuickFix: TOP entrynos=". a:entrynos)
+function! vimside#actwin#EnterActionQuickFix(entrynos, instance)
+call s:LOG("vimside#actwin#EnterActionQuickFix: TOP entrynos=". a:entrynos)
   call s:ScalaSetAtEntry(a:entrynos, a:instance)
-call s:LOG("s:EnterActionQuickFix: BOTTOM")
+call s:LOG("vimside#actwin#EnterActionQuickFix: BOTTOM")
 endfunction
 
 " Goto Non-ActWin cursor file and postion
-function! s:SelectActionQuickFix(entrynos, instance)
-call s:LOG("s:SelectActionQuickFix TOP")
+function! vimside#actwin#SelectActionQuickFix(entrynos, instance)
+call s:LOG("vimside#actwin#SelectActionQuickFix TOP")
   call s:ScalaGoToEntry(a:entrynos, a:instance)
-call s:LOG("s:SelectActionQuickFix BOTTOM")
+call s:LOG("vimside#actwin#SelectActionQuickFix BOTTOM")
 endfunction
 
 " Do Nothing
-function! s:LeaveActionQuickFix(entrynos, instance)
-call s:LOG("s:LeaveActionQuickFix: TOP entrynos=". a:entrynos)
+function! vimside#actwin#LeaveActionQuickFix(entrynos, instance)
+call s:LOG("vimside#actwin#LeaveActionQuickFix: TOP entrynos=". a:entrynos)
   call s:RemoveAtEntry(a:entrynos, a:instance)
-call s:LOG("s:LeaveActionQuickFix: BOTTOM")
+call s:LOG("vimside#actwin#LeaveActionQuickFix: BOTTOM")
 endfunction
 
 " --------------------------------------------
@@ -4160,9 +4165,9 @@ function! vimside#actwin#TestQuickFix()
           \ }
         \ },
         \ "actions": {
-          \ "enter": function("s:EnterActionDoNothing"),
-          \ "select": function("s:SelectActionDoNothing"),
-          \ "leave": function("s:LeaveActionDoNothing")
+          \ "enter": function("vimside#actwin#EnterActionDoNothing"),
+          \ "select": function("vimside#actwin#SelectActionDoNothing"),
+          \ "leave": function("vimside#actwin#LeaveActionDoNothing")
         \ },
         \ "entries": [
         \  { 'content': [
@@ -4392,9 +4397,9 @@ function! vimside#actwin#TestQuickFix()
         \ "cmds": l:cmds,
         \ "display": l:display,
         \ "actions": {
-          \ "enter": function("s:EnterActionQuickFix"),
-          \ "select": function("s:SelectActionQuickFix"),
-          \ "leave": function("s:LeaveActionQuickFix")
+          \ "enter": function("vimside#actwin#EnterActionQuickFix"),
+          \ "select": function("vimside#actwin#SelectActionQuickFix"),
+          \ "leave": function("vimside#actwin#LeaveActionQuickFix")
         \ },
         \ "entries": [
         \  { 'content': "Entry 1 line one",
@@ -4493,9 +4498,9 @@ function! vimside#actwin#TestHelp()
           \ }
         \ },
         \ "actions": {
-          \ "enter": function("s:EnterActionDoNothing"),
-          \ "select": function("s:SelectActionDoNothing"),
-          \ "leave": function("s:LeaveActionDoNothing")
+          \ "enter": function("vimside#actwin#EnterActionDoNothing"),
+          \ "select": function("vimside#actwin#SelectActionDoNothing"),
+          \ "leave": function("vimside#actwin#LeaveActionDoNothing")
         \ },
         \ "entries": [
         \  { 'content': [

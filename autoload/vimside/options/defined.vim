@@ -2177,6 +2177,7 @@ function! s:MakeOptions()
 
 
 
+  " uses-of-symbol-at-point
   let l:options['tailor-uses-of-symbol-at-point-location'] = {
         \ 'name': 'tailor-uses-of-symbol-at-point-location',
         \ 'type': g:OPTION_STRING_TYPE, 
@@ -2192,9 +2193,9 @@ function! s:MakeOptions()
         \ 'name': 'tailor-uses-of-symbol-at-point-window',
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['quickfix', 'mixed' ],
+        \ 'enum': ['actwin', 'quickfix' ],
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
-        \ 'value': 'quickfix',
+        \ 'value': 'actwin',
         \ 'description': [
             \ 'Whether to use the quickfix window to display uses or if all',
             \ 'of the uses are in the same window use the locationlist ',
@@ -2219,7 +2220,69 @@ function! s:MakeOptions()
             \ 'Whether or not to use sign kind "marker" for current line.'
           \ ]
       \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-scala-sign-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-scala-sign-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '0',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with sign enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-line-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-line-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-column-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-column-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '0',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-column enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-actwin-cursor-line-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-cursor-line-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '0',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with cursor-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-actwin-highlight-line-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-highlight-line-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with highlight-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-uses-of-symbol-at-point-use-actwin-display-actwin-sign-enable'] = {
+        \ 'name': 'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-sign-enable',
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '0',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with sign enabled.'
+          \ ]
+      \ }
   
+
+
   " Sign
   let l:options['sign-quickfix-error-linehl'] = {
         \ 'name': 'sign-quickfix-error-linehl',
@@ -2519,6 +2582,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_FUNCTION_KIND, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 'vimside#swank#event#full_typecheck_finished#Handle',
         \ 'description': [
             \ "RPC event trigger for ':full:typecheck-finished'."
         \ ]

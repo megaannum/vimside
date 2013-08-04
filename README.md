@@ -35,29 +35,54 @@ Just checking in of a snapshot of work in progess: the actwin.vim
 
 ActWin's behavior is defined by the client that creates an instance.
 
+The UsesOfSymbolAtPoint can now use ActWin (as alternate to Quickfix
+window).
+
+Options:
+'tailor-uses-of-symbol-at-point-window' : 'actwin' (default) or 'quickfix'
+
+Per use of the ActWin, there are numerous Options. For now this is
+an initial set that control how lines in Scala files and in the ActWin
+itself are highlighted:
+
+Use sign in Scala files (all lines highlighted at once):
+'tailor-uses-of-symbol-at-point-use-actwin-display-scala-sign-enable' : 0 or 1
+
+Use a (sign-based) color line in Scala files (current line only):
+'tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-line-enable' : 0 or 1
+
+Use a color column in Scala files (current column only):
+'tailor-uses-of-symbol-at-point-use-actwin-display-scala-color-column-enable' : 0 or 1
+
+Use a cursor line in ActWin (current line only):
+'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-cursor-line-enable' : 0 or 1
+
+Use a highlight line in ActWin (current line only):
+'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-highlight-line-enable' : 0 or 1
+
+Use a (sign-based) color line in ActWin (current line only):
+'tailor-uses-of-symbol-at-point-use-actwin-display-actwin-sign-enable' : 0 or 1
+
+Ultimately all ActWin commands and highlight features (colors and text)
+will be Option based.
+
+
+
 Added delete entry commands to ActWin.
-
 Merged the options default.vim file into the defined.vim file.
-
 Added highlight parsing code.
 Changed functions to return error message rather than throw exceptions.
-
 Added cterm/gui color management code.
-
 Clean up DoToggleCmds function so that on exit mappings, commands 
 and abbrs are removed.
-
 Fixed property file reader so that values can be Dictionaries.
 Toggling Actwin "scala" and "actwin" features can now be done 
 with Option based :map, :cabbr and :command.
-
 Got color cursor toggling working.
 Got color cursor working.
-
 Invoking built-in command overrides no longer are placed in the
 command line history.
 Fixed both window/source display rendering.
-
 Scala window per-line sign highlighting option now supported.
 Fixed <F2>, <F3>, <F4> toggle keys.
 Options can now be defined in property files.

@@ -206,7 +206,7 @@ function! vimside#util#GetLineColumnFromOffset(offset, ...)
         return [-1, -1]
     else
       try
-        execute "sp ". file
+        execute "silent sp ". file
         let line = byte2line(a:offset)
         let offline = line2byte(line)
         let column = a:offset - offline
@@ -233,7 +233,7 @@ function! vimside#util#GetLineColumnTextFromOffset(offset, ...)
 " call s:LOG("GetLineColumnTextFromOffset file=". file) 
     " There may be a faster way but this is simple
     try
-      execute "sp ". file
+      execute "silent sp ". file
       let line = byte2line(a:offset)
       let offline = line2byte(line)
       let column = a:offset - offline
