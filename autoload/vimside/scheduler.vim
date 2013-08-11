@@ -193,8 +193,8 @@ endfunction
 
 function! vimside#scheduler#TimeTrigger()
   let [l:sec, l:msec] = vimside#scheduler#GetRealTime()
-call s:LOG("TimeTrigger: TOP [sec,msec]=[". l:sec .",". l:msec ."]")
-call s:LOG("TimeTrigger: TOP2 len(s:jobs)=". len(s:jobs))
+" call s:LOG("TimeTrigger: TOP [sec,msec]=[". l:sec .",". l:msec ."]")
+" call s:LOG("TimeTrigger: TOP2 len(s:jobs)=". len(s:jobs))
   let l:js = s:jobs
   let s:jobs = []
   let l:jobs = []
@@ -218,7 +218,7 @@ call s:LOG("TimeTrigger: TOP2 len(s:jobs)=". len(s:jobs))
         let l:jrsec = l:job[4]
         let l:jrmsec = l:job[5]
         if l:jrsec != 0 || l:jrmsec != 0
-call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
+" call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
           let m = msec + l:jrmsec
           if m >= 1000
             let l:job[2] = sec + l:jrsec + m/1000
@@ -255,7 +255,7 @@ call s:LOG("TimeTrigger: [jrsec,jrmsec]=[". l:jrsec .",". l:jrmsec ."]")
   call s:do_queued_add_job()
 
   call vimside#scheduler#FeedKeys()
-call s:LOG("TimeTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
+" call s:LOG("TimeTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#HaltFeedKeys()

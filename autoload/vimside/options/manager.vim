@@ -73,7 +73,7 @@ set cpo&vim
 " ----------------------------------------------------------------------
 " See bottom of the plugin/vimside.vim file for the usage of these.
 let s:enable_logging = exists("g:Vimside_Enable_Pre_Initialization_Logging")
-  \ && g:Vimside_Enable_Pre_Initialization_Logging
+\ && g:Vimside_Enable_Pre_Initialization_Logging
 
 if s:enable_logging
   let s:LOG_DIR = g:Vimside_Enable_Pre_Initialization_Logging_Dir
@@ -146,7 +146,7 @@ function! vimside#options#manager#UpdateOptionPrivate(key, value) dict
   endif
   let keyvals[a:key] = a:value
 endfunction
-function! vimside#options#manager#HasOptionPrivate(key) dict
+  function! vimside#options#manager#HasOptionPrivate(key) dict
   let keyvals = self.keyvals
   return has_key(keyvals, a:key)
 endfunction
@@ -241,7 +241,7 @@ function! vimside#options#manager#CheckOption(key) dict
     \ && ! self.options.user.Has(a:key)
     \ && ! self.options.default.Has(a:key)
     echoerr "ERROR: Vimside missing option: " . a:key
-  endif
+endif
 endfunction
 function! vimside#options#manager#GetOptionDefinitions() dict
   return self.options.defined
@@ -294,80 +294,80 @@ endfunction
 
 " Global user overrides of default values
 function! vimside#options#manager#LoadUser()
-call s:LOG("vimside#options#manager#LoadUser: TOP")
+  call s:LOG("vimside#options#manager#LoadUser: TOP")
 
   function! s:CheckDefinedFunc(key, value) dict
     let l:defined = g:vimside.options.defined
     let l:default = g:vimside.options.default
     if has_key(l:defined, a:key)
-      let def = l:defined[a:key]
-      call vimside#options#defined#CheckValue(def, a:value, g:vimside.errors)
+      let l:def = l:defined[a:key]
+      call vimside#options#option#CheckValue(a:key, l:def, a:value, g:vimside.errors)
 
-    elseif has_key(l:default.keyvals, a:key)
-      " TODO when OPTION_KEY_KIND templates carries type/kind info, checkit
+      elseif has_key(l:default.keyvals, a:key)
+        " TODO when OPTION_KEY_KIND templates carries type/kind info, checkit
+      else
+  call s:LOG("vimside#options#manager#LoadUser.CheckDefinedFunc: key=". a:key)
+        throw "XXXXXXXXXXXXXXX"
+        call add(g:vimside.errors, "Undefined User option: '". a:key . "'")
+      endif
+    endfunction
+
+    let g:vimside.options.user['check'] = function("s:CheckDefinedFunc")
+    let l:user_options = g:vimside.options.user
+
+    "
+    " load options from options file
+    "
+    let l:tmpfile = s:data_vimside_dir .'/'. s:option_user_file_name
+  call s:LOG("vimside#options#manager#LoadUser: l:tmpfile=". l:tmpfile)
+    if filereadable(l:tmpfile)
+  call s:LOG("vimside#options#manager#LoadUser: sourcing=". l:tmpfile)
+      execute ":source " . l:tmpfile
+      call g:VimsideOptionsUserLoad(l:user_options)
     else
-call s:LOG("vimside#options#manager#LoadUser.CheckDefinedFunc: key=". a:key)
-      throw "XXXXXXXXXXXXXXX"
-      call add(g:vimside.errors, "Undefined User option: '". a:key . "'")
+      let l:files = split(globpath(&rtp, 'data/vimside/'. s:option_user_file_name), "\n")
+  call s:LOG("vimside#options#manager#LoadUser: l:files=". string(l:files))
+      for file in l:files
+        if file != l:tmpfil &&e filereadable(file)
+  call s:LOG("vimside#options#manager#LoadUser: sourcing=". file)
+          execute ":source " . file
+          call g:VimsideOptionsUserLoad(l:user_options)
+          break
+        endif
+      endfor
     endif
-  endfunction
 
-  let g:vimside.options.user['check'] = function("s:CheckDefinedFunc")
-  let l:user_options = g:vimside.options.user
-
-  "
-  " load options from options file
-  "
-  let l:tmpfile = s:data_vimside_dir .'/'. s:option_user_file_name
-call s:LOG("vimside#options#manager#LoadUser: l:tmpfile=". l:tmpfile)
-  if filereadable(l:tmpfile)
-call s:LOG("vimside#options#manager#LoadUser: sourcing=". l:tmpfile)
-    execute ":source " . l:tmpfile
-    call g:VimsideOptionsUserLoad(l:user_options)
-  else
-    let l:files = split(globpath(&rtp, 'data/vimside/'. s:option_user_file_name), "\n")
-call s:LOG("vimside#options#manager#LoadUser: l:files=". string(l:files))
-    for file in l:files
-      if file != l:tmpfil &&e filereadable(file)
-call s:LOG("vimside#options#manager#LoadUser: sourcing=". file)
-        execute ":source " . file
-        call g:VimsideOptionsUserLoad(l:user_options)
-        break
-      endif
-    endfor
-  endif
-
-  "
-  " load options from property file
-  "
-  let l:tmpfile = s:data_vimside_dir .'/'. s:user_property_file_name
-call s:LOG("vimside#options#manager#LoadUser: l:tmpfile=". l:tmpfile)
-  let [l:found, l:keys_value_list] = vimside#property#ParseFile(l:tmpfile)
-  if l:found
-call s:LOG("vimside#options#manager#LoadUser: keys_value_list=". string(l:keys_value_list))
-call s:LOG("vimside#options#manager#LoadUser: loading=". l:tmpfile)
-    let l:options = vimside#property#ConvertToOptions(l:keys_value_list)
-    for [l:name, l:value] in l:options
-      call l:user_options.Set(l:name, l:value)
-    endfor
-  else
-    let l:files = split(globpath(&rtp, 'data/vimside/'. s:user_property_file_name), "\n")
-call s:LOG("vimside#options#manager#LoadUser: l:files=". string(l:files))
-    for file in l:files
-      let [l:found, l:keys_value_list] = vimside#property#ParseFile(file)
-      if l:found
-call s:LOG("vimside#options#manager#LoadUser: loading=". file)
-        let l:options = vimside#property#ConvertToOptions(l:keys_value_list)
-        for [l:name, l:value] in l:options
-          call l:user_options.Set(l:name, l:value)
-        endfor
-        break
-      endif
-    endfor
-  endif
+    "
+    " load options from property file
+    "
+    let l:tmpfile = s:data_vimside_dir .'/'. s:user_property_file_name
+  call s:LOG("vimside#options#manager#LoadUser: l:tmpfile=". l:tmpfile)
+    let [l:found, l:keys_value_list] = vimside#property#ParseFile(l:tmpfile)
+    if l:found
+  call s:LOG("vimside#options#manager#LoadUser: keys_value_list=". string(l:keys_value_list))
+  call s:LOG("vimside#options#manager#LoadUser: loading=". l:tmpfile)
+      let l:options = vimside#property#ConvertToOptions(l:keys_value_list)
+      for [l:name, l:value] in l:options
+        call l:user_options.Set(l:name, l:value)
+      endfor
+    else
+      let l:files = split(globpath(&rtp, 'data/vimside/'. s:user_property_file_name), "\n")
+  call s:LOG("vimside#options#manager#LoadUser: l:files=". string(l:files))
+      for file in l:files
+        let [l:found, l:keys_value_list] = vimside#property#ParseFile(file)
+        if l:found
+  call s:LOG("vimside#options#manager#LoadUser: loading=". file)
+          let l:options = vimside#property#ConvertToOptions(l:keys_value_list)
+          for [l:name, l:value] in l:options
+            call l:user_options.Set(l:name, l:value)
+          endfor
+          break
+        endif
+      endfor
+    endif
 
 
-call s:LOG("vimside#options#manager#LoadUser: BOTTOM")
+  call s:LOG("vimside#options#manager#LoadUser: BOTTOM")
 endfunction
 
 " ---------------------------------------------------------------------
@@ -831,18 +831,25 @@ endfunction
 "   optional:
 "     filename: file to write to
 "     force: 1 overwrite 
+" example: call vimside#options#manager#OutputProperties('PROPERTIES', 1)
 function! vimside#options#manager#OutputProperties(...)
+  let l:call = "call vimside#options#manager#OutputProperties("
   if a:0 == 1
     let l:has_file = 1
     let l:filename = a:1
     let l:force = 0
+
+    let l:call .= "'". l:filename ."'"
   elseif a:0 == 2
     let l:has_file = 1
     let l:filename = a:1
     let l:force = a:2
+
+    let l:call .= "'". l:filename ."', ". l:force
   else
     let l:has_file = 0
   endif
+  let l:call .= ")"
     
   if l:has_file
     let l:s = getfsize(l:filename)
@@ -867,17 +874,19 @@ function! vimside#options#manager#OutputProperties(...)
   endif
   " call vimside#options#defined#Load(g:vimside.options)
 
-  let t = exists("*strftime")
+  let l:datetime = exists("*strftime")
           \ ? strftime("%Y%m%d-%H%M%S: ") : "" . localtime() . ": "
   if l:is_silent
     silent echo "#"
     silent echo "# Vimside Options"
-    silent echo "# Generated on: ". t
+    silent echo "# Generated on: ". l:datetime
+    silent echo "# By calling: ". l:call
     silent echo "#"
   else
     echo "#"
     echo "# Vimside Options"
-    echo "# Generated on: ". t
+    echo "# Generated on: ". l:datetime
+    echo "# By calling: ". l:call
     echo "#"
   endif
 
@@ -893,19 +902,28 @@ function! vimside#options#manager#OutputProperties(...)
 
     if l:is_silent
       silent echo "# Option: ". l:opt
+      if has_key(l:value, 'parent')
+        silent echo "# parent: ". l:value.parent
+      endif
       silent echo "# description:"
     else
       echo "# Option: ". l:opt
+      if has_key(l:value, 'parent')
+        echo "# parent: ". l:value.parent
+      endif
       echo "# description:"
     endif
 
-    for l:s in l:value['description']
-      if l:is_silent
-        silent echo "#   ". l:s
-      else
-        echo "#   ". l:s
-      endif
-    endfor
+    if has_key(l:value, 'description')
+      for l:s in l:value['description']
+        if l:is_silent
+          silent echo "#   ". l:s
+        else
+          echo "#   ". l:s
+        endif
+      endfor
+    endif
+
     if has_key(l:default.keyvals, l:opt) 
       let l:current_value= l:default.keyvals[l:opt]
       if l:is_silent
@@ -920,6 +938,7 @@ function! vimside#options#manager#OutputProperties(...)
         echo "# default value: ". l:no_value_set
       endif
     endif
+
     if has_key(l:user.keyvals, l:opt) 
       let l:current_value= l:user.keyvals[l:opt]
       if l:is_silent
@@ -934,6 +953,7 @@ function! vimside#options#manager#OutputProperties(...)
         echo "# user value: ".  l:no_value_set
       endif
     endif
+
     if exists("l:current_value")
       if l:is_silent
         silent echo l:key ."=". string(l:current_value)

@@ -33,6 +33,26 @@ unit/regression tests in the future.
 Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. 
 
+UsesOfSymbolAtPoint use of ActWin is now configurable with a
+myriad of Options (some 100 Options) covering definition of commands
+(mapping, command and abbreviations) controlling Scala and ActWin
+navigation; Options for how information is displayed in the Scala
+and ActWin windows and Options for highlights and signs.
+Now, by default, the "uses_of_symbol_at_point" uses the ActWin.
+For all available Options, see the newly added PROPERTIES file.
+Four new Option "kind"s have been defined supporting Option String 
+types specialized for "commands", "highlight" definitions, 
+highlight "group" names and "highlight" or "group" name.
+As examples (see PROPERTIES file), the (current) default value
+of 'tailor-actwin-display-actwin-cursor-line-highlight' is
+"cterm=bold ctermfg=DarkYellow ctermbg=Cyan" and the (current)
+default value of 'tailor-actwin-display-scala-color-line-kinds-marker-linehl'
+is "Search" (a highlight group name).
+In the future, rather than using the existing options_project.vim
+and options_user.vim files, Options will be able to be set
+using a (standard Java format) properties file. While some code
+to do this has been checkin, it has not been extensively tested.
+
 ActWin's behavior is defined by the client that creates an instance.
 
 The UsesOfSymbolAtPoint can now use ActWin (as alternate to Quickfix

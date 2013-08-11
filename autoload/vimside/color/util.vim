@@ -1906,7 +1906,7 @@ function! vimside#color#util#ParseHighlight(hi)
       let l:dic[l:key] = l:value
     endfor
 
-    return l:dic
+    return [1, l:dic]
   endif
 endfunction
 
@@ -1991,12 +1991,23 @@ function! vimside#color#util#CheckHighlightAttrList(parts)
   return l:errorStr
 endfunction
 
+function! vimside#color#util#GetCurrentHighlight(group)
+  if hlexists(a:group)
+    redir => l:current_highlight
+    execute "silent hi ". a:group
+    redir END
+
+    return strpart(l:current_highlight, 20);
+  else
+    return ""
+  endif
+endfunction
 
 
 function! vimside#color#util#DoHighlightTest() 
   let hi="term=bold,underline cterm=NONE ctermfg=Red ctermbg=#334455 guifg=#001100 guibg=#330033"
 
-  let dic = vimside#color#util#ParseHighlight(hi) 
+  let [ok, dic] = vimside#color#util#ParseHighlight(hi) 
   echo string(dic)
   echo vimside#color#util#AdjustHighlightArgs(dic) 
   echo string(dic)

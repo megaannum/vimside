@@ -130,14 +130,14 @@ endif
 
     let def = static_defs[key]
 
-    let type = vimside#options#defined#GetTypeName(def.type)
+    let type = vimside#options#option#GetTypeName(def.type)
     let typelabel = forms#newLabel({'text': 'type: '})
     let typevalue = forms#newLabel({'text': type })
     call add(label_children, typelabel)
     call add(def_children, typevalue)
 
     if has_key(def, 'kind')
-      let kind = vimside#options#defined#GetKindName(def.kind)
+      let kind = vimside#options#option#GetKindName(def.kind)
       let kindlabel = forms#newLabel({'text': 'kind: '})
       let kindvalue = forms#newLabel({'text': kind})
       call add(label_children, kindlabel)
@@ -277,14 +277,14 @@ call forms#log("DoStaticDeckSelectAction.execute: " . pos)
 
     let def = dynamic_defs[key]
 
-    let type = vimside#options#defined#GetTypeName(def.type)
+    let type = vimside#options#option#GetTypeName(def.type)
     let typelabel = forms#newLabel({'text': 'type: '})
     let typevalue = forms#newLabel({'text': type })
     call add(label_children, typelabel)
     call add(def_children, typevalue)
 
     if has_key(def, 'kind')
-      let kind = vimside#options#defined#GetKindName(def.kind)
+      let kind = vimside#options#option#GetKindName(def.kind)
       let kindlabel = forms#newLabel({'text': 'kind: '})
       let kindvalue = forms#newLabel({'text': kind})
       call add(label_children, kindlabel)

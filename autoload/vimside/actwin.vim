@@ -219,9 +219,9 @@ let s:buf_change = 1
 "     }
 "   }
 "   map: {
-"     actwin_key_map_show: ""
+"     actwin_map_show: ""
 "     scala_cmd_show: ""
-"     scala_key_map_show: ""
+"     scala_map_show: ""
 "     help: ""
 "     select: []
 "     select_mouse: []
@@ -286,9 +286,9 @@ let s:buf_change = 1
 " functions that can be bound to keys (key mappings)
 " map
 let s:cmds_actwin_defs = {
-      \ "actwin_key_map_show": [ "ToggleActWinKeyMapInfo", "Display actwin key-map info" ],
+      \ "actwin_map_show": [ "ToggleActWinMapInfo", "Display actwin key-map info" ],
       \ "scala_cmd_show": [ "ToggleScalaBuiltinCmdInfo", "Display scala builtin cmd info" ],
-      \ "scala_key_map_show": [ "ToggleScalaKeyMapInfo", "Display scala key map cmd info" ],
+      \ "scala_map_show": [ "ToggleScalaMapInfo", "Display scala key map cmd info" ],
       \ "help": [ "OnHelp", "Display help" ],
       \ "select": [ "OnSelect", "Select current line" ],
       \ "enter_mouse": [ "OnEnterMouse", "Use mouse to set current line" ],
@@ -485,21 +485,24 @@ endfunction
 
 " MUST be called from local buffer
 function! s:MakeCmds(instance)
-  call s:MakeActWinKeyMappings(a:instance)
+  call s:MakeActWinMappings(a:instance)
   call s:MakeActWinBuiltinCommands(a:instance)
+  " TODO abbr
 
-  call s:MakeScalaKeyMappings(a:instance)
+  call s:MakeScalaMappings(a:instance)
   call s:MakeScalaBuiltinCommands(a:instance)
+  " TODO abbr
 endfunction
 
 " MUST be called from local buffer
 function! s:ClearCmds(instance)
-  call s:ClearScalaKeyMappings(a:instance)
+  call s:ClearScalaMappings(a:instance)
   call s:ClearScalaBuiltinCommands(a:instance)
+  " TODO abbr
 endfunction
 
 " MUST be called from local buffer
-function! s:MakeActWinKeyMappings(instance)
+function! s:MakeActWinMappings(instance)
   if ! empty(a:instance.data.cmds.actwin.map)
     for [l:key, l:value] in items(a:instance.data.cmds.actwin.map)
       let [l:fn, l:txt] = s:cmds_actwin_defs[l:key]
@@ -527,7 +530,7 @@ endfunction
 
 
 " MUST be called from local buffer
-function! s:MakeScalaKeyMappings(instance)
+function! s:MakeScalaMappings(instance)
   if ! empty(a:instance.data.cmds.scala.map)
     let l:map = a:instance.data.cmds.scala.map
     let l:buffer_nr =  a:instance.buffer_nr
@@ -556,7 +559,7 @@ function! s:MakeScalaKeyMappings(instance)
   endif
 endfunction
 
-function! s:ClearScalaKeyMappings(instance)
+function! s:ClearScalaMappings(instance)
   if ! empty(a:instance.data.cmds.scala.map)
     let s:buf_change = 0
     let l:is_global = a:instance.is_global
@@ -650,7 +653,7 @@ endfunction
 " --------------------------------------------
 
 function! vimside#actwin#DisplayGlobal(type, data)
-  call s:DisplayLocal(a:tag, a:data, 1)
+  call s:DisplayLocal(a:type, a:data, 1)
 endfunction
 function! vimside#actwin#DisplayLocal(tag, data)
   call s:DisplayLocal(a:tag, a:data, 0)
@@ -852,7 +855,12 @@ function! s:AdjustMapping(owner, mapname, ref_map_defs)
       if ! has_key(a:ref_map_defs, l:key)
         call s:ERROR('AdjustMapping '. a:mapname .' - bad key "'. l:key .'"')
       elseif type(l:value) == type("") 
-        let map[l:key] = [ l:value ]
+        if l:value == ''
+          " no values
+          let map[l:key] = [ ]
+        else
+          let map[l:key] = [ l:value ]
+        endif
       elseif type(l:value) == type([])
         let map[l:key] = l:value
       else
@@ -863,20 +871,6 @@ function! s:AdjustMapping(owner, mapname, ref_map_defs)
     let a:owner[a:mapname] = map
   endif
 endfunction
-
-if 0 " NOTUSED
-function! s:CheckMapping(mapname, keyvals, ref_map_defs)
-  for [l:key, l:value] in items(a:keyvals)
-    if ! has_key(a:ref_map_defs, l:key)
-      call s:ERROR('Adjust '. a:mapname .' - bad key "'. l:key .'"')
-    elseif type(l:value) != type("") && type(l:value) != type([])
-      call s:ERROR('Adjust '. a:mapname .' - for key "'. l:key .'" bad value type: '. type(l:value))
-    endif
-
-    unlet l:value
-  endfor
-endfunction
-endif " NOTUSED
 
 function! s:Adjust(data)
 call s:LOG("Adjust  TOP")
@@ -904,14 +898,15 @@ call s:LOG("Adjust  TOP")
 
   " actwin cmds
   call s:AdjustMapping(l:actwin, 'map', s:cmds_actwin_defs)
-
   call s:AdjustMapping(l:actwin, 'cmd', s:cmds_actwin_defs)
-  call s:AdjustMapping(l:actwin, 'map', s:cmds_actwin_defs)
+  " call s:AdjustMapping(l:actwin, 'map', s:cmds_actwin_defs)
+  " TODO abbr
 
 
   " scala cmds
   call s:AdjustMapping(l:scala, 'map', s:cmds_scala_defs)
   call s:AdjustMapping(l:scala, 'cmd', s:cmds_scala_defs)
+  " TODO abbr
 
   "--------------
   " actwin
@@ -1897,8 +1892,8 @@ call s:LOG("g:ScalaToggleSigns TOP")
   let l:has_data_sign = has_key(l:data, 'display') && has_key(l:data.display, 'scala') && has_key(l:data.display.scala, 'sign')
   if l:has_data_sign
     let l:sign = l:data.display.scala.sign
-    let l:sign.is_one = ! l:sign.is_one
-    call vimside#sign#Toggle(l:sign.category, l:sign.is_one)
+    let l:sign.is_on = ! l:sign.is_on
+    call vimside#sign#Toggle(l:sign.category, l:sign.is_on)
   endif
 call s:LOG("g:ScalaToggleSigns BOTTOM")
 endfunction
@@ -2328,6 +2323,12 @@ endfunction
 function! s:ActWinDefineCursorLine(instance)
   let l:cursor_line = a:instance.data.display.actwin.cursor_line
 
+  if has_key(l:cursor_line, 'highlight') 
+    let l:highlight = l:cursor_line.highlight
+    let l:cursor_line.current_highlight = vimside#color#util#GetCurrentHighlight("CursorLine")
+    execute "hi ".  ." ". l:highlight
+  endif
+
   if l:cursor_line.is_on
     setlocal modifiable
     setlocal cursorline
@@ -2391,6 +2392,7 @@ call s:LOG("g:ActWinDeleteCursorLine BOTTOM")
 endfunction
 
 function! s:ActWinDisableCursorLine(instance)
+call s:LOG("g:ActWinDisableCursorLine TOP")
 
   let l:is_global = a:instance.is_global
   let l:buffer_nr = a:instance.buffer_nr
@@ -2400,6 +2402,11 @@ function! s:ActWinDisableCursorLine(instance)
   let l:funcname = "g:ActWinToggleCursorLine"
 
   call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
+
+  if exists(l:cursor_line.current_highlight) && l:cursor_line.current_highlight != ''
+    execute "highlight CursorLine " . l:cursor_line.current_highlight
+  endif
+call s:LOG("g:ActWinDisableCursorLine BOTTOM")
 endfunction
 
 
@@ -2415,6 +2422,11 @@ endfunction
 " MUST be called from local buffer
 function! s:ActWinDefineHighlightLine(instance)
   let l:highlight_line = a:instance.data.display.actwin.highlight_line
+
+  if has_key(l:highlight_line, 'highlight') 
+    let l:group = "HighlightLine"
+    execute "highlight ". l:group ." ". l:highlight_line.highlight
+  endif
 
   if l:highlight_line.is_full
     let l:currentline = a:instance.current_line
@@ -2466,9 +2478,11 @@ call s:LOG("s:ActWinEnterHighlightLine TOP")
   endif
   let l:nos_columns = l:highlight_line.nos_columns
 
+  let l:group = "HighlightLine"
+
 " call s:LOG("s:ActWinEnterHighlightLine line_start=". l:line_start)
 " call s:LOG("s:ActWinEnterHighlightLine nos_lines=". l:nos_lines)
-  let l:highlight_line.sids = s:HighlightDisplay(l:line_start, l:line_start + l:nos_lines, l:nos_columns)
+  let l:highlight_line.sids = s:HighlightDisplay(l:group, l:line_start, l:line_start + l:nos_lines, l:nos_columns)
 
   let l:highlight_line.is_on = 1
 
@@ -2764,7 +2778,9 @@ call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "
       if a:create
         execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
       else
-        execute "silent delcommand ". l:value 
+        if exists(":". l:value) == 2
+          execute "silent delcommand ". l:value 
+        endif
       endif
       " execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")<CR>"
       " execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
@@ -2818,7 +2834,9 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":command! ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
         else
-          execute "silent delcommand ". l:value 
+          if exists(":". l:value) == 2
+            execute "silent delcommand ". l:value 
+          endif
         endif
       else
 
@@ -2827,7 +2845,9 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
         if a:create
           execute ":command! -buffer ". l:value ." call ". a:funcname ."(". a:buffer_nr .")"
         else
-          execute "silent delcommand ". l:value 
+          if exists(":". l:value) == 2
+            execute "silent delcommand ". l:value 
+          endif
         endif
         execute 'silent '. a:buffer_nr.'wincmd w'
 
@@ -2964,7 +2984,7 @@ call s:LOG("Close BOTTOM")
 endfunction
 
 " ============================================================================
-" KeyMappings: {{{1
+" Mappings: {{{1
 " ============================================================================
 
 " MUST be called from local buffer
@@ -2988,16 +3008,16 @@ call s:LOG("OnHelp BOTTOM")
 endfunction
 
 " MUST be called from local buffer
-function! s:ToggleActWinKeyMapInfo()
-  call s:Toggle('actwin_key_map_show', 'actwin', 'map', s:cmds_actwin_defs)
+function! s:ToggleActWinMapInfo()
+  call s:Toggle('actwin_map_show', 'actwin', 'map', s:cmds_actwin_defs)
 endfunction
 
 function! s:ToggleScalaBuiltinCmdInfo()
   call s:Toggle('scala_cmd_show', 'scala', 'cmd', s:cmds_scala_defs)
 endfunction
 
-function! s:ToggleScalaKeyMapInfo()
-  call s:Toggle('scala_key_map_show', 'scala', 'map', s:cmds_scala_defs)
+function! s:ToggleScalaMapInfo()
+  call s:Toggle('scala_map_show', 'scala', 'map', s:cmds_scala_defs)
 endfunction
 
 function! s:Toggle(key_name, data_win, data_element, defs)
@@ -3979,6 +3999,7 @@ function! s:GetOption(name)
   return value
 endfunction
 
+if 0 " HIGHLIGHT
 function! s:Color_2_Number(color)
   " is it a name
   let rgbtxt = forms#color#util#ConvertName_2_RGB(a:color)
@@ -4032,6 +4053,8 @@ function! s:InitializeHighlight()
 endfunction
 
 call s:InitializeHighlight()
+
+endif " HIGHLIGHT
 
 function! s:GetLinesMatchPatterns(line_start, line_end, nos_columns)
   let lnum1 = a:line_start
@@ -4112,12 +4135,12 @@ function! s:HighlightClear(sids)
 endfunction
 
 " returns list of sids
-function! s:HighlightDisplay(line_start, line_end, nos_columns)
+function! s:HighlightDisplay(group, line_start, line_end, nos_columns)
 " call s:LOG("s:HighlightDisplay: line_start=". a:line_start .", line_end=". a:line_end) 
   let patterns = s:GetLinesMatchPatterns(a:line_start, a:line_end, a:nos_columns)
   let l:sids = []
   for pattern in patterns
-    let sid = matchadd("VimsideActWin_HL", pattern)
+    let sid = matchadd(a:group, pattern)
 " call s:LOG("s:HighlightDisplay: sid=". sid) 
     call add(l:sids, sid)
   endfor
@@ -4207,9 +4230,9 @@ function! vimside#actwin#TestQuickFix()
           \ },
           \ "actwin": {
             \ "map": {
-              \ "actwin_key_map_show": "<F2>",
+              \ "actwin_map_show": "<F2>",
               \ "scala_cmd_show": "<F3>",
-              \ "scala_key_map_show": "<F4>",
+              \ "scala_map_show": "<F4>",
               \ "help": "<F1>",
               \ "select": [ "<CR>", "<2-LeftMouse>"],
               \ "enter_mouse": "<LeftMouse> <LeftMouse>",
@@ -4231,14 +4254,14 @@ function! vimside#actwin#TestQuickFix()
               \ "abbreviation": "tw",
               \ "toggle": {
                 \ "actwin": {
-                  \ "map": "tw",
-                  \ "cmd": "TW",
-                  \ "abbr": "tw"
+                  \ "map": "ts",
+                  \ "cmd": "TS",
+                  \ "abbr": "ts"
                 \ },
                 \ "scala": {
-                  \ "map": "tw",
-                  \ "cmd": "TW",
-                  \ "abbr": "tw"
+                  \ "map": "ts",
+                  \ "cmd": "TS",
+                  \ "abbr": "ts"
                 \ }
               \ },
               \ "default_kind": "marker",
@@ -4272,14 +4295,14 @@ function! vimside#actwin#TestQuickFix()
               \ "category": "ColorLine",
               \ "toggle": {
                 \ "actwin": {
-                  \ "map": "tc",
-                  \ "cmd": "TC",
-                  \ "abbr": "tc"
+                  \ "map": "tcl",
+                  \ "cmd": "TCL",
+                  \ "abbr": "tcl"
                 \ },
                 \ "scala": {
-                  \ "map": "tc",
-                  \ "cmd": "TC",
-                  \ "abbr": "tc"
+                  \ "map": "tcl",
+                  \ "cmd": "TCL",
+                  \ "abbr": "tcl"
                 \ }
               \ },
               \ "abbreviation": "cl",
@@ -4301,6 +4324,18 @@ function! vimside#actwin#TestQuickFix()
               \ "info": "use colorcolumn to note current entry col",
               \ "is_enable": 0,
               \ "is_on": 0,
+              \ "toggle": {
+                \ "actwin": {
+                  \ "map": "tcc",
+                  \ "cmd": "TCC",
+                  \ "abbr": "tcc"
+                \ },
+                \ "scala": {
+                  \ "map": "tcc",
+                  \ "cmd": "TCC",
+                  \ "abbr": "tcc"
+                \ }
+              \ },
               \ "colorcolumn": "cterm=reverse"
             \ }
           \ }
@@ -4310,7 +4345,7 @@ function! vimside#actwin#TestQuickFix()
               \ "info": "use cursorline to note current line",
               \ "is_enable": 0,
               \ "is_on": 0,
-              \ "cursorline": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan",
+              \ "highlight": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan",
               \ "toggle": {
                 \ "scala": {
                   \ "map": "wc",
@@ -4331,6 +4366,7 @@ function! vimside#actwin#TestQuickFix()
               \ "is_full": 1,
               \ "nos_columns": 0,
               \ "all_text": 1,
+              \ "highlight": "cterm=bold ctermfg=DarkYellow ctermbg=Cyan",
               \ "toggle": {
                 \ "actwin": {
                   \ "map": "wh",
