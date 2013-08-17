@@ -198,7 +198,8 @@ endfunction
 
 function! vimside#command#ShowErrorsAndWarning() range
   if exists("g:vimside.started") && g:vimside.started
-    call vimside#command#show_errors_and_warning#Run()
+    call vimside#command#show_errors_and_warning#Close()
+    call vimside#command#show_errors_and_warning#Run("c")
   else
     call s:ERROR("Ensime must be started first")
   endif

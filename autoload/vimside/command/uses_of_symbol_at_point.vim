@@ -245,7 +245,6 @@ function! s:InitializeQuickFix()
   let s:use_signs = s:GetOption('tailor-uses-of-symbol-at-point-use-signs', 0)
   let s:use_sign_kind_marker = s:GetOption('tailor-uses-of-symbol-at-point-use-sign-kind-marker', 0)
 
-
   let s:quickfix_initialized = 1
 endfunction
 
@@ -284,22 +283,22 @@ if 0 " XXX
 call s:LOG("uses_of_symbol_at_point_callback start_line=".  l:start_line) 
 endif " XXX
 
-   let [found, l:window] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-window')
-   if found
-     if l:window == 'actwin'
+  let [found, l:window] = g:vimside.GetOption('tailor-uses-of-symbol-at-point-window')
+  if found
+    if l:window == 'actwin'
 call s:LOG("uses_of_symbol_at_point_callback call ActWin Display") 
-        return s:ActWin(l:diclist)
-      elseif l:window == 'quickfix'
-call s:LOG("uses_of_symbol_at_point_callback call Quickfix Display") 
-        return s:Quickfix(l:diclist)
-      else " punt
-call s:LOG("uses_of_symbol_at_point_callback punt call ActWin Display") 
-        return s:ActWin(l:diclist)
-      endif
-   else " default
-call s:LOG("uses_of_symbol_at_point_callback default call ActWin Display") 
       return s:ActWin(l:diclist)
-   endif
+    elseif l:window == 'quickfix'
+call s:LOG("uses_of_symbol_at_point_callback call Quickfix Display") 
+      return s:Quickfix(l:diclist)
+    else " punt
+call s:LOG("uses_of_symbol_at_point_callback punt call ActWin Display") 
+      return s:ActWin(l:diclist)
+    endif
+  else " default
+call s:LOG("uses_of_symbol_at_point_callback default call ActWin Display") 
+    return s:ActWin(l:diclist)
+  endif
 endfunction
 
 function! s:Quickfix(diclist)
@@ -358,7 +357,7 @@ call s:LOG("uses_of_symbol_at_point_callback Quickfix entry=".  string(entry))
   let l:location = s:GetLocation()
 call s:LOG("uses_of_symbol_at_point_callback location=".  l:location) 
 
-  let g:switchbuf_save = &switchbuf
+  let s:switchbuf_save = &switchbuf
 
   if l:location == 'tab_window'
     let &switchbuf = "usetab,newtab"
@@ -398,6 +397,10 @@ call s:LOG("uses_of_symbol_at_point_callback ActWin TOP")
 
   let l:current_file = expand('%:p')
   let l:len = len(diclist)
+  if l:len == 0
+call s:LOG("uses_of_symbol_at_point_callback ActWin diclist empty") 
+    return
+  endif
   let l:cnt = 0
   while l:cnt < l:len
     let l:dic = l:diclist[cnt]
@@ -536,7 +539,7 @@ call s:LOG("uses_of_symbol_at_point_callback ActWin entry=".  string(entry))
               \ "info": "use sign to note current entry line kind",
               \ "is_enable": s:scala_color_line_enable,
               \ "is_on": s:scala_color_line_on,
-              \ "category": "ColorLine",
+              \ "category": "USPColorLine",
               \ "toggle": {
                 \ "actwin": {
                   \ "map": s:scala_color_line_toggle_actwin_map,
@@ -629,7 +632,7 @@ call s:LOG("uses_of_symbol_at_point_callback ActWin entry=".  string(entry))
               \ "is_enable": s:actwin_sign_enable,
               \ "is_on": s:actwin_sign_on,
               \ "all_text": 1,
-              \ "category": "ScalaWindow",
+              \ "category": "USPScalaWindow",
               \ "abbreviation": "sw",
               \ "toggle": {
                 \ "actwin": {
@@ -665,6 +668,7 @@ call s:LOG("uses_of_symbol_at_point_callback ActWin entry=".  string(entry))
           \ }
 
   let l:data = {
+        \ "action": "c",
         \ "title": "Test Window",
         \ "winname": "Test",
         \ "help": {
@@ -802,7 +806,7 @@ call s:LOG("CloseWindow:")
    autocmd!
   augroup END
 
-  let &switchbuf = g:switchbuf_save
+  let &switchbuf = s:switchbuf_save
 
   let location = s:GetLocation()
   if location == 'vsplit_window'

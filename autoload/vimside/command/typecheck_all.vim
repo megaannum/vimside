@@ -15,5 +15,6 @@ let s:ERROR = function("vimside#log#error")
 
 
 function!  vimside#command#typecheck_all#Run()
+  call vimside#command#show_errors_and_warning#Close()
   call vimside#swank#rpc#typecheck_all#Run()
 endfunction

@@ -1,7 +1,7 @@
 
 #
 # Vimside Options
-# Generated on: 20130811-123916: 
+# Generated on: 20130817-143017: 
 # By calling: call vimside#options#manager#OutputProperties('PROPERTIES', 1)
 #
 # Option: ensime-config-file-name
@@ -183,9 +183,9 @@ scheduler.expecting.many.events.char.count=20
 # Option: scheduler-expecting-many-events-read-time-out
 # description:
 #   Expecting many events socket read timeout.
-# default value: 100
+# default value: 200
 # user value: <No Value Set>
-scheduler.expecting.many.events.read.time.out=100
+scheduler.expecting.many.events.read.time.out=200
  
 # Option: scheduler-expecting-many-events-update-time
 # description:
@@ -1909,6 +1909,30 @@ tailor.actwin.display.scala.color.column.toggle.scala.map='tcc'
 # user value: <No Value Set>
 tailor.actwin.display.scala.color.line.enable='1'
  
+# Option: tailor-actwin-display-scala-color-line-kinds-error-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "error".
+# default value: 'Error'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.error.linehl='Error'
+ 
+# Option: tailor-actwin-display-scala-color-line-kinds-error-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "error".
+# default value: 'E>'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.error.text='E>'
+ 
+# Option: tailor-actwin-display-scala-color-line-kinds-error-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthl
+#   of kind "error".
+# default value: 'Error'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.error.texthl='Error'
+ 
 # Option: tailor-actwin-display-scala-color-line-kinds-info-linehl
 # description:
 #   Scala highlight definition or group name for color-line linehl
@@ -1955,6 +1979,30 @@ tailor.actwin.display.scala.color.line.kinds.marker.text='MM'
 # default value: 'Search'
 # user value: <No Value Set>
 tailor.actwin.display.scala.color.line.kinds.marker.texthl='Search'
+ 
+# Option: tailor-actwin-display-scala-color-line-kinds-warn-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "warn".
+# default value: 'SpellCap'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.warn.linehl='SpellCap'
+ 
+# Option: tailor-actwin-display-scala-color-line-kinds-warn-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "warn".
+# default value: 'W>'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.warn.text='W>'
+ 
+# Option: tailor-actwin-display-scala-color-line-kinds-warn-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthl
+#   of kind "warn".
+# default value: 'Search'
+# user value: <No Value Set>
+tailor.actwin.display.scala.color.line.kinds.warn.texthl='Search'
  
 # Option: tailor-actwin-display-scala-color-line-on
 # description:
@@ -2400,6 +2448,1068 @@ tailor.sbt.error.read.size=10000
 # user value: <No Value Set>
 tailor.show.doc.keys=['java', 'scala', 'scala-compiler', 'scala-reflect', 'android']
  
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-actwin-map-show
+# parent: tailor-actwin-cmds-actwin-map-actwin-map-show
+# description:
+#   Show the current key mappings for the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.actwin.map.show=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-bottom
+# parent: tailor-actwin-cmds-actwin-map-bottom
+# description:
+#   Goto the last line in the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.bottom=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-close
+# parent: tailor-actwin-cmds-actwin-map-close
+# description:
+#   Close the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.close=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-delete
+# parent: tailor-actwin-cmds-actwin-map-delete
+# description:
+#   Delete the current line in the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.delete=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-down
+# parent: tailor-actwin-cmds-actwin-map-down
+# description:
+#   Goto the next line in the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.down=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-enter-mouse
+# parent: tailor-actwin-cmds-actwin-map-enter-mouse
+# description:
+#   Mouse action to goto a new line current line.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.enter.mouse=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-help
+# parent: tailor-actwin-cmds-actwin-map-help
+# description:
+#   Invoke help for the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.help=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-scala-cmd-show
+# parent: tailor-actwin-cmds-actwin-map-scala-cmd-show
+# description:
+#   Show the current commands for Scala windows.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.scala.cmd.show=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-scala-map-show
+# parent: tailor-actwin-cmds-actwin-map-scala-map-show
+# description:
+#   Show the current key mappings for Scala windows.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.scala.map.show=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-select
+# parent: tailor-actwin-cmds-actwin-map-select
+# description:
+#   Select the action associated with the current line.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.select=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-top
+# parent: tailor-actwin-cmds-actwin-map-top
+# description:
+#   Goto the first line in the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.top=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-actwin-map-up
+# parent: tailor-actwin-cmds-actwin-map-up
+# description:
+#   Goto the previous line in the ActWin.
+#   Called from ActWin.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.actwin.map.up=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-close
+# parent: tailor-actwin-cmds-scala-cmd-close
+# description:
+#   Close ActWin. Command called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.close=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-delete
+# parent: tailor-actwin-cmds-scala-cmd-delete
+# description:
+#   Delete current line in ActWin. Command called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.delete=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-enter
+# parent: tailor-actwin-cmds-scala-cmd-enter
+# description:
+#   Command to enter ActWin from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.enter=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-first
+# parent: tailor-actwin-cmds-scala-cmd-first
+# description:
+#   Goto the first line. Command called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.first=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-last
+# parent: tailor-actwin-cmds-scala-cmd-last
+# description:
+#   Goto the last line. Command called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.last=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-next
+# parent: tailor-actwin-cmds-scala-cmd-next
+# description:
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.next=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-cmd-previous
+# parent: tailor-actwin-cmds-scala-cmd-previous
+# description:
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.cmd.previous=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-close
+# parent: tailor-actwin-cmds-scala-map-close
+# description:
+#   Close ActWin. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.close=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-delete
+# parent: tailor-actwin-cmds-scala-map-delete
+# description:
+#   Delete current line in ActWin. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.delete=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-enter
+# parent: tailor-actwin-cmds-scala-map-enter
+# description:
+#   Key mapping to enter ActWin from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.enter=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-first
+# parent: tailor-actwin-cmds-scala-map-first
+# description:
+#   Goto the first line. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.first=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-last
+# parent: tailor-actwin-cmds-scala-map-last
+# description:
+#   Goto the last line. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.last=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-next
+# parent: tailor-actwin-cmds-scala-map-next
+# description:
+#   Goto the next line. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.next=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-cmds-scala-map-previous
+# parent: tailor-actwin-cmds-scala-map-previous
+# description:
+#   Goto the previous line. Key mapping called from Scala window
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.cmds.scala.map.previous=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-cursor-line-enable
+# parent: tailor-actwin-display-actwin-cursor-line-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with cursor-line enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.cursor.line.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-cursor-line-on
+# parent: tailor-actwin-display-actwin-cursor-line-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with cursor-line on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.cursor.line.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-highlight-line-enable
+# parent: tailor-actwin-display-actwin-highlight-line-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with highlight-line enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.highlight.line.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-highlight-line-on
+# parent: tailor-actwin-display-actwin-highlight-line-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with highlight-line on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.highlight.line.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-sign-enable
+# parent: tailor-actwin-display-actwin-sign-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with sign enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.sign.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-actwin-sign-on
+# parent: tailor-actwin-display-actwin-sign-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   ActWin line augmented with sign on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.actwin.sign.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-color-column-enable
+# parent: tailor-actwin-display-scala-color-column-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with color-column enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.color.column.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-color-column-on
+# parent: tailor-actwin-display-scala-color-column-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with color-column on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.color.column.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-color-line-enable
+# parent: tailor-actwin-display-scala-color-line-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with color-line enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.color.line.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-color-line-on
+# parent: tailor-actwin-display-scala-color-line-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with color-line on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.color.line.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-sign-enable
+# parent: tailor-actwin-display-scala-sign-enable
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with sign enabled.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.sign.enable=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-actwin-display-scala-sign-on
+# parent: tailor-actwin-display-scala-sign-on
+# description:
+#   Is the Use Of Symbol At Point ActWin display of
+#   Scala code augmented with sign on at start-up.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.actwin.display.scala.sign.on=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-highlight
+# parent: tailor-actwin-display-actwin-cursor-line-highlight
+# description:
+#   ActWin highlight definition for CursorLine group.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.highlight=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-abbr
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle ActWin Window cursor-line markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-cmd
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-actwin-cmd
+# description:
+#   Command to toggle ActWin Window cursor-line markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-map
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-actwin-map
+# description:
+#   Mapping to toggle ActWin Window cursor-line markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-abbr
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle ActWin Window cursor-line markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-cmd
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-scala-cmd
+# description:
+#   Command to toggle ActWin Window cursor-line markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-map
+# parent: tailor-actwin-display-actwin-cursor-line-toggle-scala-map
+# description:
+#   Mapping to toggle ActWin Window cursor-line markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.cursor.line.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-highlight
+# parent: tailor-actwin-display-actwin-highlight-line-highlight
+# description:
+#   ActWin highlight definition for highlight line group.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.highlight=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-abbr
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle ActWin Window highlight-line markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-cmd
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-actwin-cmd
+# description:
+#   Command to toggle ActWin Window highlight-line markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-map
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-actwin-map
+# description:
+#   Mapping to toggle ActWin Window highlight-line markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-abbr
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle ActWin Window highlight-line markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-cmd
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-scala-cmd
+# description:
+#   Command to toggle ActWin Window highlight-line markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-map
+# parent: tailor-actwin-display-actwin-highlight-line-toggle-scala-map
+# description:
+#   Mapping to toggle ActWin Window highlight-line markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.highlight.line.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-error-linehl
+# parent: tailor-actwin-display-actwin-sign-kinds-error-linehl
+# description:
+#   ActWin highlight definition or group name for sign linehl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.error.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-error-text
+# parent: tailor-actwin-display-actwin-sign-kinds-error-text
+# description:
+#   ActWin two charcters text used for sign text
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.error.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-error-texthl
+# parent: tailor-actwin-display-actwin-sign-kinds-error-texthl
+# description:
+#   ActWin highlight definition or group name for sign texthl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.error.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-info-linehl
+# parent: tailor-actwin-display-actwin-sign-kinds-info-linehl
+# description:
+#   ActWin highlight definition or group name for sign linehl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.info.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-info-text
+# parent: tailor-actwin-display-actwin-sign-kinds-info-text
+# description:
+#   ActWin two charcters text used for sign text
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.info.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-info-texthl
+# parent: tailor-actwin-display-actwin-sign-kinds-info-texthl
+# description:
+#   ActWin highlight definition or group name for sign texthl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.info.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-linehl
+# parent: tailor-actwin-display-actwin-sign-kinds-marker-linehl
+# description:
+#   ActWin highlight definition or group name for sign linehl
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.marker.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-text
+# parent: tailor-actwin-display-actwin-sign-kinds-marker-text
+# description:
+#   ActWin two charcters text used for sign text
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.marker.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-texthl
+# parent: tailor-actwin-display-actwin-sign-kinds-marker-texthl
+# description:
+#   ActWin highlight definition or group name for sign texthlof kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.marker.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-linehl
+# parent: tailor-actwin-display-actwin-sign-kinds-warn-linehl
+# description:
+#   ActWin highlight definition or group name for sign linehl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.warn.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-text
+# parent: tailor-actwin-display-actwin-sign-kinds-warn-text
+# description:
+#   ActWin two charcters text used for sign text
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.warn.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-texthl
+# parent: tailor-actwin-display-actwin-sign-kinds-warn-texthl
+# description:
+#   ActWin highlight definition or group name for sign texthl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.kinds.warn.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-abbr
+# parent: tailor-actwin-display-actwin-sign-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle ActWin Window sign markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-cmd
+# parent: tailor-actwin-display-actwin-sign-toggle-actwin-cmd
+# description:
+#   Command to toggle ActWin Window sign markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-map
+# parent: tailor-actwin-display-actwin-sign-toggle-actwin-map
+# description:
+#   Mapping to toggle ActWin Window sign markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-abbr
+# parent: tailor-actwin-display-actwin-sign-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle ActWin Window sign markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-cmd
+# parent: tailor-actwin-display-actwin-sign-toggle-scala-cmd
+# description:
+#   Command to toggle ActWin Window sign markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-map
+# parent: tailor-actwin-display-actwin-sign-toggle-scala-map
+# description:
+#   Mapping to toggle ActWin Window sign markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.actwin.sign.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-color-column
+# parent: tailor-actwin-display-scala-color-column-color-column
+# description:
+#   Scala highlight definition for ColorColumn group.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.color.column=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-abbr
+# parent: tailor-actwin-display-scala-color-column-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle Scala Window color-column markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-cmd
+# parent: tailor-actwin-display-scala-color-column-toggle-actwin-cmd
+# description:
+#   Command to toggle Scala Window color-column markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-map
+# parent: tailor-actwin-display-scala-color-column-toggle-actwin-map
+# description:
+#   Mapping to toggle Scala Window color-column markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-abbr
+# parent: tailor-actwin-display-scala-color-column-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle Scala Window color-column markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-cmd
+# parent: tailor-actwin-display-scala-color-column-toggle-scala-cmd
+# description:
+#   Command to toggle Scala Window color-column markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-map
+# parent: tailor-actwin-display-scala-color-column-toggle-scala-map
+# description:
+#   Mapping to toggle Scala Window color-column markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.column.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-error-linehl
+# parent: tailor-actwin-display-scala-color-line-kinds-error-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.error.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-error-text
+# parent: tailor-actwin-display-scala-color-line-kinds-error-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.error.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-error-texthl
+# parent: tailor-actwin-display-scala-color-line-kinds-error-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.error.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-info-linehl
+# parent: tailor-actwin-display-scala-color-line-kinds-info-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.info.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-info-text
+# parent: tailor-actwin-display-scala-color-line-kinds-info-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.info.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-info-texthl
+# parent: tailor-actwin-display-scala-color-line-kinds-info-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.info.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-linehl
+# parent: tailor-actwin-display-scala-color-line-kinds-marker-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.marker.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-text
+# parent: tailor-actwin-display-scala-color-line-kinds-marker-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.marker.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-texthl
+# parent: tailor-actwin-display-scala-color-line-kinds-marker-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthlof kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.marker.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-linehl
+# parent: tailor-actwin-display-scala-color-line-kinds-warn-linehl
+# description:
+#   Scala highlight definition or group name for color-line linehl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.warn.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-text
+# parent: tailor-actwin-display-scala-color-line-kinds-warn-text
+# description:
+#   Scala two charcters text used for color-line text
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.warn.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-texthl
+# parent: tailor-actwin-display-scala-color-line-kinds-warn-texthl
+# description:
+#   Scala highlight definition or group name for color-line texthl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.kinds.warn.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-abbr
+# parent: tailor-actwin-display-scala-color-line-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle Scala Window color-line markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-cmd
+# parent: tailor-actwin-display-scala-color-line-toggle-actwin-cmd
+# description:
+#   Command to toggle Scala Window color-line markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-map
+# parent: tailor-actwin-display-scala-color-line-toggle-actwin-map
+# description:
+#   Mapping to toggle Scala Window color-line markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-abbr
+# parent: tailor-actwin-display-scala-color-line-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle Scala Window color-line markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-cmd
+# parent: tailor-actwin-display-scala-color-line-toggle-scala-cmd
+# description:
+#   Command to toggle Scala Window color-line markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-map
+# parent: tailor-actwin-display-scala-color-line-toggle-scala-map
+# description:
+#   Mapping to toggle Scala Window color-line markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.color.line.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-error-linehl
+# parent: tailor-actwin-display-scala-sign-kinds-error-linehl
+# description:
+#   Scala highlight definition or group name for sign linehl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.error.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-error-text
+# parent: tailor-actwin-display-scala-sign-kinds-error-text
+# description:
+#   Scala two charcters text used for sign text
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.error.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-error-texthl
+# parent: tailor-actwin-display-scala-sign-kinds-error-texthl
+# description:
+#   Scala highlight definition or group name for sign texthl
+#   of kind "error".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.error.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-info-linehl
+# parent: tailor-actwin-display-scala-sign-kinds-info-linehl
+# description:
+#   Scala highlight definition or group name for sign linehl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.info.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-info-text
+# parent: tailor-actwin-display-scala-sign-kinds-info-text
+# description:
+#   Scala two charcters text used for sign text
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.info.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-info-texthl
+# parent: tailor-actwin-display-scala-sign-kinds-info-texthl
+# description:
+#   Scala highlight definition or group name for sign texthl
+#   of kind "info".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.info.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-marker-linehl
+# parent: tailor-actwin-display-scala-sign-kinds-marker-linehl
+# description:
+#   Scala highlight definition or group name for sign linehl
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.marker.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-marker-text
+# parent: tailor-actwin-display-scala-sign-kinds-marker-text
+# description:
+#   Scala two charcters text used for sign text
+#   of kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.marker.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-marker-texthl
+# parent: tailor-actwin-display-scala-sign-kinds-marker-texthl
+# description:
+#   Scala highlight definition or group name for sign texthlof kind "marker".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.marker.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-warn-linehl
+# parent: tailor-actwin-display-scala-sign-kinds-warn-linehl
+# description:
+#   Scala highlight definition or group name for sign linehl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.warn.linehl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-warn-text
+# parent: tailor-actwin-display-scala-sign-kinds-warn-text
+# description:
+#   Scala two charcters text used for sign text
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.warn.text=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-kinds-warn-texthl
+# parent: tailor-actwin-display-scala-sign-kinds-warn-texthl
+# description:
+#   Scala highlight definition or group name for sign texthl
+#   of kind "warn".
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.kinds.warn.texthl=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-abbr
+# parent: tailor-actwin-display-scala-sign-toggle-actwin-abbr
+# description:
+#   Abbreviation to toggle Scala Window sign markings.
+#   Called from ActWin.
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.actwin.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-cmd
+# parent: tailor-actwin-display-scala-sign-toggle-actwin-cmd
+# description:
+#   Command to toggle Scala Window sign markings.
+#   Called from ActWin. First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.actwin.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-map
+# parent: tailor-actwin-display-scala-sign-toggle-actwin-map
+# description:
+#   Mapping to toggle Scala Window sign markings.
+#   Called from ActWin.
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.actwin.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-scala-abbr
+# parent: tailor-actwin-display-scala-sign-toggle-scala-abbr
+# description:
+#   Abbreviation to toggle Scala Window sign markings.
+#   Called from Scala
+#   Uses cabbrev and cunabbrev.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.scala.abbr=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-scala-cmd
+# parent: tailor-actwin-display-scala-sign-toggle-scala-cmd
+# description:
+#   Command to toggle Scala Window sign markings.
+#   Called from Scala First letter must be upper case.
+#   Uses command and delcommand.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.scala.cmd=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-display-scala-sign-toggle-scala-map
+# parent: tailor-actwin-display-scala-sign-toggle-scala-map
+# description:
+#   Mapping to toggle Scala Window sign markings.
+#   Called from Scala
+#   Uses nnoremap and nunmap.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.display.scala.sign.toggle.scala.map=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-location
+# parent: tailor-location-diff-file
+# description:
+#   How to jump to show-errors-and-warning file and pos.
+# default value: <No Value Set>
+# user value: <No Value Set>
+# tailor.show.errors.and.warning.location=<No Value Set>
+ 
+# Option: tailor-show-errors-and-warning-use-sign-kind-marker
+# description:
+#   Whether or not to use sign kind "marker" for current line.
+# default value: '1'
+# user value: <No Value Set>
+tailor.show.errors.and.warning.use.sign.kind.marker='1'
+ 
+# Option: tailor-show-errors-and-warning-use-signs
+# description:
+#   Whether or not to use signs when displaying uses.
+# default value: '1'
+# user value: <No Value Set>
+tailor.show.errors.and.warning.use.signs='1'
+ 
+# Option: tailor-show-errors-and-warning-window
+# description:
+#   Whether to use the quickfix window to display uses or if all
+#   of the uses are in the same window use the locationlist 
+#   window.
+# default value: 'actwin'
+# user value: <No Value Set>
+tailor.show.errors.and.warning.window='actwin'
+ 
 # Option: tailor-show-errors-and-warnings-use-signs
 # description:
 #   Whether or not to use signs when compiler is displaying compile errors.
@@ -2508,7 +3618,7 @@ tailor.type.check.file.on.write=0
 # tailor.uses.of.symbol.at.point.actwin.cmds.actwin.map.down=<No Value Set>
  
 # Option: tailor-uses-of-symbol-at-point-actwin-cmds-actwin-map-enter-mouse
-# parent: tailor-actwin-cmds-actwin-map-select
+# parent: tailor-actwin-cmds-actwin-map-enter-mouse
 # description:
 #   Mouse action to goto a new line current line.
 #   Called from ActWin.
@@ -3443,8 +4553,8 @@ vimside.project.options.file.name='options_project.vim'
 # description:
 #   Supported Scala versions.
 # default value: '2.9.2'
-# user value: '2.10.0'
-vimside.scala.version='2.10.0'
+# user value: '2.10.1'
+vimside.scala.version='2.10.1'
  
 # Option: vimside-use-cwd-as-output-dir
 # description:

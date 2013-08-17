@@ -211,7 +211,7 @@ function! vimside#sign#PlaceMany(line_tag_List, category, kind)
 call s:LOG("vimside#sign#PlaceMany: TOP")
 call s:LOG("vimside#sign#PlaceMany: category=". a:category)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "PlaceMany Bad Category: ". a:category
     return 0
   endif
 
@@ -264,7 +264,7 @@ endfunction
 
 function! s:PlaceTag(linenos, tagtype, tag, category, kind)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "PlaceTag Bad Category: ". a:category
     return 0
   endif
 
@@ -319,7 +319,7 @@ endfunction
 
 function! s:UnPlaceTag(tagtype, tag, category, kind, ...)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "UnPlaceTag Bad Category: ". a:category
     return 0
   endif
 
@@ -374,7 +374,7 @@ endfunction
 
 function! s:EmptyTag(linenos, tagtype, tag, category, kind)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "EmptyTag Bad Category: ". a:category
     return 0
   endif
 
@@ -406,7 +406,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#Toggle(category, ...)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "Toggle Bad Category: ". a:category
     return 0
   endif
 
@@ -445,7 +445,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ToggleKind(category, kind, ...)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "ToggleKind Bad Category: ". a:category
     return 0
   endif
 
@@ -509,7 +509,7 @@ endfunction
 
 function! s:ChangeKind(linenos, tagtype, tag, category, to_kind)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "ChangeKind Bad Category: ". a:category
     return 0
   endif
 
@@ -544,7 +544,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ChangeKindKind(category, from_kind, to_kind)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "ChangeKindKind Bad Category: ". a:category
     return 0
   endif
 
@@ -591,7 +591,7 @@ endfunction
 
 function! s:Clear(linenos, tagtype, tag, category)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "Clear Bad Category: ". a:category
     return 0
   endif
 
@@ -610,7 +610,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ClearKind(category, kind)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "ClearKind Bad Category: ". a:category
     return 0
   endif
 
@@ -639,7 +639,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#ClearCategory(category)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "ClearCategory Bad Category: ". a:category
     return 0
   endif
 
@@ -706,7 +706,7 @@ endfunction
 " return 0 or 1
 function! vimside#sign#RemoveCategory(category)
   if ! has_key(s:categories, a:category)
-    echo "Bad Category: ". a:category
+    echo "RemoveCateory Bad Category: ". a:category
     return 0
   endif
 

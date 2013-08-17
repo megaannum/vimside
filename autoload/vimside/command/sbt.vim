@@ -150,7 +150,7 @@ if has_key(s:subproc, 'pid')
 call s:LOG("sbt: pid=" . s:subproc.pid)
 endif
 
-  call vimside#scheduler#SetUpdateTime(100)
+  call vimside#scheduler#SetUpdateTime(300)
   call vimside#scheduler#ResetAuto()
 
 call s:LOG("vimside#command#sbt#Switch: BOTTOM")
@@ -200,18 +200,18 @@ call s:LOG("vimside#command#sbt#Compile: TOP")
   let l:charcnt = 10
   let l:repeat = 1
   call vimside#scheduler#AddJob(s:sbt_compile, l:Func, l:sec, l:msec, l:charcnt, l:repeat) 
-call vimside#scheduler#SetUpdateTime(100)
+call vimside#scheduler#SetUpdateTime(300)
 " call vimside#scheduler#ResetAuto()
 
   let g:vimside.project.scala_notes = []
   let g:vimside.project.java_notes = []
-  call vimside#quickfix#Close()
-
+  call vimside#command#show_errors_and_warning#Close()
 
   " closes quickfix window (if its open, otherwise nothing)
-  cclose
-
+  " cclose
+  
   call s:send("compile")
+
 call s:LOG("vimside#command#sbt#Compile: BOTTOM")
 endfunction
 
@@ -230,7 +230,7 @@ call s:LOG("vimside#command#sbt#Clean: TOP")
   let l:charcnt = 10
   let l:repeat = 1
   call vimside#scheduler#AddJob(s:sbt_clean, l:Func, l:sec, l:msec, l:charcnt, l:repeat) 
-call vimside#scheduler#SetUpdateTime(100)
+call vimside#scheduler#SetUpdateTime(300)
 
   call s:send("clean")
 call s:LOG("vimside#command#sbt#Clean: BOTTOM")
@@ -285,7 +285,7 @@ call s:LOG("vimside#command#sbt#Package: TOP")
   let l:charcnt = 10
   let l:repeat = 1
   call vimside#scheduler#AddJob(s:sbt_package, l:Func, l:sec, l:msec, l:charcnt, l:repeat) 
-call vimside#scheduler#SetUpdateTime(100)
+call vimside#scheduler#SetUpdateTime(300)
 
   call s:send("package")
 call s:LOG("vimside#command#sbt#Package: BOTTOM")
@@ -313,6 +313,8 @@ call s:LOG("s:HandleCompilePackageCB: lines=" . string(lines))
     let colnum = ""
     let msg = ""
 
+    let l:got_prompt = 0
+
     let echolines=[]
 
     for line in lines
@@ -330,8 +332,10 @@ call s:LOG("s:HandleCompilePackageCB: line=" . line)
       if status
 call s:LOG("s:HandleCompilePackageCB: tag=" . tag)
         if tag == 'prompt'
+call s:LOG("s:HandleCompilePackageCB: PROMPT")
           call vimside#scheduler#RemoveJob(a:cb_name)
 call vimside#ensime#swank#ping_info_set_not_expecting_anything()
+          let l:got_prompt = 1
         elseif tag == 'warn'
 let severity = "warn"
         elseif tag == 'error_compile'
@@ -391,9 +395,8 @@ call s:ERROR("s:HandleCompilePackageCB: unknown line=" . line)
 
     call s:cmdline_echo(echolines)
 
-    let entries = g:vimside.project.java_notes + g:vimside.project.scala_notes
-    if len(entries) > 0
-      call vimside#quickfix#Display(entries, s:sbt_use_signs)
+    if l:got_prompt
+      call vimside#command#show_errors_and_warning#Run("c")
     endif
 
   endif
@@ -495,7 +498,7 @@ function! g:SbtInvokeCallback(context, cmdinfolist)
 
   let l:Func = function("g:SbtInvokeCallbackAction")
   let l:sec = 0
-  let l:msec = 100
+  let l:msec = 300
   let l:charcnt = 2
   let l:repeat = 0
   call vimside#scheduler#AddJob('sbt_callback', l:Func, l:sec, l:msec, l:charcnt, l:repeat)

@@ -25,8 +25,10 @@ function! vimside#swank#event#full_typecheck_finished#Handle(...)
   if a:0 != 0
     call s:ERROR("vimside#swank#event#full_typecheck_finished#Handle: has additional args=". string(a:000))
   endif
-  call s:LOG("full_typecheck_finished#Handle") 
+  call s:LOG("full_typecheck_finished#Handle TOP") 
 
+  call vimside#command#show_errors_and_warning#Run("c")
+if 0 " REMOVE
   let entries = g:vimside.project.java_notes + g:vimside.project.scala_notes
   if len(entries) > 0
     call vimside#quickfix#Display(entries, s:full_typecheck_finished_use_signs) 
@@ -34,5 +36,7 @@ function! vimside#swank#event#full_typecheck_finished#Handle(...)
     let msg = "Full Typecheck Finished..."
     call vimside#cmdline#Display(msg) 
   endif
+endif " REMOVE
 
+  call s:LOG("full_typecheck_finished#Handle BOTTOM") 
 endfunction

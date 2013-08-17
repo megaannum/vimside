@@ -9,10 +9,14 @@
 " Internal hooks variables
 "
 
+let s:do_logging = 0
+
 function! s:LOG(msg)
+if s:do_logging
   execute "redir >> ". "HOOKS_LOG"
   silent echo "INFO: ". a:msg
   execute "redir END"
+endif
 endfunction
 
 call s:LOG("vimside#hooks: TOP")

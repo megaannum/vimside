@@ -410,7 +410,7 @@ function! s:MakeOptions()
         \ 'type': g:OPTION_NUMBER_TYPE, 
         \ 'kind': g:OPTION_TIME_KIND, 
         \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
-        \ 'value': 100,
+        \ 'value': 200,
         \ 'description': [
             \ "Expecting many events socket read timeout."
           \ ]
@@ -1658,14 +1658,6 @@ function! s:MakeOptions()
           \ ]
       \ }
   
-  let l:options['tailor-show-errors-and-warnings-use-signs'] = {
-        \ 'type': g:OPTION_BOOLEAN_TYPE, 
-        \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'value': 1,
-        \ 'description': [
-            \ 'Whether or not to use signs when compiler is displaying compile errors.'
-          \ ]
-      \ }
   let l:options['tailor-full-typecheck-finished-use-signs'] = {
         \ 'type': g:OPTION_BOOLEAN_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -2590,6 +2582,66 @@ function! s:MakeOptions()
           \ ]
       \ }
 
+
+  let l:options['tailor-actwin-display-scala-color-line-kinds-error-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "E>",
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-actwin-display-scala-color-line-kinds-error-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "Error",
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-actwin-display-scala-color-line-kinds-error-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "Error",
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-actwin-display-scala-color-line-kinds-warn-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "W>",
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-actwin-display-scala-color-line-kinds-warn-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "Search",
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-actwin-display-scala-color-line-kinds-warn-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "SpellCap",
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+
   let l:options['tailor-actwin-display-scala-color-line-kinds-info-text'] = {
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'scope': g:OPTION_STATIC_SCOPE, 
@@ -3144,7 +3196,7 @@ endif " XXXXXXXXXX
   let l:options['tailor-uses-of-symbol-at-point-actwin-cmds-actwin-map-enter-mouse'] = {
         \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
         \ 'kind': g:OPTION_CMD_KIND, 
-        \ 'parent': 'tailor-actwin-cmds-actwin-map-select',
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-enter-mouse',
         \ 'scope': g:OPTION_STATIC_SCOPE, 
         \ 'description': [
             \ 'Mouse action to goto a new line current line.',
@@ -3810,6 +3862,1213 @@ endif " XXXXXXXXXX
           \ ]
       \ }
   let l:options['tailor-uses-of-symbol-at-point-display-actwin-sign-kinds-marker-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-marker-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign linehl',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  
+  " ------------------------------------------------------
+  " show-errors-and_warning Options
+  let l:options['tailor-show-errors-and-warnings-use-signs'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1,
+        \ 'description': [
+            \ 'Whether or not to use signs when compiler is displaying compile errors.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-location'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['same_window', 'split_window', 'vsplit_window', 'tab_window' ],
+        \ 'parent': 'tailor-location-diff-file',
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'description': [
+            \ 'How to jump to show-errors-and-warning file and pos.'
+          \ ]
+      \ }
+
+  " TODO use \ 'parent': 'parent option',
+  let l:options['tailor-show-errors-and-warning-window'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_ENUM_KIND, 
+        \ 'enum': ['actwin', 'quickfix' ],
+        \ 'scope': g:OPTION_DYNAMIC_SCOPE, 
+        \ 'value': 'actwin',
+        \ 'description': [
+            \ 'Whether to use the quickfix window to display uses or if all',
+            \ 'of the uses are in the same window use the locationlist ',
+            \ 'window.',
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-use-signs'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
+        \ 'description': [
+            \ 'Whether or not to use signs when displaying uses.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-use-sign-kind-marker'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': '1',
+        \ 'description': [
+            \ 'Whether or not to use sign kind "marker" for current line.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-sign-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with sign enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-color-line-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-color-column-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-column enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-cursor-line-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with cursor-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-highlight-line-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with highlight-line enabled.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-sign-enable'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-enable',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with sign enabled.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-sign-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with sign on at start-up.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-color-line-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-line on at start-up.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-scala-color-column-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'Scala code augmented with color-column on at start-up.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-cursor-line-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with cursor-line on at start-up.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-highlight-line-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with highlight-line on at start-up.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-display-actwin-sign-on'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-on',
+        \ 'description': [
+            \ 'Is the Use Of Symbol At Point ActWin display of',
+            \ 'ActWin line augmented with sign on at start-up.'
+          \ ]
+      \ }
+
+
+  " show-errors-and_warning Command Options
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-first'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-first',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the first line. Command called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-last'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-last',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the last line. Command called from Scala window'
+          \ ]
+      \ }
+if 0 " XXXXXXXXXX
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-previous'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-previous',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the previous line. Command called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-next'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-next',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the next line. Command called from Scala window'
+          \ ]
+      \ }
+endif " XXXXXXXXXX
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-previous'] = {
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-previous'
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-next'] = {
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-next'
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-enter'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-enter',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to enter ActWin from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-delete'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-delete',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Delete current line in ActWin. Command called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-cmd-close'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-cmd-close',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Close ActWin. Command called from Scala window'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-first'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-first',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the first line. Key mapping called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-last'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-last',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the last line. Key mapping called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-previous'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-previous',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the previous line. Key mapping called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-next'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-next',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the next line. Key mapping called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-enter'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-enter',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Key mapping to enter ActWin from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-delete'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-delete',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Delete current line in ActWin. Key mapping called from Scala window'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-scala-map-close'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-scala-map-close',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Close ActWin. Key mapping called from Scala window'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-actwin-map-show'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-actwin-map-show',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Show the current key mappings for the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-scala-cmd-show'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-scala-cmd-show',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Show the current commands for Scala windows.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-scala-map-show'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-scala-map-show',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Show the current key mappings for Scala windows.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-help'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-help',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Invoke help for the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-select'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-select',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Select the action associated with the current line.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-enter-mouse'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-enter-mouse',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mouse action to goto a new line current line.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-top'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-top',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the first line in the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-bottom'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-bottom',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the last line in the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-down'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-down',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the next line in the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-up'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-up',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Goto the previous line in the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-delete'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-delete',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Delete the current line in the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-actwin-cmds-actwin-map-close'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-cmds-actwin-map-close',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Close the ActWin.',
+            \ 'Called from ActWin.'
+          \ ]
+      \ }
+  
+  " show-errors-and_warning Display Toggle Options
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window sign markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window sign markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window sign markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window sign markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window sign markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window sign markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window color-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window color-line markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window color-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window color-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window color-line markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window color-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window color-column markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window color-column markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window color-column markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle Scala Window color-column markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle Scala Window color-column markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle Scala Window color-column markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window cursor-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window cursor-line markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window cursor-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window cursor-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window cursor-line markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window cursor-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window highlight-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window highlight-line markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window highlight-line markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window highlight-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window highlight-line markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window highlight-line markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-actwin-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window sign markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-actwin-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window sign markings.',
+            \ 'Called from ActWin. First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-actwin-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-actwin-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window sign markings.',
+            \ 'Called from ActWin.',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-map'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-scala-map',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Mapping to toggle ActWin Window sign markings.',
+            \ 'Called from Scala',
+            \ 'Uses nnoremap and nunmap.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-cmd'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-scala-cmd',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Command to toggle ActWin Window sign markings.',
+            \ 'Called from Scala First letter must be upper case.',
+            \ 'Uses command and delcommand.'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-toggle-scala-abbr'] = {
+        \ 'type': g:OPTION_LIST_OR_STRING_TYPE, 
+        \ 'kind': g:OPTION_CMD_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-toggle-scala-abbr',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Abbreviation to toggle ActWin Window sign markings.',
+            \ 'Called from Scala',
+            \ 'Uses cabbrev and cunabbrev.'
+          \ ]
+      \ }
+  
+  " show-errors-and_warning Display Color Options
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-error-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-error-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala two charcters text used for sign text',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-error-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-error-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign texthl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-error-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-error-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign linehl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-warn-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-warn-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala two charcters text used for sign text',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-warn-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-warn-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign texthl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-warn-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-warn-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign linehl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-info-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-info-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala two charcters text used for sign text',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-info-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-info-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign texthl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-info-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-info-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign linehl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-marker-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-marker-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala two charcters text used for sign text',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-marker-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-marker-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign texthl'.
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-sign-kinds-marker-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-sign-kinds-marker-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for sign linehl',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-error-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-error-text',
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-error-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-error-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-error-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-error-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-warn-text',
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-warn-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-warn-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-warn-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-info-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-info-text',
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-info-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-info-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-info-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-info-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-marker-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala two charcters text used for color-line text',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-marker-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line texthl'.
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-scala-color-line-kinds-marker-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-line-kinds-marker-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition or group name for color-line linehl',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-scala-color-column-color-column'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_KIND, 
+        \ 'parent': 'tailor-actwin-display-scala-color-column-color-column',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'Scala highlight definition for ColorColumn group.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-actwin-cursor-line-highlight'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-cursor-line-highlight',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition for CursorLine group.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-actwin-highlight-line-highlight'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-highlight-line-highlight',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition for highlight line group.'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-error-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-error-text',
+        \ 'description': [
+            \ 'ActWin two charcters text used for sign text',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-error-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-error-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign texthl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-error-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-error-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign linehl',
+            \ 'of kind "error".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-warn-text',
+        \ 'description': [
+            \ 'ActWin two charcters text used for sign text',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-warn-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign texthl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-warn-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-warn-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign linehl',
+            \ 'of kind "warn".'
+          \ ]
+      \ }
+
+
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-info-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-info-text',
+        \ 'description': [
+            \ 'ActWin two charcters text used for sign text',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-info-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-info-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign texthl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-info-linehl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-info-linehl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign linehl',
+            \ 'of kind "info".'
+          \ ]
+      \ }
+
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-text'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-marker-text',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin two charcters text used for sign text',
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-texthl'] = {
+        \ 'type': g:OPTION_STRING_TYPE, 
+        \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
+        \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-marker-texthl',
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'description': [
+            \ 'ActWin highlight definition or group name for sign texthl'.
+            \ 'of kind "marker".'
+          \ ]
+      \ }
+  let l:options['tailor-show-errors-and-warning-display-actwin-sign-kinds-marker-linehl'] = {
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_HIGHLIGHT_OR_GROUP_NAME_KIND, 
         \ 'parent': 'tailor-actwin-display-actwin-sign-kinds-marker-linehl',

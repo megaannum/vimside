@@ -339,7 +339,7 @@ let s:globals = {}
 let s:locals = {}
 
 " TODO maps from unique id -> actwin
-let s:uid_to_actwin = {}
+" let s:uid_to_actwin = {}
 
 " maps actwin buffer number to actwin
 let s:actwin_buffer_nr_to_actwin = {}
@@ -485,6 +485,7 @@ endfunction
 
 " MUST be called from local buffer
 function! s:MakeCmds(instance)
+call s:LOG("MakeCmds TOP")
   call s:MakeActWinMappings(a:instance)
   call s:MakeActWinBuiltinCommands(a:instance)
   " TODO abbr
@@ -492,6 +493,7 @@ function! s:MakeCmds(instance)
   call s:MakeScalaMappings(a:instance)
   call s:MakeScalaBuiltinCommands(a:instance)
   " TODO abbr
+call s:LOG("MakeCmds BOTTOM")
 endfunction
 
 " MUST be called from local buffer
@@ -503,14 +505,18 @@ endfunction
 
 " MUST be called from local buffer
 function! s:MakeActWinMappings(instance)
+call s:LOG("MakeActWinMappings TOP")
   if ! empty(a:instance.data.cmds.actwin.map)
+" call s:LOG("MakeActWinMappings not empty")
     for [l:key, l:value] in items(a:instance.data.cmds.actwin.map)
+" call s:LOG("MakeActWinMappings l:key=". l:key)
       let [l:fn, l:txt] = s:cmds_actwin_defs[l:key]
       for l:v in l:value
         execute 'nnoremap <script> <silent> <buffer> '. l:v .' :call <SID>'. l:fn .'()<CR>'
       endfor
     endfor
   endif
+call s:LOG("MakeActWinMappings BOTTOM")
 endfunction
 
 
@@ -652,21 +658,147 @@ endfunction
 " Main entry function
 " --------------------------------------------
 
+function! vimside#actwin#DisplayGlobalClose(type)
+call s:LOG("vimside#actwin#DisplayGlobalClose TOP")
+  if has_key(s:globals, a:type)
+    let l:instance = s:globals[a:type]
+    call g:VimsideActWinClose(l:instance.buffer_nr)
+  endif
+call s:LOG("vimside#actwin#DisplayGlobalClose Bottom")
+endfunction
+
 function! vimside#actwin#DisplayGlobal(type, data)
-  call s:DisplayLocal(a:type, a:data, 1)
+call s:LOG("vimside#actwin#DisplayGlobal TOP")
+  if len(a:data.entries) == 0
+call s:LOG("vimside#actwin#DisplayGlobal entries empty")
+    return
+  endif
+call s:LOG("vimside#actwin#DisplayGlobal type=". a:type)
+  let l:data = deepcopy(a:data)
+
+  if has_key(s:globals, a:type)
+
+    " already exists, see what the action is.
+    " action: create/modify/append create
+    let l:action = s:GetAction(l:data)
+call s:LOG("vimside#actwin#DisplayGlobal action=". l:action)
+    let l:instance = s:globals[a:type]
+
+    if l:action == 'm'
+      " modify
+      call s:Modify(l:instance.data, l:data)
+      " TODO
+      return
+    elseif l:action == 'a'
+      " append
+      call s:AppendEntries(l:instance.data, l:data)
+      " TODO
+      return
+    elseif l:action == 'r'
+      " replace
+      call s:ReplaceEntries(l:instance.data, l:data)
+      " TODO
+      return
+    else
+      " create
+      " it exist but must create anyway
+      let l:data.action = 'c'
+      let l:uid = s:NextUID()
+      let l:scala_buffer_name = bufname("%")
+      let l:scala_buffer_nr = bufnr("%")
+      let l:scala_win_nr = bufwinnr(l:scala_buffer_nr)
+      let l:instance = {
+          \ "is_global": 1,
+          \ "is_info_open": 0,
+          \ "scala_win_nr": l:scala_win_nr,
+          \ "scala_buffer_nr": l:scala_buffer_nr,
+          \ "scala_buffer_name": l:scala_buffer_name,
+          \ "tag": a:type,
+          \ "uid": l:uid,
+          \ "data": l:data
+        \ }
+
+      let s:globals[a:type] = l:instance
+      call s:Adjust(l:instance.data)
+    endif
+
+  else
+
+    " does not exist, must create it regardless of action
+    let l:data.action = 'c'
+    let l:uid = s:NextUID()
+    let l:scala_buffer_name = bufname("%")
+    let l:scala_buffer_nr = bufnr("%")
+    let l:scala_win_nr = bufwinnr(l:scala_buffer_nr)
+    let l:instance = {
+        \ "is_global": 1,
+        \ "is_info_open": 0,
+        \ "scala_win_nr": l:scala_win_nr,
+        \ "scala_buffer_nr": l:scala_buffer_nr,
+        \ "scala_buffer_name": l:scala_buffer_name,
+        \ "tag": a:type,
+        \ "uid": l:uid,
+        \ "data": l:data
+      \ }
+
+    let s:globals[a:type] = l:instance
+    call s:Adjust(l:instance.data)
+
+  endif
+  call s:DoDisplay(a:type, l:instance)
+
+  " call s:DoDisplay(a:type, a:data, 1)
 endfunction
+
 function! vimside#actwin#DisplayLocal(tag, data)
-  call s:DisplayLocal(a:tag, a:data, 0)
+call s:LOG("vimside#actwin#DisplayLocal TOP")
+  if len(a:data.entries) == 0
+call s:LOG("vimside#actwin#DisplayLocal entries empty")
+    return
+  endif
+call s:LOG("vimside#actwin#DisplayLocal tag=". a:tag)
+  let l:data = deepcopy(a:data)
+
+  " TODO for now just create it
+  let l:data.action = 'c'
+  let l:uid = s:NextUID()
+  let l:scala_buffer_name = bufname("%")
+  let l:scala_buffer_nr = bufnr("%")
+  let l:scala_win_nr = bufwinnr(l:scala_buffer_nr)
+  let l:instance = {
+      \ "is_global": 0,
+      \ "is_info_open": 0,
+      \ "scala_win_nr": l:scala_win_nr,
+      \ "scala_buffer_nr": l:scala_buffer_nr,
+      \ "scala_buffer_name": l:scala_buffer_name,
+      \ "tag": a:tag,
+      \ "uid": l:uid,
+      \ "data": l:data
+    \ }
+
+  let s:locals[a:tag] = l:instance
+  call s:Adjust(l:instance.data)
+
+  call s:DoDisplay(a:tag, l:instance)
+
+  " call s:DoDisplay(a:tag, a:data, 0)
 endfunction
-function! s:DisplayLocal(tag, data, is_global)
-call s:LOG("DisplayLocal TOP")
+
+function! s:DoDisplay(tag, instance)
+call s:LOG("DoDisplay TOP")
+  let l:instance = a:instance
+  let l:data = l:instance.data
+  let l:action = l:data.action
+
+if 0 " OLD
   let l:data = deepcopy(a:data)
   let l:scala_buffer_name = bufname("%")
   let l:scala_buffer_nr = bufnr("%")
   let l:scala_win_nr = bufwinnr(l:scala_buffer_nr)
-call s:LOG("DisplayLocal l:scala_buffer_nr=". l:scala_buffer_nr)
-call s:LOG("DisplayLocal l:scala_win_nr=". l:scala_win_nr)
+call s:LOG("DoDisplay l:scala_buffer_nr=". l:scala_buffer_nr)
+call s:LOG("DoDisplay l:scala_win_nr=". l:scala_win_nr)
 
+  " TODO remove l:scala_buffer_nr / a:tag on close
   if has_key(s:locals, l:scala_buffer_nr)
     let l:bnr_dic = s:locals[l:scala_buffer_nr]
     if has_key(l:bnr_dic, a:tag)
@@ -733,12 +865,13 @@ call s:LOG("DisplayLocal l:scala_win_nr=". l:scala_win_nr)
 
     let l:action = 'c'
   endif
-call s:LOG("DisplayLocal action=". l:action)
+
+call s:LOG("DoDisplay action=". l:action)
 
   " make adjustments, modification and replacements
   if l:action == 'c'
     " save instance by its uid
-    let s:uid_to_actwin[l:instance.uid] = l:instance
+    " let s:uid_to_actwin[l:instance.uid] = l:instance
     " create = new display
     call s:Adjust(l:instance.data)
   elseif l:action == 'm'
@@ -751,6 +884,7 @@ call s:LOG("DisplayLocal action=". l:action)
     " append entries
     call s:AppendEntries(l:instance.data, l:data)
   endif
+endif " OLD
 
   if l:action == 'c'
     let l:actwin =  l:data.actwin
@@ -758,7 +892,7 @@ call s:LOG("DisplayLocal action=". l:action)
 
     let l:actwin = l:instance.data.actwin
     if has_key(l:actwin, 'split')
-call s:LOG("DisplayLocal split")
+call s:LOG("DoDisplay split")
       let l:split = l:actwin.split
 
       " save current values
@@ -778,29 +912,29 @@ call s:LOG("DisplayLocal split")
       let &splitright = l:right
 
     elseif has_key(l:actwin, 'edit')
-call s:LOG("DisplayLocal edit")
+call s:LOG("DoDisplay edit")
       let l:edit = l:actwin.edit
       let l:cmd = l:edit.cmd
-call s:LOG("DisplayLocal l:cmd=". l:cmd)
-call s:LOG("DisplayLocal current buffer=". bufnr("%"))
+call s:LOG("DoDisplay l:cmd=". l:cmd)
+call s:LOG("DoDisplay current buffer=". bufnr("%"))
       " execute l:cmd .' '. l:winname
       execute l:cmd 
-call s:LOG("DisplayLocal current buffer=". bufnr("%"))
+call s:LOG("DoDisplay current buffer=". bufnr("%"))
 
     elseif has_key(l:actwin, 'tab')
-call s:LOG("DisplayLocal tab")
+call s:LOG("DoDisplay tab")
       let l:tab = l:actwin.tab
       let l:cmd = l:tab.cmd
       execute l:cmd .' '. l:winname
 
     endif
 
-    " save the buffer and actwin number
+    " save the actwin buffer and actwin number
     let l:instance.buffer_nr = bufnr("%")
     let l:instance.win_nr = bufwinnr(l:instance.buffer_nr)
-    let b:return_win_nr = l:scala_win_nr 
+    let b:return_win_nr = l:instance.scala_win_nr 
 
-call s:LOG("DisplayLocal l:instance.buffer_nr=". l:instance.buffer_nr)
+call s:LOG("DoDisplay l:instance.buffer_nr=". l:instance.buffer_nr)
     let b:buffer_nr = l:instance.buffer_nr
     let s:actwin_buffer_nr_to_actwin[l:instance.buffer_nr] = l:instance
 
@@ -823,7 +957,7 @@ let s:buf_change = 1
 
  echo  "Show cmds: <F2>"
 
-call s:LOG("DisplayLocal BOTTOM")
+call s:LOG("DoDisplay BOTTOM")
 endfunction
 
 
@@ -1930,7 +2064,9 @@ call s:LOG("s:ScalaDisableSigns TOP")
   call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
   let l:category = l:sign.category
-  call vimside#sign#ClearCategory(l:category)
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#ClearCategory(l:category)
+  endif
 
 call s:LOG("s:ScalaDisableSigns BOTTOM")
 endfunction
@@ -1938,7 +2074,10 @@ endfunction
 function! s:ScalaDestroySigns(instance)
 call s:LOG("s:ScalaDestroySigns TOP")
   let l:sign = a:instance.data.display.scala.sign
-  call vimside#sign#RemoveCategory(l:sign.category)
+  let l:category = l:sign.category
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#RemoveCategory(l:category)
+  endif
 call s:LOG("s:ScalaDestroySigns BOTTOM")
 endfunction
 
@@ -2064,7 +2203,9 @@ call s:LOG("s:ScalaEntryLeaveColorLine file=". l:file)
   let l:line = l:entry.line
   " call vimside#sign#UnPlaceFileByLine(l:file, l:category, l:kind, l:line)
   " call vimside#sign#UnPlaceFile(l:file, l:category, l:kind)
-  call vimside#sign#ClearCategory(l:category)
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#ClearCategory(l:category)
+  endif
 
 call s:LOG("s:ScalaEntryLeaveColorLine BOTTOM")
 endfunction
@@ -2101,7 +2242,10 @@ call s:LOG("s:ScalaDisableColorLine TOP")
   call s:DoToggleCmds(0, l:is_global, l:toggle, l:buffer_nr, l:scala_buffer_nr, l:funcname)
 
 
-  call vimside#sign#ClearCategory(l:color_line.category)
+  let l:category = l:color_line.category
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#ClearCategory(l:category)
+  endif
 
 call s:LOG("s:ScalaDisableColorLine BOTTOM")
 endfunction
@@ -2109,7 +2253,10 @@ endfunction
 function! s:ScalaDestroyColorLine(instance)
 call s:LOG("s:ScalaDestroyColorLine TOP")
   let l:color_line = a:instance.data.display.scala.color_line
-  call vimside#sign#RemoveCategory(l:color_line.category)
+  let l:category = l:color_line.category
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#RemoveCategory(l:category)
+  endif
 call s:LOG("s:ScalaDestroyColorLine BOTTOM")
 endfunction
 
@@ -2748,7 +2895,9 @@ call s:LOG("s:ActWinDestroySign TOP")
   let l:sign = a:instance.data.display.actwin.sign
   let l:category = l:sign.category
 
-  call vimside#sign#RemoveCategory(l:category)
+  if vimside#sign#HasCategory(l:category)
+    call vimside#sign#RemoveCategory(l:category)
+  endif
 endfunction
 
 " ============================================================================
@@ -2763,7 +2912,7 @@ let s:buf_change = 0
 
     if has_key(l:actwin, "map")
       let l:value = l:actwin.map
-call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
+" call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
       if a:create
         execute ":nnoremap <silent> <buffer> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
       else
@@ -2788,7 +2937,7 @@ call s:LOG("s:DoToggleCmds actwin.map(". l:value .")=". string(maparg(l:value, "
     endif
     if has_key(l:actwin, "abbr")
       let l:value = l:actwin.abbr
-call s:LOG("s:DoToggleCmds actwin.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
+" call s:LOG("s:DoToggleCmds actwin.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
       if a:create
         execute "cabbrev <silent> <buffer> ". l:value ." <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'call ". a:funcname ."(".  a:buffer_nr .")' : '' )<CR>"
       else
@@ -2803,7 +2952,7 @@ call s:LOG("s:DoToggleCmds actwin.abbr(". l:value .")=". string(maparg(l:value, 
 
     if has_key(l:scala, "map")
       let l:value = l:scala.map
-call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
+" call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n", 0, 1)))
       if (a:is_global)
         if a:create
           execute ":nnoremap <silent> ". l:value ." :call ". a:funcname ."(". a:buffer_nr .")<CR>"
@@ -2856,7 +3005,7 @@ call s:LOG("s:DoToggleCmds scala.map(". l:value .")=". string(maparg(l:value, "n
     endif
     if has_key(l:scala, "abbr")
       let l:value = l:scala.abbr
-call s:LOG("s:DoToggleCmds scala.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
+" call s:LOG("s:DoToggleCmds scala.abbr(". l:value .")=". string(maparg(l:value, "c", 1, 1)))
       if (a:is_global)
         if a:create
           " execute "cabbrev <silent> ". l:value ." 'call ". a:funcname ."(". a:buffer_nr .")'<CR>"
@@ -2980,6 +3129,13 @@ execute 'silent '. l:instance.scala_win_nr.'wincmd w'
   call s:CallOnCloseHandlers(l:instance)
 
   unlet s:actwin_buffer_nr_to_actwin[l:instance.buffer_nr]
+
+  if l:instance.is_global
+    unlet s:globals[l:instance.tag]
+  else
+    unlet s:locals[l:instance.tag]
+  endif
+
 call s:LOG("Close BOTTOM")
 endfunction
 
@@ -3137,10 +3293,14 @@ call s:LOG("s:OnEnterMouse: TOP")
   endif
 
   let l:line = line(".")
+call s:LOG("s:OnEnterMouse: l:line=". l:line)
+call s:LOG("s:OnEnterMouse: l:instance.first_buffer_line=". l:instance.first_buffer_line)
 
   if l:line > (l:instance.first_buffer_line - 1)
     let l:linenos = l:line - l:instance.first_buffer_line + 1
     let l:current_line = l:instance.current_line
+call s:LOG("s:OnEnterMouse: l:linenos=". l:linenos)
+call s:LOG("s:OnEnterMouse: l:current_line=". l:current_line)
     let l:current_entrynos = l:instance.linenos_to_entrynos[l:current_line-1]
     let l:entrynos = l:instance.linenos_to_entrynos[l:linenos-1]
 

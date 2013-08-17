@@ -138,19 +138,19 @@ endfunction
 
 " Face used for marking lines with breakpoints.
 let s:breakpoint_face = {
-                \ "background_dark": "DarkGreen"
+                \ "background_dark": "DarkGreen",
                 \ "background_light": "LightGreen"
                 \ }
 
 " Face used for marking lines with a pending breakpoints.
 let s:pending_breakpoint_face = {
-                \ "background_dark": "DarkGreen"
+                \ "background_dark": "DarkGreen",
                 \ "background_light": "LightGreen"
                 \ }
 
 " Face used for marking the current point of execution
 let s:marker_face = {
-                \ "background_dark": "DarkGoldenrod4"
+                \ "background_dark": "DarkGoldenrod4",
                 \ "background_light": "DarkGoldenrod2"
                 \ }
 
