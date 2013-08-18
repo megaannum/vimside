@@ -33,6 +33,9 @@ unit/regression tests in the future.
 Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. 
 
+Updated "sbt" project build.sbt example file and now allow Option
+enum values to be Vim patterns (e,g., vimside-scala-version == 2.10.*).
+
 ShowErrorAndWarning (Compiling by directly invoking the Scala compiler
 or via SBT) can use ActWin (the default) and is configurable with, again, 
 a myriad of Options. The PROPERTIES file contains the new Options

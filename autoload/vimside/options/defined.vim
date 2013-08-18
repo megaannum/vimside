@@ -18,9 +18,9 @@ function! s:MakeOptions()
   let l:options['vimside-scala-version'] = {
         \ 'type': g:OPTION_STRING_TYPE, 
         \ 'kind': g:OPTION_ENUM_KIND, 
-        \ 'enum': ['2.9.2', '2.10.0', '2.10.1'],
+        \ 'enum': ['2.9.2', '2.10.*', '2.11.*' ],
         \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'value': "2.9.2",
+        \ 'value': "2.10.2",
         \ 'description': [
             \ 'Supported Scala versions.'
         \ ]

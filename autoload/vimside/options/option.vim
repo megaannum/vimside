@@ -326,7 +326,7 @@ function! s:CheckEnumKind(key, def, value, errors)
   if has_key(a:def, 'enum')
     let enums = a:def.enum
     for e in enums
-      if e == a:value
+      if a:value =~ e
         return
       endif
     endfor
