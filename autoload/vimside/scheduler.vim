@@ -356,28 +356,28 @@ function! vimside#scheduler#ReplaceMotionJob(name, func, charcnt, repeat)
 endfunction
 
 function! vimside#scheduler#MotionTrigger()
-call s:LOG("MotionTrigger: TOP s:total_mcounter=". s:total_mcounter .", s:mcounter=". s:mcounter)
+" call s:LOG("MotionTrigger: TOP s:total_mcounter=". s:total_mcounter .", s:mcounter=". s:mcounter)
   let s:total_mcounter += 1
   if s:mcounter <= 0
     let l:sec = -1
     let l:ccc = s:total_mcounter
-call s:LOG("MotionTrigger: l:ccc=". l:ccc)
+" call s:LOG("MotionTrigger: l:ccc=". l:ccc)
     let l:js = s:jobs
-call s:LOG("MotionTrigger: len(jobs)=". len(l:js))
+" call s:LOG("MotionTrigger: len(jobs)=". len(l:js))
     let s:jobs = []
     let l:jobs = []
 
     let s:handling_jobs=1
     try
     for l:job in l:js
-call s:LOG("MotionTrigger: for l:job=". string(l:job))
+" call s:LOG("MotionTrigger: for l:job=". string(l:job))
       let l:cc = l:job[6]
       " is it a motion job
       if l:cc != -1
         if l:cc <= l:ccc
 " call s:LOG("MotionTrigger: job=". string(job))
           try
-call s:LOG("MotionTrigger: calling job")
+" call s:LOG("MotionTrigger: calling job")
             call l:job[1]()
           catch /.*/
             call s:ERROR("MotionTrigger: ". v:exception ." at ". v:throwpoint)
@@ -429,7 +429,7 @@ call s:LOG("MotionTrigger: calling job")
   else
     let s:mcounter -= 1
   endif
-call s:LOG("MotionTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
+" call s:LOG("MotionTrigger: BOTTOM len(s:jobs)=". len(s:jobs))
 endfunction
 
 function! vimside#scheduler#StartAutoMotion() 

@@ -1,7 +1,7 @@
 *vimside.txt*        For Vim version 7.3              Last change: 2012
 
 Author:      Richard Emberson 
-Version:     0.3.01
+Version:     0.4.00
 Title:       Vimside: Vim Scala IDE
 Homepage:    TODO
 
@@ -25,8 +25,9 @@ For Vim instructions on installing this 'txt' file, enter:
     2.5.2 Pathogen                                 |vimside-pathogen|
   3. Test Configure                              |vimside-test-configure|
   4. Running                                     |vimside-running|
-    4.1 Project Config
-    4.2 Start and Stop
+    4.1 User Config
+    4.2 Project Config
+    4.3 Start and Stop
   5. Options                                     |vimside-options|
     5.1 Dynamic vs Static
     5.2 Vimside Configuration
@@ -406,21 +407,52 @@ existing project.
 ==============================================================================
 4. Running                                                    *vimside-running*
 
-4.1 Project Config
+Vimside can be configured with the setting of Options both at a per-User
+level and at a per-Project level. A User can have global preferences
+and then on a project by project basis further tailor those preferences.
+[Currently, all projects must have the same name for the file that
+defines its local Option/Properties ... and this have to be fixed somehow. ]
 
-There is a single file to configure Vimside Options under '.vim', 
-'data/vimside/options_user.vim'. This is sufficient if you only have
-a single project on your machine. But, if you have or plan to have more
+User specific Options would typically deal with "ergonomic" Options, e.g,,
+what colors to display, what key mapping to commands to use, etc.
+While Project Options (whether the Project is shared with multiple
+developers or just the single User) might deal with Java and Scala
+version, Ensime version, code formatting options, etc. which might
+differ from Project to Project.
+
+A Property key is simply an Option key with the '-' replaced with '.'.
+As will be noted, I use the Property/Option key representations
+interchangeable throughout this text.
+
+4.1 User Config
+
+In a User's Vimside Home directory ("$HOME/.vim/data/vimside" if installed
+in ".vim" or, for instance, "$HOME/.vim/vim-addons/vimside/data/vimside"
+with VAM) a User can create a vimside.properties (or options_user.vim) file
+(or both). The the example file example_vimside.properties and 
+example_options_user.vim, respectively, as examples.
+
+4.2 Project Config
+
+There need only be a single file to configure Vimside via Properties
+(Options) in Vimside Home ($HOME/.vim/data/vimside.properties
+or $HOME/.vim/data/options_user.vim) if you only have a single
+project on your machine.  But, if you have or plan to have more
 than one projects on your machine you might want to have project
 specific option configuration files. There are two Options that 
 control this.
 
-The first Option is: 'vimside-project-options-enabled' and if 
-true (default is false), then Vimside will look for a configuration
-file with name given by the second Option: 'vimside-project-options-file-name'.
+The first Option is: 'vimside-project-options-enabled' (default false)
+(Property: 'vimside-project-properties-enabled' default is true)) and if 
+it is true (true==1 and false==0), then Vimside will look for 
+a configuration file with name given by the 
+second Option: 'vimside-project-options-file-name'
+(second Property: 'vimside-project-properties-file-name').
 
 The default value of the 'vimside-project-options-file-name' Option
 is 'options_project.vim'.
+The default value of the 'vimside-project-properties-file-name' Option
+is 'project.peroperties'.
 
 While in the 'options_user.vim' file, an Option value is set using
 the 'Set' function, e.g,:
@@ -446,79 +478,11 @@ in a project file there might be:
   call owner.Update("ensime-dist-dir", "ensime_2.10.0-RC3-0.9.8.2")
   call owner.Update("ensime-config-file-name", "_ensime")
 
+On the other hand, for user and project properties, one simply have to 
+define the properties; there is no notion of "Set" versus "Update".
 
 
-An alternative approach is to also treat the 'data/vimside/' test code
-as also a project, in that, it has its own 'options_project.vim' file.
-To do this one must do the following:
-
-1) In the 'options_user.vim' file enable project local options files:
-
-    call owner.Set("vimside-project-options-enabled", 1)
-
-While one can also uncomment/add addition option value setting,
-if one wants all projects to share some behavior or to set some
-default behavior (which can be over-ridden on a project-by-project
-basis), but enabling the above Option is all that is need in this file.
-
-2) In the 'data/vimside' directory create a 'options_project.vim' such as:
-
-    " full path to this file
-    let s:full_path=expand('<sfile>:p')
-
-    " full path to this file's directory
-    let s:full_dir=fnamemodify(s:full_path, ':h')
-
-    function! g:VimsideOptionsProjectLoad(owner)
-      let owner = a:owner
-
-      "--------------
-      " Enable logging
-      call owner.Set("ensime-log-enabled", 1)
-      call owner.Set("vimside-log-enabled", 1)
-      "--------------
-
-      "--------------
-      " Defined Java versions: '1.5', '1.6', '1.7'
-      " Defined Scala versions: '2.9.2', '2.10.0'
-      " Minor version numbers not needed
-      " Scala version MUST match 'ensime-dist-dir' used.
-      call owner.Set("vimside-java-version", "1.6")
-      call owner.Set("vimside-scala-version", "2.9.2")
-      "--------------
-      
-      "--------------
-      " Which build version of Ensime to use. 
-      call owner.Set("ensime-dist-dir", "ensime_2.9.2-0.9.8.9")
-      "--------------
-
-      "--------------
-      " The Ensime Config information is in a file called 'ensime_config.vim'
-      call owner.Set("ensime-config-file-name", "ensime_config.vim")
-      "--------------
-
-      "--------------
-      " Vimside uses Forms library 
-      call owner.Set("forms-use", 1)
-      "--------------
-
-      "--------------
-      " Hover Options
-      call owner.Set("vimside-hover-balloon-enabled", 0)
-      call owner.Set("vimside-hover-term-balloon-enabled", 0)
-      "--------------
-    endfunction
-
-This will instruct Vimside to use the "test" source code and configuration
-files.
-
-3) In all your other projects on this machine, create their own 
-project-specific 'options_project.vim' files.
-
-This is a very flexible way of configuring Vimside.
-
-
-4.2 Start and Stop
+4.3 Start and Stop
 
 To run Vimside one simply starts Vim and then start the Ensime Server. This
 is done by executing the command:
@@ -572,9 +536,18 @@ after exiting Vim, you can simply kill it.
 ==============================================================================
 5. Options                                                    *vimside-options*
 
-Vimside has many Options, currently, close to 100. The reason for such
-a large number of Options is to allow for a flexible architecture and
-to allow the user to tailor Vimside. 
+Vimside has many Options. See the PROPERTIES file included in the
+distribution of all of them (represented as properties). 
+One can also get a list of the current properties and their values
+by calling:
+
+  :call vimside#options#manager#OutputProperties('PROPERTIES', 1)
+
+which will generate a new PROPERTIES file (1 forces an over-write of
+any existing PROPERTIES file).
+
+The reason for such a large number of Options is to allow for 
+a flexible architecture and to allow the user to tailor Vimside. 
 
 Some Options will most likely rarely be modified. For other Options, as the 
 user become more familiar with Vimside, they will be modified by the user to 
@@ -610,6 +583,7 @@ displaying all of the 'dynamic' Options. As an Editor, it is only the
 Vimside session.
 
 5.2 Vimside Configuration
+  Refer to the PROPERTIES file for up-to-date list.
 
   'vimside-java-version'
   'vimside-scala-version'
@@ -622,9 +596,11 @@ Vimside session.
   'vimside-use-cwd-as-output-dir'
 
 5.2 Test Configuration
+  Refer to the PROPERTIES file for up-to-date list.
 
 
 5.3 Ensime Configuration
+  Refer to the PROPERTIES file for up-to-date list.
 
   'ensime-config-file-name'
   'ensime-install-path'
@@ -641,6 +617,7 @@ Vimside session.
   'ensime-shutdown-on-vim-exit'
 
 5.4 Swank Caller, Handler and Event
+  Refer to the PROPERTIES file for up-to-date list.
 
   'swank-rpc-builder-add-files-handler'
   'swank-rpc-builder-add-files-caller'
@@ -770,15 +747,18 @@ Vimside session.
   'swank-debug-trigger-thread-death'
 
 5.5 Forms
+  Refer to the PROPERTIES file for up-to-date list.
 
   'forms-use'
 
 5.6 Implementation to Use
+  Refer to the PROPERTIES file for up-to-date list.
 
   'vimside-hover-balloon-enabled'
   'vimside-hover-term-balloon-enabled'
 
 5.7 Command Tailoring
+  Refer to the PROPERTIES file for up-to-date list.
 
   'tailor-forms-sourcebrowser-open-in-tab'
 
@@ -843,6 +823,7 @@ Vimside session.
   'tailor-show-doc-android-func-ref'
 
 5.7 Scheduler
+  Refer to the PROPERTIES file for up-to-date list.
 
   'scheduler-not-expecting-anything-read-time-out'
   'scheduler-not-expecting-anything-update-time'
@@ -1564,6 +1545,14 @@ rr = {
 
 ==============================================================================
 11. Release notes                                       *vimside-release-notes*
+0.4.00   - Snapshot
+  Added ActWin and made default for both use-of-symbol-at-point and
+    compiling with Ensime and SBT. Numerous configuration Options.
+  Added ability to set Options using "java-like" properties files. Simpler
+    than using the Options base approach (although, Options are still
+    used internally). Configuring with the existing options-dot-vim files
+    is still supported, but, if the properties way works out, I expect 
+    the Options way will be deprecated.
 0.3.02   - Snapshot
   Just checking is some work in progress.
 0.3.01   - Fix: ~

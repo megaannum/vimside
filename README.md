@@ -30,6 +30,13 @@ unit/regression tests in the future.
 
 ## Latest checkin
 
+Now Vimside supports either initialization with the Option files
+'options_user.vim' and a project specific options file (and/) or
+with Properties file 'vimside.properties' and a project specific
+properties file. See the 'data/vimside/PROPERTIES' file for
+available Properties (or, changing '.' to '-', Options).
+Also, bumped (after a long time, the version number.
+
 Just checking in of a snapshot of work in progess: the actwin.vim
 (ActionWindow) code. 
 

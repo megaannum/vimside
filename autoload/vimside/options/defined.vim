@@ -29,9 +29,17 @@ function! s:MakeOptions()
   let l:options['vimside-project-options-enabled'] = {
         \ 'type': g:OPTION_BOOLEAN_TYPE,
         \ 'scope': g:OPTION_STATIC_SCOPE, 
-        \ 'value': 1, 
+        \ 'value': 0, 
         \ 'description': [
             \ 'Load a project-local user options file.'
+        \ ]
+      \ }
+  let l:options['vimside-project-properties-enabled'] = {
+        \ 'type': g:OPTION_BOOLEAN_TYPE,
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': 1, 
+        \ 'description': [
+            \ 'Load a project-local user properties file.'
         \ ]
       \ }
   let l:options['vimside-project-options-file-name'] = {
@@ -41,6 +49,15 @@ function! s:MakeOptions()
         \ 'value': "options_project.vim",
         \ 'description': [
             \ 'File name of a project-local options file.'
+        \ ]
+      \ }
+  let l:options['vimside-project-properties-file-name'] = {
+        \ 'type': g:OPTION_STRING_TYPE,
+        \ 'kind': g:OPTION_FILE_NAME_KIND, 
+        \ 'scope': g:OPTION_STATIC_SCOPE, 
+        \ 'value': "project.properties",
+        \ 'description': [
+            \ 'File name of a project-local property file.'
         \ ]
       \ }
 
