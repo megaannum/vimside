@@ -32,21 +32,35 @@ unit/regression tests in the future.
 
 Snapshot of debug code (only some works currently).
 From project/simple edit the new Main.scala class:
- vi src/main/scala/com/megaannum/Main.scala
+
+    vi src/main/scala/com/megaannum/Main.scala
+
 Start Vimside:
- <Leader>vs
+
+    \<Leader>vs
+
 After Vimside is up, build the code:
- <Leader>vbb
+
+    \<Leader>vbb
+
 Then start the debugger:
-  <Leader>dd
+
+    \<Leader>dd
+
 Enter: 
-   com.megaannum.Main
+
+    com.megaannum.Main
+
 as the class to run.
 Goto some line and set a breakpoint:
-  <Leader>db
+
+    \<Leader>db
+
 That much works.
 To stop be debugging session use:
-  <Leader>dq
+
+    \<Leader>dq
+
 Note that be background debug Java process is NOT removed.
 Do not know why at this point so you will have to kill it
 manually.  Like I said, only some of it works.
