@@ -70,17 +70,17 @@ function! vimside#util#GotoSourceLocation(dic)
     call s:ERROR("vimside#util#GotoSourceLocation no file attribute") 
     return
   else
-    let l:file = fnameescape(fnamemodify(dic['file'], ':p'))
+    let l:file = fnameescape(fnamemodify(a:dic['file'], ':p'))
   endif
   if has_key(a:dic, 'line')
-    let l:line = dic['line']
-    if has_key(a:dic, 'line')
+    let l:line = a:dic['line']
+    if has_key(a:dic, 'column')
       let l:column = a:dic['column']
     else
       let l:column = 0
     endif
   elseif  has_key(a:dic, 'offset')
-    let l:offset = dic['offset']
+    let l:offset = a:dic['offset']
     let [l:line, l:column] = vimside#util#GetLineColumnFromOffset(l:offset)
   else
     call s:ERROR("vimside#util#GotoSourceLocation no line or offset attribute") 

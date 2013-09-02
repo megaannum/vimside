@@ -1099,6 +1099,7 @@ endfunction
 
 " (:debug-event (:type ....))
 function! g:DebugEventHandler(keyword, ...)
+call s:LOG("g:DebugEventHandler a:keyword=". a:keyword) 
   let g:vimside.status.debug_event += 1
   " call g:vimside.trigger.debug_event(a:000)
 
@@ -1106,12 +1107,35 @@ function! g:DebugEventHandler(keyword, ...)
     call s:ERROR("DebugEventHandler No arguments". string(a:keyword)) 
 
   elseif a:0 == 1
-    let [ok, kw_dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:1) 
-    if !ok
-      call s:ERROR("DebugEventHandler failure to create kw dict ". kw_dic) 
+call s:LOG("g:DebugEventHandler a:1=". string(a:1)) 
+if 0 " XXXX
+    let [found, value2] =  vimside#sexp#Get_ListValue(a:1) 
+    if found
+call s:LOG("g:DebugEventHandler value2=". string(value2)) 
+      let [ok, kw_dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(value2) 
+call s:LOG("g:DebugEventHandler kw_dic=". string(kw_dic)) 
+      if !ok
+        call s:ERROR("DebugEventHandler failure to create kw dict ". kw_dic) 
+      else
+        let DB_handler = get(g:vimside.debug_event_handlers, ':type', g:vimside.unknown_debug_handler)
+        call DB_handler(kw_dic)
+      endif
+
+call s:LOG("g:DebugEventHandler return") 
+return
     else
-      let DB_handler = get(g:vimside.debug_event_handlers, ':type', g:vimside.unknown_debug_handler)
-      call DB_handler(kw_dic)
+      call s:ERROR("DebugEventHandler: getting a:1 ". string(a:1)) 
+    endif
+endif " XXXX
+
+    let [ok, kw_dic] = vimside#sexp#Convert_KeywordValueList2Dictionary(a:1) 
+call s:LOG("g:DebugEventHandler kw_dic=". string(kw_dic)) 
+    if !ok
+      call s:ERROR("DebugEventHandler failure to create kw dict ". string(kw_dic)) 
+    else
+      let l:type = kw_dic[':type']
+      let l:DB_handler = get(g:vimside.debug_event_handlers, l:type, g:vimside.unknown_debug_handler)
+      call l:DB_handler(kw_dic)
     endif
   else
     call s:ERROR("DebugEventHandler Too may arguments". string(a:keyword) . ", args=" . string(a:000)) 
@@ -1198,7 +1222,7 @@ function! g:DeathDebugHandler(kw_dic)
     let g:vimside.debug_trigger.death = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-debug-trigger-death')
   endif
 
-  call g:vimside.debug_trigger.death()
+  call g:vimside.debug_trigger.death(a:kw_dic)
 endfunction
 
 
@@ -1212,7 +1236,7 @@ function! g:StartDebugHandler(kw_dic)
     let g:vimside.debug_trigger.start = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-debug-trigger-start')
   endif
 
-  call g:vimside.debug_trigger.start()
+  call g:vimside.debug_trigger.start(a:kw_dic)
 endfunction
 
 
@@ -1223,7 +1247,7 @@ function! g:DisconnectDebugHandler(kw_dic)
     let g:vimside.debug_trigger.disconnect = vimside#swank#rpc#util#LoadFuncrefFromOption('swank-debug-trigger-disconnect')
   endif
 
-  call g:vimside.debug_trigger.disconnect()
+  call g:vimside.debug_trigger.disconnect(a:kw_dic)
 endfunction
 
 

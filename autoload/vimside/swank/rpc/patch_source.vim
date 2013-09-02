@@ -43,11 +43,8 @@ call s:LOG("patch_source TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  call vimside#ensime#swank#dispatch(l:rr)
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-patch-source-handler'
-  call s:ERROR(msg)
-  echoerr msg
 
 call s:LOG("patch_source BOTTOM") 
 endfunction

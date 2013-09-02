@@ -608,6 +608,18 @@ function! s:Clear(linenos, tagtype, tag, category)
 endfunction
 
 " return 0 or 1
+function! vimside#sign#HasCategoryKind(category, kind)
+
+  if ! has_key(s:categories, a:category)
+    return 0
+  endif
+  let l:cdata = s:categories[a:category]
+  let l:kinds = l:cdata['kinds']
+  return has_key(l:kinds, a:kind) 
+
+endfunction
+
+" return 0 or 1
 function! vimside#sign#ClearKind(category, kind)
   if ! has_key(s:categories, a:category)
     echo "ClearKind Bad Category: ". a:category

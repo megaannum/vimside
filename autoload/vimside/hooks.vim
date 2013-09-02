@@ -88,10 +88,19 @@ function! vimside#hooks#ClearHook(category, Hook)
   let l:cat_hooks = s:hooks_categories[a:category]
   let l:len = len(l:cat_hooks)
 
-  let hookname = String(a:Hook)
-  call filter(l:cat_hooks, 'string(v:val) !='. hookname)
+  let hookname = string(a:Hook)
+  let l:ch = []
 
-  return l:len != len(l:cat_hooks)
+  " call filter(l:cat_hooks, 'string(v:val) !='. hookname)
+  
+  for Hook in l:cat_hooks
+    if string(Hook) != hookname
+      call add(l:ch, HOOK)
+    endif
+  endfor
+  let s:hooks_categories[a:category] = l:ch
+
+  return l:len != len(l:ch)
 
 endfunction
 

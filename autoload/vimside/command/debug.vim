@@ -10,9 +10,19 @@
 " Intro: {{{1
 " ============================================================================
 
+" TODO
+"
+" have to reenter classname and args
+" Not Implemented Yet:swank-rpc-debug-stop-handler
+" DONE ???
+" kill VM on Sever shutdown
+"
+"
+
 let s:LOG = function("vimside#log#log")
 let s:ERROR = function("vimside#log#error")
 
+let s:category = 'Debug'
 
 let s:is_debug_init = 0
 
@@ -57,83 +67,58 @@ endfunction
 " Sign
 " ==============================================
 
+function! s:GetOption(option, defaultvalue)
+  let [l:found, l:value ] = g:vimside.GetOption(a:option)
+  if l:found
+    return l:value
+  else
+    call s:WARN("vimside#command#debug s:GetOption: Option not found: ". a:option)
+    return a:defaultvalue 
+  endif
+endfunction
+
 function! s:InitSign()
 
-  let [l:found, l:sign_debug_active_linehl] = g:vimside.GetOption('sign-debug-active-linehl')
-  if ! found
-    throw "Option not found: sign-debug-active-linehl"
+  if ! vimside#sign#HasCategory(s:category)
+
+    let l:sign_debug_active_linehl = s:GetOption('sign-debug-active-linehl', "")
+    let l:sign_debug_active_text = s:GetOption('sign-debug-active-text', '')
+    let l:sign_debug_active_texthl = s:GetOption('sign-debug-active-texthl', '')
+    let l:sign_debug_pending_linehl = s:GetOption('sign-debug-pending-linehl', '')
+    let l:sign_debug_pending_text = s:GetOption('sign-debug-pending-text', '')
+    let l:sign_debug_pending_texthl = s:GetOption('sign-debug-pending-texthl', '')
+    let l:sign_debug_marker_linehl = s:GetOption('sign-debug-marker-linehl', '')
+    let l:sign_debug_marker_text = s:GetOption('sign-debug-marker-text', '')
+    let l:sign_debug_marker_texthl = s:GetOption('sign-debug-marker-texthl', '')
+
+    let l:sign = {}
+    let l:sign['category'] = s:category
+    let l:sign['abbreviation'] = 'db'
+    let l:kinds = {}
+    let l:sign['kinds'] = l:kinds
+
+    let l:kdata = {}
+    let l:kdata['linehl'] = l:sign_debug_active_linehl
+    let l:kdata['texthl'] = l:sign_debug_active_texthl
+    let l:kdata['text'] = strpart(l:sign_debug_active_text, 0, 2)
+    let l:kinds['active'] = l:kdata
+
+    let l:kdata = {}
+    let l:kdata['linehl'] = l:sign_debug_pending_linehl
+    let l:kdata['texthl'] = l:sign_debug_pending_texthl
+    let l:kdata['text'] = strpart(l:sign_debug_pending_text, 0, 2)
+    let l:kinds['pending'] = l:kdata
+
+    let l:kdata = {}
+    let l:kdata['linehl'] = l:sign_debug_marker_linehl
+    let l:kdata['texthl'] = l:sign_debug_marker_texthl
+    let l:kdata['text'] = strpart(l:sign_debug_marker_text, 0, 2)
+    let l:kinds['marker'] = l:kdata
+
+    let sign['ids'] = {}
+
+    call vimside#sign#AddCategory(s:category, l:sign)
   endif
-
-  let [l:found, l:sign_debug_active_text] = g:vimside.GetOption('sign-debug-active-text')
-  if ! found
-    throw "Option not found: sign-debug-active-text"
-  endif
-
-  let [l:found, l:sign_debug_active_texthl] = g:vimside.GetOption('sign-debug-active-texthl')
-  if ! found
-    throw "Option not found: sign-debug-active-texthl"
-  endif
-
-
-  let [l:found, l:sign_debug_pending_linehl] = g:vimside.GetOption('sign-debug-pending-linehl')
-  if ! found
-    throw "Option not found: sign-debug-pending-linehl"
-  endif
-
-  let [l:found, l:sign_debug_pending_text] = g:vimside.GetOption('sign-debug-pending-text')
-  if ! found
-    throw "Option not found: sign-debug-pending-text"
-  endif
-
-  let [l:found, l:sign_debug_pending_texthl] = g:vimside.GetOption('sign-debug-pending-texthl')
-  if ! found
-    throw "Option not found: sign-debug-pending-texthl"
-  endif
-
-  let [l:found, l:sign_debug_marker_linehl] = g:vimside.GetOption('sign-debug-marker-linehl')
-  if ! found
-    throw "Option not found: sign-debug-marker-linehl"
-  endif
-
-  let [l:found, l:sign_debug_marker_text] = g:vimside.GetOption('sign-debug-marker-text')
-  if ! found
-    throw "Option not found: sign-debug-marker-text"
-  endif
-
-  let [l:found, l:sign_debug_marker_texthl] = g:vimside.GetOption('sign-debug-marker-texthl')
-  if ! found
-    throw "Option not found: sign-debug-marker-texthl"
-  endif
-
-  let name = 'Debug'
-  let cdata = {}
-  let cdata['name'] = name
-  let cdata['abbreviation'] = 'db'
-  let kinds = {}
-  let cdata['kinds'] = kinds
-
-  let kdata = {}
-  let kdata['linehl'] = l:sign_debug_active_linehl
-  let kdata['texthl'] = l:sign_debug_active_texthl
-  let kdata['text'] = strpart(l:sign_debug_active_text, 0, 2)
-  let kinds['active'] = kdata
-
-  let kdata = {}
-  let kdata['linehl'] = l:sign_debug_pending_linehl
-  let kdata['texthl'] = l:sign_debug_pending_texthl
-  let kdata['text'] = strpart(l:sign_debug_pending_text, 0, 2)
-  let kinds['pending'] = kdata
-
-  let kdata = {}
-  let kdata['linehl'] = l:sign_debug_marker_linehl
-  let kdata['texthl'] = l:sign_debug_marker_texthl
-  let kdata['text'] = strpart(l:sign_debug_marker_text, 0, 2)
-  let kinds['marker'] = kdata
-
-  let cdata['ids'] = {}
-
-  " let s:categories[name] = cdata
-  call vimside#sign#AddCategory(name, cdata)
 endfunction
 
 " Face used for marking lines with breakpoints.
@@ -154,48 +139,64 @@ let s:marker_face = {
                 \ "background_light": "DarkGoldenrod2"
                 \ }
 
-function! s:debug_create_breakpoint_overlays(bps, kind) 
+function! s:debug_create_breakpoint_overlays(bplist, kind) 
 call s:LOG("g:debug_create_breakpoint_overlays: TOP")
   let l:list = []
-  for bp in a:bps
+  for bp in a:bplist
     let l:file = bp[":file"]
     let l:line = bp[":line"]
-    call append(l:list, { "file": l:file, "line": l:line }}
+call s:LOG("g:debug_create_breakpoint_overlays: file=". l:file .", line=" . l:line)
+    call add(l:list, { "file": l:file, "line": l:line })
   endfor
-  call vimside#sign#PlaceMany(l:list, 'Debug', a:kind)
+  call vimside#sign#PlaceMany(l:list, s:category, a:kind)
 
 call s:LOG("g:debug_create_breakpoint_overlays: BOTTOM")
 endfunction
 
 " Clear all Debug signs
 function! s:db_clear_all_overlays()
-  call vimside#sign#ClearCategory('Debug')
+  if vimside#sign#HasCategory(s:category)
+    call vimside#sign#ClearCategory(s:category)
+  endif
 endfunction
 
 " Remove all overlays that ensime-debug has created
 function! s:db_clear_breakpoint_overlays()
-  call vimside#sign#ClearKind('Debug', 'active')
-  call vimside#sign#ClearKind('Debug', 'pending')
+call s:LOG("s:db_clear_breakpoint_overlays: TOP")
+
+  if vimside#sign#HasCategoryKind(s:category, 'active')
+    call vimside#sign#ClearKind(s:category, 'active')
+  endif
+
+  if vimside#sign#HasCategoryKind(s:category, 'pending')
+    call vimside#sign#ClearKind(s:category, 'pending')
+  endif
+
+call s:LOG("s:db_clear_breakpoint_overlays: BOTTOM")
 endfunction
 
 " Remove all overlays that ensime-debug has created
 function! s:db_clear_marker_overlays()
-  call vimside#sign#ClearKind('Debug', 'marker')
+  if vimside#sign#HasCategoryKind(s:category, 'marker')
+    call vimside#sign#ClearKind(s:category, 'marker')
+  endif
 endfunction
 
 function! s:debug_set_marker(line, file)
+call s:LOG("s:debug_set_marker: TOP line=". a:line ." file=". a:file)
   call s:db_clear_marker_overlays()
 
   " TODO Option tailor
   let l:dic = { 
          \ "line": a:line, 
          \ "file": a:file,
-         \ "location": "same_window"
+         \ "location": "same_window",
          \ "edit_existing": 0
          \ }
-  vimside#util#GotoSourceLocation(l:dic)
+  call vimside#util#GotoSourceLocation(l:dic)
 
-  call vimside#sign#PlaceFile(a:line, a:file, 'Debug', 'marker')
+  call vimside#sign#PlaceFile(a:line, a:file, s:category, 'marker')
+call s:LOG("s:debug_set_marker: BOTTOM")
 endfunction
 
 " ==============================================
@@ -205,18 +206,20 @@ endfunction
 " Get the command needed to launch a debugger, including all
 " the current project's dependencies. 
 " Returns list of form [cmd [arg]*]
+
 function! s:get_command_line()
   let l:prompt = "Qualified name of class to debug: "
   " NOTE: no command completion used currently see command-completion-custom
-  let l:cmd_line = input(l:prompt, s:default_main_class)
+  let l:main_class = input(l:prompt, s:default_main_class)
 
   let l:prompt = "CommandLine arguements: "
   let l:debug_args = input(l:prompt, s:default_main_args)
 
-  let s:default_main_class = l:cmd_line
+  let s:default_main_class = l:main_class
   let s:default_main_args = l:debug_args
 
-  return l:cmd_line ."  ". l:debug_args
+  let l:cmd_full = l:main_class ."  ". l:debug_args
+  return substitute(l:cmd_full, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 
 
@@ -321,28 +324,50 @@ endfunction
 " Start and run the debugger.
 function! vimside#command#debug#Start()
 call s:LOG("vimside#command#debug#Start: TOP")
+" TODO get root path
   let l:cmd_line = s:get_command_line()
 
-  let dic = {
-        \ 'handler': {
-        \   'ok': function("g:debug_start_success_callback"),
-        \   'abort': function("g:debug_start_abort_callback")
-        \ },
-        \ 'args': {
-        \   "cmd_line": l:cmd_line
-        \ }
-        \ }
-  call vimside#swank#rpc#debug_start#Run(dic)
+  if l:cmd_line != ''
+
+    let dic = {
+          \ 'handler': {
+          \   'ok': function("g:debug_start_success_callback"),
+          \   'abort': function("g:debug_start_abort_callback")
+          \ },
+          \ 'args': {
+          \   "cmd_line": l:cmd_line
+          \ }
+          \ }
+    call vimside#swank#rpc#debug_start#Run(dic)
+  else
+    let l:msg = "No command line entered"
+    call vimside#cmdline#Display(l:msg)
+  endif
 call s:LOG("vimside#command#debug#Start: BOTTOM")
 endfunction
 
 function! g:debug_start_success_callback(dic)
 call s:LOG("g:debug_start_success_callback: TOP")
-  let l:msg = "Starting debug VM..."
-  call vimside#cmdline#Display(l:msg)
+call s:LOG("g:debug_start_success_callback: dic=". string(a:dic))
+  let l:status = a:dic[':status']
+call s:LOG("g:debug_start_success_callback: status=". string(l:status))
 
-  call append(s:db_thread_suspended_hooks, g:db_update_backtraces)
-  call append(s:db_net_process_close_hooks, g:db_connection_closed)
+  if l:status == "error"
+    let l:msg = "Error occurred during VM Debug startup: " . a:dic.details
+    call vimside#cmdline#Display(l:msg)
+
+  elseif l:status == "success"
+    let l:msg = "Starting debug VM..."
+    call vimside#cmdline#Display(l:msg)
+
+    call add(s:db_thread_suspended_hooks, function("g:db_update_backtraces"))
+    call add(s:db_net_process_close_hooks, function("g:db_connection_closed"))
+
+    call vimside#hooks#AddHook('PreShutDown', function("vimside#command#debug#Quit"))
+
+  else
+    call s:ERROR("g:debug_start_success_callback: Unknown status=". string(l:status))
+  endif
 
 call s:LOG("g:debug_start_success_callback: BOTTOM")
 endfunction
@@ -358,6 +383,7 @@ endfunction
 " Attach
 " ==============================================
 
+" Attach to a debug VM"
 function! vimside#command#debug#Attach()
 call s:LOG("vimside#command#debug#Attach: TOP")
   let l:hostname = s:debug_get_hostname()
@@ -383,8 +409,8 @@ call s:LOG("g:debug_attach_success_callback: TOP")
   let l:msg = "Attaching to target VM..."
   call vimside#cmdline#Display(l:msg)
 
-  call append(s:db_thread_suspended_hooks, g:db_update_backtraces)
-  call append(s:db_net_process_close_hooks, g:db_connection_closed)
+  call add(s:db_thread_suspended_hooks, function("g:db_update_backtraces"))
+  call add(s:db_net_process_close_hooks, function("g:db_connection_closed"))
 
 call s:LOG("g:debug_attach_success_callback: BOTTOM")
 endfunction
@@ -413,13 +439,19 @@ call s:LOG("vimside#command#debug#Run: TOP")
 call s:LOG("vimside#command#debug#Run: BOTTOM")
 endfunction
 
-function! g:debug_active_vm_success_callback(dic)
+function! g:debug_active_vm_success_callback(list)
 call s:LOG("g:debug_active_vm_success_callback: TOP")
-call s:LOG("g:debug_active_vm_success_callback: dic=". string(a:dic))
-  if a:dic == "nil"
-    call vimside#command#debug#Start()
+call s:LOG("g:debug_active_vm_success_callback: list=". string(a:list))
+  if type(a:list) != type([])
+    call s:ERROR("g:debug_active_vm_success_callback: not a list=". string(a:list))
+  elseif len(a:list) != 1
+    call s:ERROR("g:debug_active_vm_success_callback: list ". string(a:list) ." length not 1: ". len(a:list))
   else
-    call s:debug_run()
+    if a:list[0] == 1
+      call s:debug_run()
+    else
+      call vimside#command#debug#Start()
+    endif
   endif
 call s:LOG("g:debug_active_vm_success_callback: BOTTOM")
 endfunction
@@ -443,7 +475,7 @@ endfunction
 " Set Breakpoint
 " ==============================================
 
-" Set a breakpoint.
+" Set a breakpoint in the current source file at point.
 function! vimside#command#debug#SetBreakpoint()
 call s:LOG("vimside#command#debug#SetBreakpoint: TOP")
   let [found, l:cfile] = vimside#util#GetCurrentFilename()
@@ -476,14 +508,19 @@ endfunction
 
 " Refresh all breakpoints from server.
 function! s:debug_refresh_breakpoints()
+call s:LOG("g:debug_refresh_breakpoints: TOP")
+
   call s:db_clear_breakpoint_overlays()
+  call s:db_clear_marker_overlays()
 
   let dic = {
         \ 'handler': {
         \   'ok': function("g:debug_list_breakpoints_success_callback")
         \ }
         \ }
-  call vimside#swank#rpc#debug_list_breakpoints(dic)
+  call vimside#swank#rpc#debug_list_breakpoints#Run(dic)
+
+call s:LOG("g:debug_refresh_breakpoints: BOTTOM")
 endfunction
 
 function! g:debug_list_breakpoints_success_callback(dic)
@@ -647,6 +684,7 @@ endfunction
 "  Continue from a breakpoint.
 function! vimside#command#debug#Continue()
 call s:LOG("vimside#command#debug#Continue: TOP")
+
   let dic = {
         \ 'handler': {
         \   'ok': function("g:debug_continue_success_callback")
@@ -655,7 +693,8 @@ call s:LOG("vimside#command#debug#Continue: TOP")
         \   "active_thread_id": s:active_thread_id
         \ }
         \ }
-  call vimside#swank#rpc#debug_continue(dic)
+  call vimside#swank#rpc#debug_continue#Run(dic)
+
 call s:LOG("vimside#command#debug#Continue: BOTTOM")
 endfunction
 
@@ -681,6 +720,7 @@ call s:LOG("vimside#command#debug#Quit: TOP")
         \ }
         \ }
   call vimside#swank#rpc#debug_stop#Run(dic)
+  
 call s:LOG("vimside#command#debug#Quit: BOTTOM")
 endfunction
 

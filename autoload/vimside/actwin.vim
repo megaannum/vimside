@@ -1387,7 +1387,7 @@ function! s:Modify(org_data, new_data)
     " register sign
     let l:sign = a:new_data.display.scala.sign
     if ! vimside#sign#HasCategory(l:sign.category)
-      vimside#sign#AddCategory(l:sign.category, l:sign)
+      call vimside#sign#AddCategory(l:sign.category, l:sign)
     endif
   endif
 

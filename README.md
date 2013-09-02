@@ -30,6 +30,27 @@ unit/regression tests in the future.
 
 ## Latest checkin
 
+Snapshot of debug code (only some works currently).
+From project/simple edit the new Main.scala class:
+ vi src/main/scala/com/megaannum/Main.scala
+Start Vimside:
+ <Leader>vs
+After Vimside is up, build the code:
+ <Leader>vbb
+Then start the debugger:
+  <Leader>dd
+Enter: 
+   com.megaannum.Main
+as the class to run.
+Goto some line and set a breakpoint:
+  <Leader>db
+That much works.
+To stop be debugging session use:
+  <Leader>dq
+Note that be background debug Java process is NOT removed.
+Do not know why at this point so you will have to kill it
+manually.  Like I said, only some of it works.
+
 Now Vimside supports either initialization with the Option files
 'options_user.vim' and a project specific options file (and/) or
 with Properties file 'vimside.properties' and a project specific

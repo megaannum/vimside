@@ -45,11 +45,8 @@ call s:LOG("debug_to_string TOP")
 
   let l:args = { }
   let l:rr = vimside#swank#rpc#util#MakeRPCEnds(s:Caller, l:args, s:Handler, a:000)
-  " call vimside#ensime#swank#dispatch(l:rr)
+  call vimside#ensime#swank#dispatch(l:rr)
 
-  let msg = "Not Implemented Yet:" . 'swank-rpc-debug-to-string-handler'
-  call s:ERROR(msg)
-  echoerr msg
 
 call s:LOG("debug_to_string BOTTOM") 
 endfunction
