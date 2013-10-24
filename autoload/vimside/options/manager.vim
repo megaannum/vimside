@@ -639,7 +639,7 @@ call s:LOG("vimside#options#manager#Load: ensime-dist-dir=". l:distdir)
 
     " Check that Java and Scala versions agree with Option values
     " Get Scala version from ensime distribution directory name
-    let l:ensime_scala_version = matchlist(l:distdir, '[a-zA-Z]*_\(\d\+\.\d\+\.\d\+\)-\(.*\)')[1]
+    let l:ensime_scala_version = matchlist(l:distdir, '[a-zA-Z]*_\(\d\+\.\d\+\.\d\+\)\(.*\)')[1]
 call s:LOG("vimside#options#manager#Load: l:ensime_scala_version=". l:ensime_scala_version)
     let [found, l:vimside_scala_version] = g:vimside.GetOption('vimside-scala-version')
     if ! found
